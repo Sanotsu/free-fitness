@@ -39,6 +39,8 @@ dependencies:
   intl: ^0.18.1
   flutter_localizations:
     sdk: flutter
+  sqflite: ^2.3.0
+  path_provider: ^2.1.1
 
 dev_dependencies:
   flutter_test:
