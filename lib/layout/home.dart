@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../views/dietary/index.dart';
 import '../views/me/index.dart';
-import '../views/workout/index.dart';
+import '../views/training/index.dart';
 
 /// 主页面
 
@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   static const List<Widget> _widgetOptions = <Widget>[
-    Workout(),
+    Training(),
     Dietary(),
     UserCenter()
   ];

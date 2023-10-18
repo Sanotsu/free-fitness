@@ -33,14 +33,14 @@ enum IconLabel {
   final IconData icon;
 }
 
-class WorkoutDiscovers extends StatefulWidget {
-  const WorkoutDiscovers({super.key});
+class TrainingExercise extends StatefulWidget {
+  const TrainingExercise({super.key});
 
   @override
-  State<WorkoutDiscovers> createState() => _WorkoutDiscoversState();
+  State<TrainingExercise> createState() => _TrainingExerciseState();
 }
 
-class _WorkoutDiscoversState extends State<WorkoutDiscovers> {
+class _TrainingExerciseState extends State<TrainingExercise> {
   final DBTrainHelper _dbHelper = DBTrainHelper();
 
   List<Exercise> exerciseList = [];
@@ -92,7 +92,7 @@ class _WorkoutDiscoversState extends State<WorkoutDiscovers> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('WorkoutDiscovers'),
+        title: const Text('TrainingExercise'),
       ),
       body: SafeArea(
         child: Column(
