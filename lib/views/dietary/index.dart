@@ -3,8 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../common/utils/global_styles.dart';
-
 import 'records/index.dart';
 import 'reports/index.dart';
 import 'settings/index.dart';
@@ -17,9 +15,6 @@ class Dietary extends StatefulWidget {
 }
 
 class _DietaryState extends State<Dietary> with SingleTickerProviderStateMixin {
-  // 当前tab索引，默认为0
-  late int currentTabIndex = 0;
-
   @override
   void initState() {
     super.initState();
@@ -27,66 +22,78 @@ class _DietaryState extends State<Dietary> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        // 避免搜索时弹出键盘，让底部的minibar位置移动到tab顶部导致溢出的问题
-        resizeToAvoidBottomInset: false,
-        appBar: _buildAppBar(),
-        body: _buildBody(),
+    return Scaffold(
+      // 避免搜索时弹出键盘，让底部的minibar位置移动到tab顶部导致溢出的问题
+      resizeToAvoidBottomInset: false,
+      appBar: AppBar(
+        title: const Text("饮食"),
       ),
+      body: _buildBody(),
     );
   }
 
-  /// 构建标题工具栏
-  _buildAppBar() {
-    return AppBar(
-      title: const Text("饮食"),
-      bottom: TabBar(
-        // controller: _tabController,
-        // 指示器的样式(标签下的下划线)
-        indicator: UnderlineTabIndicator(
-          // 下划线的粗度和颜色
-          borderSide: BorderSide(
-            width: 3.0.sp,
-            color: Colors.white,
+  /// 构建主体内容(是个 GridView)
+  _buildBody() {
+    return Center(
+      child: Column(
+        children: [
+          SizedBox(
+            // 此外，设置了固定宽高之后，也更好定量每个card的尺寸
+            height: 0.20.sh,
+            width: 340.sp,
+            child: Padding(
+              padding: EdgeInsets.all(10.sp),
+              child: _buildCard(const DietaryReports(), "报告"),
+            ),
           ),
-          // 下划线的四边的间距horizontal橫向
-          // insets: EdgeInsets.symmetric(horizontal: 2.0.sp),
-        ),
-        indicatorWeight: 0,
-        // 下划线的尺寸(这个label表示下划线执行器的宽度与标签文本宽度一致。默认是整个tab的宽度)
-        indicatorSize: TabBarIndicatorSize.label,
-        tabs: [
-          Tab(child: Text("记录", style: TextStyle(fontSize: sizeHeadline2))),
-          Tab(child: Text("报告", style: TextStyle(fontSize: sizeHeadline2))),
-          Tab(child: Text("设置", style: TextStyle(fontSize: sizeHeadline2))),
+
+          // 因为 GridView.count 默认会根据其内容进行滚动，所以先设置一个固定高度的容器，将该容器居中
+          Expanded(
+            child: SizedBox(
+              // 此外，设置了固定宽高之后，也更好定量每个card的尺寸
+              height: 340.sp,
+              width: 340.sp,
+              child: GridView.count(
+                crossAxisCount: 2, // 一行2个
+                padding: EdgeInsets.all(10.sp), // 边框10
+                crossAxisSpacing: 10.0,
+                mainAxisSpacing: 10.0,
+                childAspectRatio: 1, // 宽高比（单个card应该是160.sp * 160.sp）
+                children: <Widget>[
+                  _buildCard(const DietaryRecords(), "日记"),
+                  _buildCard(const DietarySettings(), "我的"),
+                  // _buildCard(const DietaryReports(), "训练计划"),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  /// 构建主体内容（是个 TabBarView）
-  _buildBody() {
-    return Builder(builder: (BuildContext context) {
-      // final TabController tabController = DefaultTabController.of(context);
-
-      return const Center(
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: TabBarView(
-                // controller: _tabController,
-                children: <Widget>[
-                  DietaryRecords(),
-                  DietaryReports(),
-                  DietarySettings(),
-                ],
-              ),
+  _buildCard(Widget widget, String title) {
+    return Card(
+      clipBehavior: Clip.hardEdge,
+      child: InkWell(
+        splashColor: Colors.blue.withAlpha(30),
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext ctx) => widget,
             ),
-          ],
+          );
+        },
+        child: Container(
+          color: Colors.lightBlue[100],
+          child: Center(
+            child: Text(
+              title,
+              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+            ),
+          ),
         ),
-      );
-    });
+      ),
+    );
   }
 }

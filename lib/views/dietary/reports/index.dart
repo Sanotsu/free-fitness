@@ -10,8 +10,11 @@ class DietaryReports extends StatefulWidget {
 class _DietaryReportsState extends State<DietaryReports> {
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text("DietaryReports index"),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('DietaryReports'),
+      ),
+      body: const Center(child: Text('DietaryReports index')),
     );
   }
 }
