@@ -44,6 +44,18 @@ String getRandomString(int length) {
   );
 }
 
+// 指定长度的范围的随机字符串(包含上面那个，最大最小同一个值即可)
+String generateRandomString(int minLength, int maxLength) {
+  int length = minLength + _rnd.nextInt(maxLength - minLength + 1);
+
+  return String.fromCharCodes(
+    Iterable.generate(
+      length,
+      (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length)),
+    ),
+  );
+}
+
 // 获取文件大小（长度额bytes -> 字符串表示）
 getFileSize(int bytes, int decimals) {
   if (bytes <= 0) return "0 B";

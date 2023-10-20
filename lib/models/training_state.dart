@@ -1,12 +1,12 @@
-/// 关于训练模块的model都放在这里
+/// 关于 workout 模块的model都放在这里，对照相关表栏位了解更多
 
-// 动作基础表的model
+// 基础活动表的model
 class Exercise {
   int? exerciseId; // 自增的，可以不传
   String exerciseCode, exerciseName, category, gmtCreate;
   String? force, level, mechanic, equipment, instructions, ttsNotes;
-  String? primaryMuscles, secondaryMuscles, images, isCustom, contributor;
-  String? gmtModified;
+  String? primaryMuscles, secondaryMuscles, images, standardDuration;
+  String? gmtModified, isCustom, contributor;
 
   Exercise({
     this.exerciseId,
@@ -18,6 +18,7 @@ class Exercise {
     this.level,
     this.mechanic,
     this.equipment,
+    this.standardDuration,
     this.instructions,
     this.ttsNotes,
     this.primaryMuscles,
@@ -38,6 +39,7 @@ class Exercise {
       'level': level,
       'mechanic': mechanic,
       'equipment': equipment,
+      'standard_duration': standardDuration,
       'instructions': instructions,
       'tts_notes': ttsNotes,
       'category': category,
@@ -58,9 +60,22 @@ class Exercise {
     Exercise{
     exercise_id: $exerciseId, exercise_code: $exerciseCode, exercise_name: $exerciseName,
     force: $force, level: $level, mechanic: $mechanic,equipment: $equipment, 
-    instructions: $instructions, tts_notes: $ttsNotes, category: $category, 
+    standard_duration: $standardDuration, instructions: $instructions, tts_notes: $ttsNotes, category: $category, 
     primary_muscles: $primaryMuscles, secondary_muscles: $secondaryMuscles, images: $images, 
     is_custom: $isCustom, contributor: $contributor, gmt_create: $gmtCreate, gmt_modified: $gmtModified }
     ''';
   }
+}
+
+// 基础活动一些栏位的默认选项都具有label和value
+class ExerciseDefaultOption {
+  final String label;
+  final String? name;
+  final String value;
+
+  ExerciseDefaultOption({
+    required this.label,
+    this.name,
+    required this.value,
+  });
 }

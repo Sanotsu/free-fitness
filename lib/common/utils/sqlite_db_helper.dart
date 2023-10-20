@@ -27,7 +27,7 @@ class DBTrainHelper {
   Future<Database> initializeDatabase() async {
     // 获取Android和iOS存储数据库的目录路径。
     Directory directory = await getApplicationDocumentsDirectory();
-    String path = "${directory.path}/${SqliteSqlStatements.databaseName}";
+    String path = "${directory.path}/${DbCconstants.databaseName}";
 
     print("初始化 TRAIN sqlite数据库存放的地址：$path");
 
@@ -42,12 +42,15 @@ class DBTrainHelper {
 
   // 创建训练数据库相关表
   void _createDb(Database db, int newVersion) async {
-    await db.execute(SqliteSqlStatements.ddlForExercise);
-    await db.execute(SqliteSqlStatements.ddlForAction);
-    await db.execute(SqliteSqlStatements.ddlForPlan);
-    await db.execute(SqliteSqlStatements.ddlForUser);
-    await db.execute(SqliteSqlStatements.ddlForTrainedLog);
-    await db.execute(SqliteSqlStatements.ddlForWeightTrend);
+    await db.execute(TrainingDdl.ddlForExercise);
+    await db.execute(TrainingDdl.ddlForAction);
+    await db.execute(TrainingDdl.ddlForGroup);
+    await db.execute(TrainingDdl.ddlForGroupHaAction);
+    await db.execute(TrainingDdl.ddlForPlan);
+    await db.execute(TrainingDdl.ddlForPlanHasGroup);
+    await db.execute(TrainingDdl.ddlForUser);
+    await db.execute(TrainingDdl.ddlForTrainedLog);
+    await db.execute(TrainingDdl.ddlForWeightTrend);
   }
 
   // 关闭数据库
@@ -109,7 +112,7 @@ class DBTrainHelper {
   Future<int> insertExercise(Exercise exercise) async {
     Database db = await database;
     var result = await db.insert(
-      SqliteSqlStatements.tableNameOfExercise,
+      TrainingDdl.tableNameOfExercise,
       exercise.toMap(),
     );
     return result;
@@ -119,7 +122,7 @@ class DBTrainHelper {
   Future<int> updateExercise(Exercise exercise) async {
     Database db = await database;
     var result = await db.update(
-      SqliteSqlStatements.tableNameOfExercise,
+      TrainingDdl.tableNameOfExercise,
       exercise.toMap(),
       // 确保Id存在.
       where: 'exercise_id = ?',
@@ -133,7 +136,7 @@ class DBTrainHelper {
   Future<int> deleteExercise(int id) async {
     Database db = await database;
     var result = await db.delete(
-      SqliteSqlStatements.tableNameOfExercise,
+      TrainingDdl.tableNameOfExercise,
       where: "exercise_id=?",
       whereArgs: [id],
     );
@@ -151,6 +154,8 @@ class DBTrainHelper {
     String? equipment,
     String? category,
     String? primaryMuscle, // 都只有单个
+    String? limit, // 一次查询条数显示
+    String? offset, // 一次查询的偏移量，用于分页
   }) async {
     Database db = await database;
 
@@ -183,11 +188,19 @@ class DBTrainHelper {
     final whereClause =
         whereClauses.isNotEmpty ? 'WHERE ${whereClauses.join(' AND ')}' : '';
 
-    var sql =
-        'SELECT * FROM ${SqliteSqlStatements.tableNameOfExercise} $whereClause';
+    var sql = 'SELECT * FROM ${TrainingDdl.tableNameOfExercise} $whereClause';
+
+    if (limit != null) {
+      sql += ' LIMIT $limit';
+    }
+    if (offset != null) {
+      sql += ' OFFSET $offset';
+    }
     print("exercise条件查询的sql语句：$sql");
 
     List<Map<String, dynamic>> maps = await db.rawQuery(sql, whereArgs);
+
+    print(maps);
 
     return List.generate(maps.length, (i) {
       return Exercise(
@@ -198,13 +211,16 @@ class DBTrainHelper {
         level: maps[i]['level'],
         mechanic: maps[i]['mechanic'],
         equipment: maps[i]['equipment'],
+        // ？？？明明sql语句设置了默认值，但是不传还是null
+        standardDuration: maps[i]['standard_duration'] ?? "1",
         instructions: maps[i]['instructions'],
         ttsNotes: maps[i]['tts_notes'],
         category: maps[i]['category'],
         primaryMuscles: maps[i]['primary_muscles'],
         secondaryMuscles: maps[i]['secondary_muscles'],
         images: maps[i]['images'],
-        isCustom: maps[i]['is_custom'],
+        // ？？？明明sql语句设置了默认值，但是不传还是null
+        isCustom: maps[i]['is_custom'] ?? '0',
         contributor: maps[i]['contributor'],
         gmtCreate: maps[i]['gmt_create'],
         gmtModified: maps[i]['gmt_modified'],
