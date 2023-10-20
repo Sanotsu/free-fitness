@@ -6,7 +6,9 @@ import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../models/dietary_state.dart';
 import '../../models/training_state.dart';
+import 'dietary_ddl.dart';
 import 'sqlite_sql_statements.dart';
 
 class DBTrainHelper {
@@ -226,5 +228,227 @@ class DBTrainHelper {
         gmtModified: maps[i]['gmt_modified'],
       );
     });
+  }
+}
+
+class DBDietaryHelper {
+  static final DBDietaryHelper _dbHelper = DBDietaryHelper._createInstance();
+  static Database? _database;
+  // 创建sqlite的db文件成功后，记录该地址，以便删除时使用。
+  var dbFilePath = "";
+
+  // 命名的构造函数用于创建DatabaseHelper的实例
+  DBDietaryHelper._createInstance();
+
+  factory DBDietaryHelper() => _dbHelper;
+
+  Future<Database> get database async =>
+      _database ??= await initializeDatabase();
+
+  // 初始化数据库
+  Future<Database> initializeDatabase() async {
+    // 获取Android和iOS存储数据库的目录路径。
+    Directory directory = await getApplicationDocumentsDirectory();
+    String path = "${directory.path}/${DietaryDdl.databaseName}";
+
+    print("初始化 TRAIN sqlite数据库存放的地址：$path");
+
+    // 在给定路径上打开/创建数据库
+    var db = await openDatabase(path, version: 1, onCreate: _createDb);
+
+    dbFilePath = path;
+
+    return db;
+  }
+
+  // 创建训练数据库相关表
+  void _createDb(Database db, int newVersion) async {
+    await db.execute(DietaryDdl.ddlForFood);
+    await db.execute(DietaryDdl.ddlForServingInfo);
+    await db.execute(DietaryDdl.ddlForMeal);
+    await db.execute(DietaryDdl.ddlForFoodDailyLog);
+  }
+
+  // 关闭数据库
+  Future<bool> closeDatabase() async {
+    Database db = await database;
+
+    print("Dietary db.isOpen ${db.isOpen}");
+    await db.close();
+    print("Dietary db.isOpen ${db.isOpen}");
+
+    // 删除db或者关闭db都需要重置db为null，
+    // 否则后续会保留之前的连接，以致出现类似错误：Unhandled Exception: DatabaseException(database_closed 5)
+    // https://github.com/tekartik/sqflite/issues/223
+    _database = null;
+
+    // 如果已经关闭了，返回ture
+    if (!db.isOpen) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  // 删除sqlite的db文件（初始化数据库操作中那个path的值）
+  void deleteDb() async {
+    print("开始删除內嵌的 sqlite Dietary db文件，db文件地址：$dbFilePath");
+
+    // 删除db或者关闭db都需要重置db为null，
+    // 否则后续会保留之前的连接，以致出现类似错误：Unhandled Exception: DatabaseException(database_closed 5)
+    // https://stackoverflow.com/questions/60848752/delete-database-when-log-out-and-create-again-after-log-in-dart
+    _database = null;
+
+    await deleteDatabase(dbFilePath);
+  }
+
+// 显示db中已有的table，默认的和自建立的
+  void showTableNameList() async {
+    Database db = await database;
+    var tableNames = (await db
+            .query('sqlite_master', where: 'type = ?', whereArgs: ['table']))
+        .map((row) => row['name'] as String)
+        .toList(growable: false);
+
+    // for (var row
+    //     in (await db.query('sqlite_master', columns: ['type', 'name']))) {
+    //   print(row.values);
+    // }
+
+    print("------------Dietary");
+    print(tableNames);
+    print("------------Dietary");
+  }
+
+  ///
+  /// 食物基本表的相关操作
+  ///  实际使用时，新增食物一定会级联带上新增单份食物营养素信息
+  ///  insertFoodWithServingInfo
+  ///  updateFoodWithServingInfo
+  /// selectFoodBasic  一般是查看拥有的食物，通过品牌或产品类型的关键字查询时
+  /// selectFoodDetail 会带上详情，一般查看food详情时用
+
+  ///
+  ///
+  // 插入单条食物
+  Future<int> insertFoodWithServingInfo(
+      Food food, ServingInfo servingInfo) async {
+    final db = await database;
+    int foodId = 0;
+    try {
+      await db.transaction((txn) async {
+        // Insert food info
+        // 由于food_id列被设置为自增属性的主键，因此在调用insert方法时，返回值应该是新插入行的food_id值。
+        // 如果不是自增主键，则返回的是行号row 的id。
+        foodId = await txn.insert(DietaryDdl.tableNameOfFood, food.toMap());
+
+        // Insert serving info associated with the food
+        servingInfo.foodId = foodId;
+        await txn.insert(
+            DietaryDdl.tableNameOfServingInfo, servingInfo.toMap());
+      });
+    } catch (e) {
+      // Handle the error
+      print('Error inserting food with serving info: $e');
+      // 抛出异常来触发回滚的方式是 sqflite 中常用的做法
+      rethrow;
+    }
+
+    return foodId; // 返回成功插入的食品信息 ID
+  }
+
+  Future<void> updateFoodWithServingInfo(
+      Food food, ServingInfo servingInfo) async {
+    final db = await database;
+    try {
+      await db.transaction((txn) async {
+        // Update food info
+        await txn.update(
+          DietaryDdl.tableNameOfFood,
+          food.toMap(),
+          where: 'food_id = ?',
+          whereArgs: [food.foodId],
+        );
+
+        // Update serving info associated with the food
+        await txn.update(
+          DietaryDdl.tableNameOfServingInfo,
+          servingInfo.toMap(),
+          where: 'food_id = ?',
+          whereArgs: [food.foodId],
+        );
+      });
+    } catch (e) {
+      // Handle the error
+      print('Error updating food with serving info: $e');
+      rethrow;
+    }
+  }
+
+  // 删除单条数据
+  Future<void> deleteFoodWithServingInfo(int foodId) async {
+    final db = await database;
+    try {
+      await db.transaction((txn) async {
+        // Delete serving info associated with the food
+        await txn.delete(
+          DietaryDdl.tableNameOfServingInfo,
+          where: 'food_id = ?',
+          whereArgs: [foodId],
+        );
+
+        // Delete the food
+        await txn.delete(
+          DietaryDdl.tableNameOfFood,
+          where: 'food_id = ?',
+          whereArgs: [foodId],
+        );
+      });
+    } catch (e) {
+      // Handle the error
+      print('Error deleting food with serving info: $e');
+      rethrow;
+    }
+  }
+
+  // 关键字查询食物及其不同单份食物营养素
+  Future<List<FoodAndServingInfo>> searchFoodWithServingInfoWithPagination(
+    String keyword,
+    int page,
+    int pageSize,
+  ) async {
+    print("进入了searchFoodWithServingInfoWithPagination……");
+
+    final db = await database;
+    final offset = (page - 1) * pageSize;
+
+    final foodRows = await db.query(
+      DietaryDdl.tableNameOfFood,
+      where: 'brand LIKE ? OR product LIKE ?',
+      whereArgs: ['%$keyword%', '%$keyword%'],
+      limit: pageSize,
+      offset: offset,
+    );
+
+    final foods = <FoodAndServingInfo>[];
+
+    for (final row in foodRows) {
+      final food = Food.fromMap(row);
+      final servingInfoRows = await db.query(
+        DietaryDdl.tableNameOfServingInfo,
+        where: 'food_id = ?',
+        whereArgs: [food.foodId],
+      );
+
+      print("--------------servingInfoRows:");
+      print(servingInfoRows);
+
+      final servingInfoList =
+          servingInfoRows.map((row) => ServingInfo.fromMap(row)).toList();
+      final foodAndServingInfo =
+          FoodAndServingInfo(food: food, servingInfoList: servingInfoList);
+      foods.add(foodAndServingInfo);
+    }
+    return foods;
   }
 }

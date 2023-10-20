@@ -1,5 +1,23 @@
 import '../../models/training_state.dart';
 
+// 1 大卡 = 4.184 千焦
+const double oneCalToKjRatio = 4.18400;
+
+// 常量声明的示例,上面那种单个变量或者这种class
+class LocalStorageKey {
+  // add a private constructor to prevent this class being instantiated
+  // e.g. invoke `LocalStorageKey()` accidentally
+  LocalStorageKey._();
+
+  // the properties are static so that we can use them without a class instance
+  // e.g. can be retrieved by `LocalStorageKey.saveUserId`.
+  static const String saveUserId = 'save_user_id';
+  static const String userId = 'user_id';
+  static const String language = 'language';
+  static const String themeMode = 'theme_mode';
+  static const String enablePushNotification = 'enable_push_notification';
+}
+
 /// 基础活动的一些分类选项
 /// 来源： https://lite.datasette.io/?json=https://github.com/yuhonas/free-exercise-db/blob/main/dist/exercises.json#/data/exercises?_facet=force
 List<ExerciseDefaultOption> mechanicOptions = [
