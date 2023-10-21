@@ -72,7 +72,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
             ? selectedPrimaryMuscles.map((opt) => opt.value).toList().join(',')
             : '',
         secondaryMuscles: selectedSecondaryMuscles.isNotEmpty
-            ? (selectedSecondaryMuscles as List<ExerciseDefaultOption>)
+            ? (selectedSecondaryMuscles)
                 .map((opt) => opt.value)
                 .toList()
                 .join(',')
