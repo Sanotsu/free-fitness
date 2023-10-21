@@ -18,8 +18,8 @@ class FoodList extends StatefulWidget {
 
 class _FoodListState extends State<FoodList> {
   List<FoodAndServingInfo> foodItems = [];
-  int currentPage = 1;
-  int pageSize = 15;
+  int currentPage = 1; // 数据库查询的时候会从0开始offset
+  int pageSize = 10;
   bool isLoading = false;
   ScrollController scrollController = ScrollController();
   TextEditingController searchController = TextEditingController();
@@ -45,6 +45,10 @@ class _FoodListState extends State<FoodList> {
 
   Future<void> _loadData() async {
     print("进入了_loadData");
+
+    // _dietaryHelper.deleteDb();
+
+    // return;
 
     if (isLoading) return;
 

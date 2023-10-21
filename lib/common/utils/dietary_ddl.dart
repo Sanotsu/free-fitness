@@ -26,7 +26,7 @@ class DietaryDdl {
     CREATE TABLE IF NOT EXISTS $tableNameOfServingInfo (
       serving_info_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
       food_id INTEGER NOT NULL,
-      is_metric INTEGER,
+      is_metric INTEGER NOT NULL DEFAULT 0,
       serving_size TEXT,
       metric_serving_size INTEGER,
       metric_serving_unit TEXT,

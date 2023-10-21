@@ -56,7 +56,7 @@ class Food {
 class ServingInfo {
   int? servingInfoId; // 自增的，可以不传
   int foodId;
-  bool? isMetric;
+  bool isMetric;
   int? metricServingSize;
   String? servingSize, metricServingUnit;
   String? contributor, gmtCreate, updUserId, gmtModified;
@@ -67,7 +67,7 @@ class ServingInfo {
   ServingInfo({
     this.servingInfoId,
     required this.foodId,
-    this.isMetric,
+    required this.isMetric,
     this.servingSize,
     this.metricServingSize,
     this.metricServingUnit,
@@ -151,7 +151,8 @@ class ServingInfo {
   String toString() {
     return '''
     ServingInfo{
-    "serving_info_id": $servingInfoId, "food_id": $foodId, "serving_size": $servingSize, "metric_serving_size": $metricServingSize,
+    "serving_info_id": $servingInfoId, "food_id": $foodId, 
+      "is_metric": $isMetric, "serving_size": $servingSize, "metric_serving_size": $metricServingSize, "metric_serving_unit": $metricServingUnit,
       "energy": $energy, "protein": $protein, "total_fat": $totalFat, "saturated_fat": $saturatedFat, "trans_fat": $transFat, 
       "polyunsaturated_fat": $polyunsaturatedFat, "monounsaturated_fat": $monounsaturatedFat, "cholesterol": $cholesterol, 
       "total_carbohydrate": $totalCarbohydrate, "sugar": $sugar, "dietary_fiber": $dietaryFiber, "sodium": $sodium, "potassium": $potassium, 

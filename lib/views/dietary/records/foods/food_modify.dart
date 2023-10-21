@@ -37,33 +37,33 @@ class _FoodModifyState extends State<FoodModify> {
     var dfood = Food(brand: "永川", product: '黄瓜');
 
     // 输入公制单位营养素
-    var dserving = ServingInfo(
-      energy: 4190,
-      foodId: 1, // 这个id会在insert语句中被成功插入的food的id替代
-      metricServingSize: 100,
-      metricServingUnit: "克",
-      isMetric: true,
-      protein: 23.5,
-      totalFat: 12.3,
-      totalCarbohydrate: 45.5,
-      sodium: 123,
-    );
-
-    // 输入公制单位营养素
-    // var dserving2 = ServingInfo(
+    // var dserving = ServingInfo(
     //   energy: 4190,
     //   foodId: 1, // 这个id会在insert语句中被成功插入的food的id替代
-    //   servingSize: '一条尾钩鱼',
-    //   metricServingSize: 200,
+    //   metricServingSize: 100,
     //   metricServingUnit: "克",
-    //   isMetric: false,
+    //   isMetric: true,
     //   protein: 23.5,
     //   totalFat: 12.3,
     //   totalCarbohydrate: 45.5,
     //   sodium: 123,
     // );
 
-    int ret = await _dietaryHelper.insertFoodWithServingInfo(dfood, dserving);
+    // 输入公制单位营养素
+    var dserving2 = ServingInfo(
+      energy: 13456,
+      foodId: 1, // 这个id会在insert语句中被成功插入的food的id替代
+      servingSize: '一条尾钩鱼',
+      metricServingSize: 200,
+      metricServingUnit: "克",
+      isMetric: false,
+      protein: 43.5,
+      totalFat: 56.3,
+      totalCarbohydrate: 76.6,
+      sodium: 555,
+    );
+
+    int ret = await _dietaryHelper.insertFoodWithServingInfo(dfood, dserving2);
     return ret;
   }
 
