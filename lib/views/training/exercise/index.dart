@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/sqlite_db_helper.dart';
 import '../../../common/utils/tools.dart';
+import 'exercise_detail.dart';
 import 'exercise_modify_form.dart';
 import 'exercise_query.dart';
 
@@ -161,6 +162,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
       equipment:
           equipmentOptions[Random().nextInt(equipmentOptions.length)].value,
       // standardDuration: "1",
+      instructions: generateRandomString(300, 500),
       primaryMuscles:
           musclesOptions[Random().nextInt(musclesOptions.length)].value,
       gmtCreate: DateFormat.yMMMd().format(DateTime.now()),
@@ -327,63 +329,81 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                       },
 
                       child: Card(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: 0.4.sw,
-                              height: 0.3.sh,
-                              child: Image.file(
-                                File(imageUrl),
-                                errorBuilder: (BuildContext context,
-                                    Object exception, StackTrace? stackTrace) {
-                                  return Image.asset(
-                                    placeholderImageUrl,
-                                    fit: BoxFit.cover,
-                                  );
-                                },
+                        child: InkWell(
+                          onTap: () {
+                            // 处理点击事件的逻辑
+                            print("------ tap in card");
+                            showModalBottomSheet(
+                              context: context,
+                              // 设置滚动控制为true，子部件设置dialog的高度才有效，不然固定在9/16左右无法更多。
+                              isScrollControlled: true,
+                              builder: (BuildContext context) {
+                                return ExerciseDetailDialog(
+                                  exerciseItems: exerciseItems,
+                                  exerciseIndex: index,
+                                );
+                              },
+                            );
+                          },
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 0.4.sw,
+                                height: 0.3.sh,
+                                child: Image.file(
+                                  File(imageUrl),
+                                  errorBuilder: (BuildContext context,
+                                      Object exception,
+                                      StackTrace? stackTrace) {
+                                    return Image.asset(
+                                      placeholderImageUrl,
+                                      fit: BoxFit.cover,
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                            // SizedBox(width: 0.1.sw),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.all(10.sp),
-                                    child: Text(
-                                      "$index-${exerciseItem.exerciseName}",
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                      style: TextStyle(
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.bold),
+                              // SizedBox(width: 0.1.sw),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.all(10.sp),
+                                      child: Text(
+                                        "$index-${exerciseItem.exerciseName}",
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        style: TextStyle(
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.bold),
+                                      ),
                                     ),
-                                  ),
-                                  _buildCardPadding(
-                                    "级别：",
-                                    exerciseItem.level ?? "",
-                                    levelOptions,
-                                  ),
-                                  _buildCardPadding(
-                                    "类型：",
-                                    exerciseItem.category,
-                                    categoryOptions,
-                                  ),
-                                  // _buildCardPadding(
-                                  //   "器械：",
-                                  //   exerciseItem.equipment ?? "",
-                                  //   equipmentOptions,
-                                  // ),
-                                  _buildCardPadding(
-                                    "耗时：",
-                                    exerciseItem.standardDuration ?? "",
-                                    standardDurationOptions,
-                                  ),
-                                ],
+                                    _buildCardPadding(
+                                      "级别：",
+                                      exerciseItem.level ?? "",
+                                      levelOptions,
+                                    ),
+                                    _buildCardPadding(
+                                      "类型：",
+                                      exerciseItem.category,
+                                      categoryOptions,
+                                    ),
+                                    // _buildCardPadding(
+                                    //   "器械：",
+                                    //   exerciseItem.equipment ?? "",
+                                    //   equipmentOptions,
+                                    // ),
+                                    _buildCardPadding(
+                                      "耗时：",
+                                      exerciseItem.standardDuration ?? "",
+                                      standardDurationOptions,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     );
