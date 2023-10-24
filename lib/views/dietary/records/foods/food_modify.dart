@@ -34,7 +34,7 @@ class _FoodModifyState extends State<FoodModify> {
     // _dietaryHelper.deleteDb();
     // return;
     // var dfood = Food(brand: "重庆", product: '豆豉鲮鱼');
-    var dfood = Food(brand: "永川", product: '黄瓜');
+    var dfood = Food(brand: "重庆", product: '豇豆');
 
     // 输入公制单位营养素
     // var dserving = ServingInfo(
@@ -51,17 +51,24 @@ class _FoodModifyState extends State<FoodModify> {
 
     // 输入公制单位营养素
     var dserving2 = ServingInfo(
-      energy: 13456,
-      foodId: 1, // 这个id会在insert语句中被成功插入的food的id替代
-      servingSize: '一条尾钩鱼',
-      metricServingSize: 200,
-      metricServingUnit: "克",
-      isMetric: false,
-      protein: 43.5,
-      totalFat: 56.3,
-      totalCarbohydrate: 76.6,
-      sodium: 555,
-    );
+        energy: 13456,
+        foodId: 1, // 这个id会在insert语句中被成功插入的food的id替代
+        servingSize: '一堆',
+        metricServingSize: 200,
+        metricServingUnit: "克",
+        isMetric: false,
+        protein: 43.5,
+        totalFat: 56.3,
+        saturatedFat: 10,
+        transFat: 11,
+        polyunsaturatedFat: 12,
+        monounsaturatedFat: 13,
+        totalCarbohydrate: 76.6,
+        sugar: 30.5,
+        dietaryFiber: 34.65,
+        sodium: 555,
+        potassium: 113,
+        cholesterol: 456);
 
     int ret = await _dietaryHelper.insertFoodWithServingInfo(dfood, dserving2);
     return ret;
