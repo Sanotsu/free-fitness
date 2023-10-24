@@ -56,3 +56,6 @@ ios
 
 # 存放一些网站的api token
 **/tokens
+
+# 本地测试显示的一些gif图
+**/exercise_gifs

@@ -72,6 +72,10 @@ flutter:
   assets:
     - assets/images/
     - assets/images/no_image.png
+    - assets/exercise_gifs/
+    - assets/exercise_gifs/demo2/
+    # - assets/exercise_gifs/demo2/demo2.gif
+    # - assets/exercise_gifs/demo1.gif
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

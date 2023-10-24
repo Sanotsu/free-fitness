@@ -156,8 +156,8 @@ class DBTrainHelper {
     String? equipment,
     String? category,
     String? primaryMuscle, // 都只有单个
-    String? limit, // 一次查询条数显示
-    String? offset, // 一次查询的偏移量，用于分页
+    required int pageSize, // 一次查询条数显示
+    required int page, // 一次查询的偏移量，用于分页
   }) async {
     Database db = await database;
 
@@ -192,19 +192,16 @@ class DBTrainHelper {
 
     var sql = 'SELECT * FROM ${TrainingDdl.tableNameOfExercise} $whereClause';
 
-    if (limit != null) {
-      sql += ' LIMIT $limit';
-    }
-    if (offset != null) {
-      sql += ' OFFSET $offset';
-    }
+    sql += ' LIMIT $pageSize';
+    sql += ' OFFSET ${(page - 1) * pageSize}';
+
     print("exercise条件查询的sql语句：$sql");
 
     List<Map<String, dynamic>> maps = await db.rawQuery(sql, whereArgs);
 
     print(maps);
 
-    return List.generate(maps.length, (i) {
+    var list = List.generate(maps.length, (i) {
       return Exercise(
         exerciseId: maps[i]['exercise_id'],
         exerciseCode: maps[i]['exercise_code'],
@@ -228,6 +225,10 @@ class DBTrainHelper {
         gmtModified: maps[i]['gmt_modified'],
       );
     });
+
+    print(list);
+
+    return list;
   }
 }
 
