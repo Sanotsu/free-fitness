@@ -1,5 +1,10 @@
-import 'package:flutter/material.dart';
+// ignore_for_file: avoid_print
 
+import 'package:flutter/material.dart';
+import 'package:free_fitness/models/dietary_state.dart';
+import 'package:intl/intl.dart';
+
+import '../../../common/utils/sqlite_db_helper.dart';
 import 'foods/food_list.dart';
 
 class DietaryRecords extends StatefulWidget {
@@ -10,6 +15,395 @@ class DietaryRecords extends StatefulWidget {
 }
 
 class _DietaryRecordsState extends State<DietaryRecords> {
+  final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
+
+  // 这个插入的数据是比较完整正规的，测试时在删除db之后可直接用
+  _demoInsertDailyLogData() async {
+    var food1 = Food(
+      brand: '永川',
+      product: '豆豉',
+      photos: '',
+      tags: '调味品,佐料',
+      category: '调味',
+      contributor: '张三',
+      gmtCreate: '2023-10-24 09:53:30',
+    );
+
+    var dserving1 = ServingInfo(
+      foodId: 1,
+      isMetric: false,
+      servingSize: '一包',
+      metricServingSize: 100,
+      metricServingUnit: "克",
+      energy: 2000,
+      protein: 30,
+      totalFat: 50,
+      saturatedFat: 10,
+      transFat: 20,
+      polyunsaturatedFat: 10,
+      monounsaturatedFat: 10,
+      totalCarbohydrate: 20,
+      sugar: 30,
+      dietaryFiber: 10,
+      sodium: 2,
+      potassium: 20,
+      cholesterol: 20,
+      contributor: '李四',
+      gmtCreate: '2023-10-24 09:59:15',
+      updUserId: '',
+      gmtModified: null,
+    );
+
+    await _dietaryHelper.insertFoodWithServingInfo(
+        food: food1, servingInfo: dserving1);
+
+    var food2 = Food(
+      brand: '重庆',
+      product: '烤鸭',
+      photos: '',
+      tags: '鸭子,烤鸭',
+      category: '禽肉',
+      contributor: '张三',
+      gmtCreate: '2023-10-24 09:55:30',
+    );
+
+    var dserving2 = ServingInfo(
+      foodId: 2,
+      isMetric: false,
+      servingSize: '一只',
+      metricServingSize: 0,
+      metricServingUnit: "",
+      energy: 20000,
+      protein: 300,
+      totalFat: 500,
+      saturatedFat: 100,
+      transFat: 200,
+      polyunsaturatedFat: 100,
+      monounsaturatedFat: 100,
+      totalCarbohydrate: 300,
+      sugar: 200,
+      dietaryFiber: 100,
+      sodium: 20,
+      potassium: 200,
+      cholesterol: 200,
+      contributor: '李四',
+      gmtCreate: '2023-10-24 09:55:15',
+      updUserId: '',
+      gmtModified: null,
+    );
+
+    await _dietaryHelper.insertFoodWithServingInfo(
+        food: food2, servingInfo: dserving2);
+
+    var dserving3 = ServingInfo(
+      foodId: 2,
+      isMetric: true,
+      servingSize: '',
+      metricServingSize: 100,
+      metricServingUnit: "克",
+      energy: 321,
+      protein: 111,
+      totalFat: 222,
+      saturatedFat: 12,
+      transFat: 21,
+      polyunsaturatedFat: 14,
+      monounsaturatedFat: 41,
+      totalCarbohydrate: 30,
+      sugar: 20,
+      dietaryFiber: 10,
+      sodium: 2,
+      potassium: 25,
+      cholesterol: 25,
+      contributor: '李四',
+      gmtCreate: '2023-10-24 10:55:15',
+      updUserId: '',
+      gmtModified: null,
+    );
+
+    await _dietaryHelper.insertFoodWithServingInfo(servingInfo: dserving3);
+
+    var meal1 = Meal(
+      mealName: "烤鸭餐",
+      description: "就是要吃烤鸭",
+      contributor: "王五",
+      gmtCreate: '2023-10-24 10:08:03',
+    );
+
+    var meal2 = Meal(
+      mealName: "节约餐",
+      description: "吃不起烤鸭",
+      contributor: "王五",
+      gmtCreate: '2023-10-24 10:09:03',
+    );
+
+    await _dietaryHelper.insertMeal(meal1);
+    await _dietaryHelper.insertMeal(meal2);
+
+    var mealFoodItem1 = MealFoodItem(
+      mealId: 1,
+      foodId: 2,
+      foodIntakeSize: 100,
+      servingInfoId: 3,
+    );
+    var mealFoodItem2 = MealFoodItem(
+      mealId: 1,
+      foodId: 2,
+      foodIntakeSize: 1,
+      servingInfoId: 2,
+    );
+    var mealFoodItem3 = MealFoodItem(
+      mealId: 2,
+      foodId: 1,
+      foodIntakeSize: 200,
+      servingInfoId: 1,
+    );
+
+    await _dietaryHelper.insertMealFoodItem(mealFoodItem1);
+    await _dietaryHelper.insertMealFoodItem(mealFoodItem2);
+    await _dietaryHelper.insertMealFoodItem(mealFoodItem3);
+
+    var foodDailyLog = FoodDailyLog(
+      date: '2023-10-24',
+      breakfastMealId: 1,
+      lunchMealId: 2,
+      dinnerMealId: null,
+      otherMealId: null,
+      contributor: "马六",
+      gmtCreate: '2023-10-24 10:10:10',
+      gmtModified: null,
+    );
+
+    await _dietaryHelper.insertFoodDailyLogObly(foodDailyLog);
+
+    print("_demoInsertDailyLogData------------插入执行完了");
+  }
+
+  // 这个插入是插入每日数据时，从log 到meal 到 item一次性插入完，后续可能拆分不同步骤
+  _oneInsertAll() async {
+    var foodDailyLog = FoodDailyLog(
+      // foodDailyId: 1, // 这个是自增的，不加会自增，加了会以加的值插入，重复则报错
+      // date: DateTime.now().toString(), // 这里应该收缩到年月日，而不是最小单位
+      date: "2023-10-24 16:32:15.617120",
+      contributor: "david",
+      gmtCreate: DateTime.now().toString(),
+    );
+
+    var meal = Meal(
+      // mealId: 1, // 这个是自增的，不加会自增，加了会以加的值插入，重复则报错
+      mealName: "20231024的早餐",
+      description: "早上吃好",
+      gmtCreate: DateTime.now().toString(),
+    );
+    var mealFoodItem = MealFoodItem(
+      // mealFoodItemId: 1, // 这个是自增的，不加会自增，加了会以加的值插入，重复则报错
+      mealId: 1, // 这个要真实值，这里填的插入时会被覆盖
+      foodId: 2, // 用户选择真实值
+      servingInfoId: 1, // 用户选择真实值
+      foodIntakeSize: 200, // 用户输入真实值
+    );
+
+    var insertRst = await _dietaryHelper.insertFoodDailyLog(
+      foodDailyLog,
+      "breakfast",
+      meal,
+      mealFoodItem,
+    );
+
+    print("测试插入饮食记录的结果insertRst：$insertRst");
+  }
+
+  /// 日记录的首页应该是查询出1条数据，然后固定显示早中晚夜4个模块，不定长的是每餐的摄入item
+  List<FoodDailyLogRecord> fdlrList = [];
+  // 用户可能切换日期，但显示的内容是一样的(这个是日期组件的值，默认是当天)
+  var inputDate = "";
+// 数据是否加载中
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _testInsetBrandNewOneMealFoodItem();
+  }
+
+  _testInsetBrandNewOneMealFoodItem() async {
+    print("开始运行插入示例---------");
+
+    // _dietaryHelper.deleteDb();
+
+    // await _demoInsertDailyLogData();
+
+    // await _dietaryHelper.queryFoodDailyLog();
+    // await _dietaryHelper.queryAllFoodIntakeRecords();
+
+    if (isLoading) return;
+
+    setState(() {
+      isLoading = true;
+      inputDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    });
+
+    // 理论上，当日的只会有一条
+    var temp = await _dietaryHelper.queryFoodDailyLogRecord(date: inputDate);
+
+    setState(() {
+      fdlrList = temp;
+      isLoading = false;
+    });
+
+    // return;
+  }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     appBar: AppBar(
+  //       title: const Text('DietaryRecords'),
+  //       actions: [
+  //         IconButton(
+  //           icon: const Icon(Icons.search),
+  //           onPressed: () {
+  //             Navigator.push(
+  //               context,
+  //               MaterialPageRoute(builder: (context) => const FoodList()),
+  //             );
+  //           },
+  //         ),
+  //       ],
+  //     ),
+  //     body: fdlrList.isEmpty
+  //         ? _buildLoader()
+  //         : ListView(
+  //             children: [
+  //               Center(
+  //                 child: Card(
+  //                   child: Column(
+  //                     mainAxisSize: MainAxisSize.min,
+  //                     children: <Widget>[
+  //                       ListTile(
+  //                         leading: const Icon(Icons.album),
+  //                         title: const Text('Breakfast'),
+  //                         subtitle: Text(
+  //                           '${fdlrList[0].breakfastMealFoodItems?.mealFoodItemDetailist.length}',
+  //                         ),
+  //                         trailing: IconButton(
+  //                           onPressed: _testInsetBrandNewOneMealFoodItem,
+  //                           icon: const Icon(Icons.add),
+  //                         ),
+  //                       ),
+  //                       const Divider(),
+  //                       fdlrList[0].breakfastMealFoodItems != null
+  //                           ? ExpansionTile(
+  //                               title: Text(
+  //                                 '${fdlrList[0].breakfastMealFoodItems?.mealFoodItemDetailist.length}',
+  //                               ),
+  //                               children: _buildListTile(fdlrList[0]
+  //                                   .breakfastMealFoodItems
+  //                                   ?.mealFoodItemDetailist),
+  //                             )
+  //                           : Container(),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               ),
+  //               Center(
+  //                 child: Card(
+  //                   child: Column(
+  //                     mainAxisSize: MainAxisSize.min,
+  //                     children: <Widget>[
+  //                       ListTile(
+  //                         leading: const Icon(Icons.album),
+  //                         title: const Text('Lunch'),
+  //                         subtitle: Text(
+  //                           '${fdlrList[0].lunchMealFoodItems?.mealFoodItemDetailist.length}',
+  //                         ),
+  //                         trailing: IconButton(
+  //                           onPressed: _testInsetBrandNewOneMealFoodItem,
+  //                           icon: const Icon(Icons.add),
+  //                         ),
+  //                       ),
+  //                       const Divider(),
+  //                       fdlrList[0].lunchMealFoodItems != null
+  //                           ? ExpansionTile(
+  //                               title: Text(
+  //                                 '${fdlrList[0].lunchMealFoodItems?.mealFoodItemDetailist.length}',
+  //                               ),
+  //                               children: _buildListTile(fdlrList[0]
+  //                                   .lunchMealFoodItems
+  //                                   ?.mealFoodItemDetailist),
+  //                             )
+  //                           : Container(),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               ),
+  //               Center(
+  //                 child: Card(
+  //                   child: Column(
+  //                     mainAxisSize: MainAxisSize.min,
+  //                     children: <Widget>[
+  //                       ListTile(
+  //                         leading: const Icon(Icons.album),
+  //                         title: const Text('Dinner'),
+  //                         subtitle: Text(
+  //                           '${fdlrList[0].dinnerMealFoodItems?.mealFoodItemDetailist.length}',
+  //                         ),
+  //                         trailing: IconButton(
+  //                           onPressed: _testInsetBrandNewOneMealFoodItem,
+  //                           icon: const Icon(Icons.add),
+  //                         ),
+  //                       ),
+  //                       const Divider(),
+  //                       fdlrList[0].dinnerMealFoodItems != null
+  //                           ? ExpansionTile(
+  //                               title: Text(
+  //                                 '${fdlrList[0].dinnerMealFoodItems?.mealFoodItemDetailist.length}',
+  //                               ),
+  //                               children: _buildListTile(fdlrList[0]
+  //                                   .dinnerMealFoodItems
+  //                                   ?.mealFoodItemDetailist),
+  //                             )
+  //                           : Container(),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               ),
+  //               Center(
+  //                 child: Card(
+  //                   child: Column(
+  //                     mainAxisSize: MainAxisSize.min,
+  //                     children: <Widget>[
+  //                       ListTile(
+  //                         leading: const Icon(Icons.album),
+  //                         title: const Text('Other'),
+  //                         subtitle: Text(
+  //                           '${fdlrList[0].otherMealFoodItems?.mealFoodItemDetailist.length}',
+  //                         ),
+  //                         trailing: IconButton(
+  //                           onPressed: _testInsetBrandNewOneMealFoodItem,
+  //                           icon: const Icon(Icons.add),
+  //                         ),
+  //                       ),
+  //                       const Divider(),
+  //                       fdlrList[0].otherMealFoodItems != null
+  //                           ? ExpansionTile(
+  //                               title: Text(
+  //                                 '${fdlrList[0].otherMealFoodItems?.mealFoodItemDetailist.length}',
+  //                               ),
+  //                               children: _buildListTile(fdlrList[0]
+  //                                   .otherMealFoodItems
+  //                                   ?.mealFoodItemDetailist),
+  //                             )
+  //                           : Container(),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,70 +421,213 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           ),
         ],
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(8),
-        itemCount: 4,
-        itemBuilder: (BuildContext context, int index) {
-          return _buildCard();
-        },
-        separatorBuilder: (BuildContext context, int index) => const Divider(),
-      ),
+      body: fdlrList.isEmpty
+          ? _buildLoader()
+          : ListView.builder(
+              itemCount: 4,
+              itemBuilder: (context, index) {
+                final mealType = _getMealTypeByIndex(index);
+                final mealFoodItems = _getMealFoodItemsByType(mealType);
+                return _buildMealCard(mealType, mealFoodItems);
+              },
+            ),
     );
   }
 
-  _buildCard() {
-    return const Center(
+  Widget _buildMealCard(
+    String mealType,
+    MealAndMealFoodItemDetail? mealFoodItems,
+  ) {
+    bool showExpansionTile = mealFoodItems != null;
+    return Center(
       child: Card(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             ListTile(
-              leading: Icon(Icons.album),
-              title: Text('Breakfast'),
-              subtitle: Text('eat a good breakfast.'),
+              leading: const Icon(Icons.album),
+              title: Text(mealType),
+              subtitle: Text(
+                '${mealFoodItems?.mealFoodItemDetailist.length}',
+              ),
+              trailing: IconButton(
+                onPressed: () {
+                  setState(() {
+                    // 这个是测试不会存到数据库
+                    if (mealFoodItems != null) {
+                      var food1 = Food(
+                        brand: '永川',
+                        product: '豆豉',
+                        photos: '',
+                        tags: '调味品,佐料',
+                        category: '调味',
+                        contributor: '张三',
+                        gmtCreate: '2023-10-24 09:53:30',
+                      );
+
+                      var dserving1 = ServingInfo(
+                        foodId: 1,
+                        isMetric: false,
+                        servingSize: '一包',
+                        metricServingSize: 100,
+                        metricServingUnit: "克",
+                        energy: 2000,
+                        protein: 30,
+                        totalFat: 50,
+                        saturatedFat: 10,
+                        transFat: 20,
+                        polyunsaturatedFat: 10,
+                        monounsaturatedFat: 10,
+                        totalCarbohydrate: 20,
+                        sugar: 30,
+                        dietaryFiber: 10,
+                        sodium: 2,
+                        potassium: 20,
+                        cholesterol: 20,
+                        contributor: '李四',
+                        gmtCreate: '2023-10-24 09:59:15',
+                        updUserId: '',
+                        gmtModified: null,
+                      );
+
+                      var mealFoodItem3 = MealFoodItem(
+                        mealId: 2,
+                        foodId: 1,
+                        foodIntakeSize: 200,
+                        servingInfoId: 1,
+                      );
+                      mealFoodItems.mealFoodItemDetailist.add(
+                        MealFoodItemDetail(
+                          mealFoodItem: mealFoodItem3,
+                          food: food1,
+                          servingInfo: dserving1,
+                        ),
+                      );
+                    }
+                  });
+                },
+                icon: const Icon(Icons.add),
+              ),
             ),
-            Divider(),
-            ExpansionTile(
-              title: Text('2项'),
-              children: <Widget>[
-                ListTile(
-                  leading: Icon(Icons.album),
-                  title: Text('food1 名称'),
-                  subtitle: Text('food 1 重量.'),
-                  trailing: SizedBox(
-                    width: 100,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Text'),
-                        Icon(Icons.star),
-                      ],
-                    ),
-                  ),
+            const Divider(),
+            if (showExpansionTile)
+              ExpansionTile(
+                title: Text(
+                  '${mealFoodItems.mealFoodItemDetailist.length}',
                 ),
-                Divider(),
-                ListTile(
-                  leading: Icon(Icons.album),
-                  title: Text('food2'),
-                  subtitle: Text('food 2 description.'),
-                  trailing: Icon(Icons.arrow_forward),
-                ),
-                Divider(),
-                Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Text('Text'),
-                      Icon(Icons.star),
-                    ],
-                  ),
-                )
-              ],
-            ),
+                children: _buildListTile2(mealFoodItems.mealFoodItemDetailist),
+              ),
           ],
         ),
       ),
     );
+  }
+
+  List<Widget> _buildListTile2(List<MealFoodItemDetail>? list) {
+    List<Widget> temp = [
+      const Divider(),
+    ];
+
+    if (list == null) return temp;
+
+    return list.map((mealFoodItemDetail) {
+      return Dismissible(
+        key: Key(mealFoodItemDetail.hashCode.toString()),
+        onDismissed: (direction) {
+          setState(() {
+            list.remove(mealFoodItemDetail);
+          });
+        },
+        background: Container(
+          color: Colors.red,
+          child: const Icon(Icons.delete, color: Colors.white),
+        ),
+        child: ListTile(
+          title: Text(mealFoodItemDetail.food.brand),
+          subtitle: Text('${mealFoodItemDetail.mealFoodItem.foodIntakeSize}'),
+          trailing: SizedBox(
+            width: 200,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${mealFoodItemDetail.mealFoodItem.foodIntakeSize * mealFoodItemDetail.servingInfo.energy} 卡卡卡',
+                ),
+                const Icon(Icons.star),
+              ],
+            ),
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  List<Widget> _buildListTile(List<MealFoodItemDetail>? list) {
+    List<Widget> temp = [
+      const Divider(),
+    ];
+
+    if (list == null) return temp;
+
+    for (var detail in list) {
+      temp.add(ListTile(
+        leading: const Icon(Icons.album),
+        title: Text(detail.food.brand),
+        subtitle: Text('${detail.mealFoodItem.foodIntakeSize}'),
+        trailing: SizedBox(
+          width: 200,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${detail.mealFoodItem.foodIntakeSize * detail.servingInfo.energy} 卡卡卡',
+              ),
+              const Icon(Icons.star),
+            ],
+          ),
+        ),
+      ));
+    }
+    return temp;
+  }
+
+  Widget _buildLoader() {
+    if (isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    } else {
+      return Container();
+    }
+  }
+
+  String _getMealTypeByIndex(int index) {
+    switch (index) {
+      case 0:
+        return 'Breakfast';
+      case 1:
+        return 'Lunch';
+      case 2:
+        return 'Dinner';
+      case 3:
+        return 'Other';
+      default:
+        throw Exception('Invalid index');
+    }
+  }
+
+  MealAndMealFoodItemDetail? _getMealFoodItemsByType(String mealType) {
+    switch (mealType) {
+      case 'Breakfast':
+        return fdlrList[0].breakfastMealFoodItems;
+      case 'Lunch':
+        return fdlrList[0].lunchMealFoodItems;
+      case 'Dinner':
+        return fdlrList[0].dinnerMealFoodItems;
+      case 'Other':
+        return fdlrList[0].otherMealFoodItems;
+      default:
+        throw Exception('Invalid meal type');
+    }
   }
 }

@@ -63,3 +63,11 @@ getFileSize(int bytes, int decimals) {
   var i = (log(bytes) / log(1024)).floor();
   return '${(bytes / pow(1024, i)).toStringAsFixed(decimals)} ${suffixes[i]}';
 }
+
+// 获取当日格式化的日期字符串
+String getCurrentDate() {
+  final now = DateTime.now();
+  final formatter = DateFormat('yyyy-MM-dd');
+  final formattedDate = formatter.format(now);
+  return formattedDate;
+}

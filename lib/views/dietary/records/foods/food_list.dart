@@ -166,6 +166,10 @@ class _FoodListState extends State<FoodList> {
                     title: Text(foodName),
                     // 单份食物营养素
                     subtitle: Text("$foodUnit - $foodEnergy 大卡"),
+                    trailing: IconButton(
+                      onPressed: () {},
+                      icon: const Icon(Icons.add_box_outlined),
+                    ),
                     onTap: () {
                       Navigator.push(
                         context,

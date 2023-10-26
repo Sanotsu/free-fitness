@@ -70,7 +70,10 @@ class _FoodModifyState extends State<FoodModify> {
         potassium: 113,
         cholesterol: 456);
 
-    int ret = await _dietaryHelper.insertFoodWithServingInfo(dfood, dserving2);
+    int ret = await _dietaryHelper.insertFoodWithServingInfo(
+      food: dfood,
+      servingInfo: dserving2,
+    );
     return ret;
   }
 

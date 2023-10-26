@@ -6,8 +6,10 @@ class DietaryDdl {
 
   static const tableNameOfFood = 'ff_food';
   static const tableNameOfServingInfo = 'ff_serving_info';
-  static const tableNameOfMeal = 'ff_meal';
+  // 一日多餐，一餐多种食物
   static const tableNameOfFoodDailyLog = 'ff_food_daily_log';
+  static const tableNameOfMeal = 'ff_meal';
+  static const tableNameOfMealFoodItem = 'ff_meal_food_item';
 
   static const String ddlForFood = """
     CREATE TABLE IF NOT EXISTS $tableNameOfFood (
@@ -50,13 +52,20 @@ class DietaryDdl {
     );
     """;
 
+  static const String ddlForMealFoodItem = """
+    CREATE TABLE IF NOT EXISTS $tableNameOfMealFoodItem (
+      meal_food_item_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+      meal_id INTEGER NOT NULL,
+      food_id INTEGER NOT NULL,
+      food_intake_size REAL NOT NULL,
+      serving_info_id INTEGER NOT NULL
+    );
+    """;
+
   static const String ddlForMeal = """
     CREATE TABLE IF NOT EXISTS $tableNameOfMeal (
       meal_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
       meal_name TEXT,
-      food_id INTEGER NOT NULL,
-      serving_info_id INTEGER NOT NULL,
-      intake INTEGER NOT NULL,
       description TEXT,
       contributor TEXT,
       gmt_create TEXT,
