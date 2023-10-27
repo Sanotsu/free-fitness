@@ -94,3 +94,33 @@ final List<ExerciseDefaultOption> musclesOptions = [
   ExerciseDefaultOption(label: "展肌", value: 'abductors'),
   ExerciseDefaultOption(label: "脖子", value: 'neck'),
 ];
+
+// 一日三餐餐次名称关键字，避免直接使用魔法阵
+
+enum Mealtimes {
+  breakfast,
+  lunch,
+  dinner,
+  other,
+}
+
+// 这个标识名称和值的类，在下拉选择框中可以通用，Mealtimes换为 dynamic 即可
+class CusDropdownOption {
+  final String label;
+  final Mealtimes value;
+  final String? name;
+
+  CusDropdownOption({
+    required this.label,
+    required this.value,
+    this.name,
+  });
+}
+
+// 下拉选择框使用的餐次信息(用的这个，显示更方便)
+List<CusDropdownOption> mealtimeList = [
+  CusDropdownOption(label: "breakfast", name: "早餐", value: Mealtimes.breakfast),
+  CusDropdownOption(label: "lunch", name: "午餐", value: Mealtimes.lunch),
+  CusDropdownOption(label: "dinner", name: "晚餐", value: Mealtimes.dinner),
+  CusDropdownOption(label: "other", name: "小食", value: Mealtimes.other),
+];

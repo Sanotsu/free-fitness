@@ -250,10 +250,10 @@ class DBDietaryHelper {
   // 初始化数据库
   Future<Database> initializeDatabase() async {
     // 获取Android和iOS存储数据库的目录路径。
-    Directory directory = await getApplicationDocumentsDirectory();
-    String path = "${directory.path}/${DietaryDdl.databaseName}";
+    Directory? directory = await getExternalStorageDirectory();
+    String path = "${directory?.path}/${DietaryDdl.databaseName}";
 
-    print("初始化 TRAIN sqlite数据库存放的地址：$path");
+    print("初始化 DIETARY sqlite数据库存放的地址：$path");
 
     // 在给定路径上打开/创建数据库
     var db = await openDatabase(path, version: 1, onCreate: _createDb);
@@ -481,6 +481,7 @@ class DBDietaryHelper {
     return result;
   }
 
+  // 插入单条meal food item
   Future<int> insertMealFoodItem(MealFoodItem mealFoodItem) async {
     Database db = await database;
 
@@ -492,7 +493,24 @@ class DBDietaryHelper {
     return result;
   }
 
-  Future<int> insertFoodDailyLogObly(FoodDailyLog foodDailyLog) async {
+  //  一次添加多条 meal food item
+  Future<List<Object?>> batchInsertMealFoodItem(
+    List<MealFoodItem> mealFoodItems,
+  ) async {
+    Database db = await database;
+
+    var batch = db.batch();
+    for (var item in mealFoodItems) {
+      db.insert(DietaryDdl.tableNameOfMealFoodItem, item.toMap());
+    }
+
+    var results = await batch.commit();
+
+    return results;
+  }
+
+  // 插入单条 daily log
+  Future<int> insertFoodDailyLogOnly(FoodDailyLog foodDailyLog) async {
     Database db = await database;
 
     // 因为 foodDailyLogId 作为主键且设为自增，所以这里返回的是新增的 foodDailyLogId
@@ -503,7 +521,7 @@ class DBDietaryHelper {
     return result;
   }
 
-  /// 插入每日饮食记录大体流程
+  /// ？？？插入每日饮食记录大体流程（这个逻辑还不够完善）
   ///
   /// 1、查看当前日期有没有饮食记录
   ///    如果没有，直接新增；
@@ -613,7 +631,7 @@ class DBDietaryHelper {
 
             print("555555555555555555-----------");
           } else {
-            // 如果该日该餐次没有数据，则需要先新增meal，再新增meal food item
+            // 如果该日该餐次没有数据，则需要先新增meal，再新增meal food item，最后修改该日记对应餐点的meal id为新增的meal id
             var mealId = await txn.insert(
               DietaryDdl.tableNameOfMeal,
               meal.toMap(),
@@ -623,6 +641,35 @@ class DBDietaryHelper {
               DietaryDdl.tableNameOfMealFoodItem,
               mealFoodItem.toMap(),
             );
+
+            switch (mealBelong) {
+              case "breakfast":
+                log.breakfastMealId = mealId;
+                break;
+              case "lunch":
+                log.lunchMealId = mealId;
+                break;
+              case "dinner":
+                log.dinnerMealId = mealId;
+                break;
+              case "other":
+                log.otherMealId = mealId;
+                break;
+            }
+
+            print("------666666666666-----------$log");
+            // await txn.update(
+            //   DietaryDdl.tableNameOfFoodDailyLog,
+            //   log.toMap(),
+            // );
+
+            await txn.update(
+              DietaryDdl.tableNameOfFoodDailyLog,
+              log.toMap(),
+              where: 'food_daily_id = ?',
+              whereArgs: [log.foodDailyId],
+            );
+
             print("666666666666666666666666-----------");
           }
         }
@@ -640,428 +687,24 @@ class DBDietaryHelper {
     return resultFlag;
   }
 
-  // 移除item
+  /// 移除item
   // 传入food dialy log的id，对应的早中晚夜宵编号，找到对应的meal，找到对应的food intake item id，删除
   // 如果meal 没有任何food intake item，
   //    meal没有绑定到人和food daily log中，删除meal（这一步可以在food daily log中也同时清除原本绑定了这个meal id点栏位）
 
-  Future<List<FoodDailyLog>> queryFoodDailyLog() async {
+  // 查询单纯的所有饮食日记（可能测试用的多）
+  Future<List<FoodDailyLog>> queryFoodDailyLogOnly() async {
     Database db = await database;
 
     final rows = await db.query(DietaryDdl.tableNameOfFoodDailyLog);
 
     var list = rows.map((row) => FoodDailyLog.fromMap(row)).toList();
 
-    print("queryFoodDailyLog--- $list");
-
     return list;
   }
 
-// 查询所有饮食记录及相关信息
-  Future<List<FoodIntakeRecord>> queryAllFoodIntakeRecords2() async {
-    Database db = await database;
-
-    List<Map<String, dynamic>> result = await db.rawQuery('''
-    SELECT fdl.*, 
-           m1.meal_id AS breakfast_meal_id, 
-           m1.meal_name AS breakfast_meal_name, 
-           m2.meal_id AS lunch_meal_id, 
-           m2.meal_name AS lunch_meal_name, 
-           m3.meal_id AS dinner_meal_id, 
-           m3.meal_name AS dinner_meal_name, 
-           m4.meal_id AS other_meal_id, 
-           m4.meal_name AS other_meal_name,
-           mfi1.meal_food_item_id AS breakfast_meal_food_item_id,
-           mfi1.food_id AS breakfast_food_id,
-           mfi1.serving_info_id AS breakfast_serving_info_id,
-           mfi1.food_intake_size AS breakfast_food_intake_size,
-           mfi2.meal_food_item_id AS lunch_meal_food_item_id,
-           mfi2.food_id AS lunch_food_id,
-           mfi2.serving_info_id AS lunch_serving_info_id,
-           mfi2.food_intake_size AS lunch_food_intake_size,
-           mfi3.meal_food_item_id AS dinner_meal_food_item_id,
-           mfi3.food_id AS dinner_food_id,
-           mfi3.serving_info_id AS dinner_serving_info_id,
-           mfi3.food_intake_size AS dinner_food_intake_size,
-           mfi4.meal_food_item_id AS other_meal_food_item_id,
-           mfi4.food_id AS other_food_id,
-           mfi4.serving_info_id AS other_serving_info_id,
-           mfi4.food_intake_size AS other_food_intake_size
-    FROM ff_food_daily_log AS fdl
-    LEFT JOIN ff_meal AS m1 ON fdl.breakfast_meal_id = m1.meal_id
-    LEFT JOIN ff_meal AS m2 ON fdl.lunch_meal_id = m2.meal_id
-    LEFT JOIN ff_meal AS m3 ON fdl.dinner_meal_id = m3.meal_id
-    LEFT JOIN ff_meal AS m4 ON fdl.other_meal_id = m4.meal_id
-    LEFT JOIN ff_meal_food_item AS mfi1 ON fdl.breakfast_meal_id = mfi1.meal_id
-    LEFT JOIN ff_meal_food_item AS mfi2 ON fdl.lunch_meal_id = mfi2.meal_id
-    LEFT JOIN ff_meal_food_item AS mfi3 ON fdl.dinner_meal_id = mfi3.meal_id
-    LEFT JOIN ff_meal_food_item AS mfi4 ON fdl.other_meal_id = mfi4.meal_id
-  ''');
-
-    log("queryAllFoodIntakeRecords  result---------------------$result");
-
-/*
-result be like：
-
-[{food_daily_id: 1, date: 2023-10-24 16:32:15.617120, 
-breakfast_meal_id: 1, lunch_meal_id: null, dinner_meal_id: null, other_meal_id: null, 
-contributor: david, gmt_create: 2023-10-24 16:32:15.618412, gmt_modified: null, 
-breakfast_meal_name: 20231024的早餐, lunch_meal_name: null, dinner_meal_name: null, other_meal_name: null, 
-breakfast_meal_food_item_id: 1, breakfast_food_id: 1, breakfast_serving_info_id: 1, breakfast_food_intake_size: 100.0, 
-lunch_meal_food_item_id: null, lunch_food_id: null, lunch_serving_info_id: null, lunch_food_intake_size: null, 
-dinner_meal_food_item_id: null, dinner_food_id: null, dinner_serving_info_id: null, dinner_food_intake_size: null, 
-other_meal_food_item_id: null, other_food_id: null, other_serving_info_id: null, other_food_intake_size: null}, 
-
-{food_daily_id: 1, date: 2023-10-24 16:32:15.617120, 
-breakfast_meal_id: 1, lunch_meal_id: null, dinner_meal_id: null, other_meal_id: null, 
-contributor: david, gmt_create: 2023-10-24 16:32:15.618412, gmt_modified: null, 
-breakfast_meal_name: 20231024的早餐, lunch_meal_name: null, dinner_meal_name: null, other_meal_name: null, 
-breakfast_meal_food_item_id: 2, breakfast_food_id: 2, breakfast_serving_info_id: 1, breakfast_food_intake_size: 200.0, 
-lunch_meal_food_item_id: null, lunch_food_id: null, lunch_serving_info_id: null, lunch_food_intake_size: null, 
-dinner_meal_food_item_id: null, dinner_food_id: null, dinner_serving_info_id: null, dinner_food_intake_size: null, 
-other_meal_food_item_id: null, other_food_id: null, other_serving_info_id: null, other_food_intake_size: null}]
-
-*/
-
-    List<FoodIntakeRecord> foodIntakeRecords = [];
-
-    for (Map<String, dynamic> row in result) {
-      int foodDailyId = row['food_daily_id'];
-      String date = row['date'];
-      String? contributor = row['contributor'];
-      String? gmtCreate = row['gmt_create'];
-      String? gmtModified = row['gmt_modified'];
-
-      Meal? breakfastMeal;
-      if (row['breakfast_meal_id'] != null) {
-        breakfastMeal = Meal(
-          mealId: row['breakfast_meal_id'],
-          mealName: row['breakfast_meal_name']!,
-          description: row['breakfast_description'],
-          contributor: row['breakfast_contributor'],
-          gmtCreate: row['breakfast_gmt_create'],
-          gmtModified: row['breakfast_gmt_modified'],
-        );
-      }
-
-      Meal? lunchMeal;
-      if (row['lunch_meal_id'] != null) {
-        lunchMeal = Meal(
-          mealId: row['lunch_meal_id'],
-          mealName: row['lunch_meal_name']!,
-          description: row['lunch_description'],
-          contributor: row['lunch_contributor'],
-          gmtCreate: row['lunch_gmt_create'],
-          gmtModified: row['lunch_gmt_modified'],
-        );
-      }
-
-      Meal? dinnerMeal;
-      if (row['dinner_meal_id'] != null) {
-        dinnerMeal = Meal(
-          mealId: row['dinner_meal_id'],
-          mealName: row['dinner_meal_name']!,
-          description: row['dinner_description'],
-          contributor: row['dinner_contributor'],
-          gmtCreate: row['dinner_gmt_create'],
-          gmtModified: row['dinner_gmt_modified'],
-        );
-      }
-
-      Meal? otherMeal;
-      if (row['other_meal_id'] != null) {
-        otherMeal = Meal(
-          mealId: row['other_meal_id'],
-          mealName: row['other_meal_name']!,
-          description: row['other_description'],
-          contributor: row['other_contributor'],
-          gmtCreate: row['other_gmt_create'],
-          gmtModified: row['other_gmt_modified'],
-        );
-      }
-
-      List<MealFoodItem> breakfastMealFoodItems = [];
-      if (row['breakfast_meal_food_item_id'] != null) {
-        breakfastMealFoodItems.add(MealFoodItem(
-          mealId: row['breakfast_meal_id'],
-          mealFoodItemId: row['breakfast_meal_food_item_id'],
-          foodId: row['breakfast_food_id'],
-          servingInfoId: row['breakfast_serving_info_id'],
-          foodIntakeSize: row['breakfast_food_intake_size'],
-        ));
-      }
-
-      List<MealFoodItem> lunchMealFoodItems = [];
-      if (row['lunch_meal_food_item_id'] != null) {
-        lunchMealFoodItems.add(MealFoodItem(
-          mealId: row['lunch_meal_id'],
-          mealFoodItemId: row['lunch_meal_food_item_id'],
-          foodId: row['lunch_food_id'],
-          servingInfoId: row['lunch_serving_info_id'],
-          foodIntakeSize: row['lunch_food_intake_size'],
-        ));
-      }
-
-      List<MealFoodItem> dinnerMealFoodItems = [];
-      if (row['dinner_meal_food_item_id'] != null) {
-        dinnerMealFoodItems.add(MealFoodItem(
-          mealId: row['dinner_meal_id'],
-          mealFoodItemId: row['dinner_meal_food_item_id'],
-          foodId: row['dinner_food_id'],
-          servingInfoId: row['dinner_serving_info_id'],
-          foodIntakeSize: row['dinner_food_intake_size'],
-        ));
-      }
-
-      List<MealFoodItem> otherMealFoodItems = [];
-      if (row['other_meal_food_item_id'] != null) {
-        otherMealFoodItems.add(MealFoodItem(
-          mealId: row['other_meal_id'],
-          mealFoodItemId: row['other_meal_food_item_id'],
-          foodId: row['other_food_id'],
-          servingInfoId: row['other_serving_info_id'],
-          foodIntakeSize: row['other_food_intake_size'],
-        ));
-      }
-
-      FoodIntakeRecord foodIntakeRecord = FoodIntakeRecord(
-        foodDailyId: foodDailyId,
-        date: date,
-        contributor: contributor,
-        gmtCreate: gmtCreate,
-        gmtModified: gmtModified,
-        breakfastMeal: breakfastMeal,
-        lunchMeal: lunchMeal,
-        dinnerMeal: dinnerMeal,
-        otherMeal: otherMeal,
-        breakfastMealFoodItems: breakfastMealFoodItems,
-        lunchMealFoodItems: lunchMealFoodItems,
-        dinnerMealFoodItems: dinnerMealFoodItems,
-        otherMealFoodItems: otherMealFoodItems,
-      );
-
-      foodIntakeRecords.add(foodIntakeRecord);
-    }
-
-    log("queryAllFoodIntakeRecords  foodIntakeRecords --- $foodIntakeRecords");
-
-    return foodIntakeRecords;
-  }
-
-  Future<List<FoodIntakeRecord>> queryAllFoodIntakeRecords3() async {
-    Database db = await database;
-
-    List<Map<String, dynamic>> result = await db.rawQuery('''
-    SELECT fdl.*, 
-           m1.meal_id AS breakfast_meal_id, 
-           m1.meal_name AS breakfast_meal_name, 
-           m2.meal_id AS lunch_meal_id, 
-           m2.meal_name AS lunch_meal_name, 
-           m3.meal_id AS dinner_meal_id, 
-           m3.meal_name AS dinner_meal_name, 
-           m4.meal_id AS other_meal_id, 
-           m4.meal_name AS other_meal_name,
-           mfi1.meal_food_item_id AS breakfast_meal_food_item_id,
-           mfi1.food_id AS breakfast_food_id,
-           mfi1.serving_info_id AS breakfast_serving_info_id,
-           mfi1.food_intake_size AS breakfast_food_intake_size,
-           mfi2.meal_food_item_id AS lunch_meal_food_item_id,
-           mfi2.food_id AS lunch_food_id,
-           mfi2.serving_info_id AS lunch_serving_info_id,
-           mfi2.food_intake_size AS lunch_food_intake_size,
-           mfi3.meal_food_item_id AS dinner_meal_food_item_id,
-           mfi3.food_id AS dinner_food_id,
-           mfi3.serving_info_id AS dinner_serving_info_id,
-           mfi3.food_intake_size AS dinner_food_intake_size,
-           mfi4.meal_food_item_id AS other_meal_food_item_id,
-           mfi4.food_id AS other_food_id,
-           mfi4.serving_info_id AS other_serving_info_id,
-           mfi4.food_intake_size AS other_food_intake_size
-    FROM ff_food_daily_log AS fdl
-    LEFT JOIN ff_meal AS m1 ON fdl.breakfast_meal_id = m1.meal_id
-    LEFT JOIN ff_meal AS m2 ON fdl.lunch_meal_id = m2.meal_id
-    LEFT JOIN ff_meal AS m3 ON fdl.dinner_meal_id = m3.meal_id
-    LEFT JOIN ff_meal AS m4 ON fdl.other_meal_id = m4.meal_id
-    LEFT JOIN ff_meal_food_item AS mfi1 ON fdl.breakfast_meal_id = mfi1.meal_id
-    LEFT JOIN ff_meal_food_item AS mfi2 ON fdl.lunch_meal_id = mfi2.meal_id
-    LEFT JOIN ff_meal_food_item AS mfi3 ON fdl.dinner_meal_id = mfi3.meal_id
-    LEFT JOIN ff_meal_food_item AS mfi4 ON fdl.other_meal_id = mfi4.meal_id
-  ''');
-
-    log("queryAllFoodIntakeRecords1111  result---------------------$result");
-
-    Map<int, FoodIntakeRecord> foodIntakeRecords = {};
-
-    for (var row in result) {
-      int foodDailyId = row['food_daily_id'];
-
-      // 如果字典中已存在该foodDailyId的记录，则跳过当前行数据
-      if (foodIntakeRecords.containsKey(foodDailyId)) {
-        // 有当日记录的时候，添加对应值即可
-        FoodIntakeRecord foodIntakeRecord = foodIntakeRecords[foodDailyId]!;
-
-        if (row['breakfast_meal_id'] != null) {
-          foodIntakeRecord.breakfastMeal = Meal(
-            mealId: row['breakfast_meal_id'],
-            mealName: row['breakfast_meal_name'] ?? "",
-          );
-
-          MealFoodItem mealFoodItem = MealFoodItem(
-            mealId: row['breakfast_meal_id'],
-            mealFoodItemId: row['breakfast_meal_food_item_id'],
-            foodId: row['breakfast_food_id'],
-            servingInfoId: row['breakfast_serving_info_id'],
-            foodIntakeSize: row['breakfast_food_intake_size'],
-          );
-
-          foodIntakeRecord.breakfastMealFoodItems.add(mealFoodItem);
-        }
-
-        if (row['lunch_meal_id'] != null) {
-          foodIntakeRecord.lunchMeal = Meal(
-            mealId: row['lunch_meal_id'],
-            mealName: row['lunch_meal_name'] ?? "",
-          );
-
-          MealFoodItem mealFoodItem = MealFoodItem(
-            mealId: row['lunch_meal_id'],
-            mealFoodItemId: row['lunch_meal_food_item_id'],
-            foodId: row['lunch_food_id'],
-            servingInfoId: row['lunch_serving_info_id'],
-            foodIntakeSize: row['lunch_food_intake_size'],
-          );
-
-          foodIntakeRecord.lunchMealFoodItems.add(mealFoodItem);
-        }
-
-        if (row['dinner_meal_id'] != null) {
-          foodIntakeRecord.dinnerMeal = Meal(
-            mealId: row['dinner_meal_id'],
-            mealName: row['dinner_meal_name'] ?? "",
-          );
-
-          MealFoodItem mealFoodItem = MealFoodItem(
-            mealId: row['dinner_meal_id'],
-            mealFoodItemId: row['dinner_meal_food_item_id'],
-            foodId: row['dinner_food_id'],
-            servingInfoId: row['dinner_serving_info_id'],
-            foodIntakeSize: row['dinner_food_intake_size'],
-          );
-
-          foodIntakeRecord.dinnerMealFoodItems.add(mealFoodItem);
-        }
-
-        if (row['other_meal_id'] != null) {
-          foodIntakeRecord.otherMeal = Meal(
-            mealId: row['other_meal_id'],
-            mealName: row['other_meal_name'] ?? "",
-          );
-
-          MealFoodItem mealFoodItem = MealFoodItem(
-            mealId: row['other_meal_id'],
-            mealFoodItemId: row['other_meal_food_item_id'],
-            foodId: row['other_food_id'],
-            servingInfoId: row['other_serving_info_id'],
-            foodIntakeSize: row['other_food_intake_size'],
-          );
-          foodIntakeRecord.otherMealFoodItems.add(mealFoodItem);
-        }
-      } else {
-        // 如果不存在，则创建新的 FoodIntakeRecord 并添加到字典中
-        FoodIntakeRecord foodIntakeRecord = FoodIntakeRecord(
-          foodDailyId: foodDailyId,
-          date: row['date'],
-          contributor: row['contributor'],
-          gmtCreate: row['gmt_create'],
-          gmtModified: row['gmt_modified'],
-          breakfastMealFoodItems: [],
-          lunchMealFoodItems: [],
-          dinnerMealFoodItems: [],
-          otherMealFoodItems: [],
-        );
-
-        if (row['breakfast_meal_id'] != null) {
-          foodIntakeRecord.breakfastMeal = Meal(
-            mealId: row['breakfast_meal_id'],
-            mealName: row['breakfast_meal_name'] ?? "",
-          );
-
-          MealFoodItem mealFoodItem = MealFoodItem(
-            mealId: row['breakfast_meal_id'],
-            mealFoodItemId: row['breakfast_meal_food_item_id'],
-            foodId: row['breakfast_food_id'],
-            servingInfoId: row['breakfast_serving_info_id'],
-            foodIntakeSize: row['breakfast_food_intake_size'],
-          );
-
-          foodIntakeRecord.breakfastMealFoodItems.add(mealFoodItem);
-        }
-
-        if (row['lunch_meal_id'] != null) {
-          foodIntakeRecord.lunchMeal = Meal(
-            mealId: row['lunch_meal_id'],
-            mealName: row['lunch_meal_name'] ?? "",
-          );
-
-          MealFoodItem mealFoodItem = MealFoodItem(
-            mealId: row['lunch_meal_id'],
-            mealFoodItemId: row['lunch_meal_food_item_id'],
-            foodId: row['lunch_food_id'],
-            servingInfoId: row['lunch_serving_info_id'],
-            foodIntakeSize: row['lunch_food_intake_size'],
-          );
-
-          foodIntakeRecord.lunchMealFoodItems.add(mealFoodItem);
-        }
-
-        if (row['dinner_meal_id'] != null) {
-          foodIntakeRecord.dinnerMeal = Meal(
-            mealId: row['dinner_meal_id'],
-            mealName: row['dinner_meal_name'] ?? "",
-          );
-
-          MealFoodItem mealFoodItem = MealFoodItem(
-            mealId: row['dinner_meal_id'],
-            mealFoodItemId: row['dinner_meal_food_item_id'],
-            foodId: row['dinner_food_id'],
-            servingInfoId: row['dinner_serving_info_id'],
-            foodIntakeSize: row['dinner_food_intake_size'],
-          );
-
-          foodIntakeRecord.dinnerMealFoodItems.add(mealFoodItem);
-        }
-
-        if (row['other_meal_id'] != null) {
-          foodIntakeRecord.dinnerMeal = Meal(
-            mealId: row['other_meal_id'],
-            mealName: row['other_meal_name'] ?? "",
-          );
-
-          MealFoodItem mealFoodItem = MealFoodItem(
-            mealId: row['other_meal_id'],
-            mealFoodItemId: row['other_meal_food_item_id'],
-            foodId: row['other_food_id'],
-            servingInfoId: row['other_serving_info_id'],
-            foodIntakeSize: row['other_food_intake_size'],
-          );
-          foodIntakeRecord.otherMealFoodItems.add(mealFoodItem);
-        }
-
-        // 没有当日记录的时候是新增
-        foodIntakeRecords[foodDailyId] = foodIntakeRecord;
-      }
-    }
-
-    List<FoodIntakeRecord> finalResult = foodIntakeRecords.values.toList();
-
-    log("queryAllFoodIntakeRecords  finalResult1111 --- $finalResult");
-
-    return finalResult;
-  }
-
   /// 查询饮食记录都是看当天。如果是某一顿，也是知道是哪一天了，再加上对应mealId直接去查下meal 和 meal_food_item即可
-
-  // 方案1,关联查询所有的数据，再按照指定格式进行转化
+  // TBC 方案1,关联查询所有的数据，再按照指定格式进行转化（未继续）
   Future<void> queryAllFoodIntakeRecords() async {
     Database db = await database;
 
@@ -1091,170 +734,6 @@ other_meal_food_item_id: null, other_food_id: null, other_serving_info_id: null,
 
   // ======================
   // 方案2,嵌套查询，一层一层查，一层一层包装，也有新的类包装起来
-  Future<List<FoodDailyLogRecord>> queryFoodDailyLogRecordOrgin(String date) async {
-    final db = await database;
-
-    // 查询log （注意：数据库中date栏位可用2023-10-24这个格式，时间戳的再说）
-    // 1 查询指定天数的，date = '2023-10-24' 即可
-    // 2 这里还可能查询几月份的，需要模糊查询date字符串的一部分 substr(date,1,7)='2023-10' 即可
-    // 3 同理，查询年份直接 substr(date,1,4)='2023' 即可
-    //
-    final logRows = await db.query(
-      DietaryDdl.tableNameOfFoodDailyLog,
-      where: 'date = ?',
-      whereArgs: ['date'],
-    );
-
-    final records = <FoodDailyLogRecord>[];
-
-    for (final row in logRows) {
-      final fdl = FoodDailyLog.fromMap(row);
-
-      // 查询meal
-      if (fdl.breakfastMealId != null) {
-        final breakfastMealRows = await db.query(
-          DietaryDdl.tableNameOfMeal,
-          where: 'meal_id = ?',
-          whereArgs: [fdl.breakfastMealId],
-        );
-
-        print("--------------breakfastMealRows:");
-        print(breakfastMealRows);
-
-        // 一切正常的话，早餐有数据，meal只有1条
-        final breakfastMeal = Meal.fromMap(breakfastMealRows[0]);
-
-        // 查询 meal food item
-        final mealFoodItemRows = await db.query(
-          DietaryDdl.tableNameOfMealFoodItem,
-          where: 'meal_id = ?',
-          whereArgs: [breakfastMeal.mealId],
-        );
-
-        print("--------------mealFoodItemRows:");
-        print(mealFoodItemRows);
-
-        final mealFoodItemList =
-            mealFoodItemRows.map((row) => MealFoodItem.fromMap(row)).toList();
-
-        List<MealFoodItemDetail> mealFoodItemDetailist = [];
-
-        // 正常来讲到这里，一个item 里面也只有1个food 和 1个serving info
-        for (var item in mealFoodItemList) {
-          // 查询 meal food item
-          final foodRows = await db.query(
-            DietaryDdl.tableNameOfFood,
-            where: 'food_id = ?',
-            whereArgs: [item.foodId],
-          );
-
-          // 正常数据的话，长度为1
-          final foodList = foodRows.map((row) => Food.fromMap(row)).toList();
-
-          final servingInfoRows = await db.query(
-            DietaryDdl.tableNameOfServingInfo,
-            where: 'serving_info_id = ?',
-            whereArgs: [item.servingInfoId],
-          );
-
-          // 正常数据的话，长度为1
-          final servingInfoList =
-              servingInfoRows.map((row) => ServingInfo.fromMap(row)).toList();
-
-          final mealFoodItemDetail = MealFoodItemDetail(
-            mealFoodItem: item,
-            food: foodList[0],
-            servingInfo: servingInfoList[0],
-          );
-
-          mealFoodItemDetailist.add(mealFoodItemDetail);
-        }
-
-        var mealAndMealFoodItemDetail = MealAndMealFoodItemDetail(
-          meal: breakfastMeal,
-          mealFoodItemDetailist: mealFoodItemDetailist,
-        );
-
-        final foodDailyLogRecord = FoodDailyLogRecord(
-          foodDailyLog: fdl,
-          breakfastMealFoodItems: mealAndMealFoodItemDetail,
-        );
-        records.add(foodDailyLogRecord);
-      }
-      if (fdl.lunchMealId != null) {
-        final lunchMealRows = await db.query(
-          DietaryDdl.tableNameOfMeal,
-          where: 'meal_id = ?',
-          whereArgs: [fdl.lunchMealId],
-        );
-
-        print("--------------lunchMealRows:");
-        print(lunchMealRows);
-
-        // 一切正常的话，早餐有数据，meal只有1条
-        final lunchMeal = Meal.fromMap(lunchMealRows[0]);
-
-        // 查询 meal food item
-        final mealFoodItemRows = await db.query(
-          DietaryDdl.tableNameOfMealFoodItem,
-          where: 'meal_id = ?',
-          whereArgs: [lunchMeal.mealId],
-        );
-
-        print("--------------mealFoodItemRows:");
-        print(mealFoodItemRows);
-
-        final mealFoodItemList =
-            mealFoodItemRows.map((row) => MealFoodItem.fromMap(row)).toList();
-
-        List<MealFoodItemDetail> mealFoodItemDetailist = [];
-
-        // 正常来讲到这里，一个item 里面也只有1个food 和 1个serving info
-        for (var item in mealFoodItemList) {
-          // 查询 meal food item
-          final foodRows = await db.query(
-            DietaryDdl.tableNameOfFood,
-            where: 'food_id = ?',
-            whereArgs: [item.foodId],
-          );
-
-          // 正常数据的话，长度为1
-          final foodList = foodRows.map((row) => Food.fromMap(row)).toList();
-
-          final servingInfoRows = await db.query(
-            DietaryDdl.tableNameOfServingInfo,
-            where: 'serving_info_id = ?',
-            whereArgs: [item.servingInfoId],
-          );
-
-          // 正常数据的话，长度为1
-          final servingInfoList =
-              servingInfoRows.map((row) => ServingInfo.fromMap(row)).toList();
-
-          final mealFoodItemDetail = MealFoodItemDetail(
-            mealFoodItem: item,
-            food: foodList[0],
-            servingInfo: servingInfoList[0],
-          );
-
-          mealFoodItemDetailist.add(mealFoodItemDetail);
-        }
-
-        var mealAndMealFoodItemDetail = MealAndMealFoodItemDetail(
-          meal: lunchMeal,
-          mealFoodItemDetailist: mealFoodItemDetailist,
-        );
-
-        final foodDailyLogRecord = FoodDailyLogRecord(
-          foodDailyLog: fdl,
-          lunchMealFoodItems: mealAndMealFoodItemDetail,
-        );
-        records.add(foodDailyLogRecord);
-      }
-    }
-    return records;
-  }
-
   // 以下是方案2优化之后的版本（前面这一堆是工具函数，也有可能其他地方可用）
   // 通过mealId查询meal，只返回一个meal
   Future<Meal> queryMealById(Database db, int mealId) async {
@@ -1322,26 +801,17 @@ other_meal_food_item_id: null, other_food_id: null, other_serving_info_id: null,
     return mealFoodItemDetailList;
   }
 
-  Future<void> _processMeal(
+  Future<MealAndMealFoodItemDetail> _getMealAndMealFoodItemDetail(
     Database db,
-    int? mealId,
-    FoodDailyLog fdl,
-    List<FoodDailyLogRecord> records,
+    int mealId,
   ) async {
-    if (mealId != null) {
-      final meal = await queryMealById(db, mealId);
-      final mealFoodItemList =
-          await queryMealFoodItemsByMealId(db, meal.mealId!);
-      final mealAndMealFoodItemDetail = MealAndMealFoodItemDetail(
-        meal: meal,
-        mealFoodItemDetailist: mealFoodItemList,
-      );
-      final foodDailyLogRecord = FoodDailyLogRecord(
-        foodDailyLog: fdl,
-        breakfastMealFoodItems: mealAndMealFoodItemDetail,
-      );
-      records.add(foodDailyLogRecord);
-    }
+    final meal = await queryMealById(db, mealId);
+    final mealFoodItemList = await queryMealFoodItemsByMealId(db, mealId);
+    final mealAndMealFoodItemDetail = MealAndMealFoodItemDetail(
+      meal: meal,
+      mealFoodItemDetailist: mealFoodItemList,
+    );
+    return mealAndMealFoodItemDetail;
   }
 
   Future<List<FoodDailyLogRecord>> queryFoodDailyLogRecord(
@@ -1350,19 +820,44 @@ other_meal_food_item_id: null, other_food_id: null, other_serving_info_id: null,
 
     final logRows = await db.query(
       DietaryDdl.tableNameOfFoodDailyLog,
-      // where: 'date = ?',
-      // whereArgs: ['date'],
+      where: 'date = ?',
+      whereArgs: [date],
     );
+
+    print("logRows------------------${logRows.length}");
 
     final records = <FoodDailyLogRecord>[];
 
     for (final row in logRows) {
       final fdl = FoodDailyLog.fromMap(row);
 
-      await _processMeal(db, fdl.breakfastMealId, fdl, records);
-      await _processMeal(db, fdl.lunchMealId, fdl, records);
-      await _processMeal(db, fdl.dinnerMealId, fdl, records);
-      await _processMeal(db, fdl.otherMealId, fdl, records);
+      // 有查到基础日记数据，先保存
+      final foodDailyLogRecord = FoodDailyLogRecord(foodDailyLog: fdl);
+
+      // 如果早中晚夜餐次有数据，分别查出详情数据加到对应栏位
+      if (fdl.breakfastMealId != null) {
+        var mealAndMealFoodItemDetail =
+            await _getMealAndMealFoodItemDetail(db, fdl.breakfastMealId!);
+        foodDailyLogRecord.breakfastMealFoodItems = mealAndMealFoodItemDetail;
+      }
+      if (fdl.lunchMealId != null) {
+        var mealAndMealFoodItemDetail =
+            await _getMealAndMealFoodItemDetail(db, fdl.lunchMealId!);
+        foodDailyLogRecord.lunchMealFoodItems = mealAndMealFoodItemDetail;
+      }
+      if (fdl.dinnerMealId != null) {
+        var mealAndMealFoodItemDetail =
+            await _getMealAndMealFoodItemDetail(db, fdl.dinnerMealId!);
+        foodDailyLogRecord.dinnerMealFoodItems = mealAndMealFoodItemDetail;
+      }
+      if (fdl.otherMealId != null) {
+        var mealAndMealFoodItemDetail =
+            await _getMealAndMealFoodItemDetail(db, fdl.otherMealId!);
+        foodDailyLogRecord.otherMealFoodItems = mealAndMealFoodItemDetail;
+      }
+
+      // 最后讲该条数据存入列表
+      records.add(foodDailyLogRecord);
     }
 
     log("records---------records---$records");

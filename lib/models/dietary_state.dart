@@ -316,6 +316,16 @@ class FoodAndServingInfo {
   final List<ServingInfo> servingInfoList;
 
   FoodAndServingInfo({required this.food, required this.servingInfoList});
+
+  @override
+  String toString() {
+    return '''
+    FoodAndServingInfo { 
+      "food": $food,
+      "servingInfoList": $servingInfoList
+    }
+    ''';
+  }
 }
 
 /// 扩展表 - 饮食记录比较重要涉及
