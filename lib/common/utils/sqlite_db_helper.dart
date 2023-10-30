@@ -338,28 +338,37 @@ class DBDietaryHelper {
   // 如果食物不为空，servinginfo为空，说明是单独新增食物（正常业务应该不会，新增食物一定会带一份营养素）
   // 如果食物不为空，servinginfo不为空，说明是正常的新增食物带一份营养素
   // 如果都为空，则报错
-  Future<int> insertFoodWithServingInfo({
+  // ？？？ 2023-10-30 应该支持1个食物带多份营养素信息（ServingInfo? -> List<ServingInfo>?即可）
+  Future<int> insertFoodWithServingInfoList({
     Food? food,
-    ServingInfo? servingInfo,
+    List<ServingInfo>? servingInfoList,
   }) async {
     final db = await database;
     int foodId = 0;
     try {
       await db.transaction((txn) async {
         // 如果有传入的食物信息，说明是在新增食物时一并新增其营养素
-        //是已存在的食物编号，则直接新增serving info即可
-        if (food != null && servingInfo != null) {
+        if (food != null &&
+            (servingInfoList != null && servingInfoList.isNotEmpty)) {
           // 由于food_id列被设置为自增属性的主键，因此在调用insert方法时，返回值应该是新插入行的food_id值。
           // 如果不是自增主键，则返回的是行号row 的id。
           foodId = await txn.insert(DietaryDdl.tableNameOfFood, food.toMap());
-          servingInfo.foodId = foodId;
-          await txn.insert(
-              DietaryDdl.tableNameOfServingInfo, servingInfo.toMap());
-        } else if (food != null && servingInfo == null) {
+
+          // 多个单个营养素的食物都是同一个
+          for (var e in servingInfoList) {
+            e.foodId = foodId;
+            await txn.insert(DietaryDdl.tableNameOfServingInfo, e.toMap());
+          }
+        } else if (food != null && servingInfoList == null) {
+          // 如果只有食物，则是新增食物
           foodId = await txn.insert(DietaryDdl.tableNameOfFood, food.toMap());
-        } else if (food == null && servingInfo != null) {
-          await txn.insert(
-              DietaryDdl.tableNameOfServingInfo, servingInfo.toMap());
+        } else if (food == null && servingInfoList != null) {
+          //如果没有传食物，是已存在的食物编号，则直接新增serving info即可
+
+          // 多个单个营养素的批量插入
+          for (var e in servingInfoList) {
+            txn.insert(DietaryDdl.tableNameOfServingInfo, e.toMap());
+          }
         } else {
           throw Exception("没有传入food id或serving info");
         }
@@ -541,7 +550,7 @@ class DBDietaryHelper {
 
     var batch = db.batch();
     for (var item in mealFoodItems) {
-      db.insert(DietaryDdl.tableNameOfMealFoodItem, item.toMap());
+      batch.insert(DietaryDdl.tableNameOfMealFoodItem, item.toMap());
     }
 
     var results = await batch.commit();

@@ -55,10 +55,8 @@ class Food {
 
 class ServingInfo {
   int? servingInfoId; // 自增的，可以不传
-  int foodId;
-  bool isMetric;
-  int? metricServingSize;
-  String? servingSize, metricServingUnit;
+  int foodId, servingSize;
+  String servingUnit;
   String? contributor, gmtCreate, updUserId, gmtModified;
   double energy, protein, totalFat, totalCarbohydrate, sodium;
   double? saturatedFat, transFat, polyunsaturatedFat, monounsaturatedFat;
@@ -67,10 +65,8 @@ class ServingInfo {
   ServingInfo({
     this.servingInfoId,
     required this.foodId,
-    required this.isMetric,
-    this.servingSize,
-    this.metricServingSize,
-    this.metricServingUnit,
+    required this.servingSize,
+    required this.servingUnit,
     required this.energy,
     required this.protein,
     required this.totalFat,
@@ -94,10 +90,8 @@ class ServingInfo {
     return {
       "serving_info_id": servingInfoId,
       "food_id": foodId,
-      "is_metric": isMetric,
       "serving_size": servingSize,
-      "metric_serving_size": metricServingSize,
-      "metric_serving_unit": metricServingUnit,
+      "serving_unit": servingUnit,
       "energy": energy,
       "protein": protein,
       "total_fat": totalFat,
@@ -122,11 +116,8 @@ class ServingInfo {
     return ServingInfo(
       servingInfoId: map['serving_info_id'] as int?,
       foodId: map['food_id'] as int,
-      // int? 不是null或0 就转为bool的true
-      isMetric: map['is_metric'] != null && map['is_metric'] != 0,
-      servingSize: map['serving_size'] as String?,
-      metricServingSize: map['metric_serving_size'] as int?,
-      metricServingUnit: map['metric_serving_unit'] as String,
+      servingSize: map['serving_size'] as int,
+      servingUnit: map['serving_unit'] as String,
       energy: map['energy'] as double,
       protein: map['protein'] as double,
       totalFat: map['total_fat'] as double,
@@ -152,7 +143,7 @@ class ServingInfo {
     return '''
     ServingInfo{
     "serving_info_id": $servingInfoId, "food_id": $foodId, 
-      "is_metric": $isMetric, "serving_size": $servingSize, "metric_serving_size": $metricServingSize, "metric_serving_unit": $metricServingUnit,
+      "serving_size": $servingSize, "serving_unit": $servingUnit,
       "energy": $energy, "protein": $protein, "total_fat": $totalFat, "saturated_fat": $saturatedFat, "trans_fat": $transFat, 
       "polyunsaturated_fat": $polyunsaturatedFat, "monounsaturated_fat": $monounsaturatedFat, "cholesterol": $cholesterol, 
       "total_carbohydrate": $totalCarbohydrate, "sugar": $sugar, "dietary_fiber": $dietaryFiber, "sodium": $sodium, "potassium": $potassium, 

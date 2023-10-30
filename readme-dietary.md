@@ -63,3 +63,5 @@
 2023-10-30 暂存
 
 pause: log index 和 food list 点击跳转到 food detail 的逻辑有了，但发现了更优的 serving info 的数据库设计，所以暂停目前的内容，修改新的数据库设计。
+
+基本完成: 修改了数据库表 serving_info 的栏位设计，并修改了目前涉及到的所有逻辑部分（主要是 food detail 营养素展示部件）

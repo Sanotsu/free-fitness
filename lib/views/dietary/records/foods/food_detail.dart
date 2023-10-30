@@ -45,21 +45,13 @@ class _FoodDetailState extends State<FoodDetail> {
   final _formKey = GlobalKey<FormBuilderState>();
 
   // 食物营养素单位选项
-  // 一种食物可能有多个单位，标准单份显示的栏位是metricServingUnit，自定份数的显示栏位是servingSize
-  // 所以这个选项列表的值类型为{flag:bool,value:dynamic},flag标识是否是标准化单份，value为单份取值(上一行说明)
+  // 一种食物可能有多个单份单位，所以是列表供用户下拉选择，对应数据库表中的 servingUnit。
   var servingUnitOptions = [];
 
-  // 用户输入的食物数量和单位
+  // 用户输入的食物摄入数量
   double inputServingValue = 1;
-  // 单位就是上面选项选中的值，用于计算是其value
-  var inputServingUnit = {};
-
-  /// 显示的营养素总值= 标准单位 ? (输入值*(标准单位/100)*单克/毫升的营养素) : 输入值*自定单份单位*单份营养素
-  // 当前食物的营养素是否为标准量化单位
-  bool isMetricServing = false;
-  // 用于计算的数量，即用户输入值是否要除以100用克/毫升算，还是直接份用算
-  // (是标准单份则除以100的单克，不是标准单份就直接是1份)
-  double inputMetricServingUnit = 0;
+  // 用户输入的食物摄入单位，就是上面选项选中的单位（主要是根据单位找到用于计算的营养素信息）
+  var inputServingUnit = "";
   // 保存要用于计算的单份营养素信息
   late ServingInfo nutrientsInfo;
 
@@ -99,64 +91,26 @@ class _FoodDetailState extends State<FoodDetail> {
     // 默认给传入的食物的第一个营养素信息，daily log 主页面传入时会修改为指定的
     nutrientsInfo = temp[0];
 
-// 1 如果是查询的food list 直接点击的食物详情，取默认第一个营养素信息
+    // 1 如果是查询的food list 直接点击的食物详情，取默认第一个营养素信息
     if (widget.jumpSource == "FOOD_LIST") {
       // 构建初始化值
-      if (temp[0].isMetric) {
-        inputServingValue = (temp[0].metricServingSize ?? 1).toDouble();
-        inputServingUnit = {
-          "flag": true,
-          "value": temp[0].metricServingUnit,
-        };
-        isMetricServing = true;
-        inputMetricServingUnit = inputServingValue / 100;
-      } else {
-        inputServingValue = 1;
-        inputServingUnit = {
-          "flag": false,
-          "value": temp[0].servingSize,
-        };
-        isMetricServing = false;
-        inputMetricServingUnit = inputServingValue;
-      }
+      // 没有传入的数据就用列表第一个
+      inputServingValue = (nutrientsInfo.servingSize).toDouble();
+      inputServingUnit = nutrientsInfo.servingUnit;
     } else if (widget.jumpSource == "LOG_INDEX") {
-      inputServingValue = widget.mfid!.mealFoodItem.foodIntakeSize;
-
+      // 有传入的数据就用传入的
       nutrientsInfo = widget.mfid!.servingInfo;
-      // 构建初始化值
-      if (nutrientsInfo.isMetric) {
-        inputServingUnit = {
-          "flag": true,
-          "value": nutrientsInfo.metricServingUnit,
-        };
-        isMetricServing = true;
-        inputMetricServingUnit = inputServingValue / 100;
-      } else {
-        inputServingUnit = {
-          "flag": false,
-          "value": nutrientsInfo.servingSize,
-        };
-        isMetricServing = false;
-        inputMetricServingUnit = inputServingValue;
-      }
+      inputServingValue = widget.mfid!.mealFoodItem.foodIntakeSize;
+      inputServingUnit = nutrientsInfo.servingUnit;
     }
 
-    // 构建可选单位列表
+    // 构建可选单位列表(不管是新增还是修改，对应食物的单份营养素列表都一样)
     for (var info in temp) {
-      if (info.isMetric) {
-        servingUnitOptions.add({
-          "flag": true,
-          "value": info.metricServingUnit,
-        });
-      } else {
-        servingUnitOptions.add({
-          "flag": false,
-          "value": info.servingSize,
-        });
-      }
+      servingUnitOptions.add(info.servingUnit);
     }
   }
 
+  // 修改了摄入量数值和单位，都要重新计算用于显示的营养素信息(这里是重新获取修改后的营养素单位)
   _recalculateNutrients() {
     print("_recalculateNutrients inputServingUnit $inputServingUnit");
     print("_recalculateNutrients inputServingValue $inputServingValue");
@@ -165,27 +119,16 @@ class _FoodDetailState extends State<FoodDetail> {
 
     print("-----------temp $tempList inputServingUnit $inputServingUnit ");
 
-    var flag = inputServingUnit["flag"];
-    var value = inputServingUnit["value"];
-
     //  ？？？注意，如果这里没有匹配的，肯定是哪里出问题了
-    // 2023-10-21
-    // 标准单份数据库存入100g/ml的含量，这里计算是要除以100；自定义单份则无需
-    var metricServing = tempList
-        .where((e) =>
-            (!flag && e.servingSize == value) ||
-            (flag && e.metricServingUnit == value))
-        .first;
+    // 从用户输入的单份食物单位，找到对应的营养素信息
+    var metricServing =
+        tempList.where((e) => e.servingUnit == inputServingUnit).first;
 
     print("-----------metricServing $metricServing");
 
     setState(() {
       nutrientsInfo = metricServing;
-      isMetricServing = flag;
-      inputMetricServingUnit =
-          flag ? inputServingValue / 100 : inputServingValue;
-
-      print("处理结果： $nutrientsInfo --$inputMetricServingUnit");
+      print("处理结果： $nutrientsInfo ");
     });
   }
 
@@ -241,7 +184,7 @@ class _FoodDetailState extends State<FoodDetail> {
                               .map((unit) => DropdownMenuItem(
                                     alignment: AlignmentDirectional.center,
                                     value: unit,
-                                    child: Text(unit['value']),
+                                    child: Text(unit),
                                   ))
                               .toList(),
                           onChanged: (val) {
@@ -309,11 +252,11 @@ class _FoodDetailState extends State<FoodDetail> {
                     children: <Widget>[
                       _genEssentialNutrientsTableCell(
                         "卡路里",
-                        "${(inputMetricServingUnit * nutrientsInfo.energy / oneCalToKjRatio).toStringAsFixed(2)} 大卡",
+                        "${(inputServingValue * nutrientsInfo.energy / oneCalToKjRatio).toStringAsFixed(2)} 大卡",
                       ),
                       _genEssentialNutrientsTableCell(
                         "碳水化合物",
-                        formatNutrientValue(inputMetricServingUnit *
+                        formatNutrientValue(inputServingValue *
                             nutrientsInfo.totalCarbohydrate),
                       ),
                     ],
@@ -324,12 +267,12 @@ class _FoodDetailState extends State<FoodDetail> {
                       _genEssentialNutrientsTableCell(
                         "脂肪",
                         formatNutrientValue(
-                            inputMetricServingUnit * nutrientsInfo.totalFat),
+                            inputServingValue * nutrientsInfo.totalFat),
                       ),
                       _genEssentialNutrientsTableCell(
                         "蛋白质",
                         formatNutrientValue(
-                            inputMetricServingUnit * nutrientsInfo.protein),
+                            inputServingValue * nutrientsInfo.protein),
                       ),
                     ],
                   ),
@@ -388,17 +331,17 @@ class _FoodDetailState extends State<FoodDetail> {
 
   _genAllNutrientsCard() {
     var nutrientValues = {
-      // '食用量': '$inputServingValue X ${inputServingUnit["value"]}',
-      // '卡路里': inputMetricServingUnit * nutrientsInfo.energy,
-      '蛋白质': inputMetricServingUnit * nutrientsInfo.protein,
-      '脂肪': inputMetricServingUnit * nutrientsInfo.totalFat,
-      '碳水化合物': inputMetricServingUnit * nutrientsInfo.totalCarbohydrate,
-      '钠': inputMetricServingUnit * nutrientsInfo.sodium,
+      // '食用量': '$inputServingValue X ${inputServingUnit}',
+      // '卡路里': inputServingValue * nutrientsInfo.energy,
+      '蛋白质': inputServingValue * nutrientsInfo.protein,
+      '脂肪': inputServingValue * nutrientsInfo.totalFat,
+      '碳水化合物': inputServingValue * nutrientsInfo.totalCarbohydrate,
+      '钠': inputServingValue * nutrientsInfo.sodium,
       '胆固醇': nutrientsInfo.cholesterol != null
-          ? inputMetricServingUnit * nutrientsInfo.cholesterol!
+          ? inputServingValue * nutrientsInfo.cholesterol!
           : 0.0,
       '钾': nutrientsInfo.potassium != null
-          ? inputMetricServingUnit * nutrientsInfo.potassium!
+          ? inputServingValue * nutrientsInfo.potassium!
           : 0.0,
     };
 
@@ -424,18 +367,18 @@ class _FoodDetailState extends State<FoodDetail> {
           // 食用量和能量(卡路里)这两个比较特殊，单独处理
           _buildCard(
             "食用量",
-            '$inputServingValue X ${inputServingUnit["value"]}',
+            '$inputServingValue X $inputServingUnit',
           ),
           _buildCard(
             "卡路里",
-            '${(inputMetricServingUnit * nutrientsInfo.energy).toStringAsFixed(2)} 千焦',
+            '${(inputServingValue * nutrientsInfo.energy).toStringAsFixed(2)} 千焦',
             [
               Row(
                 children: [
                   const Expanded(child: Text("")),
                   // 子行的单位都是克，不用传其他参数
                   Text(
-                    "${(inputMetricServingUnit * nutrientsInfo.energy / oneCalToKjRatio).toStringAsFixed(2)} 大卡",
+                    "${(inputServingValue * nutrientsInfo.energy / oneCalToKjRatio).toStringAsFixed(2)} 大卡",
                   ),
                 ],
               )
@@ -509,7 +452,7 @@ class _FoodDetailState extends State<FoodDetail> {
       children: [
         Expanded(child: Text(title)),
         // 子行的单位都是克，不用传其他参数
-        Text(formatNutrientValue(inputMetricServingUnit * value!)),
+        Text(formatNutrientValue(inputServingValue * value!)),
       ],
     );
   }

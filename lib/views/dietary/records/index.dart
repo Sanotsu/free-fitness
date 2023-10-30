@@ -34,10 +34,8 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
     var dserving1 = ServingInfo(
       foodId: 1,
-      isMetric: false,
-      servingSize: '一包',
-      metricServingSize: 100,
-      metricServingUnit: "克",
+      servingSize: 1,
+      servingUnit: "包",
       energy: 2000,
       protein: 30,
       totalFat: 50,
@@ -57,8 +55,8 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       gmtModified: null,
     );
 
-    await _dietaryHelper.insertFoodWithServingInfo(
-        food: food1, servingInfo: dserving1);
+    await _dietaryHelper
+        .insertFoodWithServingInfoList(food: food1, servingInfoList: [dserving1]);
 
     var food2 = Food(
       brand: '重庆',
@@ -72,10 +70,8 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
     var dserving2 = ServingInfo(
       foodId: 2,
-      isMetric: false,
-      servingSize: '一只',
-      metricServingSize: 0,
-      metricServingUnit: "",
+      servingSize: 1,
+      servingUnit: "只",
       energy: 20000,
       protein: 300,
       totalFat: 500,
@@ -95,15 +91,13 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       gmtModified: null,
     );
 
-    await _dietaryHelper.insertFoodWithServingInfo(
-        food: food2, servingInfo: dserving2);
+    await _dietaryHelper
+        .insertFoodWithServingInfoList(food: food2, servingInfoList: [dserving2]);
 
     var dserving3 = ServingInfo(
       foodId: 2,
-      isMetric: true,
-      servingSize: '',
-      metricServingSize: 100,
-      metricServingUnit: "克",
+      servingSize: 100,
+      servingUnit: "克",
       energy: 321,
       protein: 111,
       totalFat: 222,
@@ -123,7 +117,8 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       gmtModified: null,
     );
 
-    await _dietaryHelper.insertFoodWithServingInfo(servingInfo: dserving3);
+    await _dietaryHelper
+        .insertFoodWithServingInfoList(servingInfoList: [dserving3]);
 
     var meal1 = Meal(
       mealName: "烤鸭餐",
@@ -166,7 +161,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     await _dietaryHelper.insertMealFoodItem(mealFoodItem3);
 
     var foodDailyLog = FoodDailyLog(
-      date: '2023-10-24',
+      date: getCurrentDate(),
       breakfastMealId: 1,
       lunchMealId: 2,
       dinnerMealId: null,

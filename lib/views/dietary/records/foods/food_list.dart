@@ -225,10 +225,7 @@ class _FoodListState extends State<FoodList> {
                   var foodName = "${food.product} (${food.brand})";
 
                   var fistServingInfo = foodItems[index].servingInfoList[0];
-                  var foodUnit = (fistServingInfo.metricServingSize != null &&
-                          fistServingInfo.metricServingSize != 0)
-                      ? "${fistServingInfo.metricServingSize} 克"
-                      : fistServingInfo.servingSize;
+                  var foodUnit = fistServingInfo.servingUnit;
                   var foodEnergy = (foodItems[index].servingInfoList[0].energy /
                           constants.oneCalToKjRatio)
                       .toStringAsFixed(2);
@@ -274,7 +271,7 @@ class _FoodListState extends State<FoodList> {
                           // 真正用户自行输入的，是进入food详情之后才有。
                           foodId: foodItems[index].food.foodId!,
                           foodIntakeSize:
-                              fistServingInfo.metricServingSize!.toDouble(),
+                              fistServingInfo.servingSize.toDouble(),
                           servingInfoId: fistServingInfo.servingInfoId!,
                         );
 

@@ -37,26 +37,11 @@ class _FoodModifyState extends State<FoodModify> {
     var dfood = Food(brand: "重庆", product: '豇豆');
 
     // 输入公制单位营养素
-    // var dserving = ServingInfo(
-    //   energy: 4190,
-    //   foodId: 1, // 这个id会在insert语句中被成功插入的food的id替代
-    //   metricServingSize: 100,
-    //   metricServingUnit: "克",
-    //   isMetric: true,
-    //   protein: 23.5,
-    //   totalFat: 12.3,
-    //   totalCarbohydrate: 45.5,
-    //   sodium: 123,
-    // );
-
-    // 输入公制单位营养素
     var dserving2 = ServingInfo(
         energy: 13456,
         foodId: 1, // 这个id会在insert语句中被成功插入的food的id替代
-        servingSize: '一堆',
-        metricServingSize: 200,
-        metricServingUnit: "克",
-        isMetric: false,
+        servingSize: 1,
+        servingUnit: "堆",
         protein: 43.5,
         totalFat: 56.3,
         saturatedFat: 10,
@@ -70,9 +55,9 @@ class _FoodModifyState extends State<FoodModify> {
         potassium: 113,
         cholesterol: 456);
 
-    int ret = await _dietaryHelper.insertFoodWithServingInfo(
+    int ret = await _dietaryHelper.insertFoodWithServingInfoList(
       food: dfood,
-      servingInfo: dserving2,
+      servingInfoList: [dserving2],
     );
     return ret;
   }
