@@ -289,102 +289,21 @@ class _FoodListState extends State<FoodList> {
                         );
 
                         print("food list 里面的新增 insertRst：$insertRst");
-
-                        /*
-                        这个逻辑的写法还没写完
-                          
-                        /// ？？？ 1 如果已经有日记数据，该餐次也有数据，则直接为该餐次新增meal food item 即可（细节未确认）
-                        if (currentFdlr != null) {
-                          // 如果当前餐次是早餐，且日记已有早餐的食物摄入
-                          if (currentMealtime == Mealtimes.breakfast &&
-                              currentFdlr?.breakfastMealFoodItems != null) {
-                            var mealFoodItem1 = MealFoodItem(
-                              mealId:
-                                  currentFdlr!.foodDailyLog.breakfastMealId!,
-                              foodId: foodItems[index].food.foodId!,
-                              foodIntakeSize:
-                                  fistServingInfo.metricServingSize!.toDouble(),
-                              servingInfoId: fistServingInfo.servingInfoId!,
-                            );
-
-                            print("mealFoodItem1---$mealFoodItem1");
-
-                            if (!mounted) return;
-                            await _dietaryHelper
-                                .batchInsertMealFoodItem([mealFoodItem1]);
-                          } else if (currentMealtime == Mealtimes.breakfast &&
-                              currentFdlr?.breakfastMealFoodItems == null) {
-                            // 如果当前餐次是早餐，且日记没有早餐数据，则新增餐次，再新增早餐的食物摄入，再修改日记的早餐餐次对应meal id
-                            //？？？插入这块逻辑全部写在db helper中，这里只传单个log、meal、mealItem实例？
-                            var meal = Meal(
-                              mealName: "20231024的早餐",
-                              description: "早上吃好",
-                              gmtCreate: DateTime.now().toString(),
-                            );
-                            var mealFoodItem = MealFoodItem(
-                              // mealFoodItemId: 1, // 这个是自增的，不加会自增，加了会以加的值插入，重复则报错
-                              mealId: 111, // 这个要真实值，这里填的插入时会被覆盖
-                              foodId: 2, // ===============用户选择真实值
-                              servingInfoId: 1, // 用户选择真实值
-                              foodIntakeSize: 200, // 用户输入真实值
-                            );
-
-                            var insertRst =
-                                await _dietaryHelper.insertFoodDailyLog(
-                              currentFdlr!.foodDailyLog,
-                              "breakfast",
-                              meal,
-                              mealFoodItem,
-                            );
-
-                            print("insertRstinsertRst：$insertRst");
-                          }
-                        } else if (currentFdlr == null) {
-                          // 如果没有当前日，则完全新增
-                          var foodDailyLog = FoodDailyLog(
-                            date: getCurrentDate(),
-                            contributor: "david",
-                            gmtCreate: DateTime.now().toString(),
-                          );
-
-                          var meal = Meal(
-                            mealName: "20231027的$currentMealtime",
-                            description: "$currentMealtime吃好",
-                            gmtCreate: DateTime.now().toString(),
-                          );
-
-                          var mealFoodItem = MealFoodItem(
-                            mealId: 11111, // 日记都没有的话，这个餐次编号应该是无意义的值
-                            foodId: foodItems[index].food.foodId!, // 用户选择真实值
-                            foodIntakeSize: fistServingInfo.metricServingSize!
-                                .toDouble(), // 用户输入真实值
-                            servingInfoId:
-                                fistServingInfo.servingInfoId!, // 用户选择真实值
-                          );
-
-                          var tempStr = mealtimeList
-                              .firstWhere((e) => e.value == currentMealtime);
-
-                          var insertRst =
-                              await _dietaryHelper.insertFoodDailyLog(
-                            foodDailyLog,
-                            tempStr.label,
-                            meal,
-                            mealFoodItem,
-                          );
-
-                          print("如果没有当前日，则完全新增 insertRst：$insertRst");
-                        }
-                        */
                       },
                       icon: const Icon(Icons.add_box_outlined),
                     ),
                     onTap: () {
+                      print("food lsit 点击了food item ，跳转到food detail ---> ");
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => FoodDetail(
                             foodItem: foodItems[index],
+                            mealtime: currentMealtime,
+                            logDate: currentDate,
+                            jumpSource: 'FOOD_LIST',
+                            fdlr: currentFdlr,
                           ),
                         ),
                       );

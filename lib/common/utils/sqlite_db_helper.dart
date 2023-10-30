@@ -469,6 +469,46 @@ class DBDietaryHelper {
     return foods;
   }
 
+  // 像在daily log首页等地方可能需要只是单条的food id查询食物和营养素信息
+  Future<FoodAndServingInfo?> searchFoodWithServingInfoByFoodId(
+    int foodId,
+  ) async {
+    print("进入了 searchFoodWithServingInfoByFoodId ……");
+
+    final db = await database;
+
+    // 正常来讲，通过food id要么查到一条，要么查不到，所以只返回一个
+    final foodRows = await db.query(
+      DietaryDdl.tableNameOfFood,
+      where: 'food_id = ?',
+      whereArgs: [foodId],
+    );
+
+    if (foodRows.isEmpty) {
+      return null;
+    } else {
+      final food = Food.fromMap(foodRows[0]);
+
+      final servingInfoRows = await db.query(
+        DietaryDdl.tableNameOfServingInfo,
+        where: 'food_id = ?',
+        whereArgs: [food.foodId],
+      );
+
+      final servingInfoList = servingInfoRows
+          .map(
+            (row) => ServingInfo.fromMap(row),
+          )
+          .toList();
+
+      final foodAndServingInfo = FoodAndServingInfo(
+        food: food,
+        servingInfoList: servingInfoList,
+      );
+      return foodAndServingInfo;
+    }
+  }
+
   // 插入单条meal
   Future<int> insertMeal(Meal meal) async {
     Database db = await database;

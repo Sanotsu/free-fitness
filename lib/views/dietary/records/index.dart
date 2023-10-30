@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../../common/utils/sqlite_db_helper.dart';
 import '../../../common/utils/tools.dart';
+import 'foods/food_detail.dart';
 import 'foods/food_list.dart';
 
 class DietaryRecords extends StatefulWidget {
@@ -250,7 +251,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     // 理论上，当日的只会有一条
     var temp = await _dietaryHelper.queryFoodDailyLogRecord(date: inputDate);
     // 测试
-    // var temp = await _dietaryHelper.queryFoodDailyLogRecord(date: "2023-10-11");
+    // var temp = await _dietaryHelper.queryFoodDailyLogRecord(date: "2023-10-24");
 
     print("---------测试暂时没有日记数据$temp");
 
@@ -306,6 +307,9 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     MealAndMealFoodItemDetail? mealFoodItems,
   ) {
     bool showExpansionTile = mealFoodItems != null;
+
+    var cutMeal =
+        mealtimeList.firstWhere((e) => e.label == mealType.toLowerCase());
     return Center(
       child: Card(
         child: Column(
@@ -319,21 +323,19 @@ class _DietaryRecordsState extends State<DietaryRecords> {
               ),
               trailing: IconButton(
                 onPressed: () {
-                  var temp = mealtimeList
-                      .firstWhere((e) => e.label == mealType.toLowerCase());
-
-                  print("日记主页面点击了餐次的add --------$mealType ${temp.value}");
+                  print("日记主页面点击了餐次的add --------$mealType ${cutMeal.value}");
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => FoodList(
-                              mealtime: temp.value,
-                              // 这里有个问题，如果数据没加载完，这里取不到值
-                              // 可以把这个按钮的加载放在数据加载完之后显示
-                              fdlr: fdlrList.isNotEmpty ? fdlrList[0] : null,
-                              // ？？？注意，这里应该是一个日期选择器插件选中的值
-                              logDate: getCurrentDate(),
-                            )),
+                      builder: (context) => FoodList(
+                        mealtime: cutMeal.value,
+                        // 这里有个问题，如果数据没加载完，这里取不到值
+                        // 可以把这个按钮的加载放在数据加载完之后显示
+                        fdlr: fdlrList.isNotEmpty ? fdlrList[0] : null,
+                        // ？？？注意，这里应该是一个日期选择器插件选中的值
+                        logDate: getCurrentDate(),
+                      ),
+                    ),
                   );
                 },
                 icon: const Icon(Icons.add, color: Colors.blue),
@@ -345,7 +347,8 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                 title: Text(
                   '${mealFoodItems.mealFoodItemDetailist.length}',
                 ),
-                children: _buildListTile(mealFoodItems.mealFoodItemDetailist),
+                children: _buildListTile(
+                    cutMeal, mealFoodItems.mealFoodItemDetailist),
               ),
           ],
         ),
@@ -353,7 +356,8 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     );
   }
 
-  List<Widget> _buildListTile(List<MealFoodItemDetail>? list) {
+  List<Widget> _buildListTile(
+      CusDropdownOption cutMeal, List<MealFoodItemDetail>? list) {
     List<Widget> temp = [
       const Divider(),
     ];
@@ -361,32 +365,66 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     if (list == null) return temp;
 
     return list.map((mealFoodItemDetail) {
-      return Dismissible(
-        key: Key(mealFoodItemDetail.hashCode.toString()),
-        onDismissed: (direction) {
-          setState(() {
-            list.remove(mealFoodItemDetail);
-          });
+      return GestureDetector(
+        onTap: () async {
+          print("cutMeal-----${cutMeal.label}");
+
+          print(
+            "daily log index 的 指定餐次 点击了meal food item ，跳转到food detail ---> ",
+          );
+
+          // 先获取到当前item的食物信息，再传递到food detail
+          var data = await _dietaryHelper.searchFoodWithServingInfoByFoodId(
+              mealFoodItemDetail.food.foodId!);
+
+          if (data == null) {
+            // 抛出异常之后已经return了
+            throw Exception("有meal food id找不到 food？");
+          }
+
+          if (!mounted) return;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FoodDetail(
+                foodItem: data,
+                mealtime: cutMeal.value,
+                // ？？？注意，这里应该是一个日期选择器插件选中的值
+                logDate: getCurrentDate(),
+                jumpSource: 'LOG_INDEX',
+                fdlr: fdlrList.isNotEmpty ? fdlrList[0] : null,
+                mfid: mealFoodItemDetail,
+              ),
+            ),
+          );
         },
-        background: Container(
-          color: Colors.red,
-          child: const Icon(Icons.delete, color: Colors.white),
-        ),
-        child: ListTile(
-          title: Text(
-            "${mealFoodItemDetail.food.brand}-${mealFoodItemDetail.food.product}",
+        child: Dismissible(
+          key: Key(mealFoodItemDetail.hashCode.toString()),
+          onDismissed: (direction) {
+            setState(() {
+              list.remove(mealFoodItemDetail);
+            });
+          },
+          background: Container(
+            color: Colors.red,
+            child: const Icon(Icons.delete, color: Colors.white),
           ),
-          subtitle: Text('${mealFoodItemDetail.mealFoodItem.foodIntakeSize}'),
-          trailing: SizedBox(
-            width: 200,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${mealFoodItemDetail.mealFoodItem.foodIntakeSize * mealFoodItemDetail.servingInfo.energy} 卡卡',
-                ),
-                const Icon(Icons.star),
-              ],
+          child: ListTile(
+            title: Text(
+              "${mealFoodItemDetail.food.brand}-${mealFoodItemDetail.food.product}",
+            ),
+            subtitle: Text('${mealFoodItemDetail.mealFoodItem.foodIntakeSize}'),
+            trailing: SizedBox(
+              width: 200,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${mealFoodItemDetail.mealFoodItem.foodIntakeSize * mealFoodItemDetail.servingInfo.energy} 卡卡',
+                  ),
+                  const Icon(Icons.star),
+                ],
+              ),
             ),
           ),
         ),

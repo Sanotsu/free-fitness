@@ -9,8 +9,33 @@ import '../../../../common/global/constants.dart';
 import '../../../../models/dietary_state.dart';
 
 class FoodDetail extends StatefulWidget {
+  // 这个是食物搜索页面点击食物进来详情页时传入的数据
   final FoodAndServingInfo foodItem;
-  const FoodDetail({super.key, required this.foodItem});
+  // 同时需要知道该日期的日记信息和对应的餐次信息
+  // 主页点击item的话，这个一定有，而且是修改数量和单位(餐次暂不可修改)；
+  // food list 点击的话，可能是添加当日第一条，不一定有（这个只能是新增）。
+  final FoodDailyLogRecord? fdlr;
+  // 当前传入的食物item。（理论上只有log index过来的才有）
+  final MealFoodItemDetail? mfid;
+  // ？？？这次item 新增/修改 所属的餐次和日期（暂时不支持修改餐次，太麻烦了）
+  final Mealtimes mealtime;
+  final String logDate;
+
+  /// 直接从主页面的item点击过来时的数据（这个可能能是修改量，删除）
+  ///   不能修改餐次的话，那就只有修改量了；
+  ///   但如果有删除的话，需要考虑该餐次删除这个item之后为空，也要一并删除meal，再修改log对应的meal id
+  /// 从food list 过来，只能是新增了
+  final String jumpSource; // 调到详情页的来源，删除、修改、新增的按钮显示的来源
+
+  const FoodDetail({
+    super.key,
+    required this.foodItem,
+    this.fdlr,
+    this.mfid,
+    required this.mealtime,
+    required this.logDate,
+    required this.jumpSource,
+  });
 
   @override
   State<FoodDetail> createState() => _FoodDetailState();
@@ -43,33 +68,80 @@ class _FoodDetailState extends State<FoodDetail> {
     super.initState();
 
     _getDefaulFoodServingInfo();
+
+    // if (widget.jumpSource == "FOOD_LIST") {
+    //   _getDefaulFoodServingInfo();
+    // } else if (widget.jumpSource == "LOG_INDEX") {
+    //   _getInputFoodServingInfoFromFdlr();
+    // }
+
+// =================================================
+
+//--------------？？？ 这里显示的摄入量和单位（营养素的食物单份数据）根据来源不同，取值也不同
+// 新增的时候，一个食物有多种单份营养素，默认取第一个
+// 修改的时候，fdlr中有对应的serving info  和摄入量的值
+// --- 区别只是默认显示数据，修改和新增用户修改摄入量和单份类型后，其他显示或其他操作都一样的逻辑。
+
+    // setState(() {
+    //   print("yi饮食主界面或者food list传入的额数据---------------");
+    //   print(widget.foodItem);
+    //   log("${widget.fdlr}");
+    //   print(widget.logDate);
+    //   print(widget.mealtime);
+    //   print(widget.jumpSource);
+    // });
   }
 
   // 可能存在1种食物多个营养素单份单位，默认取第一个用于显示
+  // --- 这个是food list选择指定food之后的显示值处理
   _getDefaulFoodServingInfo() {
     var temp = widget.foodItem.servingInfoList;
-    // 构建初始化值
-    if (temp[0].isMetric) {
-      inputServingValue = (temp[0].metricServingSize ?? 1).toDouble();
-      inputServingUnit = {
-        "flag": true,
-        "value": temp[0].metricServingUnit,
-      };
-      isMetricServing = true;
-      inputMetricServingUnit = inputServingValue / 100;
-    } else {
-      inputServingValue = 1;
-      inputServingUnit = {
-        "flag": false,
-        "value": temp[0].servingSize,
-      };
-      isMetricServing = false;
-      inputMetricServingUnit = inputServingValue;
-    }
-
+    // 默认给传入的食物的第一个营养素信息，daily log 主页面传入时会修改为指定的
     nutrientsInfo = temp[0];
 
-// 构建可选单位列表
+// 1 如果是查询的food list 直接点击的食物详情，取默认第一个营养素信息
+    if (widget.jumpSource == "FOOD_LIST") {
+      // 构建初始化值
+      if (temp[0].isMetric) {
+        inputServingValue = (temp[0].metricServingSize ?? 1).toDouble();
+        inputServingUnit = {
+          "flag": true,
+          "value": temp[0].metricServingUnit,
+        };
+        isMetricServing = true;
+        inputMetricServingUnit = inputServingValue / 100;
+      } else {
+        inputServingValue = 1;
+        inputServingUnit = {
+          "flag": false,
+          "value": temp[0].servingSize,
+        };
+        isMetricServing = false;
+        inputMetricServingUnit = inputServingValue;
+      }
+    } else if (widget.jumpSource == "LOG_INDEX") {
+      inputServingValue = widget.mfid!.mealFoodItem.foodIntakeSize;
+
+      nutrientsInfo = widget.mfid!.servingInfo;
+      // 构建初始化值
+      if (nutrientsInfo.isMetric) {
+        inputServingUnit = {
+          "flag": true,
+          "value": nutrientsInfo.metricServingUnit,
+        };
+        isMetricServing = true;
+        inputMetricServingUnit = inputServingValue / 100;
+      } else {
+        inputServingUnit = {
+          "flag": false,
+          "value": nutrientsInfo.servingSize,
+        };
+        isMetricServing = false;
+        inputMetricServingUnit = inputServingValue;
+      }
+    }
+
+    // 构建可选单位列表
     for (var info in temp) {
       if (info.isMetric) {
         servingUnitOptions.add({
