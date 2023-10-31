@@ -558,6 +558,19 @@ class DBDietaryHelper {
     return results;
   }
 
+  // 修改单条meal food item
+  Future<int> updateMealFoodItem(MealFoodItem mealFoodItem) async {
+    Database db = await database;
+
+    var result = await db.update(
+      DietaryDdl.tableNameOfMealFoodItem,
+      mealFoodItem.toMap(),
+      where: 'meal_food_item_id = ?',
+      whereArgs: [mealFoodItem.mealFoodItemId],
+    );
+    return result;
+  }
+
   // 插入单条 daily log
   Future<int> insertFoodDailyLogOnly(FoodDailyLog foodDailyLog) async {
     Database db = await database;

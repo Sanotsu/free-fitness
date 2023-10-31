@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
 import '../../../../common/global/constants.dart';
+import '../../../../common/utils/sqlite_db_helper.dart';
 import '../../../../models/dietary_state.dart';
 
 class FoodDetail extends StatefulWidget {
@@ -42,6 +43,8 @@ class FoodDetail extends StatefulWidget {
 }
 
 class _FoodDetailState extends State<FoodDetail> {
+  final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
+
   final _formKey = GlobalKey<FormBuilderState>();
 
   // 食物营养素单位选项
@@ -55,19 +58,14 @@ class _FoodDetailState extends State<FoodDetail> {
   // 保存要用于计算的单份营养素信息
   late ServingInfo nutrientsInfo;
 
+  // 要移动到的目标餐次（原始餐次直接去widget的值即可，新的则需要根据用户选择而改变）
+  late CusDropdownOption inputMealtimeValue;
+
   @override
   void initState() {
     super.initState();
 
     _getDefaulFoodServingInfo();
-
-    // if (widget.jumpSource == "FOOD_LIST") {
-    //   _getDefaulFoodServingInfo();
-    // } else if (widget.jumpSource == "LOG_INDEX") {
-    //   _getInputFoodServingInfoFromFdlr();
-    // }
-
-// =================================================
 
 //--------------？？？ 这里显示的摄入量和单位（营养素的食物单份数据）根据来源不同，取值也不同
 // 新增的时候，一个食物有多种单份营养素，默认取第一个
@@ -108,6 +106,10 @@ class _FoodDetailState extends State<FoodDetail> {
     for (var info in temp) {
       servingUnitOptions.add(info.servingUnit);
     }
+
+    // 构建初始的目标餐次
+    inputMealtimeValue =
+        mealtimeList.firstWhere((e) => e.value == widget.mealtime);
   }
 
   // 修改了摄入量数值和单位，都要重新计算用于显示的营养素信息(这里是重新获取修改后的营养素单位)
@@ -130,6 +132,25 @@ class _FoodDetailState extends State<FoodDetail> {
       nutrientsInfo = metricServing;
       print("处理结果： $nutrientsInfo ");
     });
+  }
+
+  _updateMealFoodItem() async {
+    // 修改只能是日记主页面点击item直接跳转到详情页，就一定有对应的item信息，和log信息
+    // 不修改餐次的话，直接修改表meal food item 对应条目的size和serving info id即可
+    // 因为修改数量和单份信息时已经即时更新了数据，所以这里直接调用db helper方法然后返回即可
+
+    // 1 只修改数量和单位
+    var updatedMfi = widget.mfid!.mealFoodItem;
+    updatedMfi.foodIntakeSize = inputServingValue;
+    updatedMfi.servingInfoId = nutrientsInfo.servingInfoId!;
+
+    var rst = await _dietaryHelper.updateMealFoodItem(updatedMfi);
+
+    if (rst > 0) {
+      if (!mounted) return;
+      // ？？？父组件应该重新加载
+      Navigator.pop(context, '_updateMealFoodItem');
+    }
   }
 
   @override
@@ -211,6 +232,31 @@ class _FoodDetailState extends State<FoodDetail> {
                       )
                     ],
                   ),
+                  FormBuilderDropdown<CusDropdownOption>(
+                    name: 'new_mealtime',
+                    decoration: const InputDecoration(
+                      labelText: '餐次',
+                    ),
+                    initialValue: inputMealtimeValue,
+                    items: mealtimeList
+                        .map((unit) => DropdownMenuItem(
+                              alignment: AlignmentDirectional.center,
+                              value: unit,
+                              child: Text('${unit.name}'),
+                            ))
+                        .toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        _formKey.currentState?.fields['new_mealtime']?.save();
+                        print(
+                          "new_mealtime onchanged value now is $val, mealtime is ${val?.value}",
+                        );
+
+                        inputMealtimeValue = val!;
+                      });
+                    },
+                    valueTransformer: (val) => val?.toString(),
+                  ),
                 ],
               ),
             ),
@@ -221,8 +267,21 @@ class _FoodDetailState extends State<FoodDetail> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  ElevatedButton(onPressed: () {}, child: const Text("移除")),
-                  ElevatedButton(onPressed: () {}, child: const Text("添加"))
+                  if (widget.jumpSource == "LOG_INDEX")
+                    ElevatedButton(
+                      onPressed: _updateMealFoodItem,
+                      child: const Text("修改"),
+                    ),
+                  if (widget.jumpSource == "LOG_INDEX")
+                    ElevatedButton(
+                      onPressed: () {},
+                      child: const Text("移除"),
+                    ),
+                  if (widget.jumpSource == "FOOD_LIST")
+                    ElevatedButton(
+                      onPressed: () {},
+                      child: const Text("添加"),
+                    )
                 ],
               )),
           // 主要营养素表格
