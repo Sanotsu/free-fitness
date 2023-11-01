@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+// 食物
 class Food {
   int? foodId; // 自增的，可以不传
   String brand, product;
@@ -53,11 +54,12 @@ class Food {
   }
 }
 
+// 单份食物营养素
 class ServingInfo {
   int? servingInfoId; // 自增的，可以不传
   int foodId, servingSize;
   String servingUnit;
-  String? contributor, gmtCreate, updUserId, gmtModified;
+  String? contributor, gmtCreate, updateUser, gmtModified;
   double energy, protein, totalFat, totalCarbohydrate, sodium;
   double? saturatedFat, transFat, polyunsaturatedFat, monounsaturatedFat;
   double? cholesterol, sugar, dietaryFiber, potassium;
@@ -82,7 +84,7 @@ class ServingInfo {
     this.potassium,
     this.contributor,
     this.gmtCreate,
-    this.updUserId,
+    this.updateUser,
     this.gmtModified,
   });
 
@@ -107,7 +109,7 @@ class ServingInfo {
       "potassium": potassium,
       "contributor": contributor,
       "gmt_create": gmtCreate,
-      "upd_user_id": updUserId,
+      "update_user": updateUser,
       "gmt_modified": gmtModified,
     };
   }
@@ -133,7 +135,7 @@ class ServingInfo {
       potassium: map['potassium'] as double?,
       contributor: map['contributor'] as String?,
       gmtCreate: map['gmt_create'] as String?,
-      updUserId: map['upd_user_id'] as String?,
+      updateUser: map['update_user'] as String?,
       gmtModified: map['gmt_modified'] as String?,
     );
   }
@@ -147,161 +149,78 @@ class ServingInfo {
       "energy": $energy, "protein": $protein, "total_fat": $totalFat, "saturated_fat": $saturatedFat, "trans_fat": $transFat, 
       "polyunsaturated_fat": $polyunsaturatedFat, "monounsaturated_fat": $monounsaturatedFat, "cholesterol": $cholesterol, 
       "total_carbohydrate": $totalCarbohydrate, "sugar": $sugar, "dietary_fiber": $dietaryFiber, "sodium": $sodium, "potassium": $potassium, 
-      "contributor": $contributor, "gmt_create": $gmtCreate, "upd_user_id": $updUserId, "gmt_modified": $gmtModified}
+      "contributor": $contributor, "gmt_create": $gmtCreate, "update_user": $updateUser, "gmt_modified": $gmtModified}
     ''';
   }
 }
 
-class FoodDailyLog {
-  int? foodDailyId; // 自增的，可以不传
-  String date;
-  int? breakfastMealId, lunchMealId, dinnerMealId, otherMealId;
-  String? contributor, gmtCreate, gmtModified;
-
-  FoodDailyLog({
-    this.foodDailyId,
-    required this.date,
-    this.breakfastMealId,
-    this.lunchMealId,
-    this.dinnerMealId,
-    this.otherMealId,
-    this.contributor,
-    this.gmtCreate,
-    this.gmtModified,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      "food_daily_id": foodDailyId,
-      "date": date,
-      "breakfast_meal_id": breakfastMealId,
-      "lunch_meal_id": lunchMealId,
-      "dinner_meal_id": dinnerMealId,
-      "other_meal_id": otherMealId,
-      "contributor": contributor,
-      "gmt_create": gmtCreate,
-      "gmt_modified": gmtModified,
-    };
-  }
-
-  // 用于从数据库行映射到 MealFoodItem 对象的 fromMap 方法
-  factory FoodDailyLog.fromMap(Map<String, dynamic> map) {
-    return FoodDailyLog(
-      foodDailyId: map['food_daily_id'] as int?,
-      date: map['date'] as String,
-      breakfastMealId: map['breakfast_meal_id'] as int?,
-      lunchMealId: map['lunch_meal_id'] as int?,
-      dinnerMealId: map['dinner_meal_id'] as int?,
-      otherMealId: map['other_meal_id'] as int?,
-      contributor: map['contributor'] as String?,
-      gmtCreate: map['gmt_create'] as String?,
-      gmtModified: map['gmt_modified'] as String?,
-    );
-  }
-
-  @override
-  String toString() {
-    return '''
-    FoodDailyLog{  "food_daily_id": $foodDailyId,"date": $date,"breakfast_meal_id": $breakfastMealId,"lunch_meal_id": $lunchMealId,
-      "dinner_meal_id": $dinnerMealId,"other_meal_id": $otherMealId,"contributor": $contributor,"gmt_create": $gmtCreate,"gmt_modified": $gmtModified, }
-    ''';
-  }
-}
-
-class Meal {
-  int? mealId; // 自增的，可以不传
-  String mealName;
-  String? description, contributor, gmtCreate, gmtModified;
-
-  Meal({
-    this.mealId,
-    required this.mealName,
-    this.description,
-    this.contributor,
-    this.gmtCreate,
-    this.gmtModified,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      "meal_id": mealId,
-      "meal_name": mealName,
-      "description": description,
-      "contributor": contributor,
-      "gmt_create": gmtCreate,
-      "gmt_modified": gmtModified,
-    };
-  }
-
-  // 用于从数据库行映射到 Meal 对象的 fromMap 方法
-  factory Meal.fromMap(Map<String, dynamic> map) {
-    return Meal(
-      mealId: map['meal_id'] as int?,
-      mealName: map['meal_name'] as String,
-      description: map['description'] as String?,
-      contributor: map['contributor'] as String?,
-      gmtCreate: map['gmt_create'] as String?,
-      gmtModified: map['gmt_modified'] as String?,
-    );
-  }
-
-  @override
-  String toString() {
-    return '''
-    Meal{ 
-      "meal_id": $mealId,"meal_name": $mealName,"description": $description,
-      "contributor": $contributor,"gmt_create": $gmtCreate,"gmt_modified": $gmtModified 
-    }
-    ''';
-  }
-}
-
-class MealFoodItem {
-  int? mealFoodItemId; // 自增的，可以不传
-  int mealId, foodId, servingInfoId;
+// 饮食日记条目
+class DailyFoodItem {
+  int? dailyFoodItemId; // 自增的，可以不传(如果设为必要的栏位再给默认值，新增时会被默认值替换数据库设置的自增导致无法插入)
+  String date, mealCategory;
+  int foodId, servingInfoId;
   double foodIntakeSize;
+  String? contributor, gmtCreate, updateUser, gmtModified;
 
-  MealFoodItem({
-    this.mealFoodItemId,
-    required this.mealId,
+  DailyFoodItem({
+    this.dailyFoodItemId,
+    required this.date,
+    required this.mealCategory,
     required this.foodId,
     required this.servingInfoId,
     required this.foodIntakeSize,
+    this.contributor,
+    this.gmtCreate,
+    this.updateUser,
+    this.gmtModified,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      "meal_food_item_id": mealFoodItemId,
-      "meal_id": mealId,
+      "daily_food_item_id": dailyFoodItemId,
+      "date": date,
+      "meal_category": mealCategory,
       "food_id": foodId,
-      "serving_info_id": servingInfoId,
       "food_intake_size": foodIntakeSize,
+      "serving_info_id": servingInfoId,
+      "contributor": contributor,
+      "gmt_create": gmtCreate,
+      "update_user": updateUser,
+      "gmt_modified": gmtModified,
     };
   }
 
-// 用于从数据库行映射到 MealFoodItem 对象的 fromMap 方法
-  factory MealFoodItem.fromMap(Map<String, dynamic> map) {
-    return MealFoodItem(
-      mealFoodItemId: map['meal_food_item_id'] as int?,
-      mealId: map['meal_id'] as int,
+  // 用于从数据库行映射到 DailyFoodItem 对象的 fromMap 方法
+  factory DailyFoodItem.fromMap(Map<String, dynamic> map) {
+    return DailyFoodItem(
+      dailyFoodItemId: map['daily_food_item_id'] as int?,
+      date: map['date'] as String,
+      mealCategory: map['meal_category'] as String,
       foodId: map['food_id'] as int,
-      servingInfoId: map['serving_info_id'] as int,
       foodIntakeSize: map['food_intake_size'] as double,
+      servingInfoId: map['serving_info_id'] as int,
+      contributor: map['contributor'] as String?,
+      gmtCreate: map['gmt_create'] as String?,
+      updateUser: map['update_user'] as String?,
+      gmtModified: map['gmt_modified'] as String?,
     );
   }
 
   @override
   String toString() {
     return '''
-    MealFoodItem{ 
-      "meal_food_item_id": $mealFoodItemId,"meal_id": $mealId,
-      "food_id": $foodId,"serving_info_id": $servingInfoId,"food_intake_size": $foodIntakeSize 
+    DailyFoodItem {  
+      "daily_food_item_id": $dailyFoodItemId,"date": $date,"meal_category": $mealCategory,
+      "food_id": $foodId,"food_intake_size": $foodIntakeSize, serving_info_id:$servingInfoId,
+      "contributor": $contributor,"gmt_create": $gmtCreate,"gmt_modified": $gmtModified
     }
     ''';
   }
 }
 
 /// 扩展表
+
+// 食物营养素详情 (食物带上对应的所有单份营养素列表)
 class FoodAndServingInfo {
   final Food food;
   final List<ServingInfo> servingInfoList;
@@ -319,15 +238,14 @@ class FoodAndServingInfo {
   }
 }
 
-/// 扩展表 - 饮食记录比较重要涉及
-/// item 带 food 和serving info
-class MealFoodItemDetail {
-  MealFoodItem mealFoodItem;
+// 饮食日记条目详情 (日记条目带上食物和当前用到的那个营养素详情)
+class DailyFoodItemWithFoodServing {
+  DailyFoodItem dailyFoodItem;
   Food food;
   ServingInfo servingInfo;
 
-  MealFoodItemDetail({
-    required this.mealFoodItem,
+  DailyFoodItemWithFoodServing({
+    required this.dailyFoodItem,
     required this.food,
     required this.servingInfo,
   });
@@ -335,109 +253,11 @@ class MealFoodItemDetail {
   @override
   String toString() {
     return '''
-    MealFoodItemDetail{ 
-      "mealFoodItem": $mealFoodItem,
+    DailyFoodItemWithFoodServing{ 
+      "dailyFoodItem": $dailyFoodItem,
       "food": $food,
-      "servingInfo": $servingInfo
+      "servingInfo": $servingInfo,
     }
-    ''';
-  }
-}
-
-// meal 带 item(已含food 和serving info)
-class MealAndMealFoodItemDetail {
-  final Meal meal;
-  final List<MealFoodItemDetail> mealFoodItemDetailist;
-
-  MealAndMealFoodItemDetail({
-    required this.meal,
-    required this.mealFoodItemDetailist,
-  });
-
-  @override
-  String toString() {
-    return '''
-    MealAndMealFoodItemDetail{ 
-      "meal": $meal,
-      "mealFoodItemDetailist": $mealFoodItemDetailist
-    }
-    ''';
-  }
-}
-
-// log 带 meal (已含item,再含 food 和serving info)
-// 一个log，早中晚夜的meal也只有一个，但item有多个；
-//      但一个item中只有1个food 和1个serving info
-class FoodDailyLogRecord {
-  FoodDailyLog foodDailyLog;
-  MealAndMealFoodItemDetail? breakfastMealFoodItems;
-  MealAndMealFoodItemDetail? lunchMealFoodItems;
-  MealAndMealFoodItemDetail? dinnerMealFoodItems;
-  MealAndMealFoodItemDetail? otherMealFoodItems;
-
-  FoodDailyLogRecord({
-    required this.foodDailyLog,
-    this.breakfastMealFoodItems,
-    this.lunchMealFoodItems,
-    this.dinnerMealFoodItems,
-    this.otherMealFoodItems,
-  });
-
-  @override
-  String toString() {
-    return '''
-    FoodDailyLogRecord{ 
-      "foodDailyLog": $foodDailyLog,
-      "breakfastMealFoodItems": $breakfastMealFoodItems,
-      "lunchMealFoodItems": $lunchMealFoodItems,
-      "dinnerMealFoodItems": $dinnerMealFoodItems,
-      "otherMealFoodItems": $otherMealFoodItems  
-    }
-    ''';
-  }
-}
-
-class FoodIntakeRecord {
-  int foodDailyId;
-  String date;
-  String? contributor;
-  String? gmtCreate;
-  String? gmtModified;
-  Meal? breakfastMeal;
-  Meal? lunchMeal;
-  Meal? dinnerMeal;
-  Meal? otherMeal;
-  List<MealFoodItem> breakfastMealFoodItems;
-  List<MealFoodItem> lunchMealFoodItems;
-  List<MealFoodItem> dinnerMealFoodItems;
-  List<MealFoodItem> otherMealFoodItems;
-
-  FoodIntakeRecord({
-    required this.foodDailyId,
-    required this.date,
-    this.contributor,
-    this.gmtCreate,
-    this.gmtModified,
-    this.breakfastMeal,
-    this.lunchMeal,
-    this.dinnerMeal,
-    this.otherMeal,
-    this.breakfastMealFoodItems = const [],
-    this.lunchMealFoodItems = const [],
-    this.dinnerMealFoodItems = const [],
-    this.otherMealFoodItems = const [],
-  });
-
-  @override
-  String toString() {
-    return '''
-    FoodIntakeRecord{ 
-      "foodDailyId": $foodDailyId,"date": $date,
-      "contributor": $contributor,"gmtCreate": $gmtCreate,"gmtModified": $gmtModified,
-      "breakfastMeal": $breakfastMeal,"lunchMeal": $lunchMeal,"dinnerMeal": $dinnerMeal,"otherMeal": $otherMeal,
-      "breakfastMealFoodItems": $breakfastMealFoodItems,"lunchMealFoodItems": $lunchMealFoodItems,
-      "dinnerMealFoodItems": $dinnerMealFoodItems,"otherMealFoodItems": $otherMealFoodItems
-     }
     ''';
   }
 }

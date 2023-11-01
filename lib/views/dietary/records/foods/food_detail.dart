@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_print
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,34 +10,28 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import '../../../../common/global/constants.dart';
 import '../../../../common/utils/sqlite_db_helper.dart';
 import '../../../../models/dietary_state.dart';
+import '../index.dart';
 
 class FoodDetail extends StatefulWidget {
   // 这个是食物搜索页面点击食物进来详情页时传入的数据
   final FoodAndServingInfo foodItem;
-  // 同时需要知道该日期的日记信息和对应的餐次信息
-  // 主页点击item的话，这个一定有，而且是修改数量和单位(餐次暂不可修改)；
-  // food list 点击的话，可能是添加当日第一条，不一定有（这个只能是新增）。
-  final FoodDailyLogRecord? fdlr;
-  // 当前传入的食物item。（理论上只有log index过来的才有）
-  final MealFoodItemDetail? mfid;
-  // ？？？这次item 新增/修改 所属的餐次和日期（暂时不支持修改餐次，太麻烦了）
-  final Mealtimes mealtime;
-  final String logDate;
 
-  /// 直接从主页面的item点击过来时的数据（这个可能能是修改量，删除）
-  ///   不能修改餐次的话，那就只有修改量了；
-  ///   但如果有删除的话，需要考虑该餐次删除这个item之后为空，也要一并删除meal，再修改log对应的meal id
-  /// 从food list 过来，只能是新增了
-  final String jumpSource; // 调到详情页的来源，删除、修改、新增的按钮显示的来源
+  // 饮食日记主页，点击条目详情传入的饮食日记条目详情中什么都有（条目的修改、删除）
+  //    支持修改的餐次、食物摄入数量、食物单份单位在这个详情中都有原始的供显示
+  // 但是点击添加，先到查询食物列表，再跳转过来的话则没有这个饮食日记条目详情（条目的新增）
+  //    删除、修改、新增的按钮显示的来源
+  final DailyFoodItemWithFoodServing? dfiwfs;
+
+  // 新增时(food list 进入)需要带上新增属于哪个餐次和那个日期，修改时饮食日记条目详情都有
+  final Mealtimes? mealtime;
+  final String? logDate;
 
   const FoodDetail({
     super.key,
     required this.foodItem,
-    this.fdlr,
-    this.mfid,
-    required this.mealtime,
-    required this.logDate,
-    required this.jumpSource,
+    this.dfiwfs,
+    this.mealtime,
+    this.logDate,
   });
 
   @override
@@ -72,14 +68,13 @@ class _FoodDetailState extends State<FoodDetail> {
 // 修改的时候，fdlr中有对应的serving info  和摄入量的值
 // --- 区别只是默认显示数据，修改和新增用户修改摄入量和单份类型后，其他显示或其他操作都一样的逻辑。
 
-    // setState(() {
-    //   print("yi饮食主界面或者food list传入的额数据---------------");
-    //   print(widget.foodItem);
-    //   log("${widget.fdlr}");
-    //   print(widget.logDate);
-    //   print(widget.mealtime);
-    //   print(widget.jumpSource);
-    // });
+    setState(() {
+      print("yi饮食主界面或者food list传入的额数据---------------");
+      print(widget.foodItem);
+      log("主页进入详情页的item信息：${widget.dfiwfs}");
+      print(widget.logDate);
+      print(widget.mealtime);
+    });
   }
 
   // 可能存在1种食物多个营养素单份单位，默认取第一个用于显示
@@ -89,27 +84,34 @@ class _FoodDetailState extends State<FoodDetail> {
     // 默认给传入的食物的第一个营养素信息，daily log 主页面传入时会修改为指定的
     nutrientsInfo = temp[0];
 
-    // 1 如果是查询的food list 直接点击的食物详情，取默认第一个营养素信息
-    if (widget.jumpSource == "FOOD_LIST") {
+    // 1 如果有饮食日记条目详情，则是log index 跳转的修改或删除
+    if (widget.dfiwfs != null) {
+      print("点击详情进入【修改或删除】");
+
+      // 有传入的数据就用传入的
+      nutrientsInfo = widget.dfiwfs!.servingInfo;
+      inputServingValue = widget.dfiwfs!.dailyFoodItem.foodIntakeSize;
+      inputServingUnit = nutrientsInfo.servingUnit;
+      // 构建初始的目标餐次(移除或修改时不会单独传日期和餐次的)
+      inputMealtimeValue = mealtimeList.firstWhere(
+          (e) => e.label == widget.dfiwfs!.dailyFoodItem.mealCategory);
+    } else {
+      print("点击food list 进入【新增】");
+
+      // 1 如果没有饮食日记条目详情，则是food list跳转的新增
       // 构建初始化值
       // 没有传入的数据就用列表第一个
       inputServingValue = (nutrientsInfo.servingSize).toDouble();
       inputServingUnit = nutrientsInfo.servingUnit;
-    } else if (widget.jumpSource == "LOG_INDEX") {
-      // 有传入的数据就用传入的
-      nutrientsInfo = widget.mfid!.servingInfo;
-      inputServingValue = widget.mfid!.mealFoodItem.foodIntakeSize;
-      inputServingUnit = nutrientsInfo.servingUnit;
+      // 构建初始的目标餐次
+      inputMealtimeValue =
+          mealtimeList.firstWhere((e) => e.value == widget.mealtime);
     }
 
     // 构建可选单位列表(不管是新增还是修改，对应食物的单份营养素列表都一样)
     for (var info in temp) {
       servingUnitOptions.add(info.servingUnit);
     }
-
-    // 构建初始的目标餐次
-    inputMealtimeValue =
-        mealtimeList.firstWhere((e) => e.value == widget.mealtime);
   }
 
   // 修改了摄入量数值和单位，都要重新计算用于显示的营养素信息(这里是重新获取修改后的营养素单位)
@@ -134,22 +136,94 @@ class _FoodDetailState extends State<FoodDetail> {
     });
   }
 
-  _updateMealFoodItem() async {
+  _updateDailyFoodItem() async {
     // 修改只能是日记主页面点击item直接跳转到详情页，就一定有对应的item信息，和log信息
     // 不修改餐次的话，直接修改表meal food item 对应条目的size和serving info id即可
     // 因为修改数量和单份信息时已经即时更新了数据，所以这里直接调用db helper方法然后返回即可
 
     // 1 只修改数量和单位
-    var updatedMfi = widget.mfid!.mealFoodItem;
+
+    var updatedMfi = widget.dfiwfs!.dailyFoodItem;
     updatedMfi.foodIntakeSize = inputServingValue;
     updatedMfi.servingInfoId = nutrientsInfo.servingInfoId!;
+    updatedMfi.mealCategory = inputMealtimeValue.label;
 
-    var rst = await _dietaryHelper.updateMealFoodItem(updatedMfi);
+    log("修改后的详情条目：$updatedMfi");
+
+    var rst = await _dietaryHelper.updateDailyFoodItem(updatedMfi);
 
     if (rst > 0) {
       if (!mounted) return;
       // ？？？父组件应该重新加载
-      Navigator.pop(context, '_updateMealFoodItem');
+      Navigator.pop(context, '_updateDailyFoodItem');
+    }
+  }
+
+  /// 新增饮食日记条目详情
+  /// 食物编号、日期 父组件有传；摄入量、食物单份营养素编号、餐次 用户有自行选择(否则就是默认食物第一个单份营养素和早餐)。
+  _addDailyFoodItem() async {
+    var temp = DailyFoodItem(
+      // 主键数据库自增
+      date: widget.logDate!,
+      mealCategory: inputMealtimeValue.label,
+      foodId: widget.foodItem.food.foodId!,
+      servingInfoId: nutrientsInfo.servingInfoId!,
+      foodIntakeSize: inputServingValue,
+      contributor: "马六",
+      gmtCreate: DateTime.now().toString(),
+      updateUser: null,
+      gmtModified: null,
+    );
+
+    log("新增的详情条目：$temp");
+
+    var rst = await _dietaryHelper.insertDailyFoodItemList([temp]);
+
+    log("新增的详情条目的结果：$rst");
+
+    if (rst.isNotEmpty) {
+      if (!mounted) return;
+
+      // ？？？父组件应该重新加载
+      // Navigator.pop(context, '_updateDailyFoodItem');
+
+      // 需要在MaterialApp中设置命名路由列表，并在进入dietaryRecords的地方使用pushNamed()方法，这样这里的popUntil才会生效
+      // 如果进入dietaryRecords的路由跳转没有指定名称的话，这里的popUntil直接就调到黑屏部件了
+      // Navigator.popUntil(
+      //   context,
+      //   (route) => route.settings.name == '/dietaryRecords',
+      // );
+
+      // 这个可以直接返回到上上的部件，但也没办法带参数
+      Navigator.of(context)
+        ..pop()
+        ..pop(true);
+
+      // Navigator.of(context).popUntil((route) {
+      //   if (route.settings.name == '/dietaryRecords') {
+      //     print("---------------route.settings ${route.settings}");
+      //     (route.settings.arguments as Map)['result'] = '<<<<<<<<<<something';
+      //     print("---------------route.settings after ${route.settings}");
+
+      //     return true;
+      //   } else {
+      //     return false;
+      //   }
+      // });
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const DietaryRecords()),
+      );
+
+// 使用flutter开发，通过Navigator.push进行页面跳转，从A Navigator.push 到 B，从B Navigator.push到C，从C Navigator.push到D。现在我需要在D中pop直接返回到B，后台更新B的状态
+      // 和上一个一样
+      // Navigator.popUntil(
+      //   context,
+      //   ModalRoute.withName('/dietaryRecords'),
+      // );
+
+      // 这个会返回到最初的页面(及打开app的第一级)
+      // Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 
@@ -267,19 +341,19 @@ class _FoodDetailState extends State<FoodDetail> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  if (widget.jumpSource == "LOG_INDEX")
+                  if (widget.dfiwfs != null)
                     ElevatedButton(
-                      onPressed: _updateMealFoodItem,
+                      onPressed: _updateDailyFoodItem,
                       child: const Text("修改"),
                     ),
-                  if (widget.jumpSource == "LOG_INDEX")
+                  if (widget.dfiwfs != null)
                     ElevatedButton(
                       onPressed: () {},
                       child: const Text("移除"),
                     ),
-                  if (widget.jumpSource == "FOOD_LIST")
+                  if (widget.dfiwfs == null)
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: _addDailyFoodItem,
                       child: const Text("添加"),
                     )
                 ],

@@ -1,7 +1,5 @@
 // ignore_for_file: avoid_print
 
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/dietary_state.dart';
@@ -18,13 +16,6 @@ class FoodList extends StatefulWidget {
   // 如果是顶部搜索，默认为早餐；其他指定餐次点击添加时也会自动带上对应餐次。
   final Mealtimes mealtime;
 
-  // 当前的日记数据(注意，这个类不是数据库表直接映射表，是VO)
-  // 进入列表的时候，可能是全新新加，也可能是已存在的餐次添加新的meal food item。
-  //  如果是后者，需要 log id 和meal id
-  //    这个值应该只是取值，不会变化
-  //  如果是前者，则父组件没有日记数据传入
-  final FoodDailyLogRecord? fdlr;
-
   // 当前日期，由主界面传入。
   // 理论上主界面可以选择任意日期进入此列表进行食物摄入添加，比如过去的日期补上，未来的日期预估。
   // 如果有传入上方的日记数据，其里面的date和这个date应该是一样的值。
@@ -34,7 +25,6 @@ class FoodList extends StatefulWidget {
   const FoodList({
     Key? key,
     required this.mealtime,
-    required this.fdlr,
     required this.logDate,
   }) : super(key: key);
 
@@ -55,8 +45,7 @@ class _FoodListState extends State<FoodList> {
   late Mealtimes currentMealtime;
   // 被选中的餐次（和传入的类型不一样）
   CusDropdownOption dropdownValue = mealtimeList.first;
-  // 传入的饮食日记数据，这个应该不会变，只是查询数据
-  FoodDailyLogRecord? currentFdlr;
+
   // 这次食物摄入的查询或者预计新增的meal item，属于哪一天的(也是用来查daily log的条件，应该不会变)
   late String currentDate;
 
@@ -69,7 +58,6 @@ class _FoodListState extends State<FoodList> {
 
     setState(() {
       currentMealtime = widget.mealtime;
-      currentFdlr = widget.fdlr;
       currentDate = widget.logDate;
       // 顶部显示的餐次，默认是取列表的第一个，这个改为父组件传入的值
       // ？？？可以父组件改为传入的就是list里面的对象而不是字符串，这样这里少个参数也不用转换
@@ -243,47 +231,26 @@ class _FoodListState extends State<FoodList> {
                         print("==========当前餐次：$currentMealtime");
                         print("==========当日当餐已有食物摄入记录时，对应日、餐次添加meal food item");
                         print("==========此时需要日记id、meal id才行（从父组件传入）======");
-                        log("==========此时传入的日记数据 $currentFdlr）======");
                         print("==========如果该日、该餐没有的数据，则是全新曾======");
 
                         // ？？？这里暂时先只新增1条数据，传入log、meal、mealItem和餐次标识字符串，具体判断逻辑全部放到db helper中区
 
+                        var tempStr = mealtimeList
+                            .firstWhere((e) => e.value == currentMealtime);
                         // 如果没有当前日，则完全新增
-                        var foodDailyLog = FoodDailyLog(
+                        var dailyFoodItem = DailyFoodItem(
                           date: currentDate,
+                          mealCategory: tempStr.label,
+                          foodId: foodItems[index].food.foodId!,
+                          servingInfoId: fistServingInfo.servingInfoId!,
+                          foodIntakeSize:
+                              fistServingInfo.servingSize.toDouble(),
                           contributor: "david",
                           gmtCreate: DateTime.now().toString(),
                         );
 
-                        var meal = Meal(
-                          mealName: "$currentDate 的$currentMealtime",
-                          description: "$currentMealtime吃好",
-                          gmtCreate: DateTime.now().toString(),
-                        );
-
-                        var mealFoodItem = MealFoodItem(
-                          // 当日没有日记的话，这个餐次编号就不会存在；
-                          // 当日有日记、有餐次的话，这个餐次编号也是使用在新增时使用日记数据的值；
-                          // 当日有日记、无餐次的话，餐次编号也是全新新增的，也不会用这个值；
-                          // 所以这里要填值只是因为它必填，可以为任何int，毕竟逻辑中不会用到。
-                          mealId: 11111,
-                          // 这三个都是用户选择真实值。此处是直接预览的单份食物营养素，其实没有修改的位置。
-                          // 真正用户自行输入的，是进入food详情之后才有。
-                          foodId: foodItems[index].food.foodId!,
-                          foodIntakeSize:
-                              fistServingInfo.servingSize.toDouble(),
-                          servingInfoId: fistServingInfo.servingInfoId!,
-                        );
-
-                        var tempStr = mealtimeList
-                            .firstWhere((e) => e.value == currentMealtime);
-
-                        var insertRst = await _dietaryHelper.insertFoodDailyLog(
-                          foodDailyLog,
-                          tempStr.label,
-                          meal,
-                          mealFoodItem,
-                        );
+                        var insertRst = await _dietaryHelper
+                            .insertDailyFoodItemList([dailyFoodItem]);
 
                         print("food list 里面的新增 insertRst：$insertRst");
                       },
@@ -299,11 +266,17 @@ class _FoodListState extends State<FoodList> {
                             foodItem: foodItems[index],
                             mealtime: currentMealtime,
                             logDate: currentDate,
-                            jumpSource: 'FOOD_LIST',
-                            fdlr: currentFdlr,
                           ),
                         ),
-                      );
+                      ).then((value) {
+                        print(
+                            "food list 中的result---- ${ModalRoute.of(context)?.settings}");
+                        // final arguments =
+                        //     ModalRoute.of(context)?.settings.arguments as Map;
+                        // final result = arguments['result'];
+
+                        // print("food list 中的result---- $result");
+                      });
                     },
                   );
                 }

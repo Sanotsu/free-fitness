@@ -6,10 +6,8 @@ class DietaryDdl {
 
   static const tableNameOfFood = 'ff_food';
   static const tableNameOfServingInfo = 'ff_serving_info';
-  // 一日多餐，一餐多种食物
-  static const tableNameOfFoodDailyLog = 'ff_food_daily_log';
-  static const tableNameOfMeal = 'ff_meal';
-  static const tableNameOfMealFoodItem = 'ff_meal_food_item';
+  // 日记条目表（一天多餐多条目，空间换时间的设计）
+  static const tableNameOfDailyFoodItem = 'ff_daily_food_item';
 
   static const String ddlForFood = """
     CREATE TABLE IF NOT EXISTS $tableNameOfFood (
@@ -45,42 +43,22 @@ class DietaryDdl {
       potassium REAL,
       contributor TEXT,
       gmt_create TEXT,
-      upd_user_id TEXT,
+      update_user TEXT,
       gmt_modified TEXT
     );
     """;
 
-  static const String ddlForMealFoodItem = """
-    CREATE TABLE IF NOT EXISTS $tableNameOfMealFoodItem (
-      meal_food_item_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-      meal_id INTEGER NOT NULL,
+  static const String ddlForDailyFoodItem = """
+    CREATE TABLE IF NOT EXISTS $tableNameOfDailyFoodItem (
+      daily_food_item_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      meal_category TEXT NOT NULL,
       food_id INTEGER NOT NULL,
       food_intake_size REAL NOT NULL,
-      serving_info_id INTEGER NOT NULL
-    );
-    """;
-
-  static const String ddlForMeal = """
-    CREATE TABLE IF NOT EXISTS $tableNameOfMeal (
-      meal_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-      meal_name TEXT,
-      description TEXT,
+      serving_info_id INTEGER NOT NULL,
       contributor TEXT,
       gmt_create TEXT,
-      gmt_modified TEXT
-    );
-    """;
-
-  static const String ddlForFoodDailyLog = """
-    CREATE TABLE IF NOT EXISTS $tableNameOfFoodDailyLog (
-      food_daily_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-      date TEXT NOT NULL,
-      breakfast_meal_id INTEGER,
-      lunch_meal_id INTEGER,
-      dinner_meal_id INTEGER,
-      other_meal_id INTEGER,
-      contributor TEXT,
-      gmt_create TEXT,
+      update_user TEXT,
       gmt_modified TEXT
     );
     """;

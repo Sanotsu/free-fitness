@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:sqflite/sqflite.dart';
@@ -237,7 +236,7 @@ class DBDietaryHelper {
   static final DBDietaryHelper _dbHelper = DBDietaryHelper._createInstance();
   static Database? _database;
   // 创建sqlite的db文件成功后，记录该地址，以便删除时使用。
-  var dbFilePath = "";
+  var dietaryDbFilePath = "";
 
   // 命名的构造函数用于创建DatabaseHelper的实例
   DBDietaryHelper._createInstance();
@@ -258,7 +257,7 @@ class DBDietaryHelper {
     // 在给定路径上打开/创建数据库
     var db = await openDatabase(path, version: 1, onCreate: _createDb);
 
-    dbFilePath = path;
+    dietaryDbFilePath = path;
 
     return db;
   }
@@ -267,9 +266,7 @@ class DBDietaryHelper {
   void _createDb(Database db, int newVersion) async {
     await db.execute(DietaryDdl.ddlForFood);
     await db.execute(DietaryDdl.ddlForServingInfo);
-    await db.execute(DietaryDdl.ddlForMealFoodItem);
-    await db.execute(DietaryDdl.ddlForMeal);
-    await db.execute(DietaryDdl.ddlForFoodDailyLog);
+    await db.execute(DietaryDdl.ddlForDailyFoodItem);
   }
 
   // 关闭数据库
@@ -295,14 +292,18 @@ class DBDietaryHelper {
 
   // 删除sqlite的db文件（初始化数据库操作中那个path的值）
   void deleteDb() async {
-    print("开始删除內嵌的 sqlite Dietary db文件，db文件地址：$dbFilePath");
+    var tempPath =
+        "/storage/emulated/0/Android/data/com.example.free_fitness/files/embedded_dietary.db";
+
+    // ？？？这里删除dietaryDbFilePath 没效果？？？
+    print("开始删除內嵌的 sqlite Dietary db文件，db文件地址：$tempPath");
 
     // 删除db或者关闭db都需要重置db为null，
     // 否则后续会保留之前的连接，以致出现类似错误：Unhandled Exception: DatabaseException(database_closed 5)
     // https://stackoverflow.com/questions/60848752/delete-database-when-log-out-and-create-again-after-log-in-dart
     _database = null;
 
-    await deleteDatabase(dbFilePath);
+    await deleteDatabase(tempPath);
   }
 
 // 显示db中已有的table，默认的和自建立的
@@ -518,295 +519,6 @@ class DBDietaryHelper {
     }
   }
 
-  // 插入单条meal
-  Future<int> insertMeal(Meal meal) async {
-    Database db = await database;
-
-    // 因为meal id作为主键且设为自增，所以这里返回的是新增的meal id
-    var result = await db.insert(
-      DietaryDdl.tableNameOfMeal,
-      meal.toMap(),
-    );
-    return result;
-  }
-
-  // 插入单条meal food item
-  Future<int> insertMealFoodItem(MealFoodItem mealFoodItem) async {
-    Database db = await database;
-
-    // 因为 meal_food_item_id 作为主键且设为自增，所以这里返回的是新增的 meal_food_item_id
-    var result = await db.insert(
-      DietaryDdl.tableNameOfMealFoodItem,
-      mealFoodItem.toMap(),
-    );
-    return result;
-  }
-
-  //  一次添加多条 meal food item
-  Future<List<Object?>> batchInsertMealFoodItem(
-    List<MealFoodItem> mealFoodItems,
-  ) async {
-    Database db = await database;
-
-    var batch = db.batch();
-    for (var item in mealFoodItems) {
-      batch.insert(DietaryDdl.tableNameOfMealFoodItem, item.toMap());
-    }
-
-    var results = await batch.commit();
-
-    return results;
-  }
-
-  // 修改单条meal food item
-  Future<int> updateMealFoodItem(MealFoodItem mealFoodItem) async {
-    Database db = await database;
-
-    var result = await db.update(
-      DietaryDdl.tableNameOfMealFoodItem,
-      mealFoodItem.toMap(),
-      where: 'meal_food_item_id = ?',
-      whereArgs: [mealFoodItem.mealFoodItemId],
-    );
-    return result;
-  }
-
-  // 插入单条 daily log
-  Future<int> insertFoodDailyLogOnly(FoodDailyLog foodDailyLog) async {
-    Database db = await database;
-
-    // 因为 foodDailyLogId 作为主键且设为自增，所以这里返回的是新增的 foodDailyLogId
-    var result = await db.insert(
-      DietaryDdl.tableNameOfFoodDailyLog,
-      foodDailyLog.toMap(),
-    );
-    return result;
-  }
-
-  /// ？？？插入每日饮食记录大体流程（这个逻辑还不够完善）
-  ///
-  /// 1、查看当前日期有没有饮食记录
-  ///    如果没有，直接新增；
-  ///    如果已存在，查看需要新增的那个餐次(早中晚夜)编号是否为空
-  ///      0、查询该日该餐次是否有绑定已存在的餐次记录（food daily log 指定 date 和 四餐的meal id）
-  ///         如果为空：创建当日当餐次的基本信息（新增meal数据），获取新建的meal id
-  ///         如果已有：获取已存在的meal id
-  ///      1、新增该餐次食用食物的数据（新增 food intake item）， 加入上方得到的meal id绑定餐次
-  ///      2、将绑定了 food intake item 的meal id 放到 food daily log的当天对应早中晚宵夜的meal栏位
-  ///
-  Future<int> insertFoodDailyLog(
-    FoodDailyLog foodDailyLog,
-    String mealBelong, // 插入的是哪一餐
-    Meal meal,
-    MealFoodItem mealFoodItem,
-  ) async {
-    Database db = await database;
-
-    int resultFlag = 0;
-
-    print("进入insertFoodDailyLog-----------");
-    try {
-      await db.transaction((txn) async {
-        // 查询当前日期有没有记录
-        final logRows = await txn.query(
-          DietaryDdl.tableNameOfFoodDailyLog,
-          where: 'date = ?',
-          whereArgs: [foodDailyLog.date],
-        );
-
-        print("1111111111111111-----------");
-
-        // 如果没有记录，全新的，所有内容都直接新增
-        if (logRows.isEmpty) {
-          var mealId = await txn.insert(
-            DietaryDdl.tableNameOfMeal,
-            meal.toMap(),
-          );
-          print("2222222222222222222-----------");
-
-          mealFoodItem.mealId = mealId;
-          await txn.insert(
-            DietaryDdl.tableNameOfMealFoodItem,
-            mealFoodItem.toMap(),
-          );
-
-          print("333333333333333333333-----------");
-
-          switch (mealBelong) {
-            case "breakfast":
-              foodDailyLog.breakfastMealId = mealId;
-              break;
-            case "lunch":
-              foodDailyLog.lunchMealId = mealId;
-              break;
-            case "dinner":
-              foodDailyLog.dinnerMealId = mealId;
-              break;
-            case "other":
-              foodDailyLog.otherMealId = mealId;
-              break;
-          }
-          await txn.insert(
-            DietaryDdl.tableNameOfFoodDailyLog,
-            foodDailyLog.toMap(),
-          );
-
-          print("444444444444444444444-----------");
-        } else {
-          // 如果有记录，正常来讲，如果能查询到结果，每日只会有1条数据
-          final log = FoodDailyLog.fromMap(logRows.first);
-          int? targetMealId;
-          switch (mealBelong) {
-            case "breakfast":
-              targetMealId = log.breakfastMealId;
-              break;
-            case "lunch":
-              targetMealId = log.lunchMealId;
-              break;
-            case "dinner":
-              targetMealId = log.dinnerMealId;
-              break;
-            case "other":
-              targetMealId = log.otherMealId;
-              break;
-          }
-
-          // final logList =
-          //     logRows.map((row) => FoodDailyLog.fromMap(row)).toList();
-          // if (mealBelong == "breakfast") {
-          //   targetMealId = logList[0].breakfastMealId;
-          // } else if (mealBelong == "lunch") {
-          //   targetMealId = logList[0].lunchMealId;
-          // } else if (mealBelong == "dinner") {
-          //   targetMealId = logList[0].dinnerMealId;
-          // } else if (mealBelong == "other") {
-          //   targetMealId = logList[0].otherMealId;
-          // }
-
-          // 如果已存在log，且对应的target meal不为空，说明该日该餐次已有数据，直接新增meal food item 即可
-          if (targetMealId != null) {
-            mealFoodItem.mealId = targetMealId;
-            await txn.insert(
-              DietaryDdl.tableNameOfMealFoodItem,
-              mealFoodItem.toMap(),
-            );
-
-            print("555555555555555555-----------");
-          } else {
-            // 如果该日该餐次没有数据，则需要先新增meal，再新增meal food item，最后修改该日记对应餐点的meal id为新增的meal id
-            var mealId = await txn.insert(
-              DietaryDdl.tableNameOfMeal,
-              meal.toMap(),
-            );
-            mealFoodItem.mealId = mealId;
-            await txn.insert(
-              DietaryDdl.tableNameOfMealFoodItem,
-              mealFoodItem.toMap(),
-            );
-
-            switch (mealBelong) {
-              case "breakfast":
-                log.breakfastMealId = mealId;
-                break;
-              case "lunch":
-                log.lunchMealId = mealId;
-                break;
-              case "dinner":
-                log.dinnerMealId = mealId;
-                break;
-              case "other":
-                log.otherMealId = mealId;
-                break;
-            }
-
-            print("------666666666666-----------$log");
-            // await txn.update(
-            //   DietaryDdl.tableNameOfFoodDailyLog,
-            //   log.toMap(),
-            // );
-
-            await txn.update(
-              DietaryDdl.tableNameOfFoodDailyLog,
-              log.toMap(),
-              where: 'food_daily_id = ?',
-              whereArgs: [log.foodDailyId],
-            );
-
-            print("666666666666666666666666-----------");
-          }
-        }
-      });
-
-      // 正常执行完成，返回1
-      resultFlag = 1;
-    } catch (e) {
-      // Handle the error
-      print('Error deleting food with serving info: $e');
-      resultFlag = 0;
-      rethrow;
-    }
-
-    return resultFlag;
-  }
-
-  /// 移除item
-  // 传入food dialy log的id，对应的早中晚夜宵编号，找到对应的meal，找到对应的food intake item id，删除
-  // 如果meal 没有任何food intake item，
-  //    meal没有绑定到人和food daily log中，删除meal（这一步可以在food daily log中也同时清除原本绑定了这个meal id点栏位）
-
-  // 查询单纯的所有饮食日记（可能测试用的多）
-  Future<List<FoodDailyLog>> queryFoodDailyLogOnly() async {
-    Database db = await database;
-
-    final rows = await db.query(DietaryDdl.tableNameOfFoodDailyLog);
-
-    var list = rows.map((row) => FoodDailyLog.fromMap(row)).toList();
-
-    return list;
-  }
-
-  /// 查询饮食记录都是看当天。如果是某一顿，也是知道是哪一天了，再加上对应mealId直接去查下meal 和 meal_food_item即可
-  // TBC 方案1,关联查询所有的数据，再按照指定格式进行转化（未继续）
-  Future<void> queryAllFoodIntakeRecords() async {
-    Database db = await database;
-
-    List<Map<String, dynamic>> result = await db.rawQuery("""
-        SELECT fd.food_daily_id, fd.date,
-              m1.meal_name AS breakfast_meal, m2.meal_name AS lunch_meal, 
-              m3.meal_name AS dinner_meal, m4.meal_name AS other_meal,
-              f1.brand, f1.product, f1.photos, f1.tags, f1.category,
-              si.energy, si.protein, si.total_fat, si.saturated_fat, si.trans_fat,
-              si.polyunsaturated_fat, si.monounsaturated_fat, si.cholesterol,
-              si.total_carbohydrate, si.sugar, si.dietary_fiber, si.sodium, si.potassium,
-              fd.contributor, fd.gmt_create, fd.gmt_modified
-        FROM ff_food_daily_log fd
-        LEFT JOIN ff_meal m1 ON fd.breakfast_meal_id = m1.meal_id
-        LEFT JOIN ff_meal m2 ON fd.lunch_meal_id = m2.meal_id
-        LEFT JOIN ff_meal m3 ON fd.dinner_meal_id = m3.meal_id
-        LEFT JOIN ff_meal m4 ON fd.other_meal_id = m4.meal_id
-        LEFT JOIN ff_meal_food_item mfi ON (fd.breakfast_meal_id = mfi.meal_id OR
-                                            fd.lunch_meal_id = mfi.meal_id OR
-                                            fd.dinner_meal_id = mfi.meal_id OR
-                                            fd.other_meal_id = mfi.meal_id)
-        LEFT JOIN ff_food f1 ON mfi.food_id = f1.food_id
-        LEFT JOIN ff_serving_info si ON mfi.serving_info_id = si.serving_info_id;
-      """);
-    log("result----------$result");
-  }
-
-  // ======================
-  // 方案2,嵌套查询，一层一层查，一层一层包装，也有新的类包装起来
-  // 以下是方案2优化之后的版本（前面这一堆是工具函数，也有可能其他地方可用）
-  // 通过mealId查询meal，只返回一个meal
-  Future<Meal> queryMealById(Database db, int mealId) async {
-    final mealRows = await db.query(
-      DietaryDdl.tableNameOfMeal,
-      where: 'meal_id = ?',
-      whereArgs: [mealId],
-    );
-    return Meal.fromMap(mealRows[0]);
-  }
-
   Future<Food> queryFoodById(Database db, int foodId) async {
     final foodRows = await db.query(
       DietaryDdl.tableNameOfFood,
@@ -833,97 +545,175 @@ class DBDietaryHelper {
     return servingInfoList[0];
   }
 
-  Future<List<MealFoodItemDetail>> queryMealFoodItemsByMealId(
-      Database db, int mealId) async {
-    final mealFoodItemRows = await db.query(
-      DietaryDdl.tableNameOfMealFoodItem,
-      where: 'meal_id = ?',
-      whereArgs: [mealId],
-    );
-
-    final mealFoodItemList =
-        mealFoodItemRows.map((row) => MealFoodItem.fromMap(row)).toList();
-
-    final mealFoodItemDetailList = <MealFoodItemDetail>[];
-
-    // 正常来讲到这里，一个item 里面也只有1个food 和 1个serving info
-    for (var item in mealFoodItemList) {
-      // 正常数据的话，长度为1
-      final food = await queryFoodById(db, item.foodId);
-      // 正常数据的话，长度为1
-      final servingInfo = await queryServingInfoById(db, item.servingInfoId);
-      final mealFoodItemDetail = MealFoodItemDetail(
-        mealFoodItem: item,
-        food: food,
-        servingInfo: servingInfo,
-      );
-      mealFoodItemDetailList.add(mealFoodItemDetail);
-    }
-
-    return mealFoodItemDetailList;
-  }
-
-  Future<MealAndMealFoodItemDetail> _getMealAndMealFoodItemDetail(
-    Database db,
-    int mealId,
+  // 插入饮食日记条目( daily_food_item 一般一次性插入多条，有单条的，也放到list)
+  Future<List<Object?>> insertDailyFoodItemList(
+    List<DailyFoodItem> dfiList,
   ) async {
-    final meal = await queryMealById(db, mealId);
-    final mealFoodItemList = await queryMealFoodItemsByMealId(db, mealId);
-    final mealAndMealFoodItemDetail = MealAndMealFoodItemDetail(
-      meal: meal,
-      mealFoodItemDetailist: mealFoodItemList,
-    );
-    return mealAndMealFoodItemDetail;
-  }
+    Database db = await database;
 
-  Future<List<FoodDailyLogRecord>> queryFoodDailyLogRecord(
-      {String? date}) async {
-    final db = await database;
-
-    final logRows = await db.query(
-      DietaryDdl.tableNameOfFoodDailyLog,
-      where: 'date = ?',
-      whereArgs: [date],
-    );
-
-    print("logRows------------------${logRows.length}");
-
-    final records = <FoodDailyLogRecord>[];
-
-    for (final row in logRows) {
-      final fdl = FoodDailyLog.fromMap(row);
-
-      // 有查到基础日记数据，先保存
-      final foodDailyLogRecord = FoodDailyLogRecord(foodDailyLog: fdl);
-
-      // 如果早中晚夜餐次有数据，分别查出详情数据加到对应栏位
-      if (fdl.breakfastMealId != null) {
-        var mealAndMealFoodItemDetail =
-            await _getMealAndMealFoodItemDetail(db, fdl.breakfastMealId!);
-        foodDailyLogRecord.breakfastMealFoodItems = mealAndMealFoodItemDetail;
-      }
-      if (fdl.lunchMealId != null) {
-        var mealAndMealFoodItemDetail =
-            await _getMealAndMealFoodItemDetail(db, fdl.lunchMealId!);
-        foodDailyLogRecord.lunchMealFoodItems = mealAndMealFoodItemDetail;
-      }
-      if (fdl.dinnerMealId != null) {
-        var mealAndMealFoodItemDetail =
-            await _getMealAndMealFoodItemDetail(db, fdl.dinnerMealId!);
-        foodDailyLogRecord.dinnerMealFoodItems = mealAndMealFoodItemDetail;
-      }
-      if (fdl.otherMealId != null) {
-        var mealAndMealFoodItemDetail =
-            await _getMealAndMealFoodItemDetail(db, fdl.otherMealId!);
-        foodDailyLogRecord.otherMealFoodItems = mealAndMealFoodItemDetail;
-      }
-
-      // 最后讲该条数据存入列表
-      records.add(foodDailyLogRecord);
+    var batch = db.batch();
+    for (var item in dfiList) {
+      batch.insert(DietaryDdl.tableNameOfDailyFoodItem, item.toMap());
     }
 
-    log("records---------records---$records");
+    var results = await batch.commit();
 
-    return records;
+    return results;
+  }
+
+  // 修改单条 daily_food_item
+  Future<int> updateDailyFoodItem(DailyFoodItem dailyFoodItem) async {
+    Database db = await database;
+
+    var result = await db.update(
+      DietaryDdl.tableNameOfDailyFoodItem,
+      dailyFoodItem.toMap(),
+      where: 'daily_food_item_id = ?',
+      whereArgs: [dailyFoodItem.dailyFoodItemId],
+    );
+
+    print("updateDailyFoodItem--------的返回 $result $dailyFoodItem");
+    return result;
+  }
+
+  // 删除单条 daily_food_item
+  Future<int> deleteDailyFoodItem(int dailyFoodItemId) async {
+    Database db = await database;
+    var result = await db.delete(
+      DietaryDdl.tableNameOfDailyFoodItem,
+      where: "daily_food_item_id=?",
+      whereArgs: [dailyFoodItemId],
+    );
+    return result;
+  }
+
+  // 条件查询日记条目 daily_food_item
+  // 支持日期区间，当日的起止都是同一个，使用字符串比较，所以字符串传入的格式要都一致（YYYY-MM-DD）
+  // 不需要分页，后续即便是导出月度、年度数据，都是一次性所有，然后再格式化展示
+  Future<List<DailyFoodItem>> queryDailyFoodItemList({
+    int? dailyFoodItemId,
+    String? startDate,
+    String? endDate,
+    String? mealCategory,
+  }) async {
+    Database db = await database;
+
+    final whereClauses = <String>[];
+    final whereArgs = <dynamic>[];
+
+    if (dailyFoodItemId != null) {
+      whereClauses.add('daily_food_item_id = ?');
+      whereArgs.add(dailyFoodItemId);
+    }
+
+    if (mealCategory != null) {
+      whereClauses.add('meal_category = ?');
+      whereArgs.add(mealCategory);
+    }
+
+    if (startDate != null) {
+      whereClauses.add('date >= ?');
+      whereArgs.add(startDate);
+    }
+
+    if (endDate != null) {
+      whereClauses.add('date <= ?');
+      whereArgs.add(endDate);
+    }
+
+    final whereClause =
+        whereClauses.isNotEmpty ? whereClauses.join(' AND ') : '';
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      DietaryDdl.tableNameOfDailyFoodItem,
+      where: whereClause,
+      whereArgs: whereArgs,
+    );
+
+    final List<DailyFoodItem> list =
+        maps.map((row) => DailyFoodItem.fromMap(row)).toList();
+
+    return list;
+  }
+
+// 条件查询日记条目，但food和serving info 详情
+// 查询结果展示时，会更多用到对应的food和serving info的具体数值
+  Future<List<DailyFoodItemWithFoodServing>> queryDailyFoodItemListWithDetail({
+    int? dailyFoodItemId,
+    String? startDate,
+    String? endDate,
+    String? mealCategory,
+  }) async {
+    Database db = await database;
+
+    final whereClauses = <String>[];
+    final whereArgs = <dynamic>[];
+
+    if (dailyFoodItemId != null) {
+      whereClauses.add('daily_food_item_id = ?');
+      whereArgs.add(dailyFoodItemId);
+    }
+
+    if (mealCategory != null) {
+      whereClauses.add('meal_category = ?');
+      whereArgs.add(mealCategory);
+    }
+
+    if (startDate != null) {
+      whereClauses.add('date >= ?');
+      whereArgs.add(startDate);
+    }
+
+    if (endDate != null) {
+      whereClauses.add('date <= ?');
+      whereArgs.add(endDate);
+    }
+
+    final whereClause =
+        whereClauses.isNotEmpty ? whereClauses.join(' AND ') : '';
+
+    final dfiRows = await db.query(
+      DietaryDdl.tableNameOfDailyFoodItem,
+      where: whereClause,
+      whereArgs: whereArgs,
+    );
+
+    // 如果有查询到日记条目，查询对应的食物和营养素详情
+    final List<DailyFoodItem> list =
+        dfiRows.map((row) => DailyFoodItem.fromMap(row)).toList();
+
+    // 用来存要放回的饮食日记条目详情
+    final dfiwfsList = <DailyFoodItemWithFoodServing>[];
+
+    if (list.isEmpty) {
+      return [];
+    } else {
+      for (var dailyFoodItem in list) {
+        // ？？？当天日记条目的食物和营养素通过id查询都应该只有一条，数据正确的话也不会为空，所以不做检查
+        final foodRows = await db.query(
+          DietaryDdl.tableNameOfFood,
+          where: 'food_id = ?',
+          whereArgs: [dailyFoodItem.foodId],
+        );
+        final food = Food.fromMap(foodRows[0]);
+
+        final servingInfoRows = await db.query(
+          DietaryDdl.tableNameOfServingInfo,
+          where: 'serving_info_id = ?',
+          whereArgs: [dailyFoodItem.servingInfoId],
+        );
+        final servingInfo = ServingInfo.fromMap(servingInfoRows[0]);
+
+        final dfiwfs = DailyFoodItemWithFoodServing(
+          dailyFoodItem: dailyFoodItem,
+          food: food,
+          servingInfo: servingInfo,
+        );
+
+        dfiwfsList.add(dfiwfs);
+      }
+    }
+
+    return dfiwfsList;
   }
 }

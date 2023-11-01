@@ -72,3 +72,20 @@ pause: log index 和 food list 点击跳转到 food detail 的逻辑有了，但
 pause：修改旧的某一天某一餐次的条目，需要从早餐移到晚餐非常麻烦，然后重新思考了一下数据库结构，发现被“一天饮食记录只存一条数据”的想法限制住了，所以重新修改数据库，删除原本的 meal 和 meal food item，直接把把一餐的每一个食物摄入留存记录，原本`log-meal-item 1：（4*1）：N` 的设计，直接 `daily_food_item` 一个表搞定，以空间换时间。
 
 注意：巨大结构改动，大量已经完成的功能会被修改
+
+2023-11-01
+
+基本完成：饮食记录数据库结构和栏位的设计，并更新了相关代码
+基本完成：log index 添加饮食日记条目，先到 food list，再到 food detail，点击返回后直接回到 log index，并刷新 log index 页面
+
+- 注意：这里参考了 stackoverflow 的 [Flutter - Pass Data Back with .popUntil](https://stackoverflow.com/questions/52075130/flutter-pass-data-back-with-popuntil) 想 popUntil 时带上参数进行刷新，但是没有成功，获取不到返回的数据。
+  - popUntil 带返回值的需求一直有，但没有提供，参看[issue](https://github.com/flutter/flutter/issues/30112)。
+  - 目前返回上上层并刷新其页面的实现最简单如下(都不用使用命名路由)：
+  ```dart
+  Navigator.of(context)
+        ..pop()
+        ..pop(true);
+  Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const DietaryRecords()),
+      );
+  ```

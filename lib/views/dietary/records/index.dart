@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_print
 
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:free_fitness/common/global/constants.dart';
 import 'package:free_fitness/models/dietary_state.dart';
@@ -20,8 +22,17 @@ class DietaryRecords extends StatefulWidget {
 class _DietaryRecordsState extends State<DietaryRecords> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
 
+  /// 根据条件查询的日记条目数据
+  List<DailyFoodItemWithFoodServing> dfiwfsList = [];
+  // 用户可能切换日期，但显示的内容是一样的(这个是日期组件的值，默认是当天)
+  // (日期范围，可能只在导出时才用到，一般都是单日)
+  var inputDate = "";
+// 数据是否加载中
+  bool isLoading = false;
+
   // 这个插入的数据是比较完整正规的，测试时在删除db之后可直接用
   demoInsertDailyLogData() async {
+    // 1 插入2个食物和对应3个单份营养素信息
     var food1 = Food(
       brand: '永川',
       product: '豆豉',
@@ -51,12 +62,12 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       cholesterol: 20,
       contributor: '李四',
       gmtCreate: '2023-10-24 09:59:15',
-      updUserId: '',
+      updateUser: '',
       gmtModified: null,
     );
 
-    await _dietaryHelper
-        .insertFoodWithServingInfoList(food: food1, servingInfoList: [dserving1]);
+    await _dietaryHelper.insertFoodWithServingInfoList(
+        food: food1, servingInfoList: [dserving1]);
 
     var food2 = Food(
       brand: '重庆',
@@ -87,12 +98,12 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       cholesterol: 200,
       contributor: '李四',
       gmtCreate: '2023-10-24 09:55:15',
-      updUserId: '',
+      updateUser: '',
       gmtModified: null,
     );
 
-    await _dietaryHelper
-        .insertFoodWithServingInfoList(food: food2, servingInfoList: [dserving2]);
+    await _dietaryHelper.insertFoodWithServingInfoList(
+        food: food2, servingInfoList: [dserving2]);
 
     var dserving3 = ServingInfo(
       foodId: 2,
@@ -113,128 +124,72 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       cholesterol: 25,
       contributor: '李四',
       gmtCreate: '2023-10-24 10:55:15',
-      updUserId: '',
+      updateUser: '',
       gmtModified: null,
     );
 
     await _dietaryHelper
         .insertFoodWithServingInfoList(servingInfoList: [dserving3]);
 
-    var meal1 = Meal(
-      mealName: "烤鸭餐",
-      description: "就是要吃烤鸭",
-      contributor: "王五",
-      gmtCreate: '2023-10-24 10:08:03',
-    );
-
-    var meal2 = Meal(
-      mealName: "节约餐",
-      description: "吃不起烤鸭",
-      contributor: "王五",
-      gmtCreate: '2023-10-24 10:09:03',
-    );
-
-    await _dietaryHelper.insertMeal(meal1);
-    await _dietaryHelper.insertMeal(meal2);
-
-    var mealFoodItem1 = MealFoodItem(
-      mealId: 1,
-      foodId: 2,
-      foodIntakeSize: 100,
-      servingInfoId: 3,
-    );
-    var mealFoodItem2 = MealFoodItem(
-      mealId: 1,
-      foodId: 2,
-      foodIntakeSize: 1,
-      servingInfoId: 2,
-    );
-    var mealFoodItem3 = MealFoodItem(
-      mealId: 2,
-      foodId: 1,
-      foodIntakeSize: 200,
-      servingInfoId: 1,
-    );
-
-    await _dietaryHelper.insertMealFoodItem(mealFoodItem1);
-    await _dietaryHelper.insertMealFoodItem(mealFoodItem2);
-    await _dietaryHelper.insertMealFoodItem(mealFoodItem3);
-
-    var foodDailyLog = FoodDailyLog(
+    // 2 插入两条日志记录
+    var temp1 = DailyFoodItem(
+      // 主键数据库自增
       date: getCurrentDate(),
-      breakfastMealId: 1,
-      lunchMealId: 2,
-      dinnerMealId: null,
-      otherMealId: null,
+      mealCategory: "breakfast",
+      foodId: 2,
+      servingInfoId: 3,
+      foodIntakeSize: 12,
       contributor: "马六",
-      gmtCreate: '2023-10-24 10:10:10',
+      gmtCreate: DateTime.now().toString(),
+      updateUser: null,
       gmtModified: null,
     );
 
-    await _dietaryHelper.insertFoodDailyLogOnly(foodDailyLog);
+    var temp2 = DailyFoodItem(
+      // 主键数据库自增
+      date: getCurrentDate(),
+      mealCategory: "breakfast",
+      foodId: 2,
+      servingInfoId: 2,
+      foodIntakeSize: 5,
+      contributor: "马六",
+      gmtCreate: DateTime.now().toString(),
+      updateUser: null,
+      gmtModified: null,
+    );
+
+    var temp3 = DailyFoodItem(
+      // 主键数据库自增
+      date: getCurrentDate(),
+      mealCategory: "lunch",
+      foodId: 1,
+      servingInfoId: 1,
+      foodIntakeSize: 14,
+      contributor: "马六",
+      gmtCreate: DateTime.now().toString(),
+      updateUser: null,
+      gmtModified: null,
+    );
+
+    await _dietaryHelper.insertDailyFoodItemList([temp1, temp2, temp3]);
 
     print("demoInsertDailyLogData------------插入执行完了");
   }
-
-  // 这个插入是插入每日数据时，从log 到meal 到 item一次性插入完，后续可能拆分不同步骤
-  oneInsertAll() async {
-    var foodDailyLog = FoodDailyLog(
-      // foodDailyId: 1, // 这个是自增的，不加会自增，加了会以加的值插入，重复则报错
-      // date: DateTime.now().toString(), // 这里应该收缩到年月日，而不是最小单位
-      date: "2023-10-24 16:32:15.617120",
-      contributor: "david",
-      gmtCreate: DateTime.now().toString(),
-    );
-
-    var meal = Meal(
-      // mealId: 1, // 这个是自增的，不加会自增，加了会以加的值插入，重复则报错
-      mealName: "20231024的早餐",
-      description: "早上吃好",
-      gmtCreate: DateTime.now().toString(),
-    );
-    var mealFoodItem = MealFoodItem(
-      // mealFoodItemId: 1, // 这个是自增的，不加会自增，加了会以加的值插入，重复则报错
-      mealId: 1, // 这个要真实值，这里填的插入时会被覆盖
-      foodId: 2, // 用户选择真实值
-      servingInfoId: 1, // 用户选择真实值
-      foodIntakeSize: 200, // 用户输入真实值
-    );
-
-    var insertRst = await _dietaryHelper.insertFoodDailyLog(
-      foodDailyLog,
-      "breakfast",
-      meal,
-      mealFoodItem,
-    );
-
-    print("测试插入饮食记录的结果insertRst：$insertRst");
-  }
-
-  /// 日记录的首页应该是查询出1条数据，然后固定显示早中晚夜4个模块，不定长的是每餐的摄入item
-  /// 当然，如果是该日没有任何日志，则依旧空数组
-  List<FoodDailyLogRecord> fdlrList = [];
-  // 用户可能切换日期，但显示的内容是一样的(这个是日期组件的值，默认是当天)
-  var inputDate = "";
-// 数据是否加载中
-  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
 
-    _testInsetBrandNewOneMealFoodItem();
+    _testInsertDailyFoodItemList();
   }
 
-  _testInsetBrandNewOneMealFoodItem() async {
+  _testInsertDailyFoodItemList() async {
     print("开始运行插入示例---------");
 
     // _dietaryHelper.deleteDb();
 
     // await demoInsertDailyLogData();
     // return;
-
-    // await _dietaryHelper.queryFoodDailyLogOnly();
-    // await _dietaryHelper.queryAllFoodIntakeRecords();
 
     if (isLoading) return;
 
@@ -243,15 +198,16 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       inputDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
     });
 
-    // 理论上，当日的只会有一条
-    var temp = await _dietaryHelper.queryFoodDailyLogRecord(date: inputDate);
-    // 测试
-    // var temp = await _dietaryHelper.queryFoodDailyLogRecord(date: "2023-10-24");
+    // 理论上是查询当日的
+    var temp = await _dietaryHelper.queryDailyFoodItemListWithDetail(
+      startDate: inputDate,
+      endDate: inputDate,
+    );
 
-    print("---------测试暂时没有日记数据$temp");
+    log("---------测试查询的当前日记item $temp");
 
     setState(() {
-      fdlrList = temp;
+      dfiwfsList = temp;
       isLoading = false;
     });
   }
@@ -259,52 +215,54 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('DietaryRecords'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => FoodList(
-                          mealtime: Mealtimes.breakfast,
-                          // 这里有个问题，如果数据没加载完，这里取不到值
-                          // 可以把这个按钮的加载放在数据加载完之后显示
-                          fdlr: fdlrList.isNotEmpty ? fdlrList[0] : null,
-                          // ？？？注意，这里应该是一个日期选择器插件选中的值
-                          logDate: getCurrentDate(),
-                        )),
-              );
-            },
-          ),
-        ],
-      ),
-      body: isLoading
-          ? _buildLoader()
-          : ListView.builder(
-              itemCount: 4,
-              itemBuilder: (context, index) {
-                final mealType = _getMealTypeByIndex(index);
-                // 如果没有日记，就没有card的展开
-                final mealFoodItems = fdlrList.isNotEmpty
-                    ? _getMealFoodItemsByType(mealType)
-                    : null;
-                return _buildMealCard(mealType, mealFoodItems);
+        appBar: AppBar(
+          title: const Text('DietaryRecords'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => FoodList(
+                            mealtime: Mealtimes.breakfast,
+                            // ？？？注意，这里应该是一个日期选择器插件选中的值
+                            logDate: getCurrentDate(),
+                          )),
+                ).then((value) {
+                  final arguments =
+                      ModalRoute.of(context)?.settings.arguments as Map;
+                  final result = arguments['result'];
+
+                  print("log inde 中的result---- $value $result");
+                });
               },
             ),
-    );
+          ],
+        ),
+        body: isLoading
+            ? _buildLoader()
+            : ListView.builder(
+                itemCount: mealtimeList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  final mealtime = mealtimeList[index];
+                  return _buildMealCard(mealtime);
+                },
+              ));
   }
 
-  Widget _buildMealCard(
-    String mealType,
-    MealAndMealFoodItemDetail? mealFoodItems,
-  ) {
-    bool showExpansionTile = mealFoodItems != null;
+  Widget _buildMealCard(CusDropdownOption mealtime) {
+    // 从查询的日记条目中过滤当前餐次的数据
+    // DailyFoodItemWithFoodServingMealItems 太长了，缩写 dfiwfsMealItems
+    var dfiwfsMealItems = dfiwfsList
+        .where(
+          (e) => e.dailyFoodItem.mealCategory == mealtime.label,
+        )
+        .toList();
 
-    var cutMeal =
-        mealtimeList.firstWhere((e) => e.label == mealType.toLowerCase());
+    // 当前餐次有条目，展开行可用
+    bool showExpansionTile = dfiwfsMealItems.isNotEmpty;
+
     return Center(
       child: Card(
         child: Column(
@@ -312,21 +270,17 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           children: <Widget>[
             ListTile(
               leading: const Icon(Icons.album),
-              title: Text(mealType),
-              subtitle: Text(
-                '${mealFoodItems?.mealFoodItemDetailist.length}',
-              ),
+              title: Text("${mealtime.name}"),
+              subtitle: Text('${dfiwfsMealItems.length}'),
               trailing: IconButton(
                 onPressed: () {
-                  print("日记主页面点击了餐次的add --------$mealType ${cutMeal.value}");
+                  print("日记主页面点击了餐次的add -------- ${mealtime.value}");
                   Navigator.push(
                     context,
                     MaterialPageRoute(
+                      // 主页面点击餐次的添加是新增，没有旧数据，需要餐次和日期信息
                       builder: (context) => FoodList(
-                        mealtime: cutMeal.value,
-                        // 这里有个问题，如果数据没加载完，这里取不到值
-                        // 可以把这个按钮的加载放在数据加载完之后显示
-                        fdlr: fdlrList.isNotEmpty ? fdlrList[0] : null,
+                        mealtime: mealtime.value,
                         // ？？？注意，这里应该是一个日期选择器插件选中的值
                         logDate: getCurrentDate(),
                       ),
@@ -340,10 +294,9 @@ class _DietaryRecordsState extends State<DietaryRecords> {
             if (showExpansionTile)
               ExpansionTile(
                 title: Text(
-                  '${mealFoodItems.mealFoodItemDetailist.length}',
+                  '${dfiwfsMealItems.length}',
                 ),
-                children: _buildListTile(
-                    cutMeal, mealFoodItems.mealFoodItemDetailist),
+                children: _buildListTile(mealtime, dfiwfsMealItems),
               ),
           ],
         ),
@@ -352,25 +305,33 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   }
 
   List<Widget> _buildListTile(
-      CusDropdownOption cutMeal, List<MealFoodItemDetail>? list) {
+    CusDropdownOption curMeal,
+    List<DailyFoodItemWithFoodServing> list,
+  ) {
     List<Widget> temp = [
       const Divider(),
     ];
 
-    if (list == null) return temp;
+    if (list.isEmpty) return temp;
 
-    return list.map((mealFoodItemDetail) {
+    return list.map((logItem) {
+      var totalEnergyStr =
+          '${logItem.dailyFoodItem.foodIntakeSize * logItem.servingInfo.energy} 千焦';
+
+      var totalCalStr =
+          "${(logItem.dailyFoodItem.foodIntakeSize * logItem.servingInfo.energy / oneCalToKjRatio).toStringAsFixed(2)} 大卡";
+
       return GestureDetector(
         onTap: () async {
-          print("cutMeal-----${cutMeal.label}");
+          print("cutMeal-----${curMeal.label}");
 
           print(
             "daily log index 的 指定餐次 点击了meal food item ，跳转到food detail ---> ",
           );
 
           // 先获取到当前item的食物信息，再传递到food detail
-          var data = await _dietaryHelper.searchFoodWithServingInfoByFoodId(
-              mealFoodItemDetail.food.foodId!);
+          var data = await _dietaryHelper
+              .searchFoodWithServingInfoByFoodId(logItem.dailyFoodItem.foodId);
 
           if (data == null) {
             // 抛出异常之后已经return了
@@ -381,23 +342,16 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => FoodDetail(
-                foodItem: data,
-                mealtime: cutMeal.value,
-                // ？？？注意，这里应该是一个日期选择器插件选中的值
-                logDate: getCurrentDate(),
-                jumpSource: 'LOG_INDEX',
-                fdlr: fdlrList.isNotEmpty ? fdlrList[0] : null,
-                mfid: mealFoodItemDetail,
-              ),
+              // 主页面点击item详情是修改或删除，只需要传入食物信息和item详情就好
+              builder: (context) => FoodDetail(foodItem: data, dfiwfs: logItem),
             ),
           );
         },
         child: Dismissible(
-          key: Key(mealFoodItemDetail.hashCode.toString()),
+          key: Key(logItem.hashCode.toString()),
           onDismissed: (direction) {
             setState(() {
-              list.remove(mealFoodItemDetail);
+              list.remove(logItem);
             });
           },
           background: Container(
@@ -406,17 +360,15 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           ),
           child: ListTile(
             title: Text(
-              "${mealFoodItemDetail.food.brand}-${mealFoodItemDetail.food.product}",
+              "${logItem.food.brand}-${logItem.food.product}",
             ),
-            subtitle: Text('${mealFoodItemDetail.mealFoodItem.foodIntakeSize}'),
+            subtitle: Text('${logItem.dailyFoodItem.foodIntakeSize}'),
             trailing: SizedBox(
               width: 200,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    '${mealFoodItemDetail.mealFoodItem.foodIntakeSize * mealFoodItemDetail.servingInfo.energy} 卡卡',
-                  ),
+                  Text("$totalEnergyStr-$totalCalStr"),
                   const Icon(Icons.star),
                 ],
               ),
@@ -434,36 +386,6 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       );
     } else {
       return Container();
-    }
-  }
-
-  String _getMealTypeByIndex(int index) {
-    switch (index) {
-      case 0:
-        return 'Breakfast';
-      case 1:
-        return 'Lunch';
-      case 2:
-        return 'Dinner';
-      case 3:
-        return 'Other';
-      default:
-        throw Exception('Invalid index');
-    }
-  }
-
-  MealAndMealFoodItemDetail? _getMealFoodItemsByType(String mealType) {
-    switch (mealType) {
-      case 'Breakfast':
-        return fdlrList[0].breakfastMealFoodItems;
-      case 'Lunch':
-        return fdlrList[0].lunchMealFoodItems;
-      case 'Dinner':
-        return fdlrList[0].dinnerMealFoodItems;
-      case 'Other':
-        return fdlrList[0].otherMealFoodItems;
-      default:
-        throw Exception('Invalid meal type');
     }
   }
 }
