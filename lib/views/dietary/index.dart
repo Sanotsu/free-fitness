@@ -43,7 +43,7 @@ class _DietaryState extends State<Dietary> with SingleTickerProviderStateMixin {
             width: 340.sp,
             child: Padding(
               padding: EdgeInsets.all(10.sp),
-              child: _buildCard(const DietaryReports(), "报告", "dietaryReport"),
+              child: _buildCard(const DietaryReports(), "报告"),
             ),
           ),
 
@@ -60,8 +60,8 @@ class _DietaryState extends State<Dietary> with SingleTickerProviderStateMixin {
                 mainAxisSpacing: 10.0,
                 childAspectRatio: 1, // 宽高比（单个card应该是160.sp * 160.sp）
                 children: <Widget>[
-                  _buildCard(const DietaryRecords(), "日记", '/dietaryRecords'),
-                  _buildCard(const DietarySettings(), "我的", '/dietarySetting'),
+                  _buildCard(const DietaryRecords(), "日记"),
+                  _buildCard(const DietarySettings(), "我的"),
                   // _buildCard(const DietaryReports(), "训练计划"),
                 ],
               ),
@@ -72,27 +72,17 @@ class _DietaryState extends State<Dietary> with SingleTickerProviderStateMixin {
     );
   }
 
-  _buildCard(Widget widget, String title, String routeName) {
+  _buildCard(Widget widget, String title) {
     return Card(
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         splashColor: Colors.blue.withAlpha(30),
         onTap: () {
-          // 这里需要使用pushName并带上arguments参数，后续跨层级popUntil的时候才能指定路由名称和传参数
-          Navigator.pushNamed(context, routeName, arguments: {}).then((value) {
-            print(
-                "_buildCard 中的result----$value--- ${ModalRoute.of(context)?.settings}  ");
-            // final arguments =
-            //     ModalRoute.of(context)?.settings.arguments as Map;
-            // final result = arguments['result'];
-
-            // print("food list 中的result---- $result");
-          });
-          // Navigator.of(context).push(
-          //   MaterialPageRoute(
-          //     builder: (BuildContext ctx) => widget,
-          //   ),
-          // );
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext ctx) => widget,
+            ),
+          );
         },
         child: Container(
           color: Colors.lightBlue[100],

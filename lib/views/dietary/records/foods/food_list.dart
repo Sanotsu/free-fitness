@@ -268,15 +268,7 @@ class _FoodListState extends State<FoodList> {
                             logDate: currentDate,
                           ),
                         ),
-                      ).then((value) {
-                        print(
-                            "food list 中的result---- ${ModalRoute.of(context)?.settings}");
-                        // final arguments =
-                        //     ModalRoute.of(context)?.settings.arguments as Map;
-                        // final result = arguments['result'];
-
-                        // print("food list 中的result---- $result");
-                      });
+                      );
                     },
                   );
                 }

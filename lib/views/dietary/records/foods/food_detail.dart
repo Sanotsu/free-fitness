@@ -156,6 +156,10 @@ class _FoodDetailState extends State<FoodDetail> {
       if (!mounted) return;
       // ？？？父组件应该重新加载
       Navigator.pop(context, '_updateDailyFoodItem');
+      // 这样的重新加载对不对？？？
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const DietaryRecords()),
+      );
     }
   }
 
@@ -184,43 +188,15 @@ class _FoodDetailState extends State<FoodDetail> {
     if (rst.isNotEmpty) {
       if (!mounted) return;
 
-      // ？？？父组件应该重新加载
-      // Navigator.pop(context, '_updateDailyFoodItem');
-
-      // 需要在MaterialApp中设置命名路由列表，并在进入dietaryRecords的地方使用pushNamed()方法，这样这里的popUntil才会生效
-      // 如果进入dietaryRecords的路由跳转没有指定名称的话，这里的popUntil直接就调到黑屏部件了
-      // Navigator.popUntil(
-      //   context,
-      //   (route) => route.settings.name == '/dietaryRecords',
-      // );
-
       // 这个可以直接返回到上上的部件，但也没办法带参数
       Navigator.of(context)
         ..pop()
         ..pop(true);
 
-      // Navigator.of(context).popUntil((route) {
-      //   if (route.settings.name == '/dietaryRecords') {
-      //     print("---------------route.settings ${route.settings}");
-      //     (route.settings.arguments as Map)['result'] = '<<<<<<<<<<something';
-      //     print("---------------route.settings after ${route.settings}");
-
-      //     return true;
-      //   } else {
-      //     return false;
-      //   }
-      // });
-
+      // 使用 Navigator.pushReplacement() 方法来替换当前的 DietaryRecords 页面，使其状态更新为最新。
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const DietaryRecords()),
       );
-
-// 使用flutter开发，通过Navigator.push进行页面跳转，从A Navigator.push 到 B，从B Navigator.push到C，从C Navigator.push到D。现在我需要在D中pop直接返回到B，后台更新B的状态
-      // 和上一个一样
-      // Navigator.popUntil(
-      //   context,
-      //   ModalRoute.withName('/dietaryRecords'),
-      // );
 
       // 这个会返回到最初的页面(及打开app的第一级)
       // Navigator.of(context).popUntil((route) => route.isFirst);

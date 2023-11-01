@@ -224,18 +224,13 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => FoodList(
-                            mealtime: Mealtimes.breakfast,
-                            // ？？？注意，这里应该是一个日期选择器插件选中的值
-                            logDate: getCurrentDate(),
-                          )),
-                ).then((value) {
-                  final arguments =
-                      ModalRoute.of(context)?.settings.arguments as Map;
-                  final result = arguments['result'];
-
-                  print("log inde 中的result---- $value $result");
-                });
+                    builder: (context) => FoodList(
+                      mealtime: Mealtimes.breakfast,
+                      // ？？？注意，这里应该是一个日期选择器插件选中的值
+                      logDate: getCurrentDate(),
+                    ),
+                  ),
+                );
               },
             ),
           ],
@@ -368,8 +363,8 @@ class _DietaryRecordsState extends State<DietaryRecords> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text("$totalEnergyStr-$totalCalStr"),
-                  const Icon(Icons.star),
+                  Expanded(child: Text("$totalEnergyStr-$totalCalStr")),
+                  const Expanded(child: Icon(Icons.star)),
                 ],
               ),
             ),
