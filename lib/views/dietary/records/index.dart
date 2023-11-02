@@ -24,16 +24,19 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
   /// 根据条件查询的日记条目数据
   List<DailyFoodItemWithFoodServing> dfiwfsList = [];
-  // 用户可能切换日期，但显示的内容是一样的(这个是日期组件的值，默认是当天)
-  // (日期范围，可能只在导出时才用到，一般都是单日)
-  var inputDate = "";
+
 // 数据是否加载中
   bool isLoading = false;
 
+  /// 用户可能切换日期，但显示的内容是一样的
+  /// (这个是日期组件的值，默认是当天。日期范围，可能只在导出时才用到，一般都是单日)
+
+  // 日期选择器中选择的日期，用于构建初始值，有选择后保留选择的
+  DateTime selectedDate = DateTime.now();
+  // 用户选择日期格式化后的字符串，传入子组件或者查询日志条目的参数
+  String selectedDateStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
   // 在标题处显示当前展示的日期信息（日期选择器之后有一点自定义处理）
-  var showedDate = "今天";
-  // 日期选择器中选择的日期，用于构建初始值，有选择后保留选择的，以及传入子组件
-  var selectedDate = DateTime.now();
+  String showedDateStr = "今天";
 
   // 这个插入的数据是比较完整正规的，测试时在删除db之后可直接用
   demoInsertDailyLogData() async {
@@ -201,17 +204,12 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
     setState(() {
       isLoading = true;
-      if (userSelectedDate == null || userSelectedDate == "") {
-        inputDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-      } else {
-        inputDate = userSelectedDate;
-      }
     });
 
-    // 理论上是查询当日的
+    // 理论上是默认查询当日的，有选择其他日期则查询指定日期
     var temp = await _dietaryHelper.queryDailyFoodItemListWithDetail(
-      startDate: inputDate,
-      endDate: inputDate,
+      startDate: selectedDateStr,
+      endDate: selectedDateStr,
     );
 
     log("---------测试查询的当前日记item $temp");
@@ -234,7 +232,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
         // 饮食记录首页的日期选择器是单日的，可以不用第三方库，简单showDatePicker就好
         // 导出之类的可以花式选择日期的再用
         title: GestureDetector(
-          child: Text(showedDate),
+          child: Text(showedDateStr),
           onTap: () {
             _selectDate(context);
           },
@@ -249,10 +247,20 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                   builder: (context) => FoodList(
                     mealtime: Mealtimes.breakfast,
                     // 注意，这里应该是一个日期选择器插件选中的值，格式化为固定字符串，子组件就不再处理
-                    logDate: DateFormat('yyyy-MM-dd').format(selectedDate),
+                    logDate: selectedDateStr,
                   ),
                 ),
-              );
+              ).then((value) {
+                // 确认新增成功后重新加载当前日期的条目数据
+                final arguments =
+                    ModalRoute.of(context)!.settings.arguments as Map;
+                final bool result = arguments['isItemAdded'];
+                if (result) {
+                  _queryDailyFoodItemList(userSelectedDate: selectedDateStr);
+                }
+
+                (ModalRoute.of(context)!.settings.arguments as Map).clear();
+              });
             },
           ),
         ],
@@ -300,10 +308,23 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                       builder: (context) => FoodList(
                         mealtime: mealtime.value,
                         // 注意，这里应该是一个日期选择器插件选中的值，格式化为固定字符串，子组件就不再处理
-                        logDate: DateFormat('yyyy-MM-dd').format(selectedDate),
+                        logDate: selectedDateStr,
                       ),
                     ),
-                  );
+                  ).then((value) {
+                    // 确认新增成功后重新加载当前日期的条目数据
+                    final arguments =
+                        ModalRoute.of(context)!.settings.arguments as Map;
+                    final bool result = arguments['isItemAdded'];
+
+                    if (result) {
+                      _queryDailyFoodItemList(
+                        userSelectedDate: selectedDateStr,
+                      );
+                    }
+                    // 使用参数后应清除Map
+                    (ModalRoute.of(context)!.settings.arguments as Map).clear();
+                  });
                 },
                 icon: const Icon(Icons.add, color: Colors.blue),
               ),
@@ -363,7 +384,13 @@ class _DietaryRecordsState extends State<DietaryRecords> {
               // 主页面点击item详情是修改或删除，只需要传入食物信息和item详情就好
               builder: (context) => FoodDetail(foodItem: data, dfiwfs: logItem),
             ),
-          );
+          ).then((value) {
+            // 确认修改或删除成功后重新加载当前日期的条目数据
+            final bool result = value['isItemModified'];
+            if (result) {
+              _queryDailyFoodItemList(userSelectedDate: selectedDateStr);
+            }
+          });
         },
         child: Dismissible(
           key: Key(logItem.hashCode.toString()),
@@ -444,10 +471,9 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
       setState(() {
         selectedDate = picked;
-        showedDate = formatDate;
-        _queryDailyFoodItemList(
-          userSelectedDate: DateFormat('yyyy-MM-dd').format(picked),
-        );
+        selectedDateStr = DateFormat('yyyy-MM-dd').format(picked);
+        showedDateStr = formatDate;
+        _queryDailyFoodItemList(userSelectedDate: selectedDateStr);
       });
     }
   }

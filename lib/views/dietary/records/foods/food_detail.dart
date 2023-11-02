@@ -10,7 +10,6 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import '../../../../common/global/constants.dart';
 import '../../../../common/utils/sqlite_db_helper.dart';
 import '../../../../models/dietary_state.dart';
-import '../index.dart';
 
 class FoodDetail extends StatefulWidget {
   // 这个是食物搜索页面点击食物进来详情页时传入的数据
@@ -154,12 +153,14 @@ class _FoodDetailState extends State<FoodDetail> {
 
     if (rst > 0) {
       if (!mounted) return;
-      // ？？？父组件应该重新加载
-      Navigator.pop(context, '_updateDailyFoodItem');
-      // 这样的重新加载对不对？？？
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const DietaryRecords()),
-      );
+
+      // 父组件应该重新加载(传参到父组件中重新加载)
+      Navigator.pop(context, {"isItemModified": true});
+
+      // 直接这样是重新加载了主页面条目，会重置为今天。即便有选择显示其他日期的话，依旧重置
+      //  Navigator.of(context).pushReplacement(
+      //   MaterialPageRoute(builder: (_) => const DietaryRecords()),
+      // );
     }
   }
 
@@ -168,18 +169,14 @@ class _FoodDetailState extends State<FoodDetail> {
 
     var mfiId = widget.dfiwfs!.dailyFoodItem.dailyFoodItemId!;
 
-    print("删除的的条目编号-------：$mfiId");
-
     var rst = await _dietaryHelper.deleteDailyFoodItem(mfiId);
+
+    print("删除的的条目编号-------：$mfiId $rst");
 
     if (rst > 0) {
       if (!mounted) return;
-      // ？？？父组件应该重新加载
-      Navigator.pop(context, '_updateDailyFoodItem');
-      // 这样的重新加载对不对？？？
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const DietaryRecords()),
-      );
+      // 父组件应该重新加载(传参到父组件中重新加载，删除修改都是modified)
+      Navigator.pop(context, {"isItemModified": true});
     }
   }
 
@@ -208,15 +205,30 @@ class _FoodDetailState extends State<FoodDetail> {
     if (rst.isNotEmpty) {
       if (!mounted) return;
 
+      Navigator.of(context).popUntil((route) {
+        print("在food detail 的新增返回route.settings ${route.settings}");
+
+        if (route.settings.name == '/dietaryRecords') {
+          (route.settings.arguments as Map)['isItemAdded'] = true;
+
+          print("在food detail 的新增返回route.settings ${route.settings}");
+
+          return true;
+        } else {
+          return false;
+        }
+      });
+
       // 这个可以直接返回到上上的部件，但也没办法带参数
-      Navigator.of(context)
-        ..pop()
-        ..pop(true);
+      // Navigator.of(context)
+      //   ..pop()
+      //   ..pop(true);
 
       // 使用 Navigator.pushReplacement() 方法来替换当前的 DietaryRecords 页面，使其状态更新为最新。
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const DietaryRecords()),
-      );
+      // 但直接这样是重新加载了主页面条目，会重置为今天。即便有选择显示其他日期的话，依旧重置
+      // Navigator.of(context).pushReplacement(
+      //   MaterialPageRoute(builder: (_) => const DietaryRecords()),
+      // );
 
       // 这个会返回到最初的页面(及打开app的第一级)
       // Navigator.of(context).popUntil((route) => route.isFirst);

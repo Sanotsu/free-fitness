@@ -43,7 +43,8 @@ class _DietaryState extends State<Dietary> with SingleTickerProviderStateMixin {
             width: 340.sp,
             child: Padding(
               padding: EdgeInsets.all(10.sp),
-              child: _buildCard(const DietaryReports(), "报告"),
+              child:
+                  _buildCard(const DietaryReports(), "报告", "/dietaryReports"),
             ),
           ),
 
@@ -60,8 +61,8 @@ class _DietaryState extends State<Dietary> with SingleTickerProviderStateMixin {
                 mainAxisSpacing: 10.0,
                 childAspectRatio: 1, // 宽高比（单个card应该是160.sp * 160.sp）
                 children: <Widget>[
-                  _buildCard(const DietaryRecords(), "日记"),
-                  _buildCard(const DietarySettings(), "我的"),
+                  _buildCard(const DietaryRecords(), "日记", "/dietaryRecords"),
+                  _buildCard(const DietarySettings(), "我的", "/dietarySettings"),
                   // _buildCard(const DietaryReports(), "训练计划"),
                 ],
               ),
@@ -72,17 +73,19 @@ class _DietaryState extends State<Dietary> with SingleTickerProviderStateMixin {
     );
   }
 
-  _buildCard(Widget widget, String title) {
+  _buildCard(Widget widget, String title, String routeName) {
     return Card(
       clipBehavior: Clip.hardEdge,
       child: InkWell(
         splashColor: Colors.blue.withAlpha(30),
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext ctx) => widget,
-            ),
-          );
+          // 这里需要使用pushName 带上指定的路由名称，后续跨层级popUntil的时候才能指定路由名称进行传参
+          Navigator.pushNamed(context, routeName);
+          // Navigator.of(context).push(
+          //   MaterialPageRoute(
+          //     builder: (BuildContext ctx) => widget,
+          //   ),
+          // );
         },
         child: Container(
           color: Colors.lightBlue[100],
