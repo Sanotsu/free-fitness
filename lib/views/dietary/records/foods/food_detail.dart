@@ -163,6 +163,26 @@ class _FoodDetailState extends State<FoodDetail> {
     }
   }
 
+  _removeDailyFoodItem() async {
+    // 删除饮食日记条目不用管用户修改了什么，且一定是饮食日记主页传递而来确定有条目数据
+
+    var mfiId = widget.dfiwfs!.dailyFoodItem.dailyFoodItemId!;
+
+    print("删除的的条目编号-------：$mfiId");
+
+    var rst = await _dietaryHelper.deleteDailyFoodItem(mfiId);
+
+    if (rst > 0) {
+      if (!mounted) return;
+      // ？？？父组件应该重新加载
+      Navigator.pop(context, '_updateDailyFoodItem');
+      // 这样的重新加载对不对？？？
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const DietaryRecords()),
+      );
+    }
+  }
+
   /// 新增饮食日记条目详情
   /// 食物编号、日期 父组件有传；摄入量、食物单份营养素编号、餐次 用户有自行选择(否则就是默认食物第一个单份营养素和早餐)。
   _addDailyFoodItem() async {
@@ -311,29 +331,41 @@ class _FoodDetailState extends State<FoodDetail> {
               ),
             ),
           ),
-          // ？？？ 这里还缺一个动态的新增到餐点、从餐点中移除 的按钮。
+          // 饮食日记主界面点击知道item进来有“移除”和“修改”，点指定餐次新增进来则显示“新增”
           Padding(
-              padding: EdgeInsets.only(left: 20.sp, right: 20.sp, top: 20.sp),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  if (widget.dfiwfs != null)
-                    ElevatedButton(
+            padding: EdgeInsets.only(left: 20.sp, right: 20.sp, top: 20.sp),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                if (widget.dfiwfs != null)
+                  Expanded(
+                    flex: 4,
+                    child: ElevatedButton(
+                      onPressed: _removeDailyFoodItem,
+                      child: const Text("移除"),
+                    ),
+                  ),
+                // 两个按钮之间的占位空白
+                if (widget.dfiwfs != null)
+                  const Expanded(flex: 1, child: SizedBox()),
+                if (widget.dfiwfs != null)
+                  Expanded(
+                    flex: 4,
+                    child: ElevatedButton(
                       onPressed: _updateDailyFoodItem,
                       child: const Text("修改"),
                     ),
-                  if (widget.dfiwfs != null)
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: const Text("移除"),
-                    ),
-                  if (widget.dfiwfs == null)
-                    ElevatedButton(
+                  ),
+                if (widget.dfiwfs == null)
+                  Expanded(
+                    child: ElevatedButton(
                       onPressed: _addDailyFoodItem,
                       child: const Text("添加"),
-                    )
-                ],
-              )),
+                    ),
+                  ),
+              ],
+            ),
+          ),
           // 主要营养素表格
           Padding(
             padding: EdgeInsets.only(left: 20.sp, right: 20.sp, top: 20.sp),

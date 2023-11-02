@@ -180,11 +180,12 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   void initState() {
     super.initState();
 
-    _testInsertDailyFoodItemList();
+    _queryDailyFoodItemList();
   }
 
-  _testInsertDailyFoodItemList() async {
-    print("开始运行插入示例---------");
+  // 有指定日期查询指定日期的饮食记录条目，没有就当前日期
+  _queryDailyFoodItemList({String? userSelectedDate}) async {
+    print("开始运行查询当日饮食日记条目---------");
 
     // _dietaryHelper.deleteDb();
 
@@ -195,7 +196,11 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
     setState(() {
       isLoading = true;
-      inputDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      if (userSelectedDate == null || userSelectedDate == "") {
+        inputDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      } else {
+        inputDate = userSelectedDate;
+      }
     });
 
     // 理论上是查询当日的
@@ -210,6 +215,11 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       dfiwfsList = temp;
       isLoading = false;
     });
+  }
+
+  // 滑动删除指定饮食日记条目
+  _removeDailyFoodItem(dailyFoodItemId) async {
+    await _dietaryHelper.deleteDailyFoodItem(dailyFoodItemId);
   }
 
   @override
@@ -344,10 +354,11 @@ class _DietaryRecordsState extends State<DietaryRecords> {
         },
         child: Dismissible(
           key: Key(logItem.hashCode.toString()),
-          onDismissed: (direction) {
-            setState(() {
-              list.remove(logItem);
-            });
+          onDismissed: (direction) async {
+            print("logItem-------------------$logItem");
+            // 确认滑动移除之后，要重新查询当日数据构建卡片（全部重绘感觉有点浪费）
+            await _removeDailyFoodItem(logItem.dailyFoodItem.dailyFoodItemId);
+            _queryDailyFoodItemList();
           },
           background: Container(
             color: Colors.red,
