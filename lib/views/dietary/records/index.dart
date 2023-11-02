@@ -30,6 +30,11 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 // 数据是否加载中
   bool isLoading = false;
 
+  // 在标题处显示当前展示的日期信息（日期选择器之后有一点自定义处理）
+  var showedDate = "今天";
+  // 日期选择器中选择的日期，用于构建初始值，有选择后保留选择的，以及传入子组件
+  var selectedDate = DateTime.now();
+
   // 这个插入的数据是比较完整正规的，测试时在删除db之后可直接用
   demoInsertDailyLogData() async {
     // 1 插入2个食物和对应3个单份营养素信息
@@ -225,35 +230,43 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('DietaryRecords'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => FoodList(
-                      mealtime: Mealtimes.breakfast,
-                      // ？？？注意，这里应该是一个日期选择器插件选中的值
-                      logDate: getCurrentDate(),
-                    ),
+      appBar: AppBar(
+        // 饮食记录首页的日期选择器是单日的，可以不用第三方库，简单showDatePicker就好
+        // 导出之类的可以花式选择日期的再用
+        title: GestureDetector(
+          child: Text(showedDate),
+          onTap: () {
+            _selectDate(context);
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FoodList(
+                    mealtime: Mealtimes.breakfast,
+                    // 注意，这里应该是一个日期选择器插件选中的值，格式化为固定字符串，子组件就不再处理
+                    logDate: DateFormat('yyyy-MM-dd').format(selectedDate),
                   ),
-                );
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: isLoading
+          ? _buildLoader()
+          : ListView.builder(
+              itemCount: mealtimeList.length,
+              itemBuilder: (BuildContext context, int index) {
+                final mealtime = mealtimeList[index];
+                return _buildMealCard(mealtime);
               },
             ),
-          ],
-        ),
-        body: isLoading
-            ? _buildLoader()
-            : ListView.builder(
-                itemCount: mealtimeList.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final mealtime = mealtimeList[index];
-                  return _buildMealCard(mealtime);
-                },
-              ));
+    );
   }
 
   Widget _buildMealCard(CusDropdownOption mealtime) {
@@ -286,8 +299,8 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                       // 主页面点击餐次的添加是新增，没有旧数据，需要餐次和日期信息
                       builder: (context) => FoodList(
                         mealtime: mealtime.value,
-                        // ？？？注意，这里应该是一个日期选择器插件选中的值
-                        logDate: getCurrentDate(),
+                        // 注意，这里应该是一个日期选择器插件选中的值，格式化为固定字符串，子组件就不再处理
+                        logDate: DateFormat('yyyy-MM-dd').format(selectedDate),
                       ),
                     ),
                   );
@@ -392,6 +405,50 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       );
     } else {
       return Container();
+    }
+  }
+
+  // 导航栏处点击显示日期选择器
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: selectedDate,
+        firstDate: DateTime(1994, 7),
+        lastDate: DateTime(2077));
+
+    if (!mounted) return;
+    if (picked != null) {
+      // 包含了月日星期，其他格式修改 MMMEd 为其他即可
+      var formatDate = DateFormat('MMMEd', "zh_CN").format(picked);
+
+      print("选择的日期、星期信息----$picked $formatDate");
+
+      print(picked.day == DateTime.now().day);
+
+      // 昨天今天明天三天的显示可以特殊一点，比较的话就比较对应年月日转换的字符串即可
+      var today = DateTime.now();
+      var todayStr = "${today.year}${today.month}${today.day}";
+      var yesterdayStr = "${today.year}${today.month}${today.day - 1}";
+      var tomorrowStr = "${today.year}${today.month}${today.day + 1}";
+      var pickedDateStr = "${picked.year}${picked.month}${picked.day}";
+
+      if (pickedDateStr == yesterdayStr) {
+        formatDate = "昨天";
+      } else if (pickedDateStr == todayStr) {
+        formatDate = "今天";
+      } else if (pickedDateStr == tomorrowStr) {
+        formatDate = "明天";
+      }
+
+      print("格式化之后----$pickedDateStr $todayStr $yesterdayStr $tomorrowStr");
+
+      setState(() {
+        selectedDate = picked;
+        showedDate = formatDate;
+        _queryDailyFoodItemList(
+          userSelectedDate: DateFormat('yyyy-MM-dd').format(picked),
+        );
+      });
     }
   }
 }
