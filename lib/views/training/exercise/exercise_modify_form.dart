@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,7 +14,9 @@ import '../../../models/training_state.dart';
 
 /// 基础活动变更表单（希望新增、修改可通用）
 class ExerciseModifyForm extends StatefulWidget {
-  const ExerciseModifyForm({Key? key}) : super(key: key);
+  final Exercise? item;
+
+  const ExerciseModifyForm({Key? key, this.item}) : super(key: key);
 
   @override
   State<ExerciseModifyForm> createState() => _ExerciseModifyFormState();
@@ -36,6 +40,82 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
   // 被选中的主要、次要肌肉
   var selectedPrimaryMuscles = [];
   var selectedSecondaryMuscles = [];
+
+  // 如果有传入item，则表示要修改数据
+  Exercise? updateTarget;
+  // 数据库存入的是图片地址拼接的字符串，要转回平台文件列表
+  List<PlatformFile>? exerciseImages;
+
+  @override
+  void initState() {
+    super.initState();
+
+    setState(() {
+      print("修改表单的item ${widget.item}");
+
+      if (widget.item != null) {
+        updateTarget = widget.item;
+        // 有图片地址，显示图片
+        if (updateTarget?.images != null && updateTarget?.images != "") {
+          exerciseImages = convertToPlatformFiles(updateTarget!.images!);
+        }
+        // 有主要肌肉，显示主要肌肉
+        if (updateTarget?.primaryMuscles != null &&
+            updateTarget?.primaryMuscles != "") {
+          selectedPrimaryMuscles =
+              _genSelectedMuscleOptions(updateTarget?.primaryMuscles);
+        }
+        // 有次要肌肉，显示次要肌肉
+        if (updateTarget?.secondaryMuscles != null &&
+            updateTarget?.secondaryMuscles != "") {
+          selectedSecondaryMuscles =
+              _genSelectedMuscleOptions(updateTarget?.secondaryMuscles);
+        }
+      }
+    });
+  }
+
+  // 图片地址拼接的字符串，要转回平台文件列表
+  List<PlatformFile> convertToPlatformFiles(String imagesString) {
+    List<String> imageUrls = imagesString.split(','); // 拆分字符串
+
+    List<PlatformFile> platformFiles = []; // 存储 PlatformFile 对象的列表
+
+    for (var imageUrl in imageUrls) {
+      PlatformFile file = PlatformFile(
+        name: imageUrl,
+        path: imageUrl,
+        size: 32, // 假设图片地址即为文件路径
+      );
+      platformFiles.add(file);
+    }
+
+    return platformFiles;
+  }
+
+  // 根据数据库拼接的字符串值转回对应选项
+  List<ExerciseDefaultOption> _genSelectedMuscleOptions(String? muscleStr) {
+    if (muscleStr == null) {
+      return [];
+    }
+
+    print("muscleStr-------------$muscleStr");
+    List<String> selectedValues = muscleStr.split(',');
+
+    List<ExerciseDefaultOption> selectedLabels = [];
+
+    for (String selectedValue in selectedValues) {
+      for (ExerciseDefaultOption option in musclesOptions) {
+        if (option.value == selectedValue) {
+          selectedLabels.add(option);
+        }
+      }
+    }
+
+    print("selectedLabels-------------$selectedLabels");
+
+    return selectedLabels;
+  }
 
   // 把预设的基础活动选项列表转化为 FormBuilderDropdown 支持的列表
   _genItems(List<ExerciseDefaultOption> options) {
@@ -77,27 +157,48 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                 .toList()
                 .join(',')
             : '',
-        images: (temp?.fields['images']?.value as List<PlatformFile>)
-            .map((e) => e.path)
-            .toList()
-            .join(","),
+        images: (temp?.fields['images']?.value != null) &&
+                temp?.fields['images']?.value != ""
+            ? (temp?.fields['images']?.value as List<PlatformFile>)
+                .map((e) => e.path)
+                .toList()
+                .join(",")
+            : '',
 
         ///
         isCustom: 'true',
         contributor: "程序去获取设备登入者",
         // 时间都存时间戳，显示的时候再格式化
-        gmtCreate: DateTime.now().millisecondsSinceEpoch.toString(),
+        gmtCreate: '',
       );
 
-      try {
-        await _dbHelper.insertExercise(exercise);
+      // 修改和新增有一小部分栏位不同
+      if (updateTarget != null) {
+        // 如果是修改
+        exercise.gmtModified = DateTime.now().millisecondsSinceEpoch.toString();
+        exercise.exerciseId = updateTarget?.exerciseId;
+      } else {
+        // 如果是新增
+        exercise.gmtCreate = DateTime.now().millisecondsSinceEpoch.toString();
+      }
 
+      print(
+          "==========进入修改1111exercise了 $selectedPrimaryMuscles $selectedSecondaryMuscles $exercise");
+      try {
+        if (updateTarget != null) {
+          print("==========进入修改exercise了");
+          await _dbHelper.updateExercise(exercise);
+        } else {
+          await _dbHelper.insertExercise(exercise);
+        }
         if (mounted) {
-          var snackBar = const SnackBar(
-            content: Text("新增成功"),
-            duration: Duration(seconds: 3),
+          var snackBar = SnackBar(
+            content: Text(updateTarget != null ? '修改成功 ' : '新增成功'),
+            duration: const Duration(seconds: 3),
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+          print("==========有修改成功弹窗但是没有返回值？");
 
           Navigator.pop(context, 'exerciseModified');
         }
@@ -136,7 +237,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
     // 只能接收一个子组件滚动组件
     return Scaffold(
       appBar: AppBar(
-        title: const Text("新增基础活动"),
+        title: Text("${updateTarget != null ? '修改' : '新增'}基础活动"),
         elevation: 0,
         actions: [
           MaterialButton(
@@ -158,6 +259,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                 FormBuilderTextField(
                   name: 'exercise_code',
                   decoration: const InputDecoration(labelText: '*代号'),
+                  initialValue: updateTarget?.exerciseCode,
                   validator: FormBuilderValidators.compose([
                     FormBuilderValidators.required(errorText: '代号不可为空'),
                   ]),
@@ -165,6 +267,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                 FormBuilderTextField(
                   name: 'exercise_name',
                   decoration: const InputDecoration(labelText: '*名称'),
+                  initialValue: updateTarget?.exerciseName,
                   validator: FormBuilderValidators.compose([
                     FormBuilderValidators.required(errorText: '名称不可为空'),
                   ]),
@@ -185,6 +288,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                           FormBuilderValidators.required(errorText: '级别不可为空')
                         ]),
                         items: _genItems(levelOptions),
+                        initialValue: updateTarget?.level,
                         valueTransformer: (val) => val?.toString(),
                       ),
                     ),
@@ -199,6 +303,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                           FormBuilderValidators.required(errorText: '发力方式不可为空')
                         ]),
                         items: _genItems(forceOptions),
+                        initialValue: updateTarget?.force,
                         valueTransformer: (val) => val?.toString(),
                       ),
                     )
@@ -220,6 +325,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                           FormBuilderValidators.required(errorText: '分类不可为空')
                         ]),
                         items: _genItems(categoryOptions),
+                        initialValue: updateTarget?.category,
                         valueTransformer: (val) => val?.toString(),
                       ),
                     ),
@@ -234,6 +340,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                           FormBuilderValidators.required(errorText: '类别不可为空')
                         ]),
                         items: _genItems(mechanicOptions),
+                        initialValue: updateTarget?.mechanic,
                         valueTransformer: (val) => val?.toString(),
                       ),
                     )
@@ -251,6 +358,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                           hintText: '选择所需器械',
                         ),
                         items: _genItems(equipmentOptions),
+                        initialValue: updateTarget?.equipment,
                         valueTransformer: (val) => val?.toString(),
                       ),
                     ),
@@ -262,6 +370,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                           hintText: '选择标准动作耗时',
                         ),
                         items: _genItems(standardDurationOptions),
+                        initialValue: updateTarget?.standardDuration,
                         valueTransformer: (val) => val?.toString(),
                       ),
                     )
@@ -272,6 +381,8 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                 MultiSelectDialogField(
                   key: _multiPrimarySelectKey,
                   items: _muscleItems,
+                  // ？？？？ 好像是不带validator用了这个初始值就会报错
+                  initialValue: selectedPrimaryMuscles,
                   title: const Text("选择主要肌肉"),
                   selectedColor: Colors.blue,
                   decoration: BoxDecoration(
@@ -306,26 +417,53 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                 ),
                 // 次要肌肉(多选)
                 SizedBox(height: 10.sp),
-                MultiSelectChipField(
+                MultiSelectDialogField(
                   key: _multiSecondarySelectKey,
                   items: _muscleItems,
-                  initialValue: const [],
-                  title: const Text("次要肌肉"),
-                  headerColor: Colors.blue.withOpacity(0.5),
+                  initialValue: selectedSecondaryMuscles,
+                  title: const Text("选择次要肌肉"),
+                  selectedColor: Colors.blue,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.blue, width: 1.8),
+                    color: Colors.blue.withOpacity(0.1),
+                    borderRadius: const BorderRadius.all(Radius.circular(5)),
+                    border: Border.all(color: Colors.blue, width: 2),
                   ),
-                  selectedChipColor: Colors.blue.withOpacity(0.5),
-                  selectedTextStyle: TextStyle(color: Colors.blue[800]),
-                  onTap: (values) {
-                    selectedSecondaryMuscles = values;
+                  buttonIcon:
+                      const Icon(Icons.fitness_center, color: Colors.blue),
+                  buttonText: Text(
+                    "次要肌肉",
+                    style: TextStyle(color: Colors.blue[800], fontSize: 16),
+                  ),
+                  searchable: true,
+                  onConfirm: (results) {
+                    selectedSecondaryMuscles = results;
                   },
                 ),
+
+                // 2023-10-23 这个加上初始化值会报错，所以个主要肌肉用一样的
+                // MultiSelectChipField(
+                //   key: _multiSecondarySelectKey,
+                //   items: _muscleItems,
+                // 这样用会报错：
+                //   initialValue:
+                //       _genSelectedMuscleOptions(updateTarget?.secondaryMuscles),
+                //   title: const Text("次要肌肉"),
+                //   headerColor: Colors.blue.withOpacity(0.5),
+                //   decoration: BoxDecoration(
+                //     border: Border.all(color: Colors.blue, width: 1.8),
+                //   ),
+                //   selectedChipColor: Colors.blue.withOpacity(0.5),
+                //   selectedTextStyle: TextStyle(color: Colors.blue[800]),
+                //   onTap: (values) {
+                //     selectedSecondaryMuscles = values;
+                //   },
+                // ),
 
                 //  要点(简介这个动作步骤)
                 FormBuilderTextField(
                   name: 'instructions',
                   decoration: const InputDecoration(labelText: '*技术要点'),
+                  initialValue: updateTarget?.instructions,
                   maxLines: 5,
                   validator: FormBuilderValidators.compose([
                     FormBuilderValidators.required(errorText: '技术要点不可为空'),
@@ -335,6 +473,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                 FormBuilderTextField(
                   name: 'tts_notes',
                   decoration: const InputDecoration(labelText: '语音提示要点'),
+                  initialValue: updateTarget?.ttsNotes,
                 ),
 
                 const SizedBox(height: 10),
@@ -342,6 +481,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                 FormBuilderFilePicker(
                   name: 'images',
                   decoration: const InputDecoration(labelText: '演示图片'),
+                  initialValue: exerciseImages,
                   maxFiles: null,
                   allowMultiple: true,
                   previewImages: true,

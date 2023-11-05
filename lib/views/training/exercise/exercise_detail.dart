@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../models/training_state.dart';
+import 'exercise_detail_more.dart';
+import 'exercise_modify_form.dart';
 
 class ExerciseDetailDialog extends StatefulWidget {
   final List<Exercise> exerciseItems;
@@ -49,7 +51,6 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            // 预设的图片背景色一般是白色，所以这里也设置为白色，看起来一致
             color: Colors.white,
             child: Align(
               alignment: Alignment.topRight,
@@ -170,6 +171,9 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
                   child: ListTile(
                     title: Text(
                       '$_currentIndex -${_currentItem.exerciseName}',
+                      // 限制只显示一行，多的用省略号
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                       style: TextStyle(fontSize: 20.sp),
                     ),
                     subtitle: SingleChildScrollView(
@@ -184,6 +188,68 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
                 ),
               ),
             ),
+          ),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Container(
+                color: Colors.white,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: IconButton(
+                    icon: const Icon(Icons.more_horiz, color: Colors.blue),
+                    onPressed: () {
+                      // 可以考虑不管详情弹窗
+                      // Navigator.of(context).pop(); // 关闭详情弹窗
+                      // 跳转到详情页面
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ExerciseDetailMore(
+                                  exerciseItem: _currentItem,
+                                )),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              Container(
+                color: Colors.white,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () async {
+                      // 修改一定要关闭弹窗，然后还要返回主页面重新查询exercise list数据
+
+                      // 跳转到修改表单
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ExerciseModifyForm(item: _currentItem),
+                        ),
+                      );
+
+                      // 如果新增基础活动成功，会有指定返回值。这里拿到之后，加载最新的活动列表
+
+                      print(
+                          'exerciseModified result in exercise detail--$result');
+
+                      // 一定要关闭弹窗，但是理论是修改之后修改表单给一个修改的结果flag，这里在关闭时返回父组件，父组件更新exercise list
+                      if (result != null) {
+                        if (!mounted) return;
+                        Navigator.of(context).pop(result);
+                      } else {
+                        if (!mounted) return;
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  ),
+                ),
+              )
+            ],
           ),
           Expanded(
             flex: 1,

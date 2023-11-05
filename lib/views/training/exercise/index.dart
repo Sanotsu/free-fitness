@@ -80,7 +80,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     print("newDatanewDatanewData=$newData");
 
     // 模拟加载耗时一秒，以明显看到加载圈（实际用删除）
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(milliseconds: 200));
 
     // 如果没有更多数据，则在底部显示
     if (newData.isEmpty) {
@@ -219,9 +219,11 @@ class _TrainingExerciseState extends State<TrainingExercise> {
 
               print(
                   'exerciseModifiedexerciseModifiedexerciseModified--$result');
+              // ？？？2023-11-05 这里的新增和下面的展开详情的修改之后返回列表页面，都可以考虑直接重新加载页面，不管子组件返回值
               if (result != null) {
                 setState(() {
                   exerciseItems.clear();
+                  // ？？？新增之后重新开始，修改的话有必要吗？
                   currentPage = 1;
                 });
                 _loadData();
@@ -343,7 +345,17 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                                   exerciseIndex: index,
                                 );
                               },
-                            );
+                            ).then((value) {
+                              print("-------sdsdd $value");
+                              // 修改exercise之后，重新加载列表
+                              if (value != null) {
+                                setState(() {
+                                  exerciseItems.clear();
+                                  currentPage = 1;
+                                });
+                                _loadData();
+                              }
+                            });
                           },
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
