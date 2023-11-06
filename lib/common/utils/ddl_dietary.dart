@@ -18,7 +18,8 @@ class DietaryDdl {
       tags TEXT,
       category TEXT,
       contributor TEXT,
-      gmt_create TEXT
+      gmt_create TEXT,
+      UNIQUE(brand,product)
     );
     """;
 

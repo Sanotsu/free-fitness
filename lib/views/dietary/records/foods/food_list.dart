@@ -174,7 +174,25 @@ class _FoodListState extends State<FoodList> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const FoodModify()),
-                  );
+                  ).then((value) {
+                    print('value in food list :$value');
+
+                    // 这里如果有返回值，应该能取到新增食物的寄过flag，bool类型
+                    if (value != null && value["isFoodAdded"] != null) {
+                      // 新增成功重新加载食物列表
+                      if (value["isFoodAdded"]) {
+                        setState(() {
+                          foodItems.clear();
+                          currentPage = 1;
+                        });
+                        _loadData();
+                      } else {
+                        print(
+                          'value["isFoodAdded"]的结果不是true:${value["isFoodAdded"]}',
+                        );
+                      }
+                    }
+                  });
                 },
               )
             ],

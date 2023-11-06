@@ -111,6 +111,12 @@ class _FoodDetailState extends State<FoodDetail> {
     for (var info in temp) {
       servingUnitOptions.add(info.servingUnit);
     }
+
+    print("food detail各个初始化值：-------------");
+    print("inputServingValue ： $inputServingValue");
+    print("inputServingUnit ： $inputServingUnit");
+    print("inputMealtimeValue ： $inputMealtimeValue");
+    print("servingUnitOptions ： $servingUnitOptions");
   }
 
   // 修改了摄入量数值和单位，都要重新计算用于显示的营养素信息(这里是重新获取修改后的营养素单位)

@@ -107,7 +107,7 @@ enum Mealtimes {
 // 这个标识名称和值的类，在下拉选择框中可以通用，Mealtimes换为 dynamic 即可
 class CusDropdownOption {
   final String label;
-  final Mealtimes value;
+  final dynamic value;
   final String? name;
 
   CusDropdownOption({
@@ -123,4 +123,55 @@ List<CusDropdownOption> mealtimeList = [
   CusDropdownOption(label: "lunch", name: "午餐", value: Mealtimes.lunch),
   CusDropdownOption(label: "dinner", name: "晚餐", value: Mealtimes.dinner),
   CusDropdownOption(label: "other", name: "小食", value: Mealtimes.other),
+];
+
+// 新增食物营养素选择单位时使用
+List<CusDropdownOption> servingTypeList = [
+  CusDropdownOption(
+    label: "100ml/100g",
+    name: "100毫升/100克",
+    value: "metric",
+  ),
+  CusDropdownOption(
+    label: "1 serving( e.g. 1 glass, 1 piece)",
+    name: "1 份(勺/杯/块 等)",
+    value: "custom",
+  ),
+];
+
+// 食物营养素列表(中文名，英文名对照，方便格式化展示之类的)
+List<CusDropdownOption> nutrientList = [
+  CusDropdownOption(value: "energy", name: "能量", label: "energy"),
+  CusDropdownOption(value: "protein", name: "蛋白质", label: "protein"),
+  CusDropdownOption(value: "total_fat", name: "总脂肪", label: "totalFat"),
+  CusDropdownOption(
+    value: "saturated_fat",
+    name: "饱和脂肪",
+    label: "saturatedFat",
+  ),
+  CusDropdownOption(value: "trans_fat", name: "反式脂肪", label: "transFat"),
+  CusDropdownOption(
+    value: "polyunsaturated_fat",
+    name: "多不饱和脂肪",
+    label: "polyunsaturatedFat",
+  ),
+  CusDropdownOption(
+    value: "monounsaturated_fat",
+    name: "单不饱和脂肪",
+    label: "monounsaturatedFat",
+  ),
+  CusDropdownOption(value: "cholesterol", name: "胆固醇", label: "cholesterol"),
+  CusDropdownOption(
+    value: "total_carbohydrate",
+    name: "总碳水化合物",
+    label: "totalCarbohydrate",
+  ),
+  CusDropdownOption(value: "sugar", name: "糖", label: "sugar"),
+  CusDropdownOption(
+    value: "dietary_fiber",
+    name: "膳食纤维",
+    label: "dietaryFiber",
+  ),
+  CusDropdownOption(value: "sodium", name: "钠", label: "sodium"),
+  CusDropdownOption(value: "potassium", name: "钾", label: "potassium")
 ];
