@@ -27,3 +27,46 @@
 6. 一个 exercise 如果有多个图片，在 showModalBottomSheet 或者详情页都只是默认显示第一张，没有地方看第二张。
 
 7. 新增或者修改 exercise 之后，返回列表页面，现在是重新从 0 开始加载所有，是否只是重新加载当前新增或修改的数据？
+
+---
+
+### 训练计划模块功能
+
+参考手机里“男士减肥健身软件”的“我的锻炼计划”
+
+注意内容 训练计划 Group/workout - 动作 Action - 基础活动 Exercise （这里显示 workout，对应 db 就是 group 表）
+
+基本流程：
+
+计划列表主页 -> 点击新增训练计划 -> 可搜索的 exercise 列表 -> 选中某一 exercise，跳转到 Action 配置页面(设置时间或者个数) -> action 配置页面点击保存，进入 action 列表 -> action 列表点击新增，继续跳转 可搜索的 exercise 列表，之后相同（选择 exercise，配置 action，保存后返回 action list）……
+
+主要页面：
+
+1. 主页锻炼计划列表
+   - 右下角悬浮新增按钮
+2. 点击训练计划【新增】进入可搜索 exericse 的“基础活动”列表，也是下拉加载更多
+   - 选中某个 exercise 之后跳到 action“动作”页面，显示 exercise 的大概信息，和该 exercise 运动的持续时间或者个数
+   - 点击【新增】加入到这个新的训练计划的第一条，即返回训练计划的 action 条目列表
+   - 更多的条目类似操作，即 action 条目中点击新增按钮
+3. 新增训练计划的 action 条目列表，在点击保存时弹窗口给训练计划取个名字（默认为新锻炼、新计划等）
+
+数据库操作：
+
+- 新增 group 的时候，会先带一个 action（关联一个 exercise），所以是 insert 时一次性新增一个 group、多条 action、多条 group_has_action 数据？
+  - 还是说，更简单一点，action 不能复用，一个 action 一定属于某个 group（反正也没有单独展示所有 action 列表的地方，内容重复不影响，idb 不同）
+    - 即只要 group 和 action 表，group has action 就不要了
+
+### 进度
+
+#### 2023-11-05
+
+- 基本完成训练计划(workout 或者 group)的几个空页面大概需要什么和理清最基础的跳转逻辑。
+
+#### 2023-11-06
+
+- 基础查询 exercise 列表，要调整查询框和显示数量，还有 card 的高度，图片太小了
+
+
+#### 2023-11-07
+
+- 基本调整了新增训练计划时跳转的插查询的基础exercise列表页面。

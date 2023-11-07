@@ -1,38 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'action_list.dart';
-import 'modify_workouts_form.dart';
+import 'action_configuration.dart';
 import 'simple_exercise_list.dart';
 
-class TrainingWorkouts extends StatefulWidget {
-  const TrainingWorkouts({super.key});
+class ActionList extends StatefulWidget {
+  const ActionList({super.key});
 
   @override
-  State<TrainingWorkouts> createState() => _TrainingWorkoutsState();
+  State<ActionList> createState() => _ActionListState();
 }
 
-class _TrainingWorkoutsState extends State<TrainingWorkouts> {
+class _ActionListState extends State<ActionList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TrainingWorkouts(即DB中的Group)'),
+        title: const Text('ActionList'),
         actions: [
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               textStyle: TextStyle(fontSize: 16.sp),
             ),
-            onPressed: () {
-              if (!mounted) return;
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext ctx) {
-                    return const ModifyWorkoutsForm();
-                  },
-                ),
-              );
-            },
+            onPressed: () {},
             child: const Text('新增'),
           )
         ],
@@ -41,7 +31,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
         children: [
           const Center(
             child: Text(
-              'TrainingWorkouts index，这里是已存在的训练计划列表（不多的话一次性展示所有，多的话还是分页。现在先直接展示所有）',
+              'ActionList.点击某一个group进来。 如果训练计划没有任何action，说明是全新的训练计划新增。如果已有action，则是对group添加action（group没有任何action是否可以自动删除该group）',
             ),
           ),
           Expanded(
@@ -53,15 +43,15 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       ListTile(
-                        title: const Text("group name"),
+                        title: const Text("exercise name"),
                         subtitle: const Text(
-                            "subtitle 应该没有内容，点击这个ListTile ，带上exercise信息进入action配置页面"),
-                        trailing: const Text("这里应该是点击跳到该group的action 列表"),
+                            "应该没有内容，点击这个ListTile ，带上exercise信息进入action配置页面"),
+                        trailing: const Text("这里应该是缩略图"),
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const ActionList(),
+                              builder: (context) => const ActionConfiguration(),
                             ),
                           );
                         },
@@ -89,7 +79,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
           ),
         ],
       ),
-      // 悬浮按钮
+      // 这里点击新增按钮，新增新的action，还是跳转到查询的exercise list
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // 处理按钮点击事件
@@ -103,11 +93,11 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
             ),
           );
         },
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.yellow,
         child: const Icon(Icons.add),
       ),
       // 悬浮按钮位置
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

@@ -33,3 +33,14 @@ final List<int> points = <int>[0xe0b0, 0xe0b1, 0xe0b2, 0xe0b3, 0xe0b4];
 final Random r = Random();
 IconData genRandomIcon() =>
     IconData(r.nextInt(points.length), fontFamily: 'MaterialIcons');
+
+// 绘制转圈圈
+Widget buildLoader(bool isLoading) {
+  if (isLoading) {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  } else {
+    return Container();
+  }
+}

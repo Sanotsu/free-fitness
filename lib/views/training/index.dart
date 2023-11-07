@@ -64,8 +64,8 @@ class _TrainingState extends State<Training>
                 childAspectRatio: 1, // 宽高比（单个card应该是160.sp * 160.sp）
                 children: <Widget>[
                   _buildCard(const TrainingExercise(), "基础动作"),
-                  _buildCard(const TrainingWorkouts(), "动作做组"),
-                  _buildCard(const TrainingPlans(), "训练计划"),
+                  _buildCard(const TrainingWorkouts(), "动作做组(类似单个训练计划)"),
+                  _buildCard(const TrainingPlans(), "训练计划（30天每天一个训练计划）"),
                   _buildCard(const TrainingSettings(), "训练设置"),
                 ],
               ),

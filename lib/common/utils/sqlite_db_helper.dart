@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../models/dietary_state.dart';
 import '../../models/training_state.dart';
+import '../global/constants.dart';
 import 'ddl_dietary.dart';
 import 'ddl_training.dart';
 
@@ -143,6 +144,55 @@ class DBTrainHelper {
       whereArgs: [id],
     );
     return result;
+  }
+
+// 关键字模糊查询基础活动
+  Future<CusDataResult> queryExerciseByKeyword({
+    required String keyword,
+    required int pageSize, // 一次查询条数显示
+    required int page, // 一次查询的偏移量，用于分页
+  }) async {
+    Database db = await database;
+
+    // 查询每页指定数量的数据，但带上总条数
+    var temp = CusDataResult(data: [], total: 0);
+
+    try {
+      List<Map<String, dynamic>> maps = await db.query(
+          TrainingDdl.tableNameOfExercise,
+          where:
+              'exercise_code LIKE ? OR exercise_name LIKE ? LIMIT ? OFFSET ?',
+          whereArgs: [
+            '%$keyword%',
+            '%$keyword%',
+            pageSize,
+            (page - 1) * pageSize
+          ]);
+
+      final list = maps.map((row) => Exercise.fromMap(row)).toList();
+      print(
+          "queryExerciseByKeyword---keyword $keyword-pageSize $pageSize-page $page-");
+      print("----$list");
+
+      // 获取满足查询条件的数据总量
+      int? totalCount = Sqflite.firstIntValue(
+        await db.rawQuery(
+          'SELECT COUNT(*) FROM ${TrainingDdl.tableNameOfExercise} '
+          'WHERE exercise_code LIKE ? OR exercise_name LIKE ?',
+          ['%$keyword%', '%$keyword%'],
+        ),
+      );
+
+      temp.data = list;
+      temp.total = totalCount ?? 0;
+    } catch (e) {
+      // Handle the error
+      print('Error inserting food with serving info: $e');
+      // 抛出异常来触发回滚的方式是 sqflite 中常用的做法
+      rethrow;
+    }
+
+    return temp;
   }
 
   // 指定栏位查询

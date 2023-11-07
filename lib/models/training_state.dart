@@ -53,6 +53,32 @@ class Exercise {
     };
   }
 
+// 用于从数据库行映射到 ServingInfo 对象的 fromMap 方法
+  factory Exercise.fromMap(Map<String, dynamic> map) {
+    return Exercise(
+      exerciseId: map['exercise_id'],
+      exerciseCode: map['exercise_code'],
+      exerciseName: map['exercise_name'],
+      force: map['force'],
+      level: map['level'],
+      mechanic: map['mechanic'],
+      equipment: map['equipment'],
+      // ？？？明明sql语句设置了默认值，但是不传还是null
+      standardDuration: map['standard_duration'] ?? "1",
+      instructions: map['instructions'],
+      ttsNotes: map['tts_notes'],
+      category: map['category'],
+      primaryMuscles: map['primary_muscles'],
+      secondaryMuscles: map['secondary_muscles'],
+      images: map['images'],
+      // ？？？明明sql语句设置了默认值，但是不传还是null
+      isCustom: map['is_custom'] ?? '0',
+      contributor: map['contributor'],
+      gmtCreate: map['gmt_create'],
+      gmtModified: map['gmt_modified'],
+    );
+  }
+
   // 重写 toString 方法
   @override
   String toString() {

@@ -94,3 +94,15 @@ final List<ExerciseDefaultOption> musclesOptions = [
   ExerciseDefaultOption(label: "展肌", value: 'abductors'),
   ExerciseDefaultOption(label: "脖子", value: 'neck'),
 ];
+
+// 数据库分页查询数据的时候，还需要带上一个该表的总数量
+// 还可以按需补入其他属性
+class CusDataResult {
+  List<dynamic> data;
+  int total;
+
+  CusDataResult({
+    required this.data,
+    required this.total,
+  });
+}
