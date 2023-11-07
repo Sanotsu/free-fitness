@@ -1,14 +1,12 @@
 // ignore_for_file: avoid_print
 
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/common/global/constants.dart';
 import 'package:free_fitness/models/dietary_state.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common/utils/sqlite_db_helper.dart';
-import '../../../common/utils/tools.dart';
 import 'foods/food_detail.dart';
 import 'foods/food_list.dart';
 
@@ -38,155 +36,27 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   // 在标题处显示当前展示的日期信息（日期选择器之后有一点自定义处理）
   String showedDateStr = "今天";
 
-  // 这个插入的数据是比较完整正规的，测试时在删除db之后可直接用
-  demoInsertDailyLogData() async {
-    // 1 插入2个食物和对应3个单份营养素信息
-    var food1 = Food(
-      brand: '永川',
-      product: '豆豉',
-      photos: '',
-      tags: '调味品,佐料',
-      category: '调味',
-      contributor: '张三',
-      gmtCreate: '2023-10-24 09:53:30',
-    );
+  // 每日饮食记录数据显示模式(目前就摘要(summary默认)和详情detailed两种即可)
+  String dataDisplayMode = dietaryLogDisplayModeList[1].value;
 
-    var dserving1 = ServingInfo(
-      foodId: 1,
-      servingSize: 1,
-      servingUnit: "包",
-      energy: 2000,
-      protein: 30,
-      totalFat: 50,
-      saturatedFat: 10,
-      transFat: 20,
-      polyunsaturatedFat: 10,
-      monounsaturatedFat: 10,
-      totalCarbohydrate: 20,
-      sugar: 30,
-      dietaryFiber: 10,
-      sodium: 2,
-      potassium: 20,
-      cholesterol: 20,
-      contributor: '李四',
-      gmtCreate: '2023-10-24 09:59:15',
-      updateUser: '',
-      gmtModified: null,
-    );
+  // RDA 的值应该在用户配置表里面带出来，在init的时候赋值。现在没有实现所以列个示例在这里
+  int valueRDA = 0;
 
-    await _dietaryHelper.insertFoodWithServingInfoList(
-        food: food1, servingInfoList: [dserving1]);
-
-    var food2 = Food(
-      brand: '重庆',
-      product: '烤鸭',
-      photos: '',
-      tags: '鸭子,烤鸭',
-      category: '禽肉',
-      contributor: '张三',
-      gmtCreate: '2023-10-24 09:55:30',
-    );
-
-    var dserving2 = ServingInfo(
-      foodId: 2,
-      servingSize: 1,
-      servingUnit: "只",
-      energy: 20000,
-      protein: 300,
-      totalFat: 500,
-      saturatedFat: 100,
-      transFat: 200,
-      polyunsaturatedFat: 100,
-      monounsaturatedFat: 100,
-      totalCarbohydrate: 300,
-      sugar: 200,
-      dietaryFiber: 100,
-      sodium: 20,
-      potassium: 200,
-      cholesterol: 200,
-      contributor: '李四',
-      gmtCreate: '2023-10-24 09:55:15',
-      updateUser: '',
-      gmtModified: null,
-    );
-
-    await _dietaryHelper.insertFoodWithServingInfoList(
-        food: food2, servingInfoList: [dserving2]);
-
-    var dserving3 = ServingInfo(
-      foodId: 2,
-      servingSize: 100,
-      servingUnit: "克",
-      energy: 321,
-      protein: 111,
-      totalFat: 222,
-      saturatedFat: 12,
-      transFat: 21,
-      polyunsaturatedFat: 14,
-      monounsaturatedFat: 41,
-      totalCarbohydrate: 30,
-      sugar: 20,
-      dietaryFiber: 10,
-      sodium: 2,
-      potassium: 25,
-      cholesterol: 25,
-      contributor: '李四',
-      gmtCreate: '2023-10-24 10:55:15',
-      updateUser: '',
-      gmtModified: null,
-    );
-
-    await _dietaryHelper
-        .insertFoodWithServingInfoList(servingInfoList: [dserving3]);
-
-    // 2 插入两条日志记录
-    var temp1 = DailyFoodItem(
-      // 主键数据库自增
-      date: getCurrentDate(),
-      mealCategory: "breakfast",
-      foodId: 2,
-      servingInfoId: 3,
-      foodIntakeSize: 12,
-      contributor: "马六",
-      gmtCreate: DateTime.now().toString(),
-      updateUser: null,
-      gmtModified: null,
-    );
-
-    var temp2 = DailyFoodItem(
-      // 主键数据库自增
-      date: getCurrentDate(),
-      mealCategory: "breakfast",
-      foodId: 2,
-      servingInfoId: 2,
-      foodIntakeSize: 5,
-      contributor: "马六",
-      gmtCreate: DateTime.now().toString(),
-      updateUser: null,
-      gmtModified: null,
-    );
-
-    var temp3 = DailyFoodItem(
-      // 主键数据库自增
-      date: getCurrentDate(),
-      mealCategory: "lunch",
-      foodId: 1,
-      servingInfoId: 1,
-      foodIntakeSize: 14,
-      contributor: "马六",
-      gmtCreate: DateTime.now().toString(),
-      updateUser: null,
-      gmtModified: null,
-    );
-
-    await _dietaryHelper.insertDailyFoodItemList([temp1, temp2, temp3]);
-
-    print("demoInsertDailyLogData------------插入执行完了");
-  }
+// 用于存储预设4个餐次的ExpansionTile的展开状态
+  Map<String, bool> isExpandedList = {
+    'breakfast': false,
+    'lunch': false,
+    'dinner': false,
+    'other': false,
+  };
 
   @override
   void initState() {
     super.initState();
+
+    setState(() {
+      valueRDA = 1800;
+    });
 
     _queryDailyFoodItemList();
   }
@@ -212,7 +82,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       endDate: selectedDateStr,
     );
 
-    log("---------测试查询的当前日记item $temp");
+    // log("---------测试查询的当前日记item $temp");
 
     setState(() {
       dfiwfsList = temp;
@@ -267,17 +137,216 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       ),
       body: isLoading
           ? _buildLoader()
-          : ListView.builder(
-              itemCount: mealtimeList.length,
-              itemBuilder: (BuildContext context, int index) {
-                final mealtime = mealtimeList[index];
-                return _buildMealCard(mealtime);
-              },
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  _buildDailyOverviewCard(),
+                  const SizedBox(height: 10),
+                  ListView.builder(
+                    // 解决 NEEDS-PAINT ……的问题
+                    shrinkWrap: true,
+                    // 只有外部的 SingleChildScrollView 滚动，这个内部的listview不滚动
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: mealtimeList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final mealtime = mealtimeList[index];
+                      return Column(
+                        children: [
+                          _buildMealCard(mealtime),
+                          SizedBox(height: 20.sp)
+                        ],
+                      );
+                    },
+                  ),
+                  const Card(
+                    child: ListTile(
+                      title: Text('Last Card'),
+                    ),
+                  ),
+                ],
+              ),
             ),
     );
   }
 
-  Widget _buildMealCard(CusDropdownOption mealtime) {
+  Widget _buildHeaderTableCell(
+    String label, {
+    double fontSize = 16,
+    textAlign = TextAlign.right,
+  }) {
+    return TableCell(
+      child: Text(
+        label,
+        textAlign: textAlign,
+        style: TextStyle(fontSize: fontSize),
+        // 中英文的leading好像不一样，统一一下避免显示不在一条水平线
+        strutStyle: StrutStyle(
+          forceStrutHeight: true,
+          leading: 1.sp,
+        ),
+      ),
+    );
+  }
+
+  /// 最上面的每日概述卡片
+  Widget _buildDailyOverviewCard() {
+    // 两种形态：只显示卡路里的基本，显示主要营养素的详细
+
+    var tempEnergy = 0.0;
+    var tempProtein = 0.0;
+    var tempFat = 0.0;
+    var tempCHO = 0.0;
+
+    for (var e in dfiwfsList) {
+      var foodIntakeSize = e.dailyFoodItem.foodIntakeSize;
+      var servingInfo = e.servingInfo;
+      tempEnergy += foodIntakeSize * servingInfo.energy;
+      tempProtein += foodIntakeSize * servingInfo.protein;
+      tempFat += foodIntakeSize * servingInfo.totalFat;
+      tempCHO += foodIntakeSize * servingInfo.totalCarbohydrate;
+    }
+
+    var tempCalories = tempEnergy / oneCalToKjRatio;
+
+    print("当日的累加值……");
+    print("tempEnergy $tempEnergy");
+    print("tempProtein $tempProtein");
+    print("tempFat $tempFat");
+    print("tempCHO $tempCHO");
+    print("tempCalories $tempCalories");
+
+/*
+    //  这个虽然和下面的table显示宽度一致了，但是数据无法完整显示，暂时不这么用
+    return Card(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          ListTile(
+            title: Table(
+              children: [
+                TableRow(
+                  children: [
+                    _buildHeaderTableCell("碳水物"),
+                    _buildHeaderTableCell("蛋白质"),
+                    _buildHeaderTableCell("脂肪"),
+                    _buildHeaderTableCell("RDA"),
+                  ],
+                ),
+                _buildMainMutrientsValueTableRow(
+                  tempCHO,
+                  tempProtein,
+                  tempFat,
+                  tempCalories,
+                  fontSize: 16.sp,
+                  textAlign: TextAlign.right,
+                ),
+              ],
+            ),
+            // dense: true,
+            trailing: SizedBox(
+              width: 0.15.sw,
+              child: GestureDetector(
+                onTap: () {
+                  // 处理点击事件
+                },
+                child: RichText(
+                  text: TextSpan(
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: (valueRDA - tempCalories).toStringAsFixed(0),
+                        style: TextStyle(color: Colors.red, fontSize: 18.sp),
+                      ),
+                      TextSpan(
+                        text: '\n${tempCalories.toStringAsFixed(0)}',
+                        style: TextStyle(color: Colors.blue, fontSize: 18.sp),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.right, // 设置文字靠右排列
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+*/
+
+    return Card(
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: Padding(
+              padding: EdgeInsets.only(left: 10.sp),
+              child: dataDisplayMode == "summary"
+                  ? Row(
+                      children: [
+                        const Expanded(
+                          flex: 4,
+                          child: Text("百分比占位"),
+                        ),
+                        Expanded(
+                          flex: 6,
+                          child: ListTile(
+                            title: _buildListTileText("剩余的卡路里"),
+                            subtitle: _buildListTileText("消耗的卡路里"),
+                          ),
+                        ),
+                      ],
+                    )
+                  : Table(
+                      children: [
+                        TableRow(
+                          children: [
+                            _buildHeaderTableCell("碳水物"),
+                            _buildHeaderTableCell("蛋白质"),
+                            _buildHeaderTableCell("脂肪"),
+                            _buildHeaderTableCell("RDA"),
+                          ],
+                        ),
+                        _buildMainMutrientsValueTableRow(
+                          tempCHO,
+                          tempProtein,
+                          tempFat,
+                          tempCalories,
+                          fontSize: 15.sp,
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: ListTile(
+              title: dataDisplayMode == "summary"
+                  ? _buildListTileText(
+                      (valueRDA - tempCalories).toStringAsFixed(0),
+                      textAlign: TextAlign.right,
+                    )
+                  : _buildListTileText(
+                      "$valueRDA",
+                      textAlign: TextAlign.right,
+                    ),
+              subtitle: _buildListTileText(
+                tempCalories.toStringAsFixed(0),
+                textAlign: TextAlign.right,
+              ),
+              onTap: () {
+                setState(() {
+                  dataDisplayMode =
+                      dataDisplayMode == "summary" ? "detailed" : "summary";
+                });
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 早中晚夜各个餐次的卡片
+  Card _buildMealCard(CusDropdownOption mealtime) {
     // 从查询的日记条目中过滤当前餐次的数据
     // DailyFoodItemWithFoodServingMealItems 太长了，缩写 dfiwfsMealItems
     var dfiwfsMealItems = dfiwfsList
@@ -286,63 +355,159 @@ class _DietaryRecordsState extends State<DietaryRecords> {
         )
         .toList();
 
+    // 该餐次的主要营养素累加值
+    var tempEnergy = 0.0;
+    var tempProtein = 0.0;
+    var tempFat = 0.0;
+    var tempCHO = 0.0;
+
+    for (var e in dfiwfsMealItems) {
+      var foodIntakeSize = e.dailyFoodItem.foodIntakeSize;
+      var servingInfo = e.servingInfo;
+      tempEnergy += foodIntakeSize * servingInfo.energy;
+      tempProtein += foodIntakeSize * servingInfo.protein;
+      tempFat += foodIntakeSize * servingInfo.totalFat;
+      tempCHO += foodIntakeSize * servingInfo.totalCarbohydrate;
+    }
+
+    var tempCalories = tempEnergy / oneCalToKjRatio;
+
     // 当前餐次有条目，展开行可用
     bool showExpansionTile = dfiwfsMealItems.isNotEmpty;
 
-    return Center(
-      child: Card(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ListTile(
-              leading: const Icon(Icons.album),
-              title: Text("${mealtime.name}"),
-              subtitle: Text('${dfiwfsMealItems.length}'),
-              trailing: IconButton(
-                onPressed: () {
-                  print("日记主页面点击了餐次的add -------- ${mealtime.value}");
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      // 主页面点击餐次的添加是新增，没有旧数据，需要餐次和日期信息
-                      builder: (context) => FoodList(
-                        mealtime: mealtime.value,
-                        // 注意，这里应该是一个日期选择器插件选中的值，格式化为固定字符串，子组件就不再处理
-                        logDate: selectedDateStr,
+    return Card(
+      elevation: 20, // 设置阴影的程度
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0), // 设置圆角的大小
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: ListTile(
+                  leading: const Icon(Icons.food_bank_sharp),
+                  title: _buildListTileText("${mealtime.name}"),
+                  subtitle: _buildListTileText('${dfiwfsMealItems.length} 项'),
+                  dense: true,
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: ListTile(
+                  title: _buildListTileText(
+                    "总卡路里",
+                    textAlign: TextAlign.right,
+                  ),
+                  subtitle: _buildListTileText(
+                    tempCalories.toStringAsFixed(0),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: IconButton(
+                  onPressed: () {
+                    print("日记主页面点击了餐次的add -------- ${mealtime.value}");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        // 主页面点击餐次的添加是新增，没有旧数据，需要餐次和日期信息
+                        builder: (context) => FoodList(
+                          mealtime: mealtime.value,
+                          // 注意，这里应该是一个日期选择器插件选中的值，格式化为固定字符串，子组件就不再处理
+                          logDate: selectedDateStr,
+                        ),
                       ),
-                    ),
-                  ).then((value) {
-                    // 确认新增成功后重新加载当前日期的条目数据
-                    final arguments =
-                        ModalRoute.of(context)!.settings.arguments as Map;
-                    final bool result = arguments['isItemAdded'];
+                    ).then((value) {
+                      // 确认新增成功后重新加载当前日期的条目数据
+                      final arguments =
+                          ModalRoute.of(context)!.settings.arguments as Map;
+                      final bool result = arguments['isItemAdded'];
 
-                    if (result) {
-                      _queryDailyFoodItemList(
-                        userSelectedDate: selectedDateStr,
-                      );
-                    }
-                    // 使用参数后应清除Map
-                    (ModalRoute.of(context)!.settings.arguments as Map).clear();
+                      if (result) {
+                        _queryDailyFoodItemList(
+                          userSelectedDate: selectedDateStr,
+                        );
+                      }
+                      // 使用参数后应清除Map
+                      (ModalRoute.of(context)!.settings.arguments as Map)
+                          .clear();
+                    });
+                  },
+                  icon: const Icon(Icons.add, color: Colors.blue),
+                ),
+              ),
+            ],
+          ),
+          // 折叠tile展开灰色，展开后白色
+          if (showExpansionTile)
+            Container(
+              decoration: const BoxDecoration(
+                // borderRadius: BorderRadius.circular(10.0), // 设置所有圆角的大小
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(0.0), // 保持上左角为直角
+                  topRight: Radius.circular(0.0), // 保持上右角为直角
+                  bottomLeft: Radius.circular(10.0), // 设置下左角为圆角
+                  bottomRight: Radius.circular(10.0), // 设置下右角为圆角
+                ),
+                // 设置展开前的背景色
+                color: Color.fromARGB(255, 195, 198, 201),
+              ),
+              child: ExpansionTile(
+                // 如果是概要，展开的标题只显示餐次的食物数量；是详情，则展示该餐次各项食物的主要营养素之和
+                title: dataDisplayMode == "summary"
+                    ? Text('${dfiwfsMealItems.length} 项')
+                    : Table(
+                        children: [
+                          _buildMainMutrientsValueTableRow(
+                            tempCHO,
+                            tempProtein,
+                            tempFat,
+                            tempCalories,
+                          ),
+                        ],
+                      ),
+                backgroundColor: const Color.fromARGB(255, 235, 227, 227),
+                trailing: SizedBox(
+                  width: 0.15.sw, // 将屏幕宽度的四分之一作为trailing的宽度
+                  child: Icon(
+                    isExpandedList[mealtime.label]!
+                        ? Icons.arrow_drop_up
+                        : Icons.arrow_drop_down,
+                  ),
+                ),
+                onExpansionChanged: (isExpanded) {
+                  setState(() {
+                    isExpandedList[mealtime.label] = isExpanded; // 更新展开状态列表
                   });
                 },
-                icon: const Icon(Icons.add, color: Colors.blue),
-              ),
-            ),
-            const Divider(),
-            if (showExpansionTile)
-              ExpansionTile(
-                title: Text(
-                  '${dfiwfsMealItems.length}',
-                ),
+                // 展开显示食物详情
                 children: _buildListTile(mealtime, dfiwfsMealItems),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
 
+  // 餐次展开的文本样式基本都一样的
+  _buildListTileText(
+    String text, {
+    double fontSize = 16,
+    TextAlign textAlign = TextAlign.left,
+  }) {
+    return Text(
+      text,
+      style: TextStyle(fontSize: fontSize),
+      textAlign: textAlign,
+    );
+  }
+
+  // 各餐次卡片点击展开的食物条目
   List<Widget> _buildListTile(
     CusDropdownOption curMeal,
     List<DailyFoodItemWithFoodServing> list,
@@ -354,11 +519,17 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     if (list.isEmpty) return temp;
 
     return list.map((logItem) {
-      var totalEnergyStr =
-          '${logItem.dailyFoodItem.foodIntakeSize * logItem.servingInfo.energy} 千焦';
+      // 该餐次的主要营养素累加值
+      var foodIntakeSize = logItem.dailyFoodItem.foodIntakeSize;
+      var servingInfo = logItem.servingInfo;
 
-      var totalCalStr =
-          "${(logItem.dailyFoodItem.foodIntakeSize * logItem.servingInfo.energy / oneCalToKjRatio).toStringAsFixed(2)} 大卡";
+      var tempEnergy = foodIntakeSize * servingInfo.energy;
+      var tempProtein = foodIntakeSize * servingInfo.protein;
+      var tempFat = foodIntakeSize * servingInfo.totalFat;
+      var tempCHO = foodIntakeSize * servingInfo.totalCarbohydrate;
+      var tempCalories = tempEnergy / oneCalToKjRatio;
+
+      var tempUnit = servingInfo.servingUnit;
 
       return GestureDetector(
         onTap: () async {
@@ -369,8 +540,9 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           );
 
           // 先获取到当前item的食物信息，再传递到food detail
-          var data = await _dietaryHelper
-              .searchFoodWithServingInfoByFoodId(logItem.dailyFoodItem.foodId);
+          var data = await _dietaryHelper.searchFoodWithServingInfoByFoodId(
+            logItem.dailyFoodItem.foodId,
+          );
 
           if (data == null) {
             // 抛出异常之后已经return了
@@ -392,6 +564,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
             }
           });
         },
+        // 滑动可删除，
         child: Dismissible(
           key: Key(logItem.hashCode.toString()),
           onDismissed: (direction) async {
@@ -400,25 +573,83 @@ class _DietaryRecordsState extends State<DietaryRecords> {
             await _removeDailyFoodItem(logItem.dailyFoodItem.dailyFoodItemId);
             _queryDailyFoodItemList();
           },
+          // 滑动时条目的背景色
           background: Container(
             color: Colors.red,
             child: const Icon(Icons.delete, color: Colors.white),
           ),
-          child: ListTile(
-            title: Text(
-              "${logItem.food.brand}-${logItem.food.product}",
-            ),
-            subtitle: Text('${logItem.dailyFoodItem.foodIntakeSize}'),
-            trailing: SizedBox(
-              width: 200,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              // 餐次的每个 listTile 间隔一点空隙
+              SizedBox(
+                height: 5.sp,
+                child: Container(
+                  color: const Color.fromARGB(255, 216, 202, 201),
+                ),
+              ),
+              // 具体的食物和数量
+              Row(
                 children: [
-                  Expanded(child: Text("$totalEnergyStr-$totalCalStr")),
-                  const Expanded(child: Icon(Icons.star)),
+                  Expanded(
+                    flex: 4,
+                    child: ListTile(
+                      // ？？？这个0.05宽度好像没效果
+                      leading: SizedBox(width: 0.05.sw),
+                      title: _buildListTileText(
+                        "${logItem.food.brand}-${logItem.food.product}",
+                      ),
+                      subtitle: _buildListTileText(
+                        '${logItem.dailyFoodItem.foodIntakeSize} * $tempUnit',
+                      ),
+                      dense: true,
+                    ),
+                  ),
+                  Expanded(
+                    flex: 2,
+                    child: ListTile(
+                      title: _buildListTileText(
+                        '卡路里',
+                        textAlign: TextAlign.right,
+                      ),
+                      subtitle: _buildListTileText(
+                        tempCalories.toStringAsFixed(0),
+                        textAlign: TextAlign.right,
+                      ),
+                      dense: true,
+                    ),
+                  ),
+                  const Expanded(
+                    flex: 1,
+                    child: Icon(Icons.keyboard_arrow_right),
+                  ),
                 ],
               ),
-            ),
+              // 如果是详情展示，还需要显示每个食物的主要营养素含量
+              dataDisplayMode == "summary"
+                  ? Container()
+                  : ListTile(
+                      title: Table(
+                        children: [
+                          _buildMainMutrientsValueTableRow(
+                            tempCHO,
+                            tempProtein,
+                            tempFat,
+                            tempCalories,
+                          ),
+                        ],
+                      ),
+                      // 这个只是为了让表格行数据和上面 expansionTile 排版一致，所以设置透明图标
+                      trailing: SizedBox(
+                        width: 0.15.sw,
+                        child: const Icon(
+                          Icons.circle,
+                          color: Colors.transparent,
+                        ),
+                      ),
+                      dense: true,
+                    ),
+            ],
           ),
         ),
       );
@@ -433,6 +664,49 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     } else {
       return Container();
     }
+  }
+
+  // 详情展示时表格显示依次碳水物、蛋白质、脂肪、RDA比例的数据，以及文本大小
+  TableRow _buildMainMutrientsValueTableRow(
+    double choValue,
+    double proteinValue,
+    double fatValue,
+    double caloriesValue, {
+    double fontSize = 14,
+    TextAlign textAlign = TextAlign.end,
+  }) {
+    return TableRow(
+      children: [
+        TableCell(
+          child: Text(
+            choValue.toStringAsFixed(2),
+            style: TextStyle(fontSize: fontSize),
+            textAlign: textAlign,
+          ),
+        ),
+        TableCell(
+          child: Text(
+            proteinValue.toStringAsFixed(2),
+            style: TextStyle(fontSize: fontSize),
+            textAlign: textAlign,
+          ),
+        ),
+        TableCell(
+          child: Text(
+            fatValue.toStringAsFixed(2),
+            style: TextStyle(fontSize: fontSize),
+            textAlign: textAlign,
+          ),
+        ),
+        TableCell(
+          child: Text(
+            "${(caloriesValue / valueRDA * 100).toStringAsFixed(2)}%",
+            style: TextStyle(fontSize: fontSize),
+            textAlign: textAlign,
+          ),
+        ),
+      ],
+    );
   }
 
   // 导航栏处点击显示日期选择器

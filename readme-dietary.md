@@ -1,6 +1,18 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+<!-- **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)* -->
+
+- [(旧的内容，问题和进度记录先不看了)](#%E6%97%A7%E7%9A%84%E5%86%85%E5%AE%B9%E9%97%AE%E9%A2%98%E5%92%8C%E8%BF%9B%E5%BA%A6%E8%AE%B0%E5%BD%95%E5%85%88%E4%B8%8D%E7%9C%8B%E4%BA%86)
+- [新的记录(以此份优先)](#%E6%96%B0%E7%9A%84%E8%AE%B0%E5%BD%95%E4%BB%A5%E6%AD%A4%E4%BB%BD%E4%BC%98%E5%85%88)
+  - [之前的未完成的问题和细节](#%E4%B9%8B%E5%89%8D%E7%9A%84%E6%9C%AA%E5%AE%8C%E6%88%90%E7%9A%84%E9%97%AE%E9%A2%98%E5%92%8C%E7%BB%86%E8%8A%82)
+  - [dietary 功能的 todo](#dietary-%E5%8A%9F%E8%83%BD%E7%9A%84-todo)
+  - [进度记录](#%E8%BF%9B%E5%BA%A6%E8%AE%B0%E5%BD%95)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 2023-10-26 起来在这里更新 dietary 的进度，避免合并冲突
 
-## 2023-10-26
+## (旧的内容，问题和进度记录先不看了)
 
 饮食日记设计思路记录
 
@@ -25,11 +37,11 @@
 
 删除了一些查询饮食日记的 db helper 方法（因为嵌套太多，这个方法不是很好写，但大体能用，要优化的点还比较多……）
 
-待完成 饮食记录主页面没有日期选择器来指定添加不同日期饮食记录  
+(done) 待完成 饮食记录主页面没有日期选择器来指定添加不同日期饮食记录  
 待完成 主页面的显示完全没有对应的细节，只是说能找到对应的数据了  
 待完成 在 food list 页面只能新增单个，且点击新增、完成新增之后没有返回到主页面，手动返回主页面也没有刷新当日日记的数据。
 
-完全没开始做 进入 foodlist 之后，点击查询结果的食物进入 food detail，然后再修改数量、单位，加入日记餐次列表。
+(基本 done) 完全没开始做 进入 foodlist 之后，点击查询结果的食物进入 food detail，然后再修改数量、单位，加入日记餐次列表。
 
 **【日记餐次条目的处理逻辑】**：
 -- `2023-10-31 数据库结构改动，此处逻辑完全变化`
@@ -94,9 +106,9 @@ pause：修改旧的某一天某一餐次的条目，需要从早餐移到晚餐
 
 基本完成：log index 滑动移除饮食日记条目，log index 点击 item 进入 food detail 中移除条目。
 
-待完成：新增食物和食物单份营养素的表单页面
+(done) 待完成：新增食物和食物单份营养素的表单页面
 
-待完成：饮食记录主页的日期选择器
+(done) 待完成：饮食记录主页的日期选择器
 
 - 基本完成 2023-11-02
 - done 2023-11-02（命名路由 RouteSetting 传参）【存在问题】，切换了日期再进入 food list 或者 food detail 之后返回主页面，日期会被重置为今天，因为是整个重新加载部件而不是指定更新状态。
@@ -120,3 +132,53 @@ pause：修改旧的某一天某一餐次的条目，需要从早餐移到晚餐
 2023-11-06
 
 基本完成 新增食物带上单份营养素的表单（查一些显示的细节优化了）
+
+## 新的记录(以此份优先)
+
+### 之前的未完成的问题和细节
+
+1. 待完成 主页面的显示完全没有对应的细节，只是说能找到对应的数据了(没有概要视图、详细视图等切换)
+   - 即饮食记录主页的显示，和饮食数据的多种展示方式（精简、具体……）
+2. 在 food list 页面只能新增单个食物（是否需要一个食物基本信息页面维护食物和营养素信息）
+3. 待完成：导出饮食记录(这个功能靠后)
+4. 考虑：一个导入表格或者 json 文件的接口，一次性导入多个食物及其各项单份营养素信息
+
+### dietary 功能的 todo
+
+### 进度记录
+
+- 2023-11-07
+  - 基本完成饮食日记的主页的显示布局效果
+
+### 问题记录
+
+1. 同样的 Text()大小的中英文看起来不在一条线上。
+
+原因：
+
+- 中文和英文字体默认的 leading 不一样。
+- StrutStyle 的 leading 属性是指字体的倍数，比如：0.5 就是 0.5\*字体的高度,而且这个高度要分成两半，上下各分一半。
+
+解决方法：
+
+Text()中设置 leading 属性，如下
+
+```dart
+  TableCell(child: Text('蛋白质')),
+  TableCell(
+    child: Text(
+      'RDA',
+      strutStyle: StrutStyle(
+        forceStrutHeight: true,
+        leading: 0.5,
+      ),
+    ),
+  ),
+```
+
+参看：
+
+- https://blog.csdn.net/gaoyp/article/details/122121739
+- https://stackoverflow.com/questions/56799068/what-is-the-strutstyle-in-the-flutter-text-widget
+
+---

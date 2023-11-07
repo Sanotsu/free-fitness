@@ -98,8 +98,8 @@ class _FoodModifyState extends State<FoodModify> {
       var food = Food(
         brand: temp?["brand"],
         product: temp?["product"],
-        tags: temp?["product"],
-        category: temp?["product"],
+        tags: temp?["tags"],
+        category: temp?["category"],
         photos: temp?["images"] != null
             ? (temp?["images"] as List<PlatformFile>)
                 .map((e) => e.path)
@@ -366,6 +366,9 @@ class _FoodModifyState extends State<FoodModify> {
       // 如果用户有输入值的栏位才计算相关转换单位内容，为null的就直接保存null
       final props = Map.fromEntries(propNames.map((key) {
         final propName = getPropName(key);
+
+        print("propName---$propName");
+
         final val = servingInfo[propName];
         return MapEntry(
           propName,
@@ -379,14 +382,14 @@ class _FoodModifyState extends State<FoodModify> {
         servingUnit: unit,
         energy: props['energy'] ?? 0.0,
         protein: props['protein'] ?? 0.0,
-        totalFat: props['totalFat'] ?? 0.0,
-        saturatedFat: props['saturatedFat'],
-        transFat: props['transFat'],
-        polyunsaturatedFat: props['polyunsaturatedFat'],
-        monounsaturatedFat: props['monounsaturatedFat'],
-        totalCarbohydrate: props['totalCarbohydrate'] ?? 0.0,
+        totalFat: props['total_fat'] ?? 0.0,
+        saturatedFat: props['saturated_fat'],
+        transFat: props['trans_fat'],
+        polyunsaturatedFat: props['polyunsaturated_fat'],
+        monounsaturatedFat: props['monounsaturated_fat'],
+        totalCarbohydrate: props['total_carbohydrate'] ?? 0.0,
         sugar: props['sugar'],
-        dietaryFiber: props['dietaryFiber'],
+        dietaryFiber: props['dietary_fiber'],
         sodium: props['sodium'] ?? 0.0,
         cholesterol: props['cholesterol'],
         potassium: props['potassium'],
@@ -421,6 +424,8 @@ class _FoodModifyState extends State<FoodModify> {
         servingList.add(createServingInfo(tempMultiplier, 1, "1$tempUnit"));
       }
     }
+
+    print("食物新增时处理后的营养素信息servingList $servingList");
 
     return servingList;
   }

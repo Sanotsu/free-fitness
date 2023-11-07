@@ -175,3 +175,9 @@ List<CusDropdownOption> nutrientList = [
   CusDropdownOption(value: "sodium", name: "钠", label: "sodium"),
   CusDropdownOption(value: "potassium", name: "钾", label: "potassium")
 ];
+
+// 饮食日记的每日主页显示的模式(摘要和详细)
+List<CusDropdownOption> dietaryLogDisplayModeList = [
+  CusDropdownOption(label: "摘要模式", name: "摘要", value: "summary"),
+  CusDropdownOption(label: "详细模式", name: "详细", value: "detailed"),
+];
