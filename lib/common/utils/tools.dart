@@ -71,3 +71,12 @@ String getCurrentDate() {
   final formattedDate = formatter.format(now);
   return formattedDate;
 }
+
+// 小数转化为2位小数的字符串
+//  如果转换为两位小数的字符串长度超过6(即999.99)，则四舍五入为整数
+String formatDoubleToString(double number, {length = 6}) {
+  String numberString = number.toStringAsFixed(2);
+  return numberString.length > length
+      ? number.toStringAsFixed(0)
+      : numberString;
+}

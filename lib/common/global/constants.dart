@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../models/training_state.dart';
 
 // 1 大卡 = 4.184 千焦
@@ -181,3 +183,18 @@ List<CusDropdownOption> dietaryLogDisplayModeList = [
   CusDropdownOption(label: "摘要模式", name: "摘要", value: "summary"),
   CusDropdownOption(label: "详细模式", name: "详细", value: "detailed"),
 ];
+
+// 用于展示的营养素需要的信息
+class CusNutrientInfo {
+  String label, name, unit;
+  double value;
+  Color? color;
+
+  CusNutrientInfo({
+    required this.label,
+    required this.name,
+    required this.unit,
+    required this.value,
+    this.color,
+  });
+}

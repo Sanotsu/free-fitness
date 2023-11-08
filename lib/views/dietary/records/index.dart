@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/common/global/constants.dart';
@@ -7,6 +8,8 @@ import 'package:free_fitness/models/dietary_state.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common/utils/sqlite_db_helper.dart';
+import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
 import 'foods/food_detail.dart';
 import 'foods/food_list.dart';
 
@@ -41,6 +44,9 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
   // RDA 的值应该在用户配置表里面带出来，在init的时候赋值。现在没有实现所以列个示例在这里
   int valueRDA = 0;
+
+  // 当日总数据还需要记录，除了顶部的概述处，其他地方也可能用到(餐次内的和指定食物的暂不需要)
+  List<CusNutrientInfo> mainNutrientsChartData = [];
 
 // 用于存储预设4个餐次的ExpansionTile的展开状态
   Map<String, bool> isExpandedList = {
@@ -139,6 +145,8 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           ? _buildLoader()
           : SingleChildScrollView(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   _buildDailyOverviewCard(),
                   const SizedBox(height: 10),
@@ -153,20 +161,167 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                       return Column(
                         children: [
                           _buildMealCard(mealtime),
-                          SizedBox(height: 20.sp)
+                          SizedBox(height: 10.sp)
                         ],
                       );
                     },
                   ),
+
+                  /// 当日主要营养素占比
+                  Card(
+                    elevation: 10,
+                    child: SizedBox(
+                      height: 450.sp,
+                      child: Column(
+                        children: [
+                          Text(
+                            '当日三大营养素占比',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18.sp,
+                            ),
+                          ),
+                          Divider(height: 5.sp, thickness: 2.sp),
+                          Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // 左边图例
+                                Expanded(
+                                  flex: 2,
+                                  child: _buildMainNutrientsPieLegend(),
+                                ),
+                                // 右边饼图
+                                Expanded(
+                                  flex: 1,
+                                  child: _buildMainNutrientsPieChart(),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            '主要营养素摄入量',
+                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 18.sp,
+                            ),
+                          ),
+                          Divider(height: 5.sp, thickness: 2.sp),
+
+                          // 更多的信息列表
+                          _buildMainNutrientsList(),
+                        ],
+                      ),
+                    ),
+                  ),
+
                   const Card(
                     child: ListTile(
-                      title: Text('Last Card'),
+                      title: Text('其他选项功能区(暂留)'),
                     ),
                   ),
                 ],
               ),
             ),
     );
+  }
+
+  // 当日主要营养素图例
+  _buildMainNutrientsList() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: mainNutrientsChartData.map((data) {
+        String tempStr = "${data.value.toStringAsFixed(2)} ${data.unit}";
+
+        return Container(
+          padding: EdgeInsets.symmetric(vertical: 4.sp),
+          child: Row(
+            children: [
+              Container(width: 16, height: 16, color: data.color),
+              SizedBox(width: 8.sp),
+              // 将百分比数据添加到标题后面
+              Expanded(
+                child: Text(
+                  '${data.name}: $tempStr',
+                  style: TextStyle(fontSize: 14.sp),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // 当日主要营养素图例
+  _buildMainNutrientsPieLegend() {
+    // 绘图只是三大营养素
+    var tempList = mainNutrientsChartData
+        .where(
+            (e) => e.label == "cho" || e.label == "protein" || e.label == "fat")
+        .toList();
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: tempList.map((data) {
+        double total =
+            tempList.fold(0, (previous, current) => previous + current.value);
+        String percentage = ((data.value / total) * 100).toStringAsFixed(1);
+
+        String tempStr = "${data.value.toStringAsFixed(2)} 克";
+
+        return Container(
+          padding: EdgeInsets.symmetric(vertical: 4.sp),
+          child: Row(
+            children: [
+              Container(width: 16, height: 16, color: data.color),
+              SizedBox(width: 8.sp),
+              // 将百分比数据添加到标题后面
+              Expanded(
+                  child: Text(
+                '${data.name}: $tempStr - $percentage%',
+                style: TextStyle(fontSize: 14.sp),
+              )),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // 当日主要营养素饼图
+  _buildMainNutrientsPieChart() {
+    var temp = mainNutrientsChartData
+        .where(
+            (e) => e.label == "cho" || e.label == "protein" || e.label == "fat")
+        .toList();
+
+    return PieChart(
+      PieChartData(
+        sections: _createPieChartSections(temp),
+      ),
+    );
+  }
+
+  List<PieChartSectionData> _createPieChartSections(
+    List<CusNutrientInfo> data,
+  ) {
+    // double total =
+    //     data.fold(0, (previous, current) => previous + current['value']);
+    return data.map((e) {
+      // double percentage = (e.value / total) * 100;
+      return PieChartSectionData(
+        value: e.value.toDouble(),
+        color: e.color,
+        // title: '${percentage.toStringAsFixed(1)}%', // 将百分比显示在标题中
+        // 没给指定title就默认是其value，所以有图例了就不显示标题
+        showTitle: false,
+      );
+    }).toList();
   }
 
   Widget _buildHeaderTableCell(
@@ -196,6 +351,12 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     var tempProtein = 0.0;
     var tempFat = 0.0;
     var tempCHO = 0.0;
+    // 这几个在底部总计可能用到
+    var tempSodium = 0.0;
+    var tempCholesterol = 0.0;
+    var tempDietaryFiber = 0.0;
+    var tempPotassium = 0.0;
+    var tempSugar = 0.0;
 
     for (var e in dfiwfsList) {
       var foodIntakeSize = e.dailyFoodItem.foodIntakeSize;
@@ -204,6 +365,11 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       tempProtein += foodIntakeSize * servingInfo.protein;
       tempFat += foodIntakeSize * servingInfo.totalFat;
       tempCHO += foodIntakeSize * servingInfo.totalCarbohydrate;
+      tempSodium += foodIntakeSize * servingInfo.sodium;
+      tempCholesterol += foodIntakeSize * (servingInfo.cholesterol ?? 0);
+      tempDietaryFiber += foodIntakeSize * (servingInfo.dietaryFiber ?? 0);
+      tempPotassium += foodIntakeSize * (servingInfo.potassium ?? 0);
+      tempSugar += foodIntakeSize * (servingInfo.sugar ?? 0);
     }
 
     var tempCalories = tempEnergy / oneCalToKjRatio;
@@ -215,62 +381,81 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     print("tempCHO $tempCHO");
     print("tempCalories $tempCalories");
 
-/*
-    //  这个虽然和下面的table显示宽度一致了，但是数据无法完整显示，暂时不这么用
-    return Card(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          ListTile(
-            title: Table(
-              children: [
-                TableRow(
-                  children: [
-                    _buildHeaderTableCell("碳水物"),
-                    _buildHeaderTableCell("蛋白质"),
-                    _buildHeaderTableCell("脂肪"),
-                    _buildHeaderTableCell("RDA"),
-                  ],
-                ),
-                _buildMainMutrientsValueTableRow(
-                  tempCHO,
-                  tempProtein,
-                  tempFat,
-                  tempCalories,
-                  fontSize: 16.sp,
-                  textAlign: TextAlign.right,
-                ),
-              ],
-            ),
-            // dense: true,
-            trailing: SizedBox(
-              width: 0.15.sw,
-              child: GestureDetector(
-                onTap: () {
-                  // 处理点击事件
-                },
-                child: RichText(
-                  text: TextSpan(
-                    children: <TextSpan>[
-                      TextSpan(
-                        text: (valueRDA - tempCalories).toStringAsFixed(0),
-                        style: TextStyle(color: Colors.red, fontSize: 18.sp),
-                      ),
-                      TextSpan(
-                        text: '\n${tempCalories.toStringAsFixed(0)}',
-                        style: TextStyle(color: Colors.blue, fontSize: 18.sp),
-                      ),
-                    ],
-                  ),
-                  textAlign: TextAlign.right, // 设置文字靠右排列
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-*/
+    setState(() {
+      // 当日主要营养素表格数据
+      mainNutrientsChartData = [
+        CusNutrientInfo(
+          label: "calorie",
+          value: tempCalories,
+          color: Colors.blue,
+          name: '卡路里',
+          unit: '大卡',
+        ),
+        CusNutrientInfo(
+          label: "energy",
+          value: tempEnergy,
+          color: Colors.green,
+          name: '能量',
+          unit: '千焦',
+        ),
+        CusNutrientInfo(
+          label: "protein",
+          value: tempProtein,
+          color: Colors.yellow,
+          name: '蛋白质',
+          unit: '克',
+        ),
+        CusNutrientInfo(
+          label: "fat",
+          value: tempFat,
+          color: Colors.black,
+          name: '脂肪',
+          unit: '克',
+        ),
+        CusNutrientInfo(
+          label: "cho",
+          value: tempCHO,
+          color: Colors.red,
+          name: '碳水',
+          unit: '克',
+        ),
+        CusNutrientInfo(
+          label: "dietaryFiber",
+          value: tempDietaryFiber,
+          color: genRandomColor(),
+          name: '膳食纤维',
+          unit: '克',
+        ),
+        CusNutrientInfo(
+          label: "sugar",
+          value: tempSugar,
+          color: genRandomColor(),
+          name: '糖',
+          unit: '克',
+        ),
+        CusNutrientInfo(
+          label: "sodium",
+          value: tempSodium,
+          color: genRandomColor(),
+          name: '钠',
+          unit: '毫克',
+        ),
+        CusNutrientInfo(
+          label: "cholesterol",
+          value: tempCholesterol,
+          color: genRandomColor(),
+          name: '胆固醇',
+          unit: '毫克',
+        ),
+        CusNutrientInfo(
+          label: "potassium",
+          value: tempPotassium,
+          color: genRandomColor(),
+          name: '钾',
+          unit: '毫克',
+        ),
+      ];
+    });
 
     return Card(
       child: Row(
@@ -679,28 +864,28 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       children: [
         TableCell(
           child: Text(
-            choValue.toStringAsFixed(2),
+            formatDoubleToString(choValue),
             style: TextStyle(fontSize: fontSize),
             textAlign: textAlign,
           ),
         ),
         TableCell(
           child: Text(
-            proteinValue.toStringAsFixed(2),
+            formatDoubleToString(proteinValue),
             style: TextStyle(fontSize: fontSize),
             textAlign: textAlign,
           ),
         ),
         TableCell(
           child: Text(
-            fatValue.toStringAsFixed(2),
+            formatDoubleToString(fatValue),
             style: TextStyle(fontSize: fontSize),
             textAlign: textAlign,
           ),
         ),
         TableCell(
           child: Text(
-            "${(caloriesValue / valueRDA * 100).toStringAsFixed(2)}%",
+            "${formatDoubleToString((caloriesValue / valueRDA * 100))}%",
             style: TextStyle(fontSize: fontSize),
             textAlign: textAlign,
           ),
