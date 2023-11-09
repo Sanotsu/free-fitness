@@ -68,7 +68,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   }
 
   // 有指定日期查询指定日期的饮食记录条目，没有就当前日期
-  _queryDailyFoodItemList({String? userSelectedDate}) async {
+  _queryDailyFoodItemList() async {
     print("开始运行查询当日饮食日记条目---------");
 
     // _dietaryHelper.deleteDb();
@@ -132,7 +132,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                     ModalRoute.of(context)!.settings.arguments as Map;
                 final bool result = arguments['isItemAdded'];
                 if (result) {
-                  _queryDailyFoodItemList(userSelectedDate: selectedDateStr);
+                  _queryDailyFoodItemList();
                 }
 
                 (ModalRoute.of(context)!.settings.arguments as Map).clear();
@@ -148,6 +148,26 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const Text("几个功能按钮(底部)"),
+                      ElevatedButton(
+                        onPressed: () {
+                          // 跳过去就是新的模块，返回时就不用再返回这里而是直接回到主页面
+                          Navigator.pushReplacementNamed(
+                            context,
+                            "/dietaryReports",
+                          );
+                        },
+                        child: const Text("今天"),
+                      ),
+                      ElevatedButton(
+                        onPressed: () {},
+                        child: const Text("相册"),
+                      ),
+                    ],
+                  ),
                   _buildDailyOverviewCard(),
                   const SizedBox(height: 10),
                   ListView.builder(
@@ -614,9 +634,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                       final bool result = arguments['isItemAdded'];
 
                       if (result) {
-                        _queryDailyFoodItemList(
-                          userSelectedDate: selectedDateStr,
-                        );
+                        _queryDailyFoodItemList();
                       }
                       // 使用参数后应清除Map
                       (ModalRoute.of(context)!.settings.arguments as Map)
@@ -745,7 +763,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
             // 确认修改或删除成功后重新加载当前日期的条目数据
             final bool result = value['isItemModified'];
             if (result) {
-              _queryDailyFoodItemList(userSelectedDate: selectedDateStr);
+              _queryDailyFoodItemList();
             }
           });
         },
@@ -932,7 +950,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
         selectedDate = picked;
         selectedDateStr = DateFormat('yyyy-MM-dd').format(picked);
         showedDateStr = formatDate;
-        _queryDailyFoodItemList(userSelectedDate: selectedDateStr);
+        _queryDailyFoodItemList();
       });
     }
   }

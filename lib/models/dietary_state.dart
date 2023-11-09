@@ -261,3 +261,57 @@ class DailyFoodItemWithFoodServing {
     ''';
   }
 }
+
+// 在饮食日记报告分析时，需要每种营养素的值或者累加值信息，这些属性仅用于显示需要
+class FoodNutrientVO {
+  double energy, calorie, protein, totalFat, totalCarbohydrate, sodium;
+  double? saturatedFat, transFat, polyunsaturatedFat, monounsaturatedFat;
+  double? sugar, dietaryFiber, cholesterol, potassium;
+  double? breakfastColories, lunchColories, dinnerColories, otherColories;
+
+  FoodNutrientVO({
+    required this.energy,
+    required this.calorie,
+    required this.protein,
+    required this.totalFat,
+    this.saturatedFat,
+    this.transFat,
+    this.polyunsaturatedFat,
+    this.monounsaturatedFat,
+    required this.totalCarbohydrate,
+    this.sugar,
+    this.dietaryFiber,
+    required this.sodium,
+    this.cholesterol,
+    this.potassium,
+    this.breakfastColories,
+    this.lunchColories,
+    this.dinnerColories,
+    this.otherColories,
+  });
+
+// 初始化方法，返回所有属性为0的实例
+  static FoodNutrientVO initWithZero() {
+    return FoodNutrientVO(
+      energy: 0,
+      calorie: 0,
+      protein: 0,
+      totalFat: 0,
+      totalCarbohydrate: 0,
+      sodium: 0,
+    );
+  }
+
+// 因为是VO，暂时可能不需要tomap或者frommap
+  @override
+  String toString() {
+    return '''
+    FoodNutrientVO{
+      "energy": $energy, "calorie": $calorie, "protein": $protein,  "sodium": $sodium, "totalFat": $totalFat,
+      "saturatedFat": $saturatedFat, "transFat": $transFat, "polyunsaturatedFat": $polyunsaturatedFat, 
+      "monounsaturatedFat": $monounsaturatedFat, "totalCarbohydrate": $totalCarbohydrate, 
+      "sugar": $sugar, "dietaryFiber": $dietaryFiber,"cholesterol": $cholesterol, "potassium": $potassium, 
+    }
+    ''';
+  }
+}

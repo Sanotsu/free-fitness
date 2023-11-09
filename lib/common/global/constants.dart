@@ -198,3 +198,11 @@ class CusNutrientInfo {
     this.color,
   });
 }
+
+// 预设可以查询的饮食记录报告选项(昨天、今天、上周、本周)
+List<CusDropdownOption> dietaryReportDisplayModeList = [
+  CusDropdownOption(label: "Today", name: "今天", value: "today"),
+  CusDropdownOption(label: "Yesterday", name: "昨天", value: "yesterday"),
+  CusDropdownOption(label: "ThisWeek", name: "本周", value: "this_week"),
+  CusDropdownOption(label: "Lastweek", name: "上周", value: "last_week"),
+];

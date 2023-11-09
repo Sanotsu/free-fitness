@@ -151,6 +151,8 @@ pause：修改旧的某一天某一餐次的条目，需要从早餐移到晚餐
   - 基本完成饮食日记的主页的显示布局效果
 - 2023-11-08
   - 饮食日记的主页添加三大营养素的饼状图和摄入量列表
+- 2023-11-09
+  - 基本完成饮食记录报告模块中选中今天、昨天时，卡路里 tabview 中的饼图和食物摄入表格的内容。
 
 ### 问题记录
 
@@ -184,3 +186,15 @@ Text()中设置 leading 属性，如下
 - https://stackoverflow.com/questions/56799068/what-is-the-strutstyle-in-the-flutter-text-widget
 
 ---
+
+2. 命名路由的寻找顺序
+
+```sh
+Make sure your root app widget has provided a way to generate this route.
+Generators for routes are searched for in the following order:
+ 1. For the "/" route, the "home" property, if non-null, is used.
+ 2. Otherwise, the "routes" table is used, if it has an entry for the route.
+ 3. Otherwise, onGenerateRoute is called. It should return a non-null value for any valid route not handled by "home" and "routes".
+ 4. Finally if all else fails onUnknownRoute is called.
+Unfortunately, onUnknownRoute was not set.
+```

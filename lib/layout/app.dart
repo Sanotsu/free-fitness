@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../views/dietary/records/index.dart';
+import '../views/dietary/reports/index.dart';
 import 'home.dart';
 
 class FreeFitnessApp extends StatelessWidget {
@@ -56,11 +57,20 @@ class FreeFitnessApp extends StatelessWidget {
             if (settings.name == "/dietaryRecords") {
               // 可带上自定义参数(注意，这里不能带const，否则popuntil修改参数就无法修改)
               return MaterialPageRoute(
-                  settings: RouteSettings(
-                    name: '/dietaryRecords',
-                    arguments: routeSettingsArgs,
-                  ),
-                  builder: (_) => const DietaryRecords());
+                settings: RouteSettings(
+                  name: '/dietaryRecords',
+                  arguments: routeSettingsArgs,
+                ),
+                builder: (_) => const DietaryRecords(),
+              );
+            } else if (settings.name == "/dietaryReports") {
+              return MaterialPageRoute(
+                settings: RouteSettings(
+                  name: '/dietaryReports',
+                  arguments: routeSettingsArgs,
+                ),
+                builder: (_) => const DietaryReports(),
+              );
             } else if (settings.name == "/") {
               // 可带上自定义参数
               return MaterialPageRoute(builder: (_) => const HomePage());
