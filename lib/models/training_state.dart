@@ -3,7 +3,7 @@
 // 基础活动表的model
 class Exercise {
   int? exerciseId; // 自增的，可以不传
-  String exerciseCode, exerciseName, category, gmtCreate;
+  String exerciseCode, exerciseName, category, countingMode, gmtCreate;
   String? force, level, mechanic, equipment, instructions, ttsNotes;
   String? primaryMuscles, secondaryMuscles, images, standardDuration;
   String? gmtModified, isCustom, contributor;
@@ -13,6 +13,7 @@ class Exercise {
     required this.exerciseCode,
     required this.exerciseName,
     required this.category,
+    required this.countingMode,
     required this.gmtCreate,
     this.force,
     this.level,
@@ -39,6 +40,7 @@ class Exercise {
       'level': level,
       'mechanic': mechanic,
       'equipment': equipment,
+      'counting_mode': countingMode,
       'standard_duration': standardDuration,
       'instructions': instructions,
       'tts_notes': ttsNotes,
@@ -63,6 +65,7 @@ class Exercise {
       level: map['level'],
       mechanic: map['mechanic'],
       equipment: map['equipment'],
+      countingMode: map['counting_mode'],
       // ？？？明明sql语句设置了默认值，但是不传还是null
       standardDuration: map['standard_duration'] ?? "1",
       instructions: map['instructions'],
@@ -106,14 +109,16 @@ class ExerciseDefaultOption {
   });
 }
 
-// 动作表的 model
-class Action {
+// 动作表的 model（Action、Group、Plan可能都和flutter的预设部件重名了，都加上Training前缀）
+class TrainingAction {
   int? actionId; // 自增的，可以不传
-  String actionCode, actionName, exerciseId, gmtCreate;
-  String? frequency, duration, equipmentWeight, actionLevel, description;
-  String? contributor, gmtModified;
+  int exerciseId;
+  int? frequency, duration;
+  double? equipmentWeight;
+  String actionCode, actionName, gmtCreate;
+  String? actionLevel, description, contributor, gmtModified;
 
-  Action({
+  TrainingAction({
     this.actionId,
     required this.actionCode,
     required this.actionName,
@@ -148,7 +153,7 @@ class Action {
   @override
   String toString() {
     return '''
-    Action {
+    TrainingAction {
     action_id: $exerciseId, action_code: $actionCode, action_name: $actionName,exercise_id: $exerciseId, 
     frequency: $frequency, duration: $duration,equipment_weight: $equipmentWeight, action_level: $actionLevel, 
     description: $description, contributor: $contributor, gmt_create: $gmtCreate, gmt_modified: $gmtModified }
@@ -156,13 +161,14 @@ class Action {
   }
 }
 
-class Group {
+class TrainingGroup {
   int? groupId; // 自增的，可以不传
   String groupCode, groupName, groupCategory, gmtCreate;
-  String? groupLevel, restInterval, consumption, timeSpent, description;
+  int? restInterval, consumption, timeSpent;
+  String? groupLevel, description;
   String? contributor, gmtModified;
 
-  Group({
+  TrainingGroup({
     this.groupId,
     required this.groupCode,
     required this.groupName,
@@ -197,7 +203,7 @@ class Group {
   @override
   String toString() {
     return '''
-    Group {
+    TrainingGroup {
     group_id: $groupId, group_code: $groupCode, group_name: $groupName, group_category: $groupCategory, 
     group_level: $groupLevel, rest_interval: $restInterval, consumption: $consumption, time_spent: $timeSpent, 
     description: $description, contributor: $contributor, gmt_create: $gmtCreate, gmt_modified: $gmtModified }
@@ -233,12 +239,12 @@ class GroupHasAction {
   }
 }
 
-class Plan {
+class TrainingPlan {
   int? planId; // 自增的，可以不传
   String planCode, planName, planCategory, gmtCreate;
   String? planLevel, description, contributor, gmtModified;
 
-  Plan({
+  TrainingPlan({
     this.planId,
     required this.planCode,
     required this.planName,
@@ -267,7 +273,7 @@ class Plan {
   @override
   String toString() {
     return '''
-    Action {action_id: $planId, action_code: $planCode, action_name: $planName,exercise_id: $planCategory, 
+    TrainingPlan {action_id: $planId, action_code: $planCode, action_name: $planName,exercise_id: $planCategory, 
     frequency: $planLevel, description: $description, contributor: $contributor, gmt_create: $gmtCreate, gmt_modified: $gmtModified }
     ''';
   }

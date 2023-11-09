@@ -144,6 +144,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
         level: temp?.fields['level']?.value,
         mechanic: temp?.fields['mechanic']?.value,
         equipment: temp?.fields['equipment']?.value,
+        countingMode: temp?.fields['counting_mode']?.value,
         standardDuration: temp?.fields['standard_duration']?.value,
         instructions: temp?.fields['instructions']?.value,
         ttsNotes: temp?.fields['tts_notes']?.value,
@@ -288,6 +289,21 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                           FormBuilderValidators.required(errorText: '级别不可为空')
                         ]),
                         items: _genItems(levelOptions),
+                        initialValue: updateTarget?.level,
+                        valueTransformer: (val) => val?.toString(),
+                      ),
+                    ),
+                    Flexible(
+                      child: FormBuilderDropdown<String>(
+                        name: 'counting_mode',
+                        decoration: const InputDecoration(
+                          labelText: '*计数方式',
+                          hintText: '选择计数方式',
+                        ),
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(errorText: '计数方式不可为空')
+                        ]),
+                        items: _genItems(countingOptions),
                         initialValue: updateTarget?.level,
                         valueTransformer: (val) => val?.toString(),
                       ),

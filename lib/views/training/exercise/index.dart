@@ -161,6 +161,8 @@ class _TrainingExerciseState extends State<TrainingExercise> {
       force: forceOptions[Random().nextInt(forceOptions.length)].value,
       equipment:
           equipmentOptions[Random().nextInt(equipmentOptions.length)].value,
+      countingMode:
+          countingOptions[Random().nextInt(countingOptions.length)].value,
       // standardDuration: "1",
       instructions: generateRandomString(300, 500),
       primaryMuscles:

@@ -295,6 +295,10 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
                   _getOptionLabel(_currentItem.force, forceOptions),
                 ),
                 _buildTableRow(
+                  "计数方式",
+                  _getOptionLabel(_currentItem.countingMode, countingOptions),
+                ),
+                _buildTableRow(
                   "级别",
                   _getOptionLabel(_currentItem.level, levelOptions),
                 ),

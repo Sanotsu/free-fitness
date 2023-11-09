@@ -56,6 +56,21 @@
   - 还是说，更简单一点，action 不能复用，一个 action 一定属于某个 group（反正也没有单独展示所有 action 列表的地方，内容重复不影响，idb 不同）
     - 即只要 group 和 action 表，group has action 就不要了
 
+**【2023-11-08 更新】**：
+
+不能按照“男士减肥健身软件”的顺序来，因为无论是创建 group 还是 action 都有很多自行输入的栏位，
+如果按那个软件来，group 只能填一个名称，action 只有一个时间和次数，和现有数据库设计差距过大。
+
+还是常规顺序：
+
+进入训练计划页面 workout list -> 点击新增训练计划，弹窗输入训练计划的基本信息，显示当前训练计划空白 action list
+-> 点击添加动作，弹窗查询 exercise list -> 点击指定 exercise，进入动作配置信息页面 action config
+-> 点击保存，返回 action list
+
+**或者说**，之前的设计太麻烦了，就应该 只保留 group 和 action，1 对多，额外栏位也不要了。
+
+--- 这部分，我试一下新的数据库设计 simple group 和 simple action 的 1 对多
+
 ### 进度
 
 #### 2023-11-05
@@ -66,7 +81,29 @@
 
 - 基础查询 exercise 列表，要调整查询框和显示数量，还有 card 的高度，图片太小了
 
-
 #### 2023-11-07
 
-- 基本调整了新增训练计划时跳转的插查询的基础exercise列表页面。
+- 基本调整了新增训练计划时跳转的插查询的基础 exercise 列表页面。
+- 大概有了 action 配置的页面
+  - 【问题】
+    - 1 exercise 缺少 counting_mode 栏位，无法判断是计时还是计数
+    - 2 action 表中的 action_code、action_name、action_level、description 等栏位需要手动输入
+      - 能不能简化一下，group 直接关联了 exercise 就好多一些冗余栏位。即不复用 action 和不需要 group_has_action 表
+
+#### 2023-11-09【暂停】
+
+问题：
+
+之前的设置参考"“男士减肥健身软件"目前有个无法解决的问题，就是有 3 种情况会进入 action config 页面，但是添加了 action 之后，要返回到 action list 比较麻烦，因为存在两种情况，1 是新增训练计划(group)时，还不存在 action list，要同时新增 group 和 action list，但是 group 没有用户输入的阶段。如果是选择完所有的 action，再新增时同时新增 group，那么一次性配置一个 action，后配置的从 action config 页面返回之后，旧的就没有了。
+
+最主要是存在 3 种情况
+
+- 新增训练计划 group list > action list > simple exercise list -> action config => 返回新的 action list
+- 旧训练计划新增动作配置 group list > action list > simple exercise list -> action config => 返回旧的 action list
+- 旧训练计划修改动作配置 group list > action list > action config => 返回旧的 action list
+
+现在放弃了，一步一步来，每步都保存：
+
+- 新增训练计划 group list -> new group form -> 空 action list -> 带入 group id 进入 simple exercise list -> action config => 返回旧的 action list
+- 旧训练计划新增动作配置 group list -> 指定 action list -> 带入 group id 进入 simple exercise list -> action config => 返回旧的 action list
+- 旧训练计划修改动作配置 group list > action list > action config => 返回旧的 action list

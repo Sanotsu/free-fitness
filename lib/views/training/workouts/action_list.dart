@@ -1,17 +1,60 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'action_configuration.dart';
+// import 'action_configuration.dart';
+import '../../../models/training_state.dart';
 import 'simple_exercise_list.dart';
 
 class ActionList extends StatefulWidget {
-  const ActionList({super.key});
+//  从已存在的训练计划进入action list，会带上group信息去查询已存在的action list
+  final TrainingGroup? groupItem;
+  // 如果是新增训练计划，是先到action config，把配置好的一个action传到action list，再保存时连同新的group存入数据库
+  final TrainingAction? actionItem;
+
+  const ActionList({super.key, this.groupItem, this.actionItem});
 
   @override
   State<ActionList> createState() => _ActionListState();
 }
 
 class _ActionListState extends State<ActionList> {
+  List<TrainingAction> actionList = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    print("widget.groupItem---${widget.groupItem}");
+    print("widget.actionItem---${widget.actionItem}");
+
+    var tempAction = TrainingAction(
+      actionCode: "action_code",
+      actionName: "action_name",
+      exerciseId: 1,
+      frequency: 10,
+      duration: 20,
+      equipmentWeight: 12,
+      actionLevel: "初级",
+      description: "就是初级",
+      contributor: "<登录用户>",
+      gmtCreate: DateTime.now().toString(),
+    );
+
+    setState(() {
+      actionList.add(tempAction);
+      if (widget.actionItem != null) {
+        actionList.add(widget.actionItem!);
+      }
+      print("actionList----$actionList");
+    });
+  }
+
+  /// 如果是group进来的，就是直接查询db中存在的action 列表，展示到这里
+  /// 如果是新传 actionItem，存放到已有的action list中去
+  /// ？？？？ pushReplacement 好像是重新刷新了，旧数据没有保存，新增训练计划的时候永远只有1条？？？
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,12 +91,17 @@ class _ActionListState extends State<ActionList> {
                             "应该没有内容，点击这个ListTile ，带上exercise信息进入action配置页面"),
                         trailing: const Text("这里应该是缩略图"),
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ActionConfiguration(),
-                            ),
-                          );
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => const ActionConfiguration(
+                          //       // item 是这里选择的那个运动
+                          //       item: null,
+                          //       // source应该是父组件传的，来源可能是 训练计划列表 或者 指定训练计划的动作列表
+                          //       source: 'action_modify',
+                          //     ),
+                          //   ),
+                          // );
                         },
                       ),
                       Row(
@@ -89,7 +137,10 @@ class _ActionListState extends State<ActionList> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const SimpleExerciseList(),
+              builder: (context) => SimpleExerciseList(
+                // 如果是已存在的训练计划新增，则会有group id；如果是全新的训练计划新增，则暂时还没有id
+                source: (widget.groupItem != null) ? "group_id" : '',
+              ),
             ),
           );
         },

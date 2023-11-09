@@ -42,6 +42,7 @@ class TrainingDdl {
       level TEXT,
       mechanic TEXT,
       equipment TEXT,
+      counting_mode TEXT NOT NULL,
       standard_duration TEXT DEFAULT '1',
       instructions TEXT,
       tts_notes TEXT,

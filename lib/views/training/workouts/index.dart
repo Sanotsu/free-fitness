@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../models/training_state.dart';
 import 'action_list.dart';
 import 'modify_workouts_form.dart';
 import 'simple_exercise_list.dart';
@@ -13,6 +14,35 @@ class TrainingWorkouts extends StatefulWidget {
 }
 
 class _TrainingWorkoutsState extends State<TrainingWorkouts> {
+  /// 这里是workout index，肯定就是group list页面
+  /// 点击某一个group，进入action list 页面
+  ///
+  /// 暂时没有，测试用创建一个
+  ///
+  ///
+  late TrainingGroup demoGroupItem;
+
+  @override
+  void initState() {
+    super.initState();
+
+    setState(() {
+      demoGroupItem = TrainingGroup(
+        groupId: 1,
+        groupCode: 'test1',
+        groupName: '测试动作组',
+        groupCategory: '减肥',
+        groupLevel: "beginner",
+        restInterval: 15,
+        consumption: 300,
+        timeSpent: 180,
+        description: "好好减肥",
+        contributor: "<登入用户>",
+        gmtCreate: DateTime.now().toString(),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +91,9 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const ActionList(),
+                              builder: (context) => ActionList(
+                                groupItem: demoGroupItem,
+                              ),
                             ),
                           );
                         },
@@ -99,7 +131,9 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => const SimpleExerciseList(),
+              builder: (context) => const SimpleExerciseList(
+                source: '',
+              ),
             ),
           );
         },

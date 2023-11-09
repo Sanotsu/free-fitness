@@ -37,6 +37,12 @@ List<ExerciseDefaultOption> levelOptions = [
   ExerciseDefaultOption(label: "专家", value: 'expert'),
 ];
 
+// 锻炼是计时还是计次
+List<ExerciseDefaultOption> countingOptions = [
+  ExerciseDefaultOption(label: "计时", value: 'timed'),
+  ExerciseDefaultOption(label: "计次", value: 'counted'),
+];
+
 List<ExerciseDefaultOption> categoryOptions = [
   ExerciseDefaultOption(label: "力量", value: 'strength'),
   ExerciseDefaultOption(label: "拉伸", value: 'stretching'),

@@ -251,34 +251,46 @@ class DBTrainHelper {
 
     print(maps);
 
-    var list = List.generate(maps.length, (i) {
-      return Exercise(
-        exerciseId: maps[i]['exercise_id'],
-        exerciseCode: maps[i]['exercise_code'],
-        exerciseName: maps[i]['exercise_name'],
-        force: maps[i]['force'],
-        level: maps[i]['level'],
-        mechanic: maps[i]['mechanic'],
-        equipment: maps[i]['equipment'],
-        // ？？？明明sql语句设置了默认值，但是不传还是null
-        standardDuration: maps[i]['standard_duration'] ?? "1",
-        instructions: maps[i]['instructions'],
-        ttsNotes: maps[i]['tts_notes'],
-        category: maps[i]['category'],
-        primaryMuscles: maps[i]['primary_muscles'],
-        secondaryMuscles: maps[i]['secondary_muscles'],
-        images: maps[i]['images'],
-        // ？？？明明sql语句设置了默认值，但是不传还是null
-        isCustom: maps[i]['is_custom'] ?? '0',
-        contributor: maps[i]['contributor'],
-        gmtCreate: maps[i]['gmt_create'],
-        gmtModified: maps[i]['gmt_modified'],
-      );
-    });
+    final list = maps.map((row) => Exercise.fromMap(row)).toList();
+
+    // var list = List.generate(maps.length, (i) {
+    //   return Exercise(
+    //     exerciseId: maps[i]['exercise_id'],
+    //     exerciseCode: maps[i]['exercise_code'],
+    //     exerciseName: maps[i]['exercise_name'],
+    //     force: maps[i]['force'],
+    //     level: maps[i]['level'],
+    //     mechanic: maps[i]['mechanic'],
+    //     equipment: maps[i]['equipment'],
+    //     // ？？？明明sql语句设置了默认值，但是不传还是null
+    //     standardDuration: maps[i]['standard_duration'] ?? "1",
+    //     instructions: maps[i]['instructions'],
+    //     ttsNotes: maps[i]['tts_notes'],
+    //     category: maps[i]['category'],
+    //     primaryMuscles: maps[i]['primary_muscles'],
+    //     secondaryMuscles: maps[i]['secondary_muscles'],
+    //     images: maps[i]['images'],
+    //     // ？？？明明sql语句设置了默认值，但是不传还是null
+    //     isCustom: maps[i]['is_custom'] ?? '0',
+    //     contributor: maps[i]['contributor'],
+    //     gmtCreate: maps[i]['gmt_create'],
+    //     gmtModified: maps[i]['gmt_modified'],
+    //   );
+    // });
 
     print(list);
 
     return list;
+  }
+
+  // 插入单条数据
+  Future<int> insertTrainingAction(TrainingAction action) async {
+    Database db = await database;
+    var result = await db.insert(
+      TrainingDdl.tableNameOfAction,
+      action.toMap(),
+    );
+    return result;
   }
 }
 
