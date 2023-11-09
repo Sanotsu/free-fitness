@@ -215,7 +215,7 @@ class _DietaryReportsState extends State<DietaryReports> {
           bottom: const TabBar(
             tabs: [
               Tab(text: "卡路里"),
-              Tab(icon: Icon(Icons.directions_transit)),
+              Tab(text: "宏量素"),
               Tab(icon: Icon(Icons.directions_bike)),
             ],
           ),
@@ -294,9 +294,9 @@ class _DietaryReportsState extends State<DietaryReports> {
                           child: buildCalorieTabview(),
                         ),
                         // 第一个选项卡的内容
-                        Center(
-                            child: Text(
-                                'DietaryReports index ${dfiwfsList.length}')),
+                        SingleChildScrollView(
+                          child: buildMacrosTabview(),
+                        ),
                         // 第二个选项卡的内容
                         Center(child: Text('Tab 3 Content ${fnVO.calorie}')),
                       ],
@@ -329,59 +329,76 @@ class _DietaryReportsState extends State<DietaryReports> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         /// 当日主要营养素占比卡片
-        _buildMealCalorieChartCard(),
+        _buildFoodStatsPieChartCard(),
 
         /// 食物摄入条目统计卡片
-        _buildMealCalorieListCard(),
+        _buildFoodStatsListCard('食物摄入', dfiwfsList),
       ],
     );
   }
 
-  _buildMealCalorieChartCard() {
+  /// 宏量macronutrients 卡片和卡路里卡片布局基本类似，可以考虑复用
+  buildMacrosTabview() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        /// 当日主要营养素占比卡片
+        _buildFoodStatsPieChartCard(type: "Macros"),
+
+        /// 食物摄入宏量统计卡片
+        _buildFoodStatsListCard('宏量素摄入', dfiwfsList),
+      ],
+    );
+  }
+
+  /// 绘制卡路里摄入或宏量素摄入的饼图【卡片】
+  _buildFoodStatsPieChartCard({String? type = "Calorie"}) {
     return Card(
       elevation: 10,
       child: SizedBox(
-        height: 300.sp,
+        height: type == "Calorie" ? 300.sp : 200.sp,
         child: Column(
           children: [
-            ListTile(
-              title: RichText(
-                text: TextSpan(
-                  children: <TextSpan>[
-                    TextSpan(
-                      text: '卡路里\n',
-                      style: TextStyle(fontSize: 16.sp, color: Colors.black),
-                    ),
-                    TextSpan(
-                      text: fnVO.calorie.toStringAsFixed(2),
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.bold,
+            // 是卡路里
+            if (type == "Calorie")
+              ListTile(
+                title: RichText(
+                  text: TextSpan(
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: '卡路里\n',
+                        style: TextStyle(fontSize: 16.sp, color: Colors.black),
                       ),
-                    ),
+                      TextSpan(
+                        text: fnVO.calorie.toStringAsFixed(2),
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                subtitle: Row(
+                  // 让子组件分别靠左和靠右对齐
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                        flex: 1,
+                        child: Text(
+                          "目标已达成 ${(fnVO.calorie / valueRDA * 100).toStringAsFixed(2)} %",
+                          textAlign: TextAlign.left,
+                        )),
+                    Expanded(
+                        flex: 1,
+                        child: Text(
+                          "目标 $valueRDA 大卡",
+                          textAlign: TextAlign.right,
+                        )),
                   ],
                 ),
               ),
-              subtitle: Row(
-                // 让子组件分别靠左和靠右对齐
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                      flex: 1,
-                      child: Text(
-                        "目标已达成 ${(fnVO.calorie / valueRDA * 100).toStringAsFixed(2)} %",
-                        textAlign: TextAlign.left,
-                      )),
-                  Expanded(
-                      flex: 1,
-                      child: Text(
-                        "目标 $valueRDA 大卡",
-                        textAlign: TextAlign.right,
-                      )),
-                ],
-              ),
-            ),
             Divider(height: 5.sp, thickness: 2.sp),
             Expanded(
               child: Row(
@@ -390,12 +407,16 @@ class _DietaryReportsState extends State<DietaryReports> {
                   // 左边图例
                   Expanded(
                     flex: 2,
-                    child: _buildMealCaloriePieLegend(),
+                    child: type == "Calorie"
+                        ? _buildMealCaloriePieLegend()
+                        : _buildMacrosPieLegend(),
                   ),
                   // 右边饼图
                   Expanded(
                     flex: 1,
-                    child: _buildMealCaloriePieChart(),
+                    child: type == "Calorie"
+                        ? _buildMealCaloriePieChart()
+                        : _buildMacrosPieChart(),
                   ),
                 ],
               ),
@@ -406,7 +427,7 @@ class _DietaryReportsState extends State<DietaryReports> {
     );
   }
 
-  // 日期范围餐次图例
+  /// 绘制卡路里摄入饼图的图例
   _buildMealCaloriePieLegend() {
     double total = fnVO.bfCalorie +
         fnVO.lunchCalorie +
@@ -423,6 +444,23 @@ class _DietaryReportsState extends State<DietaryReports> {
         _buildLegendItem(Colors.red, '午餐', fnVO.lunchCalorie, total),
         _buildLegendItem(Colors.green, '晚餐', fnVO.dinnerCalorie, total),
         _buildLegendItem(Colors.blue, '小食', fnVO.otherCalorie, total),
+      ],
+    );
+  }
+
+  /// 绘制宏量素摄入的饼图的图例
+  _buildMacrosPieLegend() {
+    double total = fnVO.totalCHO + fnVO.totalFat + fnVO.protein;
+
+    print("_buildMacrosPieLegend total---------$total");
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildLegendItem(Colors.grey, '碳水', fnVO.totalCHO, total),
+        _buildLegendItem(Colors.red, '脂肪', fnVO.totalFat, total),
+        _buildLegendItem(Colors.green, '蛋白质', fnVO.protein, total),
       ],
     );
   }
@@ -478,79 +516,94 @@ class _DietaryReportsState extends State<DietaryReports> {
     );
   }
 
-  /// 按照每种食物统计总摄入
-  _buildMealCalorieListCard() {
+  // 日期宏量素饼图
+  _buildMacrosPieChart() {
+    return SizedBox(
+      height: 100.sp,
+      child: PieChart(
+        PieChartData(
+          sections: [
+            PieChartSectionData(
+                value: fnVO.totalCHO, color: Colors.grey, showTitle: false),
+            PieChartSectionData(
+                value: fnVO.totalFat, color: Colors.red, showTitle: false),
+            PieChartSectionData(
+                value: fnVO.protein, color: Colors.green, showTitle: false),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 按照每种食物统计总卡路里摄入 或 总宏量素摄入 的列表【卡片】
+  /// (两个tabview的表格结构类似，内容不同而已，可复用)
+  _buildFoodStatsListCard(
+    String title,
+    List<DailyFoodItemWithFoodServing> dfiwfsList,
+  ) {
     Map<String, List<DailyFoodItemWithFoodServing>> splitArrays = {};
 
-    // 先把当前日期范围的饮食记录条目按食物拆分成子列表,顺便记录总卡路里
-    double totalEnergy = 0;
     for (var el in dfiwfsList) {
-      // 这里的key无法存food，因为就算food的内容一样(同一个食物)，但实例都是不同的
       var foodName = "${el.food.product}(${el.food.brand})";
       splitArrays.putIfAbsent(foodName, () => []);
       splitArrays[foodName]!.add(el);
-
-      var foodIntakeSize = el.dailyFoodItem.foodIntakeSize;
-      var servingInfo = el.servingInfo;
-      totalEnergy += foodIntakeSize * servingInfo.energy;
     }
-    var totalCalories = totalEnergy / oneCalToKjRatio;
 
-    // 每种食物的摄入次数和总量
     List<DataRow> tempRows = splitArrays.entries.map((entry) {
-      // 累加每种食物的输入总卡路里量
-      double tempEnergy = entry.value.fold(0, (prev, item) {
-        var foodIntakeSize = item.dailyFoodItem.foodIntakeSize;
-        var servingInfo = item.servingInfo;
-        return prev + foodIntakeSize * servingInfo.energy;
-      });
-      var tempCalories = tempEnergy / oneCalToKjRatio;
-
-      return DataRow(
-        cells: [
-          DataCell(SizedBox(width: 150.sp, child: Text(entry.key))),
-          DataCell(Text(entry.value.length.toString())),
-          DataCell(
-            SizedBox(
-              width: 80.sp,
-              child: Text(
-                "${tempCalories.toStringAsFixed(2)} ",
-                textAlign: TextAlign.end,
-              ),
-            ),
-          ),
-        ],
-      );
+      var tempNt = formatData(entry.value);
+      if (title == '食物摄入') {
+        return DataRow(
+          cells: [
+            DataCell(Text(entry.key)),
+            DataCell(Text(entry.value.length.toString())),
+            DataCell(Text(tempNt.calorie.toStringAsFixed(2))),
+          ],
+        );
+      } else {
+        return DataRow(
+          cells: [
+            DataCell(Text(entry.key)),
+            DataCell(Text(tempNt.totalCHO.toStringAsFixed(2))),
+            DataCell(Text(tempNt.totalFat.toStringAsFixed(2))),
+            DataCell(Text(tempNt.protein.toStringAsFixed(2))),
+          ],
+        );
+      }
     }).toList();
 
-    // 最后一行是食物条目累计的总量
     tempRows.add(DataRow(
       cells: [
-        DataCell(
-          SizedBox(
-            width: 150.sp,
-            child: const Text(
-              "合计",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
+        const DataCell(
+          Text("合计", style: TextStyle(fontWeight: FontWeight.bold)),
         ),
         DataCell(
           Text(
-            "x ${dfiwfsList.length}",
+            title == '食物摄入'
+                ? "x ${dfiwfsList.length}"
+                : fnVO.totalCHO.toStringAsFixed(2),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
         DataCell(
           SizedBox(
-            width: 80.sp,
             child: Text(
-              "${totalCalories.toStringAsFixed(2)} ",
+              title == '食物摄入'
+                  ? fnVO.calorie.toStringAsFixed(2)
+                  : fnVO.totalFat.toStringAsFixed(2),
               textAlign: TextAlign.end,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         ),
+        if (title != '食物摄入')
+          DataCell(
+            SizedBox(
+              child: Text(
+                fnVO.protein.toStringAsFixed(2),
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
       ],
     ));
 
@@ -559,31 +612,29 @@ class _DietaryReportsState extends State<DietaryReports> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          const ListTile(title: Text('食物摄入')),
+          ListTile(title: Text(title)),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 5.sp),
             child: DataTable(
-              // 每一列的间隔
               columnSpacing: 10.0,
-              columns: const [
-                DataColumn(label: Text('食物名称')),
-                DataColumn(label: Text('摄入次数'), numeric: true),
-                DataColumn(label: Text('摄入(大卡)'), numeric: true),
-              ],
+              columns: title == '食物摄入'
+                  ? const [
+                      DataColumn(label: Text('食物名称')),
+                      DataColumn(label: Text('摄入次数'), numeric: true),
+                      DataColumn(label: Text('摄入(大卡)'), numeric: true),
+                    ]
+                  : const [
+                      DataColumn(label: Text('食物名称')),
+                      DataColumn(label: Text('碳水(克)'), numeric: true),
+                      DataColumn(label: Text('脂肪(克)'), numeric: true),
+                      DataColumn(label: Text('蛋白质(克)'), numeric: true),
+                    ],
               rows: tempRows,
             ),
           ),
         ],
       ),
     );
-  }
-
-  buildMainNutrientsPieChart() {
-    return Container();
-  }
-
-  buildMainNutrientsList() {
-    return Container();
   }
 
   buildDropdownButton() {
