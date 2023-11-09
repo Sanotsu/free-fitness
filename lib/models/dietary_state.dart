@@ -344,4 +344,32 @@ class FoodNutrientTotals {
   double lunchCalorie = 0.0;
   double dinnerCalorie = 0.0;
   double otherCalorie = 0.0;
+
+  Map<String, double> toMap() {
+    return {
+      'energy': energy,
+      'protein': protein,
+      'totalFat': totalFat,
+      'totalCHO': totalCHO,
+      'sodium': sodium,
+      'cholesterol': cholesterol,
+      'dietaryFiber': dietaryFiber,
+      'potassium': potassium,
+      'sugar': sugar,
+      'transFat': transFat,
+      'saturatedFat': saturatedFat,
+      'muFat': muFat,
+      'puFat': puFat,
+      'calorie': calorie,
+      // 这几个不算营养素，暂时不放在这里
+      // 'bfEnergy': bfEnergy,
+      // 'lunchEnergy': lunchEnergy,
+      // 'dinnerEnergy': dinnerEnergy,
+      // 'otherEnergy': otherEnergy,
+      // 'bfCalorie': bfCalorie,
+      // 'lunchCalorie': lunchCalorie,
+      // 'dinnerCalorie': dinnerCalorie,
+      // 'otherCalorie': otherCalorie,
+    };
+  }
 }

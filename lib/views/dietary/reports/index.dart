@@ -216,7 +216,7 @@ class _DietaryReportsState extends State<DietaryReports> {
             tabs: [
               Tab(text: "卡路里"),
               Tab(text: "宏量素"),
-              Tab(icon: Icon(Icons.directions_bike)),
+              Tab(text: "营养素(未完)"),
             ],
           ),
           actions: [
@@ -290,15 +290,9 @@ class _DietaryReportsState extends State<DietaryReports> {
                   Expanded(
                     child: TabBarView(
                       children: [
-                        SingleChildScrollView(
-                          child: buildCalorieTabview(),
-                        ),
-                        // 第一个选项卡的内容
-                        SingleChildScrollView(
-                          child: buildMacrosTabview(),
-                        ),
-                        // 第二个选项卡的内容
-                        Center(child: Text('Tab 3 Content ${fnVO.calorie}')),
+                        SingleChildScrollView(child: buildCalorieTabview()),
+                        SingleChildScrollView(child: buildMacrosTabview()),
+                        SingleChildScrollView(child: buildNutrientsTabView()),
                       ],
                     ),
                   ),
@@ -337,7 +331,7 @@ class _DietaryReportsState extends State<DietaryReports> {
     );
   }
 
-  /// 宏量macronutrients 卡片和卡路里卡片布局基本类似，可以考虑复用
+  /// 宏量macronutrients tab 页面
   buildMacrosTabview() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -349,6 +343,39 @@ class _DietaryReportsState extends State<DietaryReports> {
         _buildFoodStatsListCard('宏量素摄入', dfiwfsList),
       ],
     );
+  }
+
+  /// ？？？营养素tab页面
+  /// （未完，还没有实现个人配置目标，这里需要和目标营养素的差值比较）
+  buildNutrientsTabView() {
+    // 简单示例，等个人配置目标完成再继续
+    List<DataRow> rows = [];
+
+    var properties = fnVO.toMap().entries;
+
+    for (var entry in properties) {
+      if (entry.value != 0) {
+        rows.add(_buildDataRow(entry.key, entry.value.toStringAsFixed(2)));
+      }
+    }
+
+    return DataTable(
+      columns: const [
+        DataColumn(label: Text('营养素')),
+        DataColumn(label: Text('摄入量'), numeric: true),
+        DataColumn(label: Text('目标量'), numeric: true),
+      ],
+      rows: rows,
+    );
+  }
+
+  DataRow _buildDataRow(String attribute, String value) {
+    return DataRow(cells: [
+      DataCell(Text(attribute)),
+      DataCell(Text(value)),
+      // 示例占位
+      const DataCell(Text("1000")),
+    ]);
   }
 
   /// 绘制卡路里摄入或宏量素摄入的饼图【卡片】
