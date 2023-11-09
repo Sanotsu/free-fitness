@@ -315,3 +315,33 @@ class FoodNutrientVO {
     ''';
   }
 }
+
+// 更单纯的一个类，记录累加量的
+class FoodNutrientTotals {
+  // 基本营养素
+  double energy = 0.0;
+  double protein = 0.0;
+  double totalFat = 0.0;
+  double totalCHO = 0.0;
+  double sodium = 0.0;
+  double cholesterol = 0.0;
+  double dietaryFiber = 0.0;
+  double potassium = 0.0;
+  double sugar = 0.0;
+  double transFat = 0.0;
+  double saturatedFat = 0.0;
+  double muFat = 0.0;
+  double puFat = 0.0;
+  // 对应卡路里数量
+  double calorie = 0.0;
+  // 三餐的能量数
+  double bfEnergy = 0.0;
+  double lunchEnergy = 0.0;
+  double dinnerEnergy = 0.0;
+  double otherEnergy = 0.0;
+  // 三餐的卡路里数
+  double bfCalorie = 0.0;
+  double lunchCalorie = 0.0;
+  double dinnerCalorie = 0.0;
+  double otherCalorie = 0.0;
+}

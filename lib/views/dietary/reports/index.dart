@@ -1,7 +1,5 @@
 // ignore_for_file: avoid_print
 
-import 'dart:developer';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -29,7 +27,8 @@ class _DietaryReportsState extends State<DietaryReports> {
   List<DailyFoodItemWithFoodServing> dfiwfsList = [];
 
   /// 根据日记条目整理的营养素VO信息
-  FoodNutrientVO fnVO = FoodNutrientVO.initWithZero();
+  /// ？？？暂时没做 类型不同：单日的是FoodNutrientTotals，单周的是Map<String, FoodNutrientTotals>
+  FoodNutrientTotals fnVO = FoodNutrientTotals();
 
   // RDA 的值应该在用户配置表里面带出来，在init的时候赋值。现在没有实现所以列个示例在这里
   int valueRDA = 0;
@@ -117,97 +116,93 @@ class _DietaryReportsState extends State<DietaryReports> {
 
     print("queryDateRange--$queryDateRange ${temp.length}");
 
-    log("---------测试查询的当前日记item $temp");
+    // log("---------测试查询的当前日记item $temp");
 
     setState(() {
       dfiwfsList = temp;
+
+      // ？？？注意：这个判断还要改，有常量这里还是魔法值来判断
+      // 不是查询昨天、今天，就是上周本周，显示的内容不一样。
+      // if (dropdownValue.value == "today" ||
+      //     dropdownValue.value == "yesterday") {
+      //   fnVO = formatData(dfiwfsList);
+      // } else {
+      //   fnVO = formatWeekData(dfiwfsList);
+      // }
       fnVO = formatData(dfiwfsList);
+      // 这里一周7条时，应该换成柱状图，数据处理有了，图暂时没做
+
       isLoading = false;
     });
   }
 
-  formatData(List<DailyFoodItemWithFoodServing> list) {
-    var tempEnergy = 0.0;
-    var tempProtein = 0.0;
-    var tempFat = 0.0;
-    var tempCHO = 0.0;
-    // 这几个在底部总计可能用到
-    var tempSodium = 0.0;
-    var tempCholesterol = 0.0;
-    var tempPotassium = 0.0;
-    var tempDietaryFiber = 0.0;
-    var tempSugar = 0.0;
-    var tempTransFat = 0.0;
-    var tempSaturatedFat = 0.0;
-    var tempPuF = 0.0;
-    var tempMuF = 0.0;
+  // 格式化饮食记录数据(单天)
+  FoodNutrientTotals formatData(List<DailyFoodItemWithFoodServing> list) {
+    var nt = FoodNutrientTotals();
 
-    // 按营养素分类统计总量
-    for (var e in list) {
-      var foodIntakeSize = e.dailyFoodItem.foodIntakeSize;
-      var servingInfo = e.servingInfo;
-      tempEnergy += foodIntakeSize * servingInfo.energy;
-      tempProtein += foodIntakeSize * servingInfo.protein;
-      tempFat += foodIntakeSize * servingInfo.totalFat;
-      tempCHO += foodIntakeSize * servingInfo.totalCarbohydrate;
-      tempSodium += foodIntakeSize * servingInfo.sodium;
-      tempCholesterol += foodIntakeSize * (servingInfo.cholesterol ?? 0);
-      tempDietaryFiber += foodIntakeSize * (servingInfo.dietaryFiber ?? 0);
-      tempPotassium += foodIntakeSize * (servingInfo.potassium ?? 0);
-      tempSugar += foodIntakeSize * (servingInfo.sugar ?? 0);
-      tempTransFat += foodIntakeSize * (servingInfo.transFat ?? 0);
-      tempSaturatedFat += foodIntakeSize * (servingInfo.saturatedFat ?? 0);
-      tempMuF += foodIntakeSize * (servingInfo.monounsaturatedFat ?? 0);
-      tempPuF += foodIntakeSize * (servingInfo.polyunsaturatedFat ?? 0);
-    }
+    for (var item in list) {
+      var foodIntakeSize = item.dailyFoodItem.foodIntakeSize;
+      var servingInfo = item.servingInfo;
+      var cate = item.dailyFoodItem.mealCategory;
 
-    var tempCalories = tempEnergy / oneCalToKjRatio;
-
-    var tempBreakfast = 0.0;
-    var tempLunch = 0.0;
-    var tempDinner = 0.0;
-    var tempOther = 0.0;
-    // 按餐次统计总量
-
-    for (var e in list) {
-      var foodIntakeSize = e.dailyFoodItem.foodIntakeSize;
-      var servingInfo = e.servingInfo;
-      if (e.dailyFoodItem.mealCategory == "breakfast") {
-        tempBreakfast += foodIntakeSize * servingInfo.energy;
-      } else if (e.dailyFoodItem.mealCategory == "lunch") {
-        tempLunch += foodIntakeSize * servingInfo.energy;
-      } else if (e.dailyFoodItem.mealCategory == "dinner") {
-        tempDinner += foodIntakeSize * servingInfo.energy;
-      } else if (e.dailyFoodItem.mealCategory == "other") {
-        tempOther += foodIntakeSize * servingInfo.energy;
+      // 按餐次统计总量
+      if (cate == "breakfast") {
+        nt.bfEnergy += foodIntakeSize * servingInfo.energy;
+      } else if (cate == "lunch") {
+        nt.lunchEnergy += foodIntakeSize * servingInfo.energy;
+      } else if (cate == "dinner") {
+        nt.dinnerEnergy += foodIntakeSize * servingInfo.energy;
+      } else if (cate == "other") {
+        nt.otherEnergy += foodIntakeSize * servingInfo.energy;
       }
+
+      // 按营养素分类统计总量
+      nt.energy += foodIntakeSize * servingInfo.energy;
+      nt.protein += foodIntakeSize * servingInfo.protein;
+      nt.totalFat += foodIntakeSize * servingInfo.totalFat;
+      nt.totalCHO += foodIntakeSize * servingInfo.totalCarbohydrate;
+      nt.sodium += foodIntakeSize * servingInfo.sodium;
+      nt.cholesterol += foodIntakeSize * (servingInfo.cholesterol ?? 0);
+      nt.dietaryFiber += foodIntakeSize * (servingInfo.dietaryFiber ?? 0);
+      nt.potassium += foodIntakeSize * (servingInfo.potassium ?? 0);
+      nt.sugar += foodIntakeSize * (servingInfo.sugar ?? 0);
+      nt.transFat += foodIntakeSize * (servingInfo.transFat ?? 0);
+      nt.saturatedFat += foodIntakeSize * (servingInfo.saturatedFat ?? 0);
+      nt.muFat += foodIntakeSize * (servingInfo.monounsaturatedFat ?? 0);
+      nt.puFat += foodIntakeSize * (servingInfo.polyunsaturatedFat ?? 0);
     }
 
-    print(
-        "tempBreakfast,tempLunch,tempDinner,tempOther $tempBreakfast,$tempLunch,$tempDinner,$tempOther");
+    // 对应总的卡路里输
+    nt.calorie = nt.energy / oneCalToKjRatio;
+    nt.bfCalorie = nt.bfEnergy / oneCalToKjRatio;
+    nt.lunchCalorie = nt.lunchEnergy / oneCalToKjRatio;
+    nt.dinnerCalorie = nt.dinnerEnergy / oneCalToKjRatio;
+    nt.otherCalorie = nt.otherEnergy / oneCalToKjRatio;
 
-    FoodNutrientVO fn = FoodNutrientVO(
-      energy: tempEnergy,
-      calorie: tempCalories,
-      protein: tempProtein,
-      totalFat: tempFat,
-      totalCarbohydrate: tempCHO,
-      sodium: tempSodium,
-      saturatedFat: tempSaturatedFat,
-      transFat: tempTransFat,
-      polyunsaturatedFat: tempPuF,
-      monounsaturatedFat: tempMuF,
-      sugar: tempSugar,
-      dietaryFiber: tempDietaryFiber,
-      cholesterol: tempCholesterol,
-      potassium: tempPotassium,
-      breakfastColories: tempBreakfast / oneCalToKjRatio,
-      lunchColories: tempLunch / oneCalToKjRatio,
-      dinnerColories: tempDinner / oneCalToKjRatio,
-      otherColories: tempOther / oneCalToKjRatio,
-    );
+    return nt;
+  }
 
-    return fn;
+  // 格式化饮食记录数据(一周7填)
+  Map<String, FoodNutrientTotals> formatWeekData(
+      List<DailyFoodItemWithFoodServing> list) {
+    // 按天拆分饮食记录条目，key是日期，value是当日的饮食记录
+    Map<String, List<DailyFoodItemWithFoodServing>> dailyListMap = {};
+
+    for (var el in dfiwfsList) {
+      var dateStr = el.dailyFoodItem.date;
+      dailyListMap.putIfAbsent(dateStr, () => []);
+      dailyListMap[dateStr]!.add(el);
+    }
+
+    // 再按天把拆分后的饮食记录条目整理成累计营养素信息，key是日期，value是 FoodNutrientTotals 类
+    Map<String, FoodNutrientTotals> tempMap = {};
+    dailyListMap.forEach((key, value) {
+      tempMap[key] = formatData(value);
+    });
+
+    print("查询一周的结果---$tempMap");
+
+    return tempMap;
   }
 
   @override
@@ -413,19 +408,21 @@ class _DietaryReportsState extends State<DietaryReports> {
 
   // 日期范围餐次图例
   _buildMealCaloriePieLegend() {
-    double total = fnVO.breakfastColories! +
-        fnVO.lunchColories! +
-        fnVO.dinnerColories! +
-        fnVO.otherColories!;
+    double total = fnVO.bfCalorie +
+        fnVO.lunchCalorie +
+        fnVO.dinnerCalorie +
+        fnVO.otherCalorie;
+
+    print("total---------$total");
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildLegendItem(Colors.grey, '早餐', fnVO.breakfastColories!, total),
-        _buildLegendItem(Colors.red, '午餐', fnVO.lunchColories!, total),
-        _buildLegendItem(Colors.green, '晚餐', fnVO.dinnerColories!, total),
-        _buildLegendItem(Colors.blue, '小食', fnVO.otherColories!, total),
+        _buildLegendItem(Colors.grey, '早餐', fnVO.bfCalorie, total),
+        _buildLegendItem(Colors.red, '午餐', fnVO.lunchCalorie, total),
+        _buildLegendItem(Colors.green, '晚餐', fnVO.dinnerCalorie, total),
+        _buildLegendItem(Colors.blue, '小食', fnVO.otherCalorie, total),
       ],
     );
   }
@@ -461,20 +458,20 @@ class _DietaryReportsState extends State<DietaryReports> {
         PieChartData(
           sections: [
             PieChartSectionData(
-              value: fnVO.breakfastColories,
+              value: fnVO.bfCalorie,
               color: Colors.grey,
               // title: '${percentage.toStringAsFixed(1)}%', // 将百分比显示在标题中
               // 没给指定title就默认是其value，所以有图例了就不显示标题
               showTitle: false,
             ),
             PieChartSectionData(
-                value: fnVO.lunchColories, color: Colors.red, showTitle: false),
+                value: fnVO.lunchCalorie, color: Colors.red, showTitle: false),
             PieChartSectionData(
-                value: fnVO.dinnerColories,
+                value: fnVO.dinnerCalorie,
                 color: Colors.green,
                 showTitle: false),
             PieChartSectionData(
-                value: fnVO.otherColories, color: Colors.blue, showTitle: false)
+                value: fnVO.otherCalorie, color: Colors.blue, showTitle: false)
           ],
         ),
       ),
