@@ -10,6 +10,7 @@ import '../../../common/utils/sqlite_db_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
 import 'action_config_dialog.dart';
+import 'action_detail.dart';
 import 'simple_exercise_list.dart';
 
 class ActionList extends StatefulWidget {
@@ -204,55 +205,56 @@ class _ActionListState extends State<ActionList> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // 在这里处理返回操作
-        // 更新变量值或执行需要的逻辑
-        return true; // 返回true表示允许返回
+        // 如果是编辑中，点击下方返回按钮取消编辑状态；如果不是编辑中，则返回上一页
+        if (_isEditing) {
+          // 取消时数据恢复原本的内容
+          await _getActionListByGroupId();
+          setState(() {
+            _isEditing = !_isEditing;
+          });
+          return false; // 返回true表示不返回上一页
+        } else {
+          // 在这里添加处理返回按钮的逻辑
+          Navigator.of(context).pop();
+          return true; // 返回true表示允许返回
+        }
       },
       child: Scaffold(
         appBar: AppBar(
           title: const Text('ActionList'),
-          // 如果是修改中，变为取消图标；否则就是默认的返回图标
-          leading: _isEditing
-              ? IconButton(
-                  icon: const Icon(Icons.cancel_outlined),
-                  onPressed: () async {
-                    // 取消时数据恢复原本的内容
-                    await _getActionListByGroupId();
-                    setState(() {
-                      _isEditing = !_isEditing;
-                    });
-                  },
-                )
-              : IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
-                    // 在这里添加处理返回按钮的逻辑
-                    Navigator.of(context).pop();
-                  },
-                ),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () async {
+              // 如果是编辑中，点击返回箭头取消编辑状态；如果不是编辑中，则返回上一页
+              if (_isEditing) {
+                // 取消时数据恢复原本的内容
+                await _getActionListByGroupId();
+                setState(() {
+                  _isEditing = !_isEditing;
+                });
+              } else {
+                // 在这里添加处理返回按钮的逻辑
+                Navigator.of(context).pop();
+              }
+            },
+          ),
           actions: <Widget>[
-            // if (_isEditing)
-            //   IconButton(
-            //     icon: const Icon(Icons.save),
-            //     onPressed: _onSavePressed,
-            //   ),
+            if (_isEditing)
+              IconButton(
+                icon: const Icon(Icons.cancel_outlined),
+                onPressed: () async {
+                  // 取消时数据恢复原本的内容
+                  await _getActionListByGroupId();
+                  setState(() {
+                    _isEditing = !_isEditing;
+                  });
+                },
+              ),
             IconButton(
               icon: Icon(_isEditing ? Icons.done : Icons.edit),
               onPressed: _isEditing ? _onSavePressed : _onEditPressed,
             ),
           ],
-          // actions: [
-          //   ElevatedButton(
-          //     style: ElevatedButton.styleFrom(
-          //       textStyle: TextStyle(fontSize: 16.sp),
-          //     ),
-          //     onPressed: () {
-          //       // 点击【编辑】后，才能对这个训练调整顺序、点击修改配置、删除、新增，同时图标变成【保存】
-          //       // 在点击保存后，不能拖动依旧修改，下方是正常的【开始】锻炼按钮，点击就开始跟练画面流程。
-          //     },
-          //     child: const Text('编辑'),
-          //   )
-          // ],
         ),
         body: isLoading
             ? buildLoader(isLoading)
@@ -341,6 +343,23 @@ class _ActionListState extends State<ActionList> {
                                         "修改时点击了action 指定卡片 ${adItem.exercise.countingMode}");
 
                                     _onConfigure(context, adItem, index);
+                                  }
+                                  if (!_isEditing) {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      // 设置滚动控制为true，子部件设置dialog的高度才有效，不然固定在9/16左右无法更多。
+                                      isScrollControlled: true,
+                                      builder: (BuildContext context) {
+                                        return ActionDetailDialog(
+                                          adItems: actionList,
+                                          adIndex: index,
+                                        );
+                                      },
+                                    ).then((value) {
+                                      print(
+                                          "-------打开action detail 弹窗后的返回 $value");
+                                      // 修改exercise之后，重新加载列表
+                                    });
                                   }
                                 },
                                 trailing: _isEditing

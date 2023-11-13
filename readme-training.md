@@ -140,5 +140,5 @@
 - 基本完成了从训练中新增或点击指定训练，进入动作列表，对动作列表的动作进行修改、删除、新增、调整顺序的功能逻辑。
 - 待完成
   - 流程走通了，页面非常粗糙，很多的地方只是占位，没有实际实现。
-  - action list 中点击修改按钮后，再点击某个指定 action 是进入 action config 弹窗；但还应该正常点击时进入 action detail 弹窗，并且想之前的 exercise list 一样可以上下条切换。
+  - (**2023-11-13 完成**) action list 中点击修改按钮后，再点击某个指定 action 是进入 action config 弹窗；但还应该正常点击时进入 action detail 弹窗，并且想之前的 exercise list 一样可以上下条切换。
     - 参考实现：传入 action list 以及对应的 index。

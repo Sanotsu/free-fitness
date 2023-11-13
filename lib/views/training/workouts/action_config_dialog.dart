@@ -64,7 +64,7 @@ void showConfigDialog(
                 onConfigurationDialogClosed(index, ad);
               }
             },
-            label: Text('增加', style: TextStyle(fontSize: 20.sp)),
+            label: Text('保存', style: TextStyle(fontSize: 20.sp)),
           ),
         ),
       ),
