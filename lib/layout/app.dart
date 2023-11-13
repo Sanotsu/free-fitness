@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../views/dietary/records/index.dart';
 import '../views/dietary/reports/index.dart';
+import '../views/dietary/settings/index.dart';
 import 'home.dart';
 
 class FreeFitnessApp extends StatelessWidget {
@@ -71,6 +72,8 @@ class FreeFitnessApp extends StatelessWidget {
                 ),
                 builder: (_) => const DietaryReports(),
               );
+            } else if (settings.name == "/dietarySettings") {
+              return MaterialPageRoute(builder: (_) => const DietarySettings());
             } else if (settings.name == "/") {
               // 可带上自定义参数
               return MaterialPageRoute(builder: (_) => const HomePage());

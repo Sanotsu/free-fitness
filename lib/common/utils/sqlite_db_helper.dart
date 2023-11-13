@@ -264,9 +264,12 @@ class DBDietaryHelper {
 
   // 创建训练数据库相关表
   void _createDb(Database db, int newVersion) async {
+    print("开始创建表 _createDb……");
     await db.execute(DietaryDdl.ddlForFood);
     await db.execute(DietaryDdl.ddlForServingInfo);
     await db.execute(DietaryDdl.ddlForDailyFoodItem);
+    await db.execute(DietaryDdl.ddlForDietaryUser);
+    await db.execute(DietaryDdl.ddlForIntakeDailyGoal);
   }
 
   // 关闭数据库
@@ -715,5 +718,83 @@ class DBDietaryHelper {
     }
 
     return dfiwfsList;
+  }
+
+  // 查询用户
+  // ？？？现在就是显示登录用户信息，用户密码登录成功之后记住信息？(缓存还不太懂，这里就账号密码id查询)
+  Future<DietaryUser> queryDietaryUser({
+    int? userId,
+    String? userName,
+    String? password,
+  }) async {
+    Database db = await database;
+
+    var where = [];
+    var whereArgs = [];
+
+    if (userId != null) {
+      where.add(" user_id = ? ");
+      whereArgs.add(userId);
+    }
+    if (userName != null) {
+      where.add(" user_name = ? ");
+      whereArgs.add(userName);
+    }
+    if (password != null) {
+      where.add(" password = ? ");
+      whereArgs.add(password);
+    }
+
+    final userRows = await db.query(
+      DietaryDdl.tableNameOfDietaryUser,
+      where: where.join(" AND "),
+      whereArgs: whereArgs,
+    );
+
+    final userlist = userRows.map((row) => DietaryUser.fromMap(row)).toList();
+
+    return userlist[0];
+  }
+
+  // 批量插入用户(有单条的，也放到list)
+  Future<List<Object?>> insertDietaryUserList(
+    List<DietaryUser> userList,
+  ) async {
+    Database db = await database;
+
+    var batch = db.batch();
+    for (var item in userList) {
+      batch.insert(DietaryDdl.tableNameOfDietaryUser, item.toMap());
+    }
+
+    var results = await batch.commit();
+
+    return results;
+  }
+
+  // 修改单条 dietaryUser
+  Future<int> updateDietaryUser(DietaryUser user) async {
+    Database db = await database;
+
+    var result = await db.update(
+      DietaryDdl.tableNameOfDietaryUser,
+      user.toMap(),
+      where: 'user_id = ?',
+      whereArgs: [user.userId],
+    );
+
+    print("updateDietaryUser--------的返回 $result $user");
+    return result;
+  }
+
+  // 删除单条 dietaryUser
+  Future<int> deleteDietaryUser(int userId) async {
+    Database db = await database;
+    var result = await db.delete(
+      DietaryDdl.tableNameOfDietaryUser,
+      where: "user_id = ?",
+      whereArgs: [userId],
+    );
+    return result;
   }
 }
