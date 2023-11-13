@@ -8,7 +8,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../common/utils/sqlite_db_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
-import 'action_configuration.dart';
 
 class SimpleExerciseList extends StatefulWidget {
   // 进此页面的来源有两个，返回的页面也会不一样
@@ -214,39 +213,25 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
                       onTap: () {
                         // 在这里添加你想要执行的点击事件逻辑
                         print('Row clicked--widget.source ${widget.source}');
-                        Navigator.push(
+
+                        Navigator.pop(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => ActionConfiguration(
-                              // item 是这里选择的那个运动
-                              item: exerciseItem,
-                              // source应该是父组件传的，来源可能是 训练计划列表 或者 指定训练计划的动作列表
-                              source: widget.source,
-                            ),
-                          ),
-                        ).then((value) {
-                          print(
-                              "如果这里的value有相关属性，根据起止，看是不是在pop到上层action list,还是跳转到新页面action list");
-                          // Navigator.pop(context, "parent widget map?");
-
-                          // 注意，如果这里只是单纯的push到action list话，在action list点击返回，就回到这里了
-                          // 应该不是单纯的push，要其他的方式
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => const ActionList(),
-                          //   ),
-                          // );
-
-                          // 如果是pushReplacement的话，那么在action list也要对应设置，否则可能略过workout的index，直接到training的index去了
-                          // 要改的可能就是默认的返回按钮和appbar那个返回简单吧，具体逻辑不清楚
-                          // Navigator.pushReplacement(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => const ActionList(),
-                          //   ),
-                          // );
-                        });
+                          {"selectedExerciseItem": exerciseItem},
+                        );
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => ActionConfiguration(
+                        //       // item 是这里选择的那个运动
+                        //       item: exerciseItem,
+                        //       // source应该是父组件传的，来源可能是 训练计划列表 或者 指定训练计划的动作列表
+                        //       source: widget.source,
+                        //     ),
+                        //   ),
+                        // ).then((value) {
+                        //   print(
+                        //       "如果这里的value有相关属性，根据起止，看是不是在pop到上层action list,还是跳转到新页面action list");
+                        // });
                       },
                       child: Row(
                         children: [
@@ -291,75 +276,6 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
                       ),
                     ),
                   );
-
-                  // card中的listtile布局方便，但是图片放在trailing很小，还没办法放大
-                  /*
-                  return Card(
-                    child: Column(
-                      // mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        ListTile(
-                          leading: const Icon(Icons.add_circle_outline_rounded),
-                          title: Text(
-                            "$index-${exerciseItem.exerciseName}",
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 2,
-                            style: TextStyle(
-                                fontSize: 16.sp, fontWeight: FontWeight.bold),
-                          ),
-                          trailing: AspectRatio(
-                            aspectRatio: 1,
-                            child: SizedBox(
-                              height: 100.sp,
-                              child: Image.file(
-                                File(imageUrl),
-                                fit: BoxFit.fill, // 使用Fill填充方式
-                                errorBuilder: (BuildContext context,
-                                    Object exception, StackTrace? stackTrace) {
-                                  return Image.asset(
-                                    placeholderImageUrl,
-                                    fit: BoxFit.fill,
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const ActionConfiguration(),
-                              ),
-                            ).then((value) {
-                              print(
-                                  "如果这里的value有相关属性，根据起止，看是不是在pop到上层action list,还是跳转到新页面action list");
-                              // Navigator.pop(context, "parent widget map?");
-
-                              // 注意，如果这里只是单纯的push到action list话，在action list点击返回，就回到这里了
-                              // 应该不是单纯的push，要其他的方式
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) => const ActionList(),
-                              //   ),
-                              // );
-
-                              // 如果是pushReplacement的话，那么在action list也要对应设置，否则可能略过workout的index，直接到training的index去了
-                              // 要改的可能就是默认的返回按钮和appbar那个返回简单吧，具体逻辑不清楚
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ActionList(),
-                                ),
-                              );
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                  */
                 }
               },
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// 用于动作配置时显示次数或者持续时间
 ///
@@ -54,13 +55,16 @@ class _CounterWidgetState extends State<CounterWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // ？？？这里没有限制边框自适应，如果太窄，可能会溢出
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         IconButton(
-          icon: const Icon(
-            Icons.remove_circle_outline,
-            size: 36,
+          icon: Icon(
+            Icons.remove_circle,
+            size: 24.sp,
+            color: Colors.green,
           ),
           // 最小值10秒或者1次，就不允许再点击
           onPressed: _count > (_isTimeMode ? 10 : 1)
@@ -71,12 +75,13 @@ class _CounterWidgetState extends State<CounterWidget> {
         ),
         Text(
           _isTimeMode ? _formatTime(_count) : _count.toString().padLeft(2, '0'),
-          style: const TextStyle(fontSize: 36.0),
+          style: TextStyle(fontSize: 28.0.sp, fontWeight: FontWeight.bold),
         ),
         IconButton(
-          icon: const Icon(
-            Icons.add_circle_outline,
-            size: 36,
+          icon: Icon(
+            Icons.add_circle,
+            size: 24.sp,
+            color: Colors.green,
           ),
           // 最大值300秒或者100次，就不允许再点击
           onPressed: _count < (_isTimeMode ? 300 : 100)

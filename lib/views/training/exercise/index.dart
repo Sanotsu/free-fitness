@@ -385,7 +385,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                                     Padding(
                                       padding: EdgeInsets.all(10.sp),
                                       child: Text(
-                                        "$index-${exerciseItem.exerciseName}",
+                                        "$index-${exerciseItem.exerciseId}-${exerciseItem.exerciseName}",
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
                                         style: TextStyle(
@@ -409,9 +409,9 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                                     //   equipmentOptions,
                                     // ),
                                     _buildCardPadding(
-                                      "耗时：",
-                                      exerciseItem.standardDuration ?? "",
-                                      standardDurationOptions,
+                                      "计量：",
+                                      exerciseItem.countingMode,
+                                      countingOptions,
                                     ),
                                   ],
                                 ),

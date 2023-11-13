@@ -20,8 +20,7 @@ class TrainingDdl {
   static const tableNameOfAction = 'ff_action';
   // 动作组表
   static const tableNameOfGroup = 'ff_group';
-  // 动作组-动作关系表
-  static const tableNameOfGroupHasAction = 'ff_group_has_action';
+
   // 训练计划基础表
   static const tableNameOfPlan = 'ff_plan';
   // 训练计划-动作组关系表
@@ -60,43 +59,27 @@ class TrainingDdl {
   static const String ddlForAction = """
     CREATE TABLE $tableNameOfAction (
       action_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-      action_code TEXT UNIQUE NOT NULL,
-      action_name TEXT UNIQUE NOT NULL,
-      exercise_id INTEGER,
+      group_id INTEGER  NOT NULL,
+      exercise_id INTEGER NOT NULL,
       frequency INTEGER,
       duration  INTEGER,
-      rest_interval  INTEGER,
-      equipment_weight  TEXT,
-      action_level TEXT,
-      description  REAL,
-      contributor TEXT,
-      gmt_create  TEXT,
-      gmt_modified  TEXT
+      equipment_weight REAL
     );
     """;
 
   static const String ddlForGroup = """
     CREATE TABLE $tableNameOfGroup (
       group_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-      group_code TEXT UNIQUE NOT NULL,
       group_name TEXT UNIQUE NOT NULL,
-      group_category TEXT,
-      group_level TEXT,
+      group_category TEXT NOT NULL,
+      group_level TEXT NOT NULL,
+      rest_interval INTEGER,
       consumption INTEGER,
       time_spent INTEGER,
       description TEXT,
       contributor TEXT,
       gmt_create TEXT,
       gmt_modified TEXT
-    );
-    """;
-
-  static const String ddlForGroupHaAction = """
-    CREATE TABLE $tableNameOfGroupHasAction (
-      group_has_action_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-      group_id INTEGER,
-      action_id INTEGER,
-      action_order INTEGER
     );
     """;
 

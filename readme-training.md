@@ -107,3 +107,38 @@
 - 新增训练计划 group list -> new group form -> 空 action list -> 带入 group id 进入 simple exercise list -> action config => 返回旧的 action list
 - 旧训练计划新增动作配置 group list -> 指定 action list -> 带入 group id 进入 simple exercise list -> action config => 返回旧的 action list
 - 旧训练计划修改动作配置 group list > action list > action config => 返回旧的 action list
+
+#### 2023-11-10
+
+后续 exercise 称为**运动**，action 称为**动作**， group/workout 称为**训练**，plan 称为**计划**，整个模块 training 称为**锻炼**。
+
+【注意】：看看 action config 从一个页面，换成一个 dailog 看看，能不能解决 pop 两次的问题？？
+
+基本完成 训练主页面点击某想训练进入动作列表
+
+待完成：
+
+- 训练中查询动作列表时，要按照 group id 来排序；当修改该 group id 中的 action 顺序时，点击保存则把每个对应 action 的 action id 替换为当前的 index，然后按 group id 删除已存在的 action，再新增重新排序的 action。
+  - 注意，修改除了移动顺序，还行修改配置（时间次数重量等）、删除、新增（弹窗的方式），在点击保存时再重新先删除后新增。
+
+#### 2023-11-12
+
+- 基本完成 action list 中修改、移动顺序、删除的展示（**还没有实现保存修改数据库数据的逻辑**）
+
+  - 这个保存全部删除旧的再新增新的列表的话，如何指定存入 action 编号？
+
+    - 还是说顺序批量保存的，让数据库的自增应该不会出现乱序的？也就是一定不会异步插入？
+
+  - 待完成：
+    - action list 中新增 action 的逻辑。
+      - 点击新增->跳到 simple exercise list 页面 -> 选中某个 exercise，带数据返回 action list -> 关闭 simple exercise list 页面的同时，展开 action config 弹窗，带入数据，进行配置。
+      - 注意，action config 弹窗可能没法全部复用，因为传入的内容参数不一样，也不存在 actiondetail 数据，看怎么修改：
+        - 是弹窗前 new 一个 ActionDetail 还是写两个不同参数的弹窗。
+
+#### 2023-11-13
+
+- 基本完成了从训练中新增或点击指定训练，进入动作列表，对动作列表的动作进行修改、删除、新增、调整顺序的功能逻辑。
+- 待完成
+  - 流程走通了，页面非常粗糙，很多的地方只是占位，没有实际实现。
+  - action list 中点击修改按钮后，再点击某个指定 action 是进入 action config 弹窗；但还应该正常点击时进入 action detail 弹窗，并且想之前的 exercise list 一样可以上下条切换。
+    - 参考实现：传入 action list 以及对应的 index。

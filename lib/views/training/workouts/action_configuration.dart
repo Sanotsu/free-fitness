@@ -8,7 +8,6 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:free_fitness/models/training_state.dart';
-import 'package:free_fitness/views/training/workouts/action_list.dart';
 
 import '../../../common/global/constants.dart';
 import 'counter_widget.dart';
@@ -366,18 +365,14 @@ class _ActionConfigurationState extends State<ActionConfiguration> {
 
               print('temp?["equipment_weight"] --${temp?["equipment_weight"]}');
 
-              var tempAction = TrainingAction(
-                actionCode: temp?["action_code"],
-                actionName: temp?["action_name"],
-                exerciseId: _currentItem.exerciseId!,
-                frequency: _count,
-                duration: _timeInSeconds,
-                equipmentWeight: double.parse(temp?["equipment_weight"]),
-                actionLevel: temp?["action_level"],
-                description: temp?["description"],
-                contributor: "<登录用户>",
-                gmtCreate: temp?["action_code"],
-              );
+              // var tempAction = TrainingAction(
+              //   // actionId:1, // 自增的，不传
+              //   groupId: 1,
+              //   exerciseId: _currentItem.exerciseId!,
+              //   frequency: _count,
+              //   duration: _timeInSeconds,
+              //   equipmentWeight: double.parse(temp?["equipment_weight"]),
+              // );
 
 // =========== 这里逻辑变了，不在action config插入数据库，新增训练计划时，也把action传到action list去，
 
@@ -392,14 +387,6 @@ class _ActionConfigurationState extends State<ActionConfiguration> {
 
               /// 全新训练计划一步步到这里
               if (widget.source == "") {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ActionList(
-                      actionItem: tempAction,
-                    ),
-                  ),
-                );
               } else if (widget.source == "action_modify") {
                 // 剩下就是在action list中点击已存在的action进行修改，直接返回就好
                 // 父组件应该重新加载(传参到父组件中重新加载)

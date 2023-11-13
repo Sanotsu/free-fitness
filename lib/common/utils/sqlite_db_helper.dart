@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:sqflite/sqflite.dart';
@@ -48,7 +49,6 @@ class DBTrainHelper {
     await db.execute(TrainingDdl.ddlForExercise);
     await db.execute(TrainingDdl.ddlForAction);
     await db.execute(TrainingDdl.ddlForGroup);
-    await db.execute(TrainingDdl.ddlForGroupHaAction);
     await db.execute(TrainingDdl.ddlForPlan);
     await db.execute(TrainingDdl.ddlForPlanHasGroup);
     await db.execute(TrainingDdl.ddlForUser);
@@ -253,44 +253,213 @@ class DBTrainHelper {
 
     final list = maps.map((row) => Exercise.fromMap(row)).toList();
 
-    // var list = List.generate(maps.length, (i) {
-    //   return Exercise(
-    //     exerciseId: maps[i]['exercise_id'],
-    //     exerciseCode: maps[i]['exercise_code'],
-    //     exerciseName: maps[i]['exercise_name'],
-    //     force: maps[i]['force'],
-    //     level: maps[i]['level'],
-    //     mechanic: maps[i]['mechanic'],
-    //     equipment: maps[i]['equipment'],
-    //     // ？？？明明sql语句设置了默认值，但是不传还是null
-    //     standardDuration: maps[i]['standard_duration'] ?? "1",
-    //     instructions: maps[i]['instructions'],
-    //     ttsNotes: maps[i]['tts_notes'],
-    //     category: maps[i]['category'],
-    //     primaryMuscles: maps[i]['primary_muscles'],
-    //     secondaryMuscles: maps[i]['secondary_muscles'],
-    //     images: maps[i]['images'],
-    //     // ？？？明明sql语句设置了默认值，但是不传还是null
-    //     isCustom: maps[i]['is_custom'] ?? '0',
-    //     contributor: maps[i]['contributor'],
-    //     gmtCreate: maps[i]['gmt_create'],
-    //     gmtModified: maps[i]['gmt_modified'],
-    //   );
-    // });
-
     print(list);
 
     return list;
   }
 
-  // 插入单条数据
-  Future<int> insertTrainingAction(TrainingAction action) async {
+  ///----------------------- group and action
+
+  // 插入单条训练
+  // 因为新增group没有给主键，而主键是自增的，所以这里返回的row id就是新增主键的group_id
+  Future<int> insertTrainingGroup(TrainingGroup group) async {
     Database db = await database;
     var result = await db.insert(
-      TrainingDdl.tableNameOfAction,
-      action.toMap(),
+      TrainingDdl.tableNameOfGroup,
+      group.toMap(),
     );
     return result;
+  }
+
+  // 查询指定训练以及其所有动作
+  // 训练支持条件查询，估计训练的数量不会多，就暂时不分页；同事关联的动作就全部带出。
+  Future<List<GroupWithActions>> searchGroupWithActions({
+    int? groupId,
+    String? groupName, // 模糊查询
+    String? groupCategory, // 分类和级别最好是下拉选择的结果，用精确查询
+    String? groupLevel,
+  }) async {
+    final db = await database;
+
+    var where = [];
+    var whereArgs = [];
+
+    if (groupId != null) {
+      where.add("group_id =? ");
+      whereArgs.add(groupId);
+    }
+    if (groupName != null) {
+      where.add("groupName  like ? ");
+      whereArgs.add("%$groupName%");
+    }
+    if (groupCategory != null) {
+      where.add("group_category =? ");
+      whereArgs.add(groupCategory);
+    }
+    if (groupLevel != null) {
+      where.add("grouplevel =? ");
+      whereArgs.add(groupLevel);
+    }
+
+    List<Map<String, Object?>> groupRows;
+
+    if (where.isEmpty) {
+      groupRows = await db.query(TrainingDdl.tableNameOfGroup);
+    } else {
+      groupRows = await db.query(
+        TrainingDdl.tableNameOfGroup,
+        where: where.join(" AND "),
+        whereArgs: whereArgs,
+      );
+    }
+
+    final list = <GroupWithActions>[];
+
+    for (final row in groupRows) {
+      final group = TrainingGroup.fromMap(row);
+      final actionRows = await db.query(
+        TrainingDdl.tableNameOfAction,
+        where: 'group_id = ?',
+        whereArgs: [group.groupId],
+      );
+
+      final adList = <ActionDetail>[];
+
+      for (final r in actionRows) {
+        final action = TrainingAction.fromMap(r);
+        final exerciseRows = await db.query(
+          TrainingDdl.tableNameOfExercise,
+          where: 'exercise_id = ?',
+          whereArgs: [action.exerciseId],
+        );
+
+        // ？？？理论上这里只有查到1个exercise，且不应该差不多(暂不考虑异常情况)
+        var ad = ActionDetail(
+          action: action,
+          exercise: Exercise.fromMap(exerciseRows[0]),
+        );
+
+        adList.add(ad);
+      }
+      final gas = GroupWithActions(group: group, actionDetailList: adList);
+
+      list.add(gas);
+    }
+
+    log("searchAllGroupWithActions---$list");
+    return list;
+  }
+
+  // 插入动作组（单条也当数组插入）
+  Future<List<Object?>> insertTrainingActionList(
+    List<TrainingAction> actionList,
+  ) async {
+    Database db = await database;
+
+    var batch = db.batch();
+    for (var item in actionList) {
+      batch.insert(TrainingDdl.tableNameOfAction, item.toMap());
+    }
+
+    var results = await batch.commit();
+
+    return results;
+  }
+
+  // 更新指定训练的所有动作(删除所有已有的，新增传入的)
+  Future<List<Object?>> renewGroupWithActionsList(
+    int groupId,
+    List<TrainingAction> actionList,
+  ) async {
+    Database db = await database;
+
+    List<Object?> rst = [];
+
+    await db.transaction((txn) async {
+      await txn.delete(
+        TrainingDdl.tableNameOfAction,
+        where: "group_id =? ",
+        whereArgs: [groupId],
+      );
+
+      var batch = txn.batch();
+      for (var item in actionList) {
+        batch.insert(TrainingDdl.tableNameOfAction, item.toMap());
+      }
+
+      rst = await batch.commit();
+    });
+
+    return rst;
+  }
+
+  Future<List<GroupWithActions>> searchAllGroupWithActions2({
+    int? groupId,
+    String? groupName,
+    String? groupCategory,
+    String? groupLevel,
+  }) async {
+    final db = await database;
+
+    final whereList = <String>[];
+    final whereArgs = <dynamic>[];
+
+    if (groupId != null) {
+      whereList.add("group_id = ?");
+      whereArgs.add(groupId);
+    }
+    if (groupName != null) {
+      whereList.add("group_name  like ?");
+      whereArgs.add("%$groupName%");
+    }
+    if (groupCategory != null) {
+      whereList.add("group_category = ?");
+      whereArgs.add(groupCategory);
+    }
+    if (groupLevel != null) {
+      whereList.add("group_level = ?");
+      whereArgs.add(groupLevel);
+    }
+
+    final whereClause = whereList.isEmpty ? null : whereList.join(" AND ");
+
+    final groupRows = await db.query(
+      TrainingDdl.ddlForGroup,
+      where: whereClause,
+      whereArgs: whereClause == null ? null : whereArgs,
+    );
+
+    final list = <GroupWithActions>[];
+
+    await Future.forEach(groupRows, (row) async {
+      final group = TrainingGroup.fromMap(row);
+      final actionRows = await db.query(
+        TrainingDdl.tableNameOfAction,
+        where: 'group_id = ?',
+        whereArgs: [group.groupId],
+      );
+
+      final adList = <ActionDetail>[];
+
+      await Future.forEach(actionRows, (r) async {
+        final action = TrainingAction.fromMap(r);
+        final exerciseRow = await db.query(
+          TrainingDdl.tableNameOfExercise,
+          where: 'exercise_id = ?',
+          whereArgs: [action.exerciseId],
+        );
+        var ad = ActionDetail(
+          action: action,
+          exercise: Exercise.fromMap(exerciseRow[0]),
+        );
+        adList.add(ad);
+      });
+
+      final gas = GroupWithActions(group: group, actionDetailList: adList);
+      list.add(gas);
+    });
+
+    return list;
   }
 }
 
