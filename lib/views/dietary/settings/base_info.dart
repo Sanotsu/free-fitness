@@ -20,7 +20,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final List<String> genders = ['男', '女', '其他'];
+  final List<String> genders = ['男', '女', '雷霆战机', '其他'];
   String selectedGender = "";
 
   final TextEditingController heightController = TextEditingController();

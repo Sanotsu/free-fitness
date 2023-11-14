@@ -747,8 +747,8 @@ class DBDietaryHelper {
 
     final userRows = await db.query(
       DietaryDdl.tableNameOfDietaryUser,
-      where: where.join(" AND "),
-      whereArgs: whereArgs,
+      where: where.isNotEmpty ? where.join(" AND ") : null,
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
     );
 
     final userlist = userRows.map((row) => DietaryUser.fromMap(row)).toList();
@@ -796,5 +796,91 @@ class DBDietaryHelper {
       whereArgs: [userId],
     );
     return result;
+  }
+
+  // 查询用户带上每周具体摄入目标
+  // ？？？现在就是显示登录用户信息，用户密码登录成功之后记住信息？(缓存还不太懂，这里就账号密码id查询)
+  Future<DietaryUserWithIntakeDailyGoal> queryDietaryUserWithIntakeGoal({
+    int? userId,
+    String? userName,
+    String? password,
+  }) async {
+    Database db = await database;
+
+    var where = [];
+    var whereArgs = [];
+
+    if (userId != null) {
+      where.add(" user_id = ? ");
+      whereArgs.add(userId);
+    }
+    if (userName != null) {
+      where.add(" user_name = ? ");
+      whereArgs.add(userName);
+    }
+    if (password != null) {
+      where.add(" password = ? ");
+      whereArgs.add(password);
+    }
+
+    final userRows = await db.query(
+      DietaryDdl.tableNameOfDietaryUser,
+      where: where.isNotEmpty ? where.join(" AND ") : null,
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
+    );
+
+    final userlist = userRows.map((row) => DietaryUser.fromMap(row)).toList();
+
+    final intakeGoalRows = await db.query(
+      DietaryDdl.tableNameOfIntakeDailyGoal,
+      where: "user_id = ? ",
+      whereArgs: [userlist[0].userId],
+    );
+
+    List<IntakeDailyGoal> goals =
+        intakeGoalRows.map((row) => IntakeDailyGoal.fromMap(row)).toList();
+
+    DietaryUserWithIntakeDailyGoal temp =
+        DietaryUserWithIntakeDailyGoal(goals: goals, user: userlist[0]);
+
+    return temp;
+  }
+
+  // 修改用户的周摄入宏量素目标
+  Future<int> updateUserIntakeDailyGoal(List<IntakeDailyGoal> goals) async {
+    Database db = await database;
+
+    int rst = 0;
+
+    try {
+      await db.transaction((txn) async {
+        for (var goal in goals) {
+          List<Map<String, dynamic>> result = await txn.query(
+            DietaryDdl.tableNameOfIntakeDailyGoal,
+            where: 'user_id = ? and day_of_week = ?',
+            whereArgs: [goal.userId, goal.dayOfWeek],
+          );
+          if (result.isNotEmpty) {
+            rst = await txn.update(
+              DietaryDdl.tableNameOfIntakeDailyGoal,
+              goal.toMap(),
+              where: 'user_id = ? and day_of_week = ?',
+              whereArgs: [goal.userId, goal.dayOfWeek],
+            );
+          } else {
+            rst = await txn.insert(
+              DietaryDdl.tableNameOfIntakeDailyGoal,
+              goal.toMap(),
+            );
+          }
+        }
+      });
+    } catch (e) {
+      // Handle the error
+      print('Error inserting food with serving info: $e');
+      // 抛出异常来触发回滚的方式是 sqflite 中常用的做法
+      rethrow;
+    }
+    return rst;
   }
 }

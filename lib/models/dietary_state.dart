@@ -507,19 +507,21 @@ class FoodNutrientTotals {
 
 // 带有饮食摄入目标的用户信息
 class DietaryUserWithIntakeDailyGoal {
+  // 用户基本信息
   DietaryUser user;
-  List<IntakeDailyGoal> goal;
+  // 一个用户最多有周一到周日7条每日摄入目标设定值
+  List<IntakeDailyGoal> goals;
 
   DietaryUserWithIntakeDailyGoal({
     required this.user,
-    required this.goal,
+    required this.goals,
   });
   @override
   String toString() {
     return '''
     DietaryUserWithIntakeDailyGoal{ 
       "user": $user,
-      "List<IntakeDailyGoal>": $goal
+      "List<IntakeDailyGoal>": $goals
     }
     ''';
   }

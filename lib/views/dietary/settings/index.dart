@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../common/utils/sqlite_db_helper.dart';
 import '../../../models/dietary_state.dart';
 import 'base_info.dart';
+import 'intake_target.dart';
 
 class DietarySettings extends StatefulWidget {
   const DietarySettings({super.key});
@@ -228,11 +229,23 @@ class _DietarySettingsState extends State<DietarySettings> {
                     },
                   ),
                   CusSettingCard(
-                    leadingIcon: Icons.photo_album_outlined,
+                    leadingIcon: Icons.flag_circle,
                     title: '摄入目标',
                     onTap: () {
                       // 处理相应的点击事件
-                      print("(点击进入相册页面)……");
+                      print("(点击进入摄入目标页面)……");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              IntakeTargetPage(userInfo: userInfo),
+                        ),
+                      ).then((value) {
+                        // 确认新增成功后重新加载当前日期的条目数据
+
+                        print("我的设置返回带过来的结果$value");
+                        _queryLoginedUserInfo();
+                      });
                     },
                   ),
                   CusSettingCard(

@@ -206,3 +206,18 @@ List<CusDropdownOption> dietaryReportDisplayModeList = [
   CusDropdownOption(label: "ThisWeek", name: "本周", value: "this_week"),
   CusDropdownOption(label: "Lastweek", name: "上周", value: "last_week"),
 ];
+
+// 摄入目标中用于每个星期的展示对象相关的类
+class CusMacro {
+  final int calory;
+  final double carbs;
+  final double fat;
+  final double protein;
+
+  CusMacro({
+    required this.calory,
+    required this.carbs,
+    required this.fat,
+    required this.protein,
+  });
+}
