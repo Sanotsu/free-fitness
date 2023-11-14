@@ -221,3 +221,27 @@ class CusMacro {
     required this.protein,
   });
 }
+
+// 自定义标签，和之前的自定义下拉选项就只是全部都必须；在常量map中常用
+// 常用来存英文、中文、全小写带下划线的英文
+class CusLabel {
+  final String enLabel;
+  final String cnLabel;
+  final dynamic value;
+
+  CusLabel({
+    required this.enLabel,
+    required this.cnLabel,
+    required this.value,
+  });
+}
+
+Map<int, CusLabel> weekdayStringMap = {
+  1: CusLabel(enLabel: "Mon", cnLabel: "周一", value: "monday"),
+  2: CusLabel(enLabel: "Tue", cnLabel: "周二", value: "tuesday"),
+  3: CusLabel(enLabel: "Wed", cnLabel: "周三", value: "wednesday"),
+  4: CusLabel(enLabel: "Thu", cnLabel: "周四", value: "thursday"),
+  5: CusLabel(enLabel: "Fri", cnLabel: "周五", value: "friday"),
+  6: CusLabel(enLabel: "Sat", cnLabel: "周六", value: "saturday"),
+  7: CusLabel(enLabel: "Sun", cnLabel: "周日", value: "sunday"),
+};

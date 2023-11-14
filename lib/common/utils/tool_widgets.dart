@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
+import '../global/constants.dart';
+
 //  hexadecimal color code 转为 material color
 MaterialColor buildMaterialColor(Color color) {
   List strengths = <double>[.05];
@@ -33,3 +35,7 @@ final List<int> points = <int>[0xe0b0, 0xe0b1, 0xe0b2, 0xe0b3, 0xe0b4];
 final Random r = Random();
 IconData genRandomIcon() =>
     IconData(r.nextInt(points.length), fontFamily: 'MaterialIcons');
+
+// 指定卡路里转化为千焦数值
+String caloryToKjStr(int calory) =>
+    "${(calory / oneCalToKjRatio).toStringAsFixed(2)} 千焦";

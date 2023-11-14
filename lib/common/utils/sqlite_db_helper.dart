@@ -860,7 +860,14 @@ class DBDietaryHelper {
             where: 'user_id = ? and day_of_week = ?',
             whereArgs: [goal.userId, goal.dayOfWeek],
           );
+          // 如果已存在，指定用户指定周几的目标值只有1条数据才对
           if (result.isNotEmpty) {
+            print(
+                "updateUserIntakeDailyGoal-------$result 修改已存在 ${goal.toMap()}");
+
+            var existed = IntakeDailyGoal.fromMap(result[0]);
+            goal.intakeDailyGoalId = existed.intakeDailyGoalId;
+
             rst = await txn.update(
               DietaryDdl.tableNameOfIntakeDailyGoal,
               goal.toMap(),
@@ -868,6 +875,7 @@ class DBDietaryHelper {
               whereArgs: [goal.userId, goal.dayOfWeek],
             );
           } else {
+            print("updateUserIntakeDailyGoal-------新增不存在");
             rst = await txn.insert(
               DietaryDdl.tableNameOfIntakeDailyGoal,
               goal.toMap(),
