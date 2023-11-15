@@ -10,6 +10,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/sqlite_db_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/dietary_state.dart';
+import 'week_intake_bar_chart.dart';
 
 class IntakeTargetPage extends StatefulWidget {
   final DietaryUser userInfo;
@@ -51,6 +52,14 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
     6: CusMacro(calory: 2250, carbs: 120, fat: 25, protein: 60),
     7: CusMacro(calory: 2250, carbs: 120, fat: 25, protein: 60),
   };
+
+// ----------------------
+
+  // 模拟数据
+  final List<double> calorieData = [2000, 1800, 2200, 2500, 1900, 2300, 2100];
+  final List<double> fatData = [50, 45, 55, 60, 48, 58, 52];
+  final List<double> proteinData = [80, 75, 85, 90, 78, 88, 82];
+  final List<double> carbData = [150, 140, 160, 170, 145, 165, 155];
 
   @override
   void initState() {
@@ -146,8 +155,53 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
             buildEditMacrosCard(),
             // 定制一周7天的卡路里和宏量素
             buildEditWeekMacrosCard(),
+            // 一周7天的摄入宏量素目标条状图
+            buildEditWeekMacrosBarChartCard(),
             // 底部稍微一点空隙来显示卡片阴影
-            SizedBox(height: 20.sp)
+            SizedBox(height: 20.sp),
+          ],
+        ),
+      ),
+    );
+  }
+
+  buildEditWeekMacrosBarChartCard() {
+    return Card(
+      elevation: 10,
+      child: Padding(
+        padding: EdgeInsets.all(16.sp),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "每日宏量素目标图示",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                fontSize: 24.sp,
+                fontWeight: FontWeight.w400,
+                color: Colors.green,
+              ),
+            ),
+            SizedBox(height: 10.sp),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(width: 16.sp, height: 16.sp, color: Colors.grey),
+                SizedBox(width: 8.sp),
+                const Text("碳水"),
+                SizedBox(width: 8.sp),
+                Container(width: 16.sp, height: 16.sp, color: Colors.red),
+                SizedBox(width: 8.sp),
+                const Text("脂肪"),
+                SizedBox(width: 8.sp),
+                Container(width: 16.sp, height: 16.sp, color: Colors.green),
+                SizedBox(width: 8.sp),
+                const Text("蛋白质")
+              ],
+            ),
+            SizedBox(height: 10.sp),
+            WeekIntakeBarChart(intakeData: intakeData),
           ],
         ),
       ),
