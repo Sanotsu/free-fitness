@@ -89,7 +89,8 @@ class TrainingDdl {
       plan_code TEXT UNIQUE NOT NULL,
       plan_name TEXT UNIQUE NOT NULL,
       plan_category TEXT,
-      plan_level  INTEGER,
+      plan_level  TEXT,
+      plan_period  INTEGER,
       description TEXT,
       contributor TEXT,
       gmt_create  TEXT,
@@ -102,7 +103,7 @@ class TrainingDdl {
       plan_has_group_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
       plan_id INTEGER,
       group_id INTEGER,
-      group_order INTEGER
+      day_number INTEGER
     );
     """;
 

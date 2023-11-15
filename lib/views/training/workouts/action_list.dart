@@ -221,7 +221,7 @@ class _ActionListState extends State<ActionList> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('ActionList'),
+          title: Text('ActionList ${actionList.length}个动作'),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -432,12 +432,29 @@ class _ActionListState extends State<ActionList> {
                     }
                   });
                 },
-                backgroundColor: Colors.yellow,
+                // backgroundColor: Colors.yellow,
                 child: const Icon(Icons.add),
               )
-            : null,
+            : SizedBox(
+                height: 50.sp,
+                width: 0.6.sw,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // 【点击开始跟练
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0), // 设置圆角
+                    ),
+                    backgroundColor: Colors.green,
+                  ),
+                  child: Text('开始', style: TextStyle(fontSize: 20.sp)),
+                ),
+              ),
         // 悬浮按钮位置
-        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        floatingActionButtonLocation: _isEditing
+            ? FloatingActionButtonLocation.endFloat
+            : FloatingActionButtonLocation.centerFloat,
       ),
     );
   }

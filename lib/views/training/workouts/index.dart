@@ -13,7 +13,12 @@ import 'action_list.dart';
 import 'modify_workouts_form.dart';
 
 class TrainingWorkouts extends StatefulWidget {
-  const TrainingWorkouts({super.key});
+  // 2023-11-15 这个页面复用，直接看【训练】模块不会传东西，
+  // 但在【计划】模块，指定计划的训练列表中新增时，则传一个标志过来。
+  // 当检测到这个标志时，点击指定行数据后就把这行数据返回到计划的新增页面去。
+  // 不是指定计划的新增，则使用正常逻辑。
+  final bool? isPlanAdd;
+  const TrainingWorkouts({super.key, this.isPlanAdd});
 
   @override
   State<TrainingWorkouts> createState() => _TrainingWorkoutsState();
@@ -39,6 +44,8 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
   final GlobalKey<FormBuilderState> _groupFormKey =
       GlobalKey<FormBuilderState>();
 
+  bool isPlanAddGroup = false;
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +56,8 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
 
     setState(() {
       getGroupList();
+      // 如果没有传这个标志，则不是计划新增训练调过来的；如果有传，取其bool值
+      isPlanAddGroup = (widget.isPlanAdd == null) ? false : widget.isPlanAdd!;
 
       demoGroupItem = TrainingGroup(
         groupId: 1,
@@ -181,24 +190,30 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                                   )),
                               trailing: const Icon(Icons.more_vert),
                               onTap: () {
-                                //  不传 GroupWithActions 类数据给 action list是因为：
-                                // 1 新增训练时，还没有group；2 而且进入action list页面后，还是会不时修改其实。
-                                // 所以还是直接传TrainingGroup，主要给子组件group id即可
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ActionList(
-                                      groupItem: groupItem.group,
+                                // 如果是计划新增训练跳转过来的，点击条目直接带值返回
+                                // (类型要一致，是GroupWithActions就好)
+                                if (isPlanAddGroup) {
+                                  Navigator.pop(context, groupItem);
+                                } else {
+                                  //  不传 GroupWithActions 类数据给 action list是因为：
+                                  // 1 新增训练时，还没有group；2 而且进入action list页面后，还是会不时修改其实。
+                                  // 所以还是直接传TrainingGroup，主要给子组件group id即可
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ActionList(
+                                        groupItem: groupItem.group,
+                                      ),
                                     ),
-                                  ),
-                                ).then((value) {
-                                  print("action list 返回的数据 $value");
-                                  // ？？？暂时返回这个页面时都重新加载最新的训练列表数据
+                                  ).then((value) {
+                                    print("action list 返回的数据 $value");
+                                    // ？？？暂时返回这个页面时都重新加载最新的训练列表数据
 
-                                  setState(() {
-                                    getGroupList();
+                                    setState(() {
+                                      getGroupList();
+                                    });
                                   });
-                                });
+                                }
                               },
                             ),
                           ],
@@ -210,112 +225,125 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
               ],
             ),
       // 悬浮按钮
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // 点击新增，简单弹窗用户输入训练计划名称
+      floatingActionButton: !isPlanAddGroup
+          ? FloatingActionButton(
+              onPressed: () {
+                // 点击新增，简单弹窗用户输入训练计划名称
 
-          // _dbHelper.deleteDb();
-          // return;
+                // _dbHelper.deleteDb();
+                // return;
 
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('新建训练计划'),
-                content: FormBuilder(
-                  key: _groupFormKey,
-                  autovalidateMode: AutovalidateMode.always,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: <Widget>[
-                        FormBuilderTextField(
-                          name: 'group_name',
-                          decoration: const InputDecoration(labelText: '名称'),
-                          validator: FormBuilderValidators.required(),
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('新建训练计划'),
+                      content: FormBuilder(
+                        key: _groupFormKey,
+                        autovalidateMode: AutovalidateMode.always,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: <Widget>[
+                              FormBuilderTextField(
+                                name: 'group_name',
+                                decoration:
+                                    const InputDecoration(labelText: '名称'),
+                                validator: FormBuilderValidators.required(),
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Flexible(
+                                    child: FormBuilderDropdown<String>(
+                                      name: 'group_category',
+                                      decoration: const InputDecoration(
+                                        labelText: '*分类',
+                                        hintText: '选择分类',
+                                      ),
+                                      validator: FormBuilderValidators.compose([
+                                        FormBuilderValidators.required(
+                                            errorText: '分类不可为空')
+                                      ]),
+                                      items: _genItems(levelOptions),
+                                      valueTransformer: (val) =>
+                                          val?.toString(),
+                                    ),
+                                  ),
+                                  Flexible(
+                                    child: FormBuilderDropdown<String>(
+                                      name: 'group_level',
+                                      decoration: const InputDecoration(
+                                        labelText: '*难度',
+                                        hintText: '选择难度',
+                                      ),
+                                      validator: FormBuilderValidators.compose([
+                                        FormBuilderValidators.required(
+                                            errorText: '难度不可为空')
+                                      ]),
+                                      items: _genItems(categoryOptions),
+                                      valueTransformer: (val) =>
+                                          val?.toString(),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Flexible(
-                              child: FormBuilderDropdown<String>(
-                                name: 'group_category',
-                                decoration: const InputDecoration(
-                                  labelText: '*分类',
-                                  hintText: '选择分类',
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('取消'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        ElevatedButton(
+                          child: const Text('确认'),
+                          onPressed: () async {
+                            if (_groupFormKey.currentState!.saveAndValidate()) {
+                              // 获取表单数值
+                              Map<String, dynamic> formData =
+                                  _groupFormKey.currentState!.value;
+                              // 处理数据提交逻辑
+                              print(formData);
+
+                              var temp = TrainingGroup.fromMap(formData);
+
+                              // ？？？这里应该验证是否新增成功
+                              var groupId =
+                                  await _dbHelper.insertTrainingGroup(temp);
+                              temp.groupId = groupId;
+
+                              if (!mounted) return;
+                              Navigator.of(context).pop();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ActionList(
+                                    groupItem: temp,
+                                  ),
                                 ),
-                                validator: FormBuilderValidators.compose([
-                                  FormBuilderValidators.required(
-                                      errorText: '分类不可为空')
-                                ]),
-                                items: _genItems(levelOptions),
-                                valueTransformer: (val) => val?.toString(),
-                              ),
-                            ),
-                            Flexible(
-                              child: FormBuilderDropdown<String>(
-                                name: 'group_level',
-                                decoration: const InputDecoration(
-                                  labelText: '*难度',
-                                  hintText: '选择难度',
-                                ),
-                                validator: FormBuilderValidators.compose([
-                                  FormBuilderValidators.required(
-                                      errorText: '难度不可为空')
-                                ]),
-                                items: _genItems(categoryOptions),
-                                valueTransformer: (val) => val?.toString(),
-                              ),
-                            )
-                          ],
+                              ).then((value) {
+                                print("新增训练，push到 action list然后 返回的数据 $value");
+                                // 总是刷新
+                                setState(() {
+                                  getGroupList();
+                                });
+                              });
+                            }
+                          },
                         ),
                       ],
-                    ),
-                  ),
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    child: const Text('取消'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  ElevatedButton(
-                    child: const Text('确认'),
-                    onPressed: () async {
-                      if (_groupFormKey.currentState!.saveAndValidate()) {
-                        // 获取表单数值
-                        Map<String, dynamic> formData =
-                            _groupFormKey.currentState!.value;
-                        // 处理数据提交逻辑
-                        print(formData);
-
-                        var temp = TrainingGroup.fromMap(formData);
-
-                        // ？？？这里应该验证是否新增成功
-                        var groupId = await _dbHelper.insertTrainingGroup(temp);
-                        temp.groupId = groupId;
-
-                        if (!mounted) return;
-                        Navigator.of(context).pop();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ActionList(
-                              groupItem: temp,
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              );
-            },
-          );
-        },
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.add),
-      ),
+                    );
+                  },
+                );
+              },
+              backgroundColor: Colors.blue,
+              child: const Icon(Icons.add),
+            )
+          : null,
       // 悬浮按钮位置
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );

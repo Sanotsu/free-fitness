@@ -223,8 +223,9 @@ class TrainingGroup {
 
 class TrainingPlan {
   int? planId; // 自增的，可以不传
-  String planCode, planName, planCategory, gmtCreate;
-  String? planLevel, description, contributor, gmtModified;
+  int planPeriod;
+  String planCode, planName, planCategory;
+  String? planLevel, description, contributor, gmtCreate, gmtModified;
 
   TrainingPlan({
     this.planId,
@@ -232,9 +233,10 @@ class TrainingPlan {
     required this.planName,
     required this.planCategory,
     this.planLevel,
+    required this.planPeriod,
     this.description,
     this.contributor,
-    required this.gmtCreate,
+    this.gmtCreate,
     this.gmtModified,
   });
 
@@ -245,6 +247,7 @@ class TrainingPlan {
       'plan_name': planName,
       'plan_category': planCategory,
       'plan_level': planLevel,
+      'plan_period': planPeriod,
       'description': description,
       'contributor': contributor,
       'gmt_create': gmtCreate,
@@ -252,24 +255,39 @@ class TrainingPlan {
     };
   }
 
+  factory TrainingPlan.fromMap(Map<String, dynamic> map) {
+    return TrainingPlan(
+      planId: map['plan_id'] as int?,
+      planCode: map['plan_code'] as String,
+      planName: map['plan_name'] as String,
+      planCategory: map['plan_category'] as String,
+      planLevel: map['plan_level'] as String,
+      planPeriod: map['plan_period'] as int,
+      description: map['description'] as String?,
+      contributor: map['contributor'] as String?,
+      gmtCreate: map['gmt_create'] as String?,
+      gmtModified: map['gmt_modified'] as String?,
+    );
+  }
+
   @override
   String toString() {
     return '''
-    TrainingPlan {action_id: $planId, action_code: $planCode, action_name: $planName,exercise_id: $planCategory, 
-    frequency: $planLevel, description: $description, contributor: $contributor, gmt_create: $gmtCreate, gmt_modified: $gmtModified }
+    TrainingPlan {planId: $planId, planCode: $planCode, planName: $planName,planCategory: $planCategory, 
+    planLevel: $planLevel, planPeriod:$planPeriod, description: $description, contributor: $contributor, gmt_create: $gmtCreate, gmt_modified: $gmtModified }
     ''';
   }
 }
 
 class PlanHasGroup {
   int? planHasGroupId; // 自增的，可以不传
-  int planId, groupId, groupOrder;
+  int planId, groupId, dayNumber;
 
   PlanHasGroup({
     this.planHasGroupId,
     required this.planId,
     required this.groupId,
-    required this.groupOrder,
+    required this.dayNumber,
   });
 
   Map<String, dynamic> toMap() {
@@ -277,14 +295,25 @@ class PlanHasGroup {
       'plan_has_group_id': planHasGroupId,
       'plan_id': planId,
       'group_id': groupId,
-      'group_order': groupOrder,
+      'day_number': dayNumber,
     };
+  }
+
+  factory PlanHasGroup.fromMap(Map<String, dynamic> map) {
+    return PlanHasGroup(
+      planHasGroupId: map['plan_has_group_id'] as int?,
+      planId: map['plan_id'] as int,
+      dayNumber: map['day_number'] as int,
+      groupId: map['group_id'] as int,
+    );
   }
 
   @override
   String toString() {
     return '''
-    Group {plan_has_group_id: $planHasGroupId, plan_id: $planId, group_id: $groupId, group_order: $groupOrder}
+    PlanHasGroup {
+      plan_has_group_id: $planHasGroupId, plan_id: $planId, group_id: $groupId, day_number: $dayNumber
+    }
     ''';
   }
 }
@@ -318,6 +347,23 @@ class GroupWithActions {
     return '''
     ActionDetail {
       group: $group, actionDetailList: $actionDetailList
+    ''';
+  }
+}
+
+// plan : group : action -> 1 :N : N*N
+class PlanWithGroups {
+  final TrainingPlan plan;
+  // 这里列表的索引，就是plan周期的训练日顺序了
+  final List<GroupWithActions> groupDetailList;
+
+  PlanWithGroups({required this.plan, required this.groupDetailList});
+
+  @override
+  String toString() {
+    return '''
+    PlanWithGroups {
+      plan: $plan, groupDetailList: $groupDetailList,
     ''';
   }
 }
