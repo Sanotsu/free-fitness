@@ -36,7 +36,7 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
         // 提示框的样式和内容
         touchTooltipData: BarTouchTooltipData(
           tooltipBgColor: Colors.blueGrey,
-          tooltipHorizontalAlignment: FLHorizontalAlignment.right,
+          tooltipHorizontalAlignment: FLHorizontalAlignment.center,
           tooltipPadding: EdgeInsets.symmetric(horizontal: 5.sp, vertical: 8),
           // 提示框的最大宽度(默认120)
           maxContentWidth: 0.5.sw,

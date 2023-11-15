@@ -209,13 +209,13 @@ class _FoodListState extends State<FoodList> {
                   child: TextField(
                     controller: searchController,
                     decoration: const InputDecoration(
-                      hintText: 'Enter query',
+                      hintText: '请输入产品或品牌关键字',
                     ),
                   ),
                 ),
                 ElevatedButton(
                   onPressed: _handleSearch,
-                  child: const Text('Search11'),
+                  child: const Text('搜索'),
                 ),
               ],
             ),

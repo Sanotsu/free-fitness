@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/sqlite_db_helper.dart';
 import '../../../models/dietary_state.dart';
+import 'week_intake_bar.dart';
 
 class DietaryReports extends StatefulWidget {
 // 报告页面默认查看当日的，但有可能从别的页面跳转过来，并带上需要查询的日期
@@ -23,22 +24,18 @@ class DietaryReports extends StatefulWidget {
 class _DietaryReportsState extends State<DietaryReports> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
 
-  /// 根据条件查询的日记条目数据
+  /// 根据条件查询的日记条目数据(所有数据的来源，格式化成VO可以在指定函数中去做)
   List<DailyFoodItemWithFoodServing> dfiwfsList = [];
 
-  /// 根据日记条目整理的营养素VO信息
-  /// ？？？暂时没做 类型不同：单日的是FoodNutrientTotals，单周的是Map<String, FoodNutrientTotals>
-  FoodNutrientTotals fnVO = FoodNutrientTotals();
-
   // RDA 的值应该在用户配置表里面带出来，在init的时候赋值。现在没有实现所以列个示例在这里
+  late DietaryUser loginUser;
+  // 如果用户没有设定，则使用预设值2250或1800
   int valueRDA = 0;
 
-// 数据是否加载中
+  // 数据是否加载中
   bool isLoading = false;
 
-  // 在标题处显示当前展示的日期信息（日期选择器之后有一点自定义处理）
-  String showedDateStr = "今天";
-
+  // 下拉切换的日期范围(默认今天)
   CusDropdownOption dropdownValue = dietaryReportDisplayModeList.first;
 
   @override
@@ -46,11 +43,11 @@ class _DietaryReportsState extends State<DietaryReports> {
     super.initState();
 
     setState(() {
-      valueRDA = 1800;
       _queryDailyFoodItemList();
     });
   }
 
+  /// 通过下拉按钮获取统计的范围日期
   getDateByOption(String flag) {
     var lowerFlag = flag.toLowerCase();
     var tempMap = {"startDate": "", "endDate": ""};
@@ -87,7 +84,7 @@ class _DietaryReportsState extends State<DietaryReports> {
     return tempMap;
   }
 
-  // 有指定日期查询指定日期的饮食记录条目，没有就当前日期
+  /// 有指定日期查询指定日期的饮食记录条目，没有就当前日期
   _queryDailyFoodItemList({Map<String, String>? queryDateRange}) async {
     print("开始运行查询当日饮食日记条目---------");
 
@@ -114,24 +111,22 @@ class _DietaryReportsState extends State<DietaryReports> {
       endDate: queryDateRange["endDate"],
     );
 
+    // 查询用户目标值
+    // TODO 这里登入者的id要存在哪里？
+    var tempUser = await _dietaryHelper.queryDietaryUser(userId: 1);
+
     print("queryDateRange--$queryDateRange ${temp.length}");
 
     // log("---------测试查询的当前日记item $temp");
 
     setState(() {
       dfiwfsList = temp;
-
-      // ？？？注意：这个判断还要改，有常量这里还是魔法值来判断
-      // 不是查询昨天、今天，就是上周本周，显示的内容不一样。
-      // if (dropdownValue.value == "today" ||
-      //     dropdownValue.value == "yesterday") {
-      //   fnVO = formatData(dfiwfsList);
-      // } else {
-      //   fnVO = formatWeekData(dfiwfsList);
-      // }
-      fnVO = formatData(dfiwfsList);
-      // 这里一周7条时，应该换成柱状图，数据处理有了，图暂时没做
-
+      loginUser = tempUser;
+      valueRDA = tempUser.rdaGoal != null
+          ? tempUser.rdaGoal!
+          : tempUser.gender == "男"
+              ? 2250
+              : 1800;
       isLoading = false;
     });
   }
@@ -183,6 +178,7 @@ class _DietaryReportsState extends State<DietaryReports> {
   }
 
   // 格式化饮食记录数据(一周7填)
+  // key是日期，比如2023-11-12,value是营养素VO；但如果某天没有记录，则不会有数据
   Map<String, FoodNutrientTotals> formatWeekData(
       List<DailyFoodItemWithFoodServing> list) {
     // 按天拆分饮食记录条目，key是日期，value是当日的饮食记录
@@ -220,6 +216,7 @@ class _DietaryReportsState extends State<DietaryReports> {
             ],
           ),
           actions: [
+            // 下拉按钮，切换报告的时间范围
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -268,34 +265,11 @@ class _DietaryReportsState extends State<DietaryReports> {
         ),
         body: isLoading
             ? _buildLoader()
-            : Column(
+            : TabBarView(
                 children: [
-                  // buildDropdownButton(),
-                  // Container(
-                  //   // 整个table的背景色
-                  //   color: Colors.blue,
-                  //   child: TabBar(
-                  //     // 指示器颜色
-                  //     indicator: BoxDecoration(
-                  //       color: Colors.green, // 设置选项卡指示器的颜色
-                  //       borderRadius: BorderRadius.circular(4.0),
-                  //     ),
-                  //     tabs: const [
-                  //       Tab(text: 'Tab 1'),
-                  //       Tab(text: 'Tab 2'),
-                  //       Tab(text: 'Tab 3'),
-                  //     ],
-                  //   ),
-                  // ),
-                  Expanded(
-                    child: TabBarView(
-                      children: [
-                        SingleChildScrollView(child: buildCalorieTabview()),
-                        SingleChildScrollView(child: buildMacrosTabview()),
-                        SingleChildScrollView(child: buildNutrientsTabView()),
-                      ],
-                    ),
-                  ),
+                  SingleChildScrollView(child: buildCalorieTabView()),
+                  SingleChildScrollView(child: buildMacrosTabView()),
+                  SingleChildScrollView(child: buildNutrientsTabView()),
                 ],
               ),
       ),
@@ -312,46 +286,119 @@ class _DietaryReportsState extends State<DietaryReports> {
     }
   }
 
+  /// *******************************卡路里 tabview *****************************************
   /// 卡路里tab页面
   /// 从上到下分别是：
   ///  1 当前选中日期范围(昨天今天上周本周)三大营养素的饼图，点击图形看具体数值；
-  ///     上方显示今日RDA和已消耗的总量及其比例，超过100%红色，没超过绿色。
-  ///     下方显示4餐次总共的卡数和比例。
+  ///     上方显示今日RDA和已消耗的总量及其比例，超过100%红色，没超过绿色(仅选择昨天、今天时)。
+  ///     下方显示4餐次总共的卡数和比例(昨天今天是饼图，上周本周是柱状图)。
   ///  2 食物摄入图表，日期范围一共摄入量多少种食物，每种食物多少次，每种总计多少卡
-  buildCalorieTabview() {
+  buildCalorieTabView() {
+    // 【注意】如果是单日的（昨天、进入，则显示饼图，如果是上周、本周则是柱状图）
+    List<Widget> chart = [];
+    if (dropdownValue.value == "today" || dropdownValue.value == "yesterday") {
+      /// 单日的卡路里标题
+      chart.add(_buildCaloryCardTitle(formatData(dfiwfsList)));
+
+      /// 当日主要营养素占比饼图卡片(默认其实就是卡路里的平涂)
+      chart
+          .add(_buildPieChartCard(formatData(dfiwfsList), CusChartType.calory));
+    } else {
+      // 当周的营养素条状图
+      chart = [
+        _buildBarChartCard(formatWeekData(dfiwfsList), CusChartType.calory)
+      ];
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        /// 当日主要营养素占比卡片
-        _buildFoodStatsPieChartCard(),
+        ...chart,
 
-        /// 食物摄入条目统计卡片
-        _buildFoodStatsListCard('食物摄入', dfiwfsList),
+        /// 食物摄入条目统计卡片(类型为name表示食物摄入次数)
+        _buildFoodStatsListCard(dfiwfsList, CusChartType.calory),
       ],
     );
   }
+
+  // 卡路里tabview的标题
+  _buildCaloryCardTitle(FoodNutrientTotals fntVO) {
+    return ListTile(
+      title: RichText(
+        text: TextSpan(
+          children: <TextSpan>[
+            TextSpan(
+              text: '卡路里\n',
+              style: TextStyle(fontSize: 16.sp, color: Colors.black),
+            ),
+            TextSpan(
+              text: fntVO.calorie.toStringAsFixed(2),
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 24.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+      subtitle: Row(
+        // 让子组件分别靠左和靠右对齐
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+              flex: 1,
+              child: Text(
+                "目标已达成 ${(fntVO.calorie / valueRDA * 100).toStringAsFixed(2)} %",
+                textAlign: TextAlign.left,
+              )),
+          Expanded(
+              flex: 1,
+              child: Text(
+                "目标 $valueRDA 大卡",
+                textAlign: TextAlign.right,
+              )),
+        ],
+      ),
+    );
+  }
+
+  /// *******************************宏量素 tabview *****************************************
 
   /// 宏量macronutrients tab 页面
-  buildMacrosTabview() {
+  buildMacrosTabView() {
+    // 【注意】如果是单日的（昨天、进入，则显示饼图，如果是上周、本周则是柱状图）
+    List<Widget> chart = [];
+    if (dropdownValue.value == "today" || dropdownValue.value == "yesterday") {
+      /// 当日主要营养素占比饼图卡片
+      chart = [_buildPieChartCard(formatData(dfiwfsList), CusChartType.macro)];
+    } else {
+      // 当周的营养素条状图
+      chart = [
+        _buildBarChartCard(formatWeekData(dfiwfsList), CusChartType.macro)
+      ];
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         /// 当日主要营养素占比卡片
-        _buildFoodStatsPieChartCard(type: "Macros"),
+        ...chart,
 
         /// 食物摄入宏量统计卡片
-        _buildFoodStatsListCard('宏量素摄入', dfiwfsList),
+        _buildFoodStatsListCard(dfiwfsList, CusChartType.macro),
       ],
     );
   }
 
+  /// *******************************营养素 tabview(未完) ************************************
   /// ？？？营养素tab页面
   /// （未完，还没有实现个人配置目标，这里需要和目标营养素的差值比较）
   buildNutrientsTabView() {
     // 简单示例，等个人配置目标完成再继续
     List<DataRow> rows = [];
 
-    var properties = fnVO.toMap().entries;
+    var properties = formatData(dfiwfsList).toMap().entries;
 
     for (var entry in properties) {
       if (entry.value != 0) {
@@ -378,55 +425,16 @@ class _DietaryReportsState extends State<DietaryReports> {
     ]);
   }
 
-  /// 绘制卡路里摄入或宏量素摄入的饼图【卡片】
-  _buildFoodStatsPieChartCard({String? type = "Calorie"}) {
+  /// -----------------复用的【饼图卡片】= 图例 + 实例 ---------------------------
+  ///
+  /// 绘制卡路里摄入或宏量素摄入的【饼图卡片】(包含图例legend和图chart两部分)
+  _buildPieChartCard(FoodNutrientTotals fntVO, CusChartType type) {
     return Card(
       elevation: 10,
       child: SizedBox(
-        height: type == "Calorie" ? 300.sp : 200.sp,
+        height: 200.sp,
         child: Column(
           children: [
-            // 是卡路里
-            if (type == "Calorie")
-              ListTile(
-                title: RichText(
-                  text: TextSpan(
-                    children: <TextSpan>[
-                      TextSpan(
-                        text: '卡路里\n',
-                        style: TextStyle(fontSize: 16.sp, color: Colors.black),
-                      ),
-                      TextSpan(
-                        text: fnVO.calorie.toStringAsFixed(2),
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 24.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                subtitle: Row(
-                  // 让子组件分别靠左和靠右对齐
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                        flex: 1,
-                        child: Text(
-                          "目标已达成 ${(fnVO.calorie / valueRDA * 100).toStringAsFixed(2)} %",
-                          textAlign: TextAlign.left,
-                        )),
-                    Expanded(
-                        flex: 1,
-                        child: Text(
-                          "目标 $valueRDA 大卡",
-                          textAlign: TextAlign.right,
-                        )),
-                  ],
-                ),
-              ),
-            Divider(height: 5.sp, thickness: 2.sp),
             Expanded(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -434,16 +442,12 @@ class _DietaryReportsState extends State<DietaryReports> {
                   // 左边图例
                   Expanded(
                     flex: 2,
-                    child: type == "Calorie"
-                        ? _buildMealCaloriePieLegend()
-                        : _buildMacrosPieLegend(),
+                    child: _buildPieLegend(formatData(dfiwfsList), type),
                   ),
                   // 右边饼图
                   Expanded(
                     flex: 1,
-                    child: type == "Calorie"
-                        ? _buildMealCaloriePieChart()
-                        : _buildMacrosPieChart(),
+                    child: _buildPieChart(formatData(dfiwfsList), type),
                   ),
                 ],
               ),
@@ -454,51 +458,44 @@ class _DietaryReportsState extends State<DietaryReports> {
     );
   }
 
-  /// 绘制卡路里摄入饼图的图例
-  _buildMealCaloriePieLegend() {
-    double total = fnVO.bfCalorie +
-        fnVO.lunchCalorie +
-        fnVO.dinnerCalorie +
-        fnVO.otherCalorie;
+  /// 饼图的“图例”
+  // 绘制卡路里摄入(type=calory)或宏量素摄入(type=macro)的饼图的图例
+  _buildPieLegend(FoodNutrientTotals fntVO, CusChartType type) {
+    List<Widget> legendItems = [];
+    // 如果类型是卡路里 calory
+    if (type == CusChartType.calory) {
+      double total = fntVO.bfCalorie +
+          fntVO.lunchCalorie +
+          fntVO.dinnerCalorie +
+          fntVO.otherCalorie;
 
-    print("total---------$total");
+      legendItems = [
+        _buildLegendItem(Colors.grey, '早餐', fntVO.bfCalorie, total, "大卡"),
+        _buildLegendItem(Colors.red, '午餐', fntVO.lunchCalorie, total, "大卡"),
+        _buildLegendItem(Colors.green, '晚餐', fntVO.dinnerCalorie, total, "大卡"),
+        _buildLegendItem(Colors.blue, '小食', fntVO.otherCalorie, total, "大卡"),
+      ];
+    } else {
+      // 否则就是宏量素 macro
+      double total = fntVO.totalCHO + fntVO.totalFat + fntVO.protein;
+
+      legendItems = [
+        _buildLegendItem(Colors.grey, '碳水', fntVO.totalCHO, total, "克"),
+        _buildLegendItem(Colors.red, '脂肪', fntVO.totalFat, total, "克"),
+        _buildLegendItem(Colors.green, '蛋白质', fntVO.protein, total, "克"),
+      ];
+    }
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildLegendItem(Colors.grey, '早餐', fnVO.bfCalorie, total),
-        _buildLegendItem(Colors.red, '午餐', fnVO.lunchCalorie, total),
-        _buildLegendItem(Colors.green, '晚餐', fnVO.dinnerCalorie, total),
-        _buildLegendItem(Colors.blue, '小食', fnVO.otherCalorie, total),
-      ],
-    );
-  }
-
-  /// 绘制宏量素摄入的饼图的图例
-  _buildMacrosPieLegend() {
-    double total = fnVO.totalCHO + fnVO.totalFat + fnVO.protein;
-
-    print("_buildMacrosPieLegend total---------$total");
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildLegendItem(Colors.grey, '碳水', fnVO.totalCHO, total),
-        _buildLegendItem(Colors.red, '脂肪', fnVO.totalFat, total),
-        _buildLegendItem(Colors.green, '蛋白质', fnVO.protein, total),
-      ],
+      children: legendItems,
     );
   }
 
   // 构建单个图例条目
   Widget _buildLegendItem(
-    Color color,
-    String label,
-    double value,
-    double total,
-  ) {
+      Color color, String label, double value, double total, String unit) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 4.sp),
       child: Row(
@@ -507,7 +504,7 @@ class _DietaryReportsState extends State<DietaryReports> {
           SizedBox(width: 8.sp),
           Expanded(
             child: Text(
-              '$label - ${(value / total * 100).toStringAsFixed(1)}% - ${value.toStringAsFixed(2)} 大卡',
+              '$label - ${(value / total * 100).toStringAsFixed(1)}% - ${value.toStringAsFixed(2)} $unit',
             ),
           ),
         ],
@@ -515,60 +512,116 @@ class _DietaryReportsState extends State<DietaryReports> {
     );
   }
 
-  // 日期范围餐次饼图
-  _buildMealCaloriePieChart() {
+  /// 饼图的“实例”
+  // 绘制卡路里摄入(type=calory)或宏量素摄入(type=macro)的饼图
+  _buildPieChart(FoodNutrientTotals fntVO, CusChartType type) {
+    List<PieChartSectionData> sections = [];
+    if (type == CusChartType.calory) {
+      sections = [
+        PieChartSectionData(
+          value: fntVO.bfCalorie,
+          color: Colors.grey,
+          // title: '${percentage.toStringAsFixed(1)}%', // 将百分比显示在标题中
+          // 没给指定title就默认是其value，所以有图例了就不显示标题
+          showTitle: false,
+        ),
+        PieChartSectionData(
+            value: fntVO.lunchCalorie, color: Colors.red, showTitle: false),
+        PieChartSectionData(
+            value: fntVO.dinnerCalorie, color: Colors.green, showTitle: false),
+        PieChartSectionData(
+            value: fntVO.otherCalorie, color: Colors.blue, showTitle: false)
+      ];
+    } else {
+      sections = [
+        PieChartSectionData(
+            value: fntVO.totalCHO, color: Colors.grey, showTitle: false),
+        PieChartSectionData(
+            value: fntVO.totalFat, color: Colors.red, showTitle: false),
+        PieChartSectionData(
+            value: fntVO.protein, color: Colors.green, showTitle: false),
+      ];
+    }
+
     return SizedBox(
       height: 100.sp,
-      child: PieChart(
-        PieChartData(
-          sections: [
-            PieChartSectionData(
-              value: fnVO.bfCalorie,
-              color: Colors.grey,
-              // title: '${percentage.toStringAsFixed(1)}%', // 将百分比显示在标题中
-              // 没给指定title就默认是其value，所以有图例了就不显示标题
-              showTitle: false,
+      child: PieChart(PieChartData(sections: sections)),
+    );
+  }
+
+  /// -----------------复用的【条状图卡片】= 图例 + 图表 ---------------------------
+  ///
+  /// 绘制卡路里摄入或宏量素摄入的【条状图卡片】(包含图例legend和图chart两部分)
+  _buildBarChartCard(Map<String, FoodNutrientTotals> map, CusChartType type) {
+    // 区分是卡路里还是宏量素，获取指定的颜色和标签
+    List<Color> colors = type == CusChartType.calory
+        ? [
+            cusNutrientColors[CusNutType.bfCalorie]!,
+            cusNutrientColors[CusNutType.lunchCalorie]!,
+            cusNutrientColors[CusNutType.dinnerCalorie]!,
+            cusNutrientColors[CusNutType.otherCalorie]!
+          ]
+        : [
+            cusNutrientColors[CusNutType.totalCHO]!,
+            cusNutrientColors[CusNutType.totalFat]!,
+            cusNutrientColors[CusNutType.protein]!,
+          ];
+
+    List<String> labels = type == CusChartType.calory
+        ? ["早餐", "午餐", "晚餐", "小食"]
+        : ["碳水", "脂肪", "蛋白质"];
+
+    // 根据颜色和标签绘制图例
+    List<Widget> legendWidgets = colors
+        .asMap()
+        .entries
+        .map((entry) => Row(
+              children: [
+                Container(
+                  width: 14.sp,
+                  height: 14.sp,
+                  color: entry.value,
+                ),
+                Text(labels[entry.key]),
+                SizedBox(width: 8.sp),
+              ],
+            ))
+        .toList();
+
+    // 绘制整体柱状图表
+    return Card(
+      elevation: 10,
+      child: SizedBox(
+        child: Column(
+          children: [
+            ListTile(
+              title: Text(type == CusChartType.calory ? '食物摄入' : '宏量素摄入'),
             ),
-            PieChartSectionData(
-                value: fnVO.lunchCalorie, color: Colors.red, showTitle: false),
-            PieChartSectionData(
-                value: fnVO.dinnerCalorie,
-                color: Colors.green,
-                showTitle: false),
-            PieChartSectionData(
-                value: fnVO.otherCalorie, color: Colors.blue, showTitle: false)
+            SizedBox(height: 10.sp),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: legendWidgets,
+            ),
+            SizedBox(height: 10.sp),
+            // ？？？这里的type和条状图的type要一样，避免混乱（最好是枚举）
+            WeekIntakeBar(fntMap: map, type: type),
           ],
         ),
       ),
     );
   }
 
-  // 日期宏量素饼图
-  _buildMacrosPieChart() {
-    return SizedBox(
-      height: 100.sp,
-      child: PieChart(
-        PieChartData(
-          sections: [
-            PieChartSectionData(
-                value: fnVO.totalCHO, color: Colors.grey, showTitle: false),
-            PieChartSectionData(
-                value: fnVO.totalFat, color: Colors.red, showTitle: false),
-            PieChartSectionData(
-                value: fnVO.protein, color: Colors.green, showTitle: false),
-          ],
-        ),
-      ),
-    );
-  }
-
+  /// -----------------复用的【食物摄入次数或营养素摄入的表格】 ----------------------
+  ///
   /// 按照每种食物统计总卡路里摄入 或 总宏量素摄入 的列表【卡片】
-  /// (两个tabview的表格结构类似，内容不同而已，可复用)
   _buildFoodStatsListCard(
-    String title,
     List<DailyFoodItemWithFoodServing> dfiwfsList,
+    CusChartType type, // 表示统计食物摄入次数；或统计宏量摄入
   ) {
     Map<String, List<DailyFoodItemWithFoodServing>> splitArrays = {};
+
+    // 这里不用区分是本周、上周还是今天昨天，英文这里已经是直接格式化所有记录条目成一个值，而不是按天存对应key的值的map。
+    FoodNutrientTotals fntVO = formatData(dfiwfsList);
 
     for (var el in dfiwfsList) {
       var foodName = "${el.food.product}(${el.food.brand})";
@@ -578,7 +631,7 @@ class _DietaryReportsState extends State<DietaryReports> {
 
     List<DataRow> tempRows = splitArrays.entries.map((entry) {
       var tempNt = formatData(entry.value);
-      if (title == '食物摄入') {
+      if (type == CusChartType.calory) {
         return DataRow(
           cells: [
             DataCell(Text(entry.key)),
@@ -605,28 +658,28 @@ class _DietaryReportsState extends State<DietaryReports> {
         ),
         DataCell(
           Text(
-            title == '食物摄入'
+            type == CusChartType.calory
                 ? "x ${dfiwfsList.length}"
-                : fnVO.totalCHO.toStringAsFixed(2),
+                : fntVO.totalCHO.toStringAsFixed(2),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
         DataCell(
           SizedBox(
             child: Text(
-              title == '食物摄入'
-                  ? fnVO.calorie.toStringAsFixed(2)
-                  : fnVO.totalFat.toStringAsFixed(2),
+              type == CusChartType.calory
+                  ? fntVO.calorie.toStringAsFixed(2)
+                  : fntVO.totalFat.toStringAsFixed(2),
               textAlign: TextAlign.end,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         ),
-        if (title != '食物摄入')
+        if (type == CusChartType.macro)
           DataCell(
             SizedBox(
               child: Text(
-                fnVO.protein.toStringAsFixed(2),
+                fntVO.protein.toStringAsFixed(2),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -639,12 +692,12 @@ class _DietaryReportsState extends State<DietaryReports> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          ListTile(title: Text(title)),
+          ListTile(title: Text(type == CusChartType.calory ? '食物摄入' : '宏量素摄入')),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 5.sp),
             child: DataTable(
               columnSpacing: 10.0,
-              columns: title == '食物摄入'
+              columns: type == CusChartType.calory
                   ? const [
                       DataColumn(label: Text('食物名称')),
                       DataColumn(label: Text('摄入次数'), numeric: true),
@@ -664,6 +717,7 @@ class _DietaryReportsState extends State<DietaryReports> {
     );
   }
 
+  /// -----------------点击下拉切换报告日期范围
   buildDropdownButton() {
     return SizedBox(
       height: 50.sp,
@@ -699,43 +753,5 @@ class _DietaryReportsState extends State<DietaryReports> {
         ),
       ),
     );
-
-    /*
-    return SizedBox(
-      width: 0.6.sw,
-      height: 50.sp,
-      child: InputDecorator(
-        decoration: InputDecoration(
-          border: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.grey),
-            borderRadius: BorderRadius.circular(1.0),
-            gapPadding: 0.5,
-          ),
-        ),
-        child: DropdownButton<CusDropdownOption>(
-          value: dropdownValue,
-          onChanged: (CusDropdownOption? newValue) {
-            setState(() {
-              // 修改下拉按钮的显示值
-              dropdownValue = newValue!;
-              var dateRange = getDateByOption(dropdownValue.value);
-              _queryDailyFoodItemList(queryDateRange: dateRange);
-            });
-          },
-          items: dietaryReportDisplayModeList
-              .map<DropdownMenuItem<CusDropdownOption>>(
-                (CusDropdownOption value) =>
-                    DropdownMenuItem<CusDropdownOption>(
-                  value: value,
-                  child: Text(value.label),
-                ),
-              )
-              .toList(),
-          // underline: Container(), // 将下划线设置为空的Container
-          // icon: null, // 将图标设置为null
-        ),
-      ),
-    );
-    */
   }
 }

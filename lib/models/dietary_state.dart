@@ -476,6 +476,32 @@ class FoodNutrientTotals {
   double dinnerCalorie = 0.0;
   double otherCalorie = 0.0;
 
+  // 定义一个方法用于累加另一个FoodNutrientTotals对象的值
+  void add(FoodNutrientTotals other) {
+    energy += other.energy;
+    protein += other.protein;
+    totalFat += other.totalFat;
+    totalCHO += other.totalCHO;
+    sodium += other.sodium;
+    cholesterol += other.cholesterol;
+    dietaryFiber += other.dietaryFiber;
+    potassium += other.potassium;
+    sugar += other.sugar;
+    transFat += other.transFat;
+    saturatedFat += other.saturatedFat;
+    muFat += other.muFat;
+    puFat += other.puFat;
+    calorie += other.calorie;
+    bfEnergy += other.bfEnergy;
+    lunchEnergy += other.lunchEnergy;
+    dinnerEnergy += other.dinnerEnergy;
+    otherEnergy += other.otherEnergy;
+    bfCalorie += other.bfCalorie;
+    lunchCalorie += other.lunchCalorie;
+    dinnerCalorie += other.dinnerCalorie;
+    otherCalorie += other.otherCalorie;
+  }
+
   Map<String, double> toMap() {
     return {
       'energy': energy,

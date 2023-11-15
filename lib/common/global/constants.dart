@@ -245,3 +245,67 @@ Map<int, CusLabel> weekdayStringMap = {
   6: CusLabel(enLabel: "Sat", cnLabel: "周六", value: "saturday"),
   7: CusLabel(enLabel: "Sun", cnLabel: "周日", value: "sunday"),
 };
+
+// 营养素枚举 CusNutrientType
+enum CusNutType {
+  energy,
+  protein,
+  totalFat,
+  totalCHO,
+  sodium,
+  cholesterol,
+  dietaryFiber,
+  potassium,
+  sugar,
+  transFat,
+  saturatedFat,
+  muFat,
+  puFat,
+  calorie,
+  bfEnergy,
+  lunchEnergy,
+  dinnerEnergy,
+  otherEnergy,
+  bfCalorie,
+  lunchCalorie,
+  dinnerCalorie,
+  otherCalorie,
+}
+
+Map<CusNutType, Color> cusNutrientColors = {
+  // 红到紫
+  CusNutType.energy: Colors.red,
+  CusNutType.protein: Colors.orange,
+  CusNutType.totalFat: Colors.yellow,
+  CusNutType.totalCHO: Colors.green,
+  CusNutType.sodium: Colors.cyan,
+  CusNutType.cholesterol: Colors.purple,
+  // 其他单色
+  CusNutType.dietaryFiber: Colors.pink,
+  CusNutType.potassium: Colors.black,
+  CusNutType.sugar: Colors.brown,
+  CusNutType.transFat: Colors.indigo,
+  CusNutType.dinnerEnergy: Colors.teal,
+  CusNutType.puFat: Colors.lime,
+  CusNutType.otherEnergy: Colors.amber,
+  CusNutType.bfCalorie: Colors.grey,
+  CusNutType.muFat: Colors.white,
+
+  // 混合色
+  CusNutType.saturatedFat: Colors.lightBlue,
+  CusNutType.bfEnergy: Colors.deepOrange,
+  CusNutType.lunchCalorie: Colors.lightGreen,
+  CusNutType.dinnerCalorie: Colors.blueGrey,
+  CusNutType.otherCalorie: Colors.deepPurple,
+
+  // 憋不出来的颜色
+  CusNutType.calorie: Colors.white10,
+  CusNutType.lunchEnergy: Colors.black45,
+};
+
+// 饮食报告中绘制图表的类型，是显示卡路里还是宏量素
+// 卡路里就是一日四餐的摄入数据，宏量素就是碳水、脂肪、蛋白质的摄入数据
+enum CusChartType {
+  calory,
+  macro,
+}
