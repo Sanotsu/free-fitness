@@ -1,9 +1,9 @@
 /// 关于 训练trainnig 模块的model都放在这里，对照相关表栏位了解更多
 
-// 基础活动表的model
+/// --- 基础表
 class Exercise {
   int? exerciseId; // 自增的，可以不传
-  String exerciseCode, exerciseName, category, gmtCreate;
+  String exerciseCode, exerciseName, category, countingMode, gmtCreate;
   String? force, level, mechanic, equipment, instructions, ttsNotes;
   String? primaryMuscles, secondaryMuscles, images, standardDuration;
   String? gmtModified, isCustom, contributor;
@@ -13,6 +13,7 @@ class Exercise {
     required this.exerciseCode,
     required this.exerciseName,
     required this.category,
+    required this.countingMode,
     required this.gmtCreate,
     this.force,
     this.level,
@@ -39,6 +40,7 @@ class Exercise {
       'level': level,
       'mechanic': mechanic,
       'equipment': equipment,
+      'counting_mode': countingMode,
       'standard_duration': standardDuration,
       'instructions': instructions,
       'tts_notes': ttsNotes,
@@ -51,6 +53,33 @@ class Exercise {
       'gmt_create': gmtCreate,
       'gmt_modified': gmtModified,
     };
+  }
+
+// 用于从数据库行映射到 ServingInfo 对象的 fromMap 方法
+  factory Exercise.fromMap(Map<String, dynamic> map) {
+    return Exercise(
+      exerciseId: map['exercise_id'],
+      exerciseCode: map['exercise_code'],
+      exerciseName: map['exercise_name'],
+      force: map['force'],
+      level: map['level'],
+      mechanic: map['mechanic'],
+      equipment: map['equipment'],
+      countingMode: map['counting_mode'],
+      // ？？？明明sql语句设置了默认值，但是不传还是null
+      standardDuration: map['standard_duration'] ?? "1",
+      instructions: map['instructions'],
+      ttsNotes: map['tts_notes'],
+      category: map['category'],
+      primaryMuscles: map['primary_muscles'],
+      secondaryMuscles: map['secondary_muscles'],
+      images: map['images'],
+      // ？？？明明sql语句设置了默认值，但是不传还是null
+      isCustom: map['is_custom'] ?? '0',
+      contributor: map['contributor'],
+      gmtCreate: map['gmt_create'],
+      gmtModified: map['gmt_modified'],
+    );
   }
 
   // 重写 toString 方法
@@ -80,68 +109,66 @@ class ExerciseDefaultOption {
   });
 }
 
-// 动作表的 model
-class Action {
+// 动作表的 model（Action、Group、Plan可能都和flutter的预设部件重名了，都加上Training前缀）
+class TrainingAction {
   int? actionId; // 自增的，可以不传
-  String actionCode, actionName, exerciseId, gmtCreate;
-  String? frequency, duration, equipmentWeight, actionLevel, description;
-  String? contributor, gmtModified;
+  int groupId, exerciseId;
+  int? frequency, duration;
+  double? equipmentWeight;
 
-  Action({
+  TrainingAction({
     this.actionId,
-    required this.actionCode,
-    required this.actionName,
+    required this.groupId,
     required this.exerciseId,
     this.frequency,
     this.duration,
     this.equipmentWeight,
-    this.actionLevel,
-    this.description,
-    this.contributor,
-    required this.gmtCreate,
-    this.gmtModified,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'action_id': actionId,
-      'action_code': actionCode,
-      'action_name': actionName,
+      'group_id': groupId,
       'exercise_id': exerciseId,
       'frequency': frequency,
       'duration': duration,
       'equipment_weight': equipmentWeight,
-      'action_level': actionLevel,
-      'description': description,
-      'contributor': contributor,
-      'gmt_create': gmtCreate,
-      'gmt_modified': gmtModified,
     };
+  }
+
+  factory TrainingAction.fromMap(Map<String, dynamic> map) {
+    return TrainingAction(
+      actionId: map['action_id'] as int?,
+      groupId: map['group_id'] as int,
+      exerciseId: map['exercise_id'] as int,
+      frequency: map['frequency'] as int?,
+      duration: map['duration'] as int?,
+      equipmentWeight: map['equipment_weight'] as double?,
+    );
   }
 
   @override
   String toString() {
     return '''
-    Action {
-    action_id: $exerciseId, action_code: $actionCode, action_name: $actionName,exercise_id: $exerciseId, 
-    frequency: $frequency, duration: $duration,equipment_weight: $equipmentWeight, action_level: $actionLevel, 
-    description: $description, contributor: $contributor, gmt_create: $gmtCreate, gmt_modified: $gmtModified }
+    TrainingAction {
+      action_id: $actionId, group_id: $groupId,exercise_id: $exerciseId, 
+      frequency: $frequency, duration: $duration,equipment_weight: $equipmentWeight
+    }
     ''';
   }
 }
 
-class Group {
+class TrainingGroup {
   int? groupId; // 自增的，可以不传
-  String groupCode, groupName, groupCategory, gmtCreate;
-  String? groupLevel, restInterval, consumption, timeSpent, description;
-  String? contributor, gmtModified;
+  String groupName, groupCategory, groupLevel;
+  int? restInterval, consumption, timeSpent;
+  String? description, contributor, gmtCreate, gmtModified;
 
-  Group({
+  TrainingGroup({
     this.groupId,
-    required this.groupCode,
     required this.groupName,
     required this.groupCategory,
-    this.groupLevel,
+    required this.groupLevel,
     this.restInterval,
     this.consumption,
     this.timeSpent,
@@ -154,7 +181,6 @@ class Group {
   Map<String, dynamic> toMap() {
     return {
       'group_id': groupId,
-      'group_code': groupCode,
       'group_name': groupName,
       'group_category': groupCategory,
       'group_level': groupLevel,
@@ -168,59 +194,49 @@ class Group {
     };
   }
 
+  factory TrainingGroup.fromMap(Map<String, dynamic> map) {
+    return TrainingGroup(
+      groupId: map['group_id'] as int?,
+      groupName: map['group_name'] as String,
+      groupCategory: map['group_category'] as String,
+      groupLevel: map['group_level'] as String,
+      restInterval: map['rest_interval'] as int?,
+      consumption: map['consumption'] as int?,
+      timeSpent: map['time_spent'] as int?,
+      description: map['description'] as String?,
+      contributor: map['contributor'] as String?,
+      gmtCreate: map['gmt_create'] as String?,
+      gmtModified: map['gmt_modified'] as String?,
+    );
+  }
+
   @override
   String toString() {
     return '''
-    Group {
-    group_id: $groupId, group_code: $groupCode, group_name: $groupName, group_category: $groupCategory, 
+    TrainingGroup {
+    group_id: $groupId, group_name: $groupName, group_category: $groupCategory, 
     group_level: $groupLevel, rest_interval: $restInterval, consumption: $consumption, time_spent: $timeSpent, 
     description: $description, contributor: $contributor, gmt_create: $gmtCreate, gmt_modified: $gmtModified }
     ''';
   }
 }
 
-class GroupHasAction {
-  int? groupHasActionId; // 自增的，可以不传
-  int groupId, actionId, actionOrder;
-
-  GroupHasAction({
-    this.groupHasActionId,
-    required this.groupId,
-    required this.actionId,
-    required this.actionOrder,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'group_has_action_id': groupHasActionId,
-      'group_id': groupId,
-      'action_id': actionId,
-      'action_order': actionOrder,
-    };
-  }
-
-  @override
-  String toString() {
-    return '''
-    Group {group_has_action_id: $groupHasActionId, group_id: $groupId, action_id: $actionId, action_order: $actionOrder}
-    ''';
-  }
-}
-
-class Plan {
+class TrainingPlan {
   int? planId; // 自增的，可以不传
-  String planCode, planName, planCategory, gmtCreate;
-  String? planLevel, description, contributor, gmtModified;
+  int planPeriod;
+  String planCode, planName, planCategory;
+  String? planLevel, description, contributor, gmtCreate, gmtModified;
 
-  Plan({
+  TrainingPlan({
     this.planId,
     required this.planCode,
     required this.planName,
     required this.planCategory,
     this.planLevel,
+    required this.planPeriod,
     this.description,
     this.contributor,
-    required this.gmtCreate,
+    this.gmtCreate,
     this.gmtModified,
   });
 
@@ -231,6 +247,7 @@ class Plan {
       'plan_name': planName,
       'plan_category': planCategory,
       'plan_level': planLevel,
+      'plan_period': planPeriod,
       'description': description,
       'contributor': contributor,
       'gmt_create': gmtCreate,
@@ -238,24 +255,39 @@ class Plan {
     };
   }
 
+  factory TrainingPlan.fromMap(Map<String, dynamic> map) {
+    return TrainingPlan(
+      planId: map['plan_id'] as int?,
+      planCode: map['plan_code'] as String,
+      planName: map['plan_name'] as String,
+      planCategory: map['plan_category'] as String,
+      planLevel: map['plan_level'] as String,
+      planPeriod: map['plan_period'] as int,
+      description: map['description'] as String?,
+      contributor: map['contributor'] as String?,
+      gmtCreate: map['gmt_create'] as String?,
+      gmtModified: map['gmt_modified'] as String?,
+    );
+  }
+
   @override
   String toString() {
     return '''
-    Action {action_id: $planId, action_code: $planCode, action_name: $planName,exercise_id: $planCategory, 
-    frequency: $planLevel, description: $description, contributor: $contributor, gmt_create: $gmtCreate, gmt_modified: $gmtModified }
+    TrainingPlan {planId: $planId, planCode: $planCode, planName: $planName,planCategory: $planCategory, 
+    planLevel: $planLevel, planPeriod:$planPeriod, description: $description, contributor: $contributor, gmt_create: $gmtCreate, gmt_modified: $gmtModified }
     ''';
   }
 }
 
 class PlanHasGroup {
   int? planHasGroupId; // 自增的，可以不传
-  int planId, groupId, groupOrder;
+  int planId, groupId, dayNumber;
 
   PlanHasGroup({
     this.planHasGroupId,
     required this.planId,
     required this.groupId,
-    required this.groupOrder,
+    required this.dayNumber,
   });
 
   Map<String, dynamic> toMap() {
@@ -263,14 +295,75 @@ class PlanHasGroup {
       'plan_has_group_id': planHasGroupId,
       'plan_id': planId,
       'group_id': groupId,
-      'group_order': groupOrder,
+      'day_number': dayNumber,
     };
+  }
+
+  factory PlanHasGroup.fromMap(Map<String, dynamic> map) {
+    return PlanHasGroup(
+      planHasGroupId: map['plan_has_group_id'] as int?,
+      planId: map['plan_id'] as int,
+      dayNumber: map['day_number'] as int,
+      groupId: map['group_id'] as int,
+    );
   }
 
   @override
   String toString() {
     return '''
-    Group {plan_has_group_id: $planHasGroupId, plan_id: $planId, group_id: $groupId, group_order: $groupOrder}
+    PlanHasGroup {
+      plan_has_group_id: $planHasGroupId, plan_id: $planId, group_id: $groupId, day_number: $dayNumber
+    }
+    ''';
+  }
+}
+
+/// --- 扩展表
+
+// 动作和对应基础活动的扩展表
+class ActionDetail {
+  final Exercise exercise;
+  final TrainingAction action;
+
+  ActionDetail({required this.exercise, required this.action});
+
+  @override
+  String toString() {
+    return '''
+    ActionDetail {
+      exercise: $exercise, action: $action
+    ''';
+  }
+}
+
+class GroupWithActions {
+  final TrainingGroup group;
+  final List<ActionDetail> actionDetailList;
+
+  GroupWithActions({required this.group, required this.actionDetailList});
+
+  @override
+  String toString() {
+    return '''
+    ActionDetail {
+      group: $group, actionDetailList: $actionDetailList
+    ''';
+  }
+}
+
+// plan : group : action -> 1 :N : N*N
+class PlanWithGroups {
+  final TrainingPlan plan;
+  // 这里列表的索引，就是plan周期的训练日顺序了
+  final List<GroupWithActions> groupDetailList;
+
+  PlanWithGroups({required this.plan, required this.groupDetailList});
+
+  @override
+  String toString() {
+    return '''
+    PlanWithGroups {
+      plan: $plan, groupDetailList: $groupDetailList,
     ''';
   }
 }

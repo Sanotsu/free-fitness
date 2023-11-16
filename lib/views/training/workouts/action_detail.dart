@@ -5,37 +5,36 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../common/global/constants.dart';
 import '../../../models/training_state.dart';
-import 'exercise_detail_more.dart';
-import 'exercise_modify_form.dart';
 
-class ExerciseDetailDialog extends StatefulWidget {
-  final List<Exercise> exerciseItems;
-  final int exerciseIndex;
+class ActionDetailDialog extends StatefulWidget {
+  final List<ActionDetail> adItems;
+  final int adIndex;
 
-  const ExerciseDetailDialog({
+  const ActionDetailDialog({
     Key? key,
-    required this.exerciseItems,
-    required this.exerciseIndex,
+    required this.adItems,
+    required this.adIndex,
   }) : super(key: key);
 
   @override
-  State<ExerciseDetailDialog> createState() => _ExerciseDetailDialogState();
+  State<ActionDetailDialog> createState() => _ActionDetailDialogState();
 }
 
-class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
+class _ActionDetailDialogState extends State<ActionDetailDialog> {
   String placeholderImageUrl = 'assets/images/no_image.png';
 
   int _currentIndex = 0;
   int _totalSize = 0;
-  late Exercise _currentItem;
+  late ActionDetail _currentItem;
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.exerciseIndex;
-    _currentItem = widget.exerciseItems[_currentIndex];
-    _totalSize = widget.exerciseItems.length;
+    _currentIndex = widget.adIndex;
+    _currentItem = widget.adItems[_currentIndex];
+    _totalSize = widget.adItems.length;
   }
 
   @override
@@ -79,7 +78,9 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
                             child: Hero(
                               tag: 'imageTag',
                               child: Image.file(
-                                File(_currentItem.images?.split(",")[0] ?? ""),
+                                File(_currentItem.exercise.images
+                                        ?.split(",")[0] ??
+                                    ""),
                                 errorBuilder: (BuildContext context,
                                     Object exception, StackTrace? stackTrace) {
                                   return Image.asset(
@@ -96,100 +97,21 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
                     child: Hero(
                       tag: 'imageTag',
                       child: Image.file(
-                        File(_currentItem.images?.split(",")[0] ?? ""),
+                        File(_currentItem.exercise.images?.split(",")[0] ?? ""),
                         errorBuilder: (BuildContext context, Object exception,
                             StackTrace? stackTrace) {
                           return Image.asset(
                             placeholderImageUrl,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fitWidth,
                           );
                         },
                       ),
                     ),
                   ),
-
-                  // Image.file(
-                  //   File(_currentItem.images?.split(",")[0] ?? ""),
-                  //   errorBuilder: (BuildContext context, Object exception,
-                  //       StackTrace? stackTrace) {
-                  //     return Image.asset(
-                  //       placeholderImageUrl,
-                  //       fit: BoxFit.cover,
-                  //     );
-                  //   },
-                  // ),
                 ),
               ),
             ),
           ),
-
-          /// 关闭按钮悬浮在图片上方的写法
-          // Expanded(
-          //   flex: 2,
-          //   child: Container(
-          //     // 预设的图片背景色一般是白色，所以这里也设置为白色，看起来一致
-          //     // color: Colors.white,
-          //     color: const Color.fromARGB(255, 239, 243, 244),
-          //     child: Stack(
-          //       alignment: Alignment.topLeft,
-          //       children: [
-          //         Center(
-          //           child: Image.file(
-          //             File(_currentItem.images?.split(",")[0] ?? ""),
-          //             errorBuilder: (BuildContext context, Object exception,
-          //                 StackTrace? stackTrace) {
-          //               return Image.asset(
-          //                 placeholderImageUrl,
-          //                 fit: BoxFit.cover,
-          //               );
-          //             },
-          //           ),
-          //         ),
-          //         Align(
-          //           alignment: Alignment.topRight,
-          //           child: IconButton(
-          //             icon: const Icon(Icons.close),
-          //             onPressed: () {
-          //               Navigator.of(context).pop(); // 关闭弹窗
-          //             },
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // ),
-          Expanded(
-            flex: 3,
-            child: Container(
-              // color: const Color.fromARGB(206, 241, 243, 243),
-              color: const Color.fromARGB(255, 239, 243, 244),
-              // color: Colors.white,
-              child: Padding(
-                padding: EdgeInsets.all(10.sp),
-                child: Container(
-                  padding: EdgeInsets.only(bottom: 20.sp), // 添加底部内边距
-                  child: ListTile(
-                    title: Text(
-                      '$_currentIndex -${_currentItem.exerciseName}',
-                      // 限制只显示一行，多的用省略号
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      style: TextStyle(fontSize: 20.sp),
-                    ),
-                    subtitle: SingleChildScrollView(
-                      scrollDirection: Axis.vertical,
-                      child: Text(
-                        _currentItem.instructions ?? "",
-                        overflow: TextOverflow.clip, // 设置文字溢出时的处理方式
-                      ),
-                    ),
-                    onTap: () {},
-                  ),
-                ),
-              ),
-            ),
-          ),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -197,59 +119,60 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
                 color: Colors.white,
                 child: Align(
                   alignment: Alignment.center,
-                  child: IconButton(
-                    icon: const Icon(Icons.more_horiz, color: Colors.blue),
-                    onPressed: () {
-                      // 可以考虑不管详情弹窗
-                      // Navigator.of(context).pop(); // 关闭详情弹窗
-                      // 跳转到详情页面
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ExerciseDetailMore(
-                                  exerciseItem: _currentItem,
-                                )),
-                      );
-                    },
+                  child: Text(
+                    (_currentItem.exercise.countingMode ==
+                            countingOptions.first.value)
+                        ? '时长 ${_currentItem.action.duration} 秒'
+                        : '重复 ${_currentItem.action.frequency} 次',
+                    style: TextStyle(fontSize: 24.sp),
                   ),
                 ),
               ),
-              Container(
-                color: Colors.white,
-                child: Align(
-                  alignment: Alignment.center,
-                  child: IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.blue),
-                    onPressed: () async {
-                      // 修改一定要关闭弹窗，然后还要返回主页面重新查询exercise list数据
-
-                      // 跳转到修改表单
-                      final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              ExerciseModifyForm(item: _currentItem),
+              _currentItem.action.equipmentWeight != null
+                  ? Container(
+                      color: Colors.white,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Text(
+                          '器械 ${_currentItem.action.equipmentWeight} kg',
+                          style: TextStyle(fontSize: 24.sp),
                         ),
-                      );
-
-                      // 如果新增基础活动成功，会有指定返回值。这里拿到之后，加载最新的活动列表
-
-                      print(
-                          'exerciseModified result in exercise detail--$result');
-
-                      // 一定要关闭弹窗，但是理论是修改之后修改表单给一个修改的结果flag，这里在关闭时返回父组件，父组件更新exercise list
-                      if (result != null) {
-                        if (!mounted) return;
-                        Navigator.of(context).pop(result);
-                      } else {
-                        if (!mounted) return;
-                        Navigator.of(context).pop();
-                      }
-                    },
+                      ),
+                    )
+                  : Container(),
+            ],
+          ),
+          Expanded(
+            flex: 3,
+            child: Container(
+              color: const Color.fromARGB(255, 239, 243, 244),
+              child: Padding(
+                padding: EdgeInsets.all(10.sp),
+                child: Container(
+                  padding: EdgeInsets.only(bottom: 20.sp), // 添加底部内边距
+                  child: ListTile(
+                    title: Text(
+                      '$_currentIndex -${_currentItem.exercise.exerciseName}',
+                      // 限制只显示一行
+                      maxLines: 1,
+                      //设置文字溢出时的处理方式，多的用省略号
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 20.sp),
+                    ),
+                    // 子标题的运动介绍也可以显示指定多少行，就不用再滚动了
+                    subtitle: SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
+                      child: Text(
+                        _currentItem.exercise.instructions ?? "",
+                        // overflow: TextOverflow.clip, // ellipsis
+                        // maxLines: 10,
+                      ),
+                    ),
+                    onTap: () {},
                   ),
                 ),
-              )
-            ],
+              ),
+            ),
           ),
           Expanded(
             flex: 1,
@@ -270,7 +193,7 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
                       setState(() {
                         if (_currentIndex > 0) {
                           _currentIndex--;
-                          _currentItem = widget.exerciseItems[_currentIndex];
+                          _currentItem = widget.adItems[_currentIndex];
                         }
                       });
                     },
@@ -307,15 +230,15 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
                     icon: Icon(
                       Icons.arrow_forward,
                       size: 30.sp,
-                      color: _currentIndex < widget.exerciseItems.length - 1
+                      color: _currentIndex < widget.adItems.length - 1
                           ? Colors.blue
                           : const Color.fromARGB(255, 128, 222, 204),
                     ),
                     onPressed: () {
                       setState(() {
-                        if (_currentIndex < widget.exerciseItems.length - 1) {
+                        if (_currentIndex < widget.adItems.length - 1) {
                           _currentIndex++;
-                          _currentItem = widget.exerciseItems[_currentIndex];
+                          _currentItem = widget.adItems[_currentIndex];
                         }
                       });
                     },

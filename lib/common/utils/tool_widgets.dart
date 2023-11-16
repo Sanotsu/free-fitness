@@ -39,3 +39,15 @@ IconData genRandomIcon() =>
 // 指定卡路里转化为千焦数值
 String caloryToKjStr(int calory) =>
     "${(calory / oneCalToKjRatio).toStringAsFixed(2)} 千焦";
+
+
+// 绘制转圈圈
+Widget buildLoader(bool isLoading) {
+  if (isLoading) {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  } else {
+    return Container();
+  }
+}

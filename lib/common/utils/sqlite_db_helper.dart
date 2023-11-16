@@ -3,11 +3,13 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:logger/logger.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../models/dietary_state.dart';
 import '../../models/training_state.dart';
+import '../global/constants.dart';
 import 'ddl_dietary.dart';
 import 'ddl_training.dart';
 
@@ -16,6 +18,8 @@ class DBTrainHelper {
   static Database? _database;
   // 创建sqlite的db文件成功后，记录该地址，以便删除时使用。
   var dbFilePath = "";
+
+  var log = Logger();
 
   // 命名的构造函数用于创建DatabaseHelper的实例
   DBTrainHelper._createInstance();
@@ -28,8 +32,11 @@ class DBTrainHelper {
   // 初始化数据库
   Future<Database> initializeDatabase() async {
     // 获取Android和iOS存储数据库的目录路径。
-    Directory directory = await getApplicationDocumentsDirectory();
-    String path = "${directory.path}/${TrainingDdl.databaseName}";
+    // Directory directory = await getApplicationDocumentsDirectory();
+    // String path = "${directory.path}/${TrainingDdl.databaseName}";
+
+    Directory? directory = await getExternalStorageDirectory();
+    String path = "${directory?.path}/${DietaryDdl.databaseName}";
 
     print("初始化 TRAIN sqlite数据库存放的地址：$path");
 
@@ -47,7 +54,6 @@ class DBTrainHelper {
     await db.execute(TrainingDdl.ddlForExercise);
     await db.execute(TrainingDdl.ddlForAction);
     await db.execute(TrainingDdl.ddlForGroup);
-    await db.execute(TrainingDdl.ddlForGroupHaAction);
     await db.execute(TrainingDdl.ddlForPlan);
     await db.execute(TrainingDdl.ddlForPlanHasGroup);
     await db.execute(TrainingDdl.ddlForUser);
@@ -145,6 +151,55 @@ class DBTrainHelper {
     return result;
   }
 
+// 关键字模糊查询基础活动
+  Future<CusDataResult> queryExerciseByKeyword({
+    required String keyword,
+    required int pageSize, // 一次查询条数显示
+    required int page, // 一次查询的偏移量，用于分页
+  }) async {
+    Database db = await database;
+
+    // 查询每页指定数量的数据，但带上总条数
+    var temp = CusDataResult(data: [], total: 0);
+
+    try {
+      List<Map<String, dynamic>> maps = await db.query(
+          TrainingDdl.tableNameOfExercise,
+          where:
+              'exercise_code LIKE ? OR exercise_name LIKE ? LIMIT ? OFFSET ?',
+          whereArgs: [
+            '%$keyword%',
+            '%$keyword%',
+            pageSize,
+            (page - 1) * pageSize
+          ]);
+
+      final list = maps.map((row) => Exercise.fromMap(row)).toList();
+      print(
+          "queryExerciseByKeyword---keyword $keyword-pageSize $pageSize-page $page-");
+      print("----$list");
+
+      // 获取满足查询条件的数据总量
+      int? totalCount = Sqflite.firstIntValue(
+        await db.rawQuery(
+          'SELECT COUNT(*) FROM ${TrainingDdl.tableNameOfExercise} '
+          'WHERE exercise_code LIKE ? OR exercise_name LIKE ?',
+          ['%$keyword%', '%$keyword%'],
+        ),
+      );
+
+      temp.data = list;
+      temp.total = totalCount ?? 0;
+    } catch (e) {
+      // Handle the error
+      print('Error inserting food with serving info: $e');
+      // 抛出异常来触发回滚的方式是 sqflite 中常用的做法
+      rethrow;
+    }
+
+    return temp;
+  }
+
   // 指定栏位查询
   Future<List<Exercise>> queryExercise({
     int? exerciseId,
@@ -201,34 +256,399 @@ class DBTrainHelper {
 
     print(maps);
 
-    var list = List.generate(maps.length, (i) {
-      return Exercise(
-        exerciseId: maps[i]['exercise_id'],
-        exerciseCode: maps[i]['exercise_code'],
-        exerciseName: maps[i]['exercise_name'],
-        force: maps[i]['force'],
-        level: maps[i]['level'],
-        mechanic: maps[i]['mechanic'],
-        equipment: maps[i]['equipment'],
-        // ？？？明明sql语句设置了默认值，但是不传还是null
-        standardDuration: maps[i]['standard_duration'] ?? "1",
-        instructions: maps[i]['instructions'],
-        ttsNotes: maps[i]['tts_notes'],
-        category: maps[i]['category'],
-        primaryMuscles: maps[i]['primary_muscles'],
-        secondaryMuscles: maps[i]['secondary_muscles'],
-        images: maps[i]['images'],
-        // ？？？明明sql语句设置了默认值，但是不传还是null
-        isCustom: maps[i]['is_custom'] ?? '0',
-        contributor: maps[i]['contributor'],
-        gmtCreate: maps[i]['gmt_create'],
-        gmtModified: maps[i]['gmt_modified'],
-      );
-    });
+    final list = maps.map((row) => Exercise.fromMap(row)).toList();
 
     print(list);
 
     return list;
+  }
+
+  ///----------------------- group and action
+
+  // 插入单条训练
+  // 因为新增group没有给主键，而主键是自增的，所以这里返回的row id就是新增主键的group_id
+  Future<int> insertTrainingGroup(TrainingGroup group) async {
+    Database db = await database;
+    var result = await db.insert(
+      TrainingDdl.tableNameOfGroup,
+      group.toMap(),
+    );
+    return result;
+  }
+
+  // 查询指定训练以及其所有动作
+  // 训练支持条件查询，估计训练的数量不会多，就暂时不分页；同事关联的动作就全部带出。
+  Future<List<GroupWithActions>> searchGroupWithActions({
+    int? groupId,
+    String? groupName, // 模糊查询
+    String? groupCategory, // 分类和级别最好是下拉选择的结果，用精确查询
+    String? groupLevel,
+  }) async {
+    final db = await database;
+
+    var where = [];
+    var whereArgs = [];
+
+    if (groupId != null) {
+      where.add("group_id =? ");
+      whereArgs.add(groupId);
+    }
+    if (groupName != null) {
+      where.add("group_name  like ? ");
+      whereArgs.add("%$groupName%");
+    }
+    if (groupCategory != null) {
+      where.add("group_category =? ");
+      whereArgs.add(groupCategory);
+    }
+    if (groupLevel != null) {
+      where.add("group_level =? ");
+      whereArgs.add(groupLevel);
+    }
+
+    List<Map<String, Object?>> groupRows;
+
+    if (where.isEmpty) {
+      groupRows = await db.query(TrainingDdl.tableNameOfGroup);
+    } else {
+      groupRows = await db.query(
+        TrainingDdl.tableNameOfGroup,
+        where: where.join(" AND "),
+        whereArgs: whereArgs,
+      );
+    }
+
+    final list = <GroupWithActions>[];
+
+    for (final row in groupRows) {
+      final group = TrainingGroup.fromMap(row);
+      final actionRows = await db.query(
+        TrainingDdl.tableNameOfAction,
+        where: 'group_id = ?',
+        whereArgs: [group.groupId],
+      );
+
+      final adList = <ActionDetail>[];
+
+      for (final r in actionRows) {
+        final action = TrainingAction.fromMap(r);
+        final exerciseRows = await db.query(
+          TrainingDdl.tableNameOfExercise,
+          where: 'exercise_id = ?',
+          whereArgs: [action.exerciseId],
+        );
+
+        // ？？？理论上这里只有查到1个exercise，且不应该差不多(暂不考虑异常情况)
+        var ad = ActionDetail(
+          action: action,
+          exercise: Exercise.fromMap(exerciseRows[0]),
+        );
+
+        adList.add(ad);
+      }
+      final gas = GroupWithActions(group: group, actionDetailList: adList);
+
+      list.add(gas);
+    }
+
+    log.d("searchAllGroupWithActions---$list");
+    return list;
+  }
+
+  // 插入动作组（单条也当数组插入）
+  Future<List<Object?>> insertTrainingActionList(
+    List<TrainingAction> actionList,
+  ) async {
+    Database db = await database;
+
+    var batch = db.batch();
+    for (var item in actionList) {
+      batch.insert(TrainingDdl.tableNameOfAction, item.toMap());
+    }
+
+    var results = await batch.commit();
+
+    return results;
+  }
+
+  // 更新指定训练的所有动作(删除所有已有的，新增传入的)
+  Future<List<Object?>> renewGroupWithActionsList(
+    int groupId,
+    List<TrainingAction> actionList,
+  ) async {
+    Database db = await database;
+
+    List<Object?> rst = [];
+
+    await db.transaction((txn) async {
+      await txn.delete(
+        TrainingDdl.tableNameOfAction,
+        where: "group_id =? ",
+        whereArgs: [groupId],
+      );
+
+      var batch = txn.batch();
+      for (var item in actionList) {
+        batch.insert(TrainingDdl.tableNameOfAction, item.toMap());
+      }
+
+      rst = await batch.commit();
+    });
+
+    return rst;
+  }
+
+  Future<List<GroupWithActions>> searchAllGroupWithActions2({
+    int? groupId,
+    String? groupName,
+    String? groupCategory,
+    String? groupLevel,
+  }) async {
+    final db = await database;
+
+    final whereList = <String>[];
+    final whereArgs = <dynamic>[];
+
+    if (groupId != null) {
+      whereList.add("group_id = ?");
+      whereArgs.add(groupId);
+    }
+    if (groupName != null) {
+      whereList.add("group_name  like ?");
+      whereArgs.add("%$groupName%");
+    }
+    if (groupCategory != null) {
+      whereList.add("group_category = ?");
+      whereArgs.add(groupCategory);
+    }
+    if (groupLevel != null) {
+      whereList.add("group_level = ?");
+      whereArgs.add(groupLevel);
+    }
+
+    final whereClause = whereList.isEmpty ? null : whereList.join(" AND ");
+
+    final groupRows = await db.query(
+      TrainingDdl.ddlForGroup,
+      where: whereClause,
+      whereArgs: whereClause == null ? null : whereArgs,
+    );
+
+    final list = <GroupWithActions>[];
+
+    await Future.forEach(groupRows, (row) async {
+      final group = TrainingGroup.fromMap(row);
+      final actionRows = await db.query(
+        TrainingDdl.tableNameOfAction,
+        where: 'group_id = ?',
+        whereArgs: [group.groupId],
+      );
+
+      final adList = <ActionDetail>[];
+
+      await Future.forEach(actionRows, (r) async {
+        final action = TrainingAction.fromMap(r);
+        final exerciseRow = await db.query(
+          TrainingDdl.tableNameOfExercise,
+          where: 'exercise_id = ?',
+          whereArgs: [action.exerciseId],
+        );
+        var ad = ActionDetail(
+          action: action,
+          exercise: Exercise.fromMap(exerciseRow[0]),
+        );
+        adList.add(ad);
+      });
+
+      final gas = GroupWithActions(group: group, actionDetailList: adList);
+      list.add(gas);
+    });
+
+    return list;
+  }
+
+  ///----------------------- plan and group
+  /// 插入单个计划基本信息
+  Future<int> insertTrainingPlan(TrainingPlan plan) async {
+    Database db = await database;
+    var result = await db.insert(
+      TrainingDdl.tableNameOfPlan,
+      plan.toMap(),
+    );
+    return result;
+  }
+
+  /// 插入计划的每天的训练数据(插入plan has group 表)
+  Future<List<Object?>> insertTrainingGroupList(
+    List<PlanHasGroup> phgList,
+  ) async {
+    Database db = await database;
+
+    var batch = db.batch();
+    for (var item in phgList) {
+      batch.insert(TrainingDdl.tableNameOfPlanHasGroup, item.toMap());
+    }
+
+    var results = await batch.commit();
+
+    return results;
+  }
+
+  // 插入动作组（单条也当数组插入）
+  Future<List<Object?>> insertPlanHasGroupList(
+    List<PlanHasGroup> phgList,
+  ) async {
+    Database db = await database;
+
+    var batch = db.batch();
+    for (var item in phgList) {
+      batch.insert(TrainingDdl.tableNameOfPlanHasGroup, item.toMap());
+    }
+
+    var results = await batch.commit();
+
+    return results;
+  }
+
+  /// ？？？查询指定计划以及其所有训练（3层嵌套，看怎么优化）
+  // 计划支持条件查询，估计计划的数量不会多，就暂时不分页；同时关联的训练就全部带出。
+  Future<List<PlanWithGroups>> searchPlanWithGroups({
+    int? planId,
+    String? planName, // 模糊查询
+    String? planCode, // 模糊查询
+    String? planCategory, // 分类和级别最好是下拉选择的结果，用精确查询
+    String? planLevel,
+  }) async {
+    final db = await database;
+
+    var where = [];
+    var whereArgs = [];
+
+    if (planId != null) {
+      where.add("plan_id =? ");
+      whereArgs.add(planId);
+    }
+    if (planName != null) {
+      where.add("plan_ame like ? ");
+      whereArgs.add("%$planName%");
+    }
+    if (planCategory != null) {
+      where.add("plan_category =? ");
+      whereArgs.add(planCategory);
+    }
+    if (planLevel != null) {
+      where.add("plan_level = ? ");
+      whereArgs.add(planLevel);
+    }
+
+    List<Map<String, Object?>> planRows;
+
+    if (where.isEmpty) {
+      planRows = await db.query(TrainingDdl.tableNameOfPlan);
+    } else {
+      planRows = await db.query(
+        TrainingDdl.tableNameOfPlan,
+        where: where.join(" AND "),
+        whereArgs: whereArgs,
+      );
+    }
+
+    final pwgList = <PlanWithGroups>[];
+
+    for (final row in planRows) {
+      // 计划有了
+      final plan = TrainingPlan.fromMap(row);
+
+      final planHasGroupRows = await db.query(
+        TrainingDdl.tableNameOfPlanHasGroup,
+        where: 'plan_id = ?',
+        whereArgs: [plan.planId],
+      );
+
+      final gwaList = <GroupWithActions>[];
+
+      // 构建groupWithActions实例
+      for (final phg in planHasGroupRows) {
+        print("----------gggggggggg$phg");
+
+        // 先通过id查到指定group，再巩固group查询包含的action
+
+        final planHasGroup = PlanHasGroup.fromMap(phg);
+
+        // ？？？理论上是有且只有1个，不会为空
+        var tempGroupRows = await db.query(
+          TrainingDdl.tableNameOfGroup,
+          where: 'group_id = ?',
+          whereArgs: [planHasGroup.groupId],
+        );
+        final group = TrainingGroup.fromMap(tempGroupRows[0]);
+
+        final actionRows = await db.query(
+          TrainingDdl.tableNameOfAction,
+          where: 'group_id = ?',
+          whereArgs: [group.groupId],
+        );
+
+        final adList = <ActionDetail>[];
+        // 构建actionDetail 实例
+        for (final a in actionRows) {
+          final action = TrainingAction.fromMap(a);
+          final exerciseRows = await db.query(
+            TrainingDdl.tableNameOfExercise,
+            where: 'exercise_id = ?',
+            whereArgs: [action.exerciseId],
+          );
+
+          // ？？？理论上这里只有查到1个exercise，且不应该差不多(暂不考虑异常情况)
+          var ad = ActionDetail(
+            action: action,
+            exercise: Exercise.fromMap(exerciseRows[0]),
+          );
+
+          adList.add(ad);
+        }
+
+        var ga = GroupWithActions(
+          group: group,
+          actionDetailList: adList,
+        );
+        gwaList.add(ga);
+      }
+
+      final gas = PlanWithGroups(plan: plan, groupDetailList: gwaList);
+
+      pwgList.add(gas);
+    }
+
+    log.d("searchPlanWithGroups---$pwgList");
+    return pwgList;
+  }
+
+  // 更新指定训练的所有动作(删除所有已有的，新增传入的)
+  Future<List<Object?>> renewPlanWithGroupList(
+    int planId,
+    List<PlanHasGroup> phgList,
+  ) async {
+    Database db = await database;
+
+    List<Object?> rst = [];
+
+    await db.transaction((txn) async {
+      await txn.delete(
+        TrainingDdl.tableNameOfPlanHasGroup,
+        where: "plan_id = ? ",
+        whereArgs: [planId],
+      );
+
+      var batch = txn.batch();
+      for (var item in phgList) {
+        batch.insert(TrainingDdl.tableNameOfPlanHasGroup, item.toMap());
+      }
+
+      rst = await batch.commit();
+    });
+
+    return rst;
   }
 }
 

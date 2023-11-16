@@ -39,6 +39,12 @@ List<ExerciseDefaultOption> levelOptions = [
   ExerciseDefaultOption(label: "专家", value: 'expert'),
 ];
 
+// 锻炼是计时还是计次
+List<ExerciseDefaultOption> countingOptions = [
+  ExerciseDefaultOption(label: "计时", value: 'timed'),
+  ExerciseDefaultOption(label: "计次", value: 'counted'),
+];
+
 List<ExerciseDefaultOption> categoryOptions = [
   ExerciseDefaultOption(label: "力量", value: 'strength'),
   ExerciseDefaultOption(label: "拉伸", value: 'stretching'),
@@ -308,4 +314,16 @@ Map<CusNutType, Color> cusNutrientColors = {
 enum CusChartType {
   calory,
   macro,
+}
+
+// 数据库分页查询数据的时候，还需要带上一个该表的总数量
+// 还可以按需补入其他属性
+class CusDataResult {
+  List<dynamic> data;
+  int total;
+
+  CusDataResult({
+    required this.data,
+    required this.total,
+  });
 }
