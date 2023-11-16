@@ -6,7 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
 import '../../../common/global/constants.dart';
-import '../../../common/utils/sqlite_db_helper.dart';
+import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
 import 'group_list.dart';
@@ -19,7 +19,7 @@ class TrainingPlans extends StatefulWidget {
 }
 
 class _TrainingPlansState extends State<TrainingPlans> {
-  final DBTrainHelper _dbHelper = DBTrainHelper();
+  final DBTrainingHelper _dbHelper = DBTrainingHelper();
 
   // 展示计划列表(训练列表一次性查询所有，应该不会太多)
   List<PlanWithGroups> planList = [];
@@ -36,40 +36,9 @@ class _TrainingPlansState extends State<TrainingPlans> {
     super.initState();
 
     print("conditionMap.isEmpty---${conditionMap.isEmpty}");
-    // _dbHelper.deleteDb();
-    // return;
 
     setState(() {});
     getPlanList();
-  }
-
-  demoInsertPlan() async {
-    var demoPlanItem = TrainingPlan(
-      planId: 1,
-      planName: '测试计划',
-      planCode: "Lost Weight",
-      planCategory: '减肥',
-      planLevel: "beginner",
-      planPeriod: 30,
-      description: "好好减肥",
-      contributor: "<登入用户>",
-      gmtCreate: DateTime.now().toString(),
-    );
-
-    var demoPlanItem2 = TrainingPlan(
-      planId: 2,
-      planName: '计划2',
-      planCode: "muscle",
-      planCategory: '健体',
-      planLevel: "beginner",
-      planPeriod: 30,
-      description: "大肌霸",
-      contributor: "<登入用户>",
-      gmtCreate: DateTime.now().toString(),
-    );
-
-    await _dbHelper.insertTrainingPlan(demoPlanItem);
-    await _dbHelper.insertTrainingPlan(demoPlanItem2);
   }
 
   // 把预设的基础活动选项列表转化为 FormBuilderDropdown 支持的列表
@@ -86,12 +55,6 @@ class _TrainingPlansState extends State<TrainingPlans> {
 
   // 查询已有的训练
   getPlanList() async {
-    // _dbHelper.deleteDb();
-    // return;
-
-    // demoInsertPlan();
-    // return;
-
     // 如果已经在查询数据中，则忽略此次新的查询
     if (isLoading) return;
 

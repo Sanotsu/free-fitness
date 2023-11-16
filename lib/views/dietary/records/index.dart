@@ -7,8 +7,7 @@ import 'package:free_fitness/common/global/constants.dart';
 import 'package:free_fitness/models/dietary_state.dart';
 import 'package:intl/intl.dart';
 
-import '../../../common/utils/sqlite_db_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tools.dart';
 import 'foods/food_detail.dart';
 import 'foods/food_list.dart';
@@ -71,11 +70,6 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   _queryDailyFoodItemList() async {
     print("开始运行查询当日饮食日记条目---------");
 
-    // _dietaryHelper.deleteDb();
-
-    // await demoInsertDailyLogData();
-    // return;
-
     if (isLoading) return;
 
     setState(() {
@@ -83,10 +77,12 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     });
 
     // 理论上是默认查询当日的，有选择其他日期则查询指定日期
-    var temp = await _dietaryHelper.queryDailyFoodItemListWithDetail(
+    List<DailyFoodItemWithFoodServing> temp =
+        (await _dietaryHelper.queryDailyFoodItemListWithDetail(
       startDate: selectedDateStr,
       endDate: selectedDateStr,
-    );
+      withDetail: true,
+    ) as List<DailyFoodItemWithFoodServing>);
 
     // log("---------测试查询的当前日记item $temp");
 
@@ -407,70 +403,70 @@ class _DietaryRecordsState extends State<DietaryRecords> {
         CusNutrientInfo(
           label: "calorie",
           value: tempCalories,
-          color: Colors.blue,
+          color: cusNutrientColors[CusNutType.calorie]!,
           name: '卡路里',
           unit: '大卡',
         ),
         CusNutrientInfo(
           label: "energy",
           value: tempEnergy,
-          color: Colors.green,
+          color: cusNutrientColors[CusNutType.energy]!,
           name: '能量',
           unit: '千焦',
         ),
         CusNutrientInfo(
           label: "protein",
           value: tempProtein,
-          color: Colors.yellow,
+          color: cusNutrientColors[CusNutType.protein]!,
           name: '蛋白质',
           unit: '克',
         ),
         CusNutrientInfo(
           label: "fat",
           value: tempFat,
-          color: Colors.black,
+          color: cusNutrientColors[CusNutType.totalFat]!,
           name: '脂肪',
           unit: '克',
         ),
         CusNutrientInfo(
           label: "cho",
           value: tempCHO,
-          color: Colors.red,
+          color: cusNutrientColors[CusNutType.totalCHO]!,
           name: '碳水',
           unit: '克',
         ),
         CusNutrientInfo(
           label: "dietaryFiber",
           value: tempDietaryFiber,
-          color: genRandomColor(),
+          color: cusNutrientColors[CusNutType.dietaryFiber]!,
           name: '膳食纤维',
           unit: '克',
         ),
         CusNutrientInfo(
           label: "sugar",
           value: tempSugar,
-          color: genRandomColor(),
+          color: cusNutrientColors[CusNutType.sugar]!,
           name: '糖',
           unit: '克',
         ),
         CusNutrientInfo(
           label: "sodium",
           value: tempSodium,
-          color: genRandomColor(),
+          color: cusNutrientColors[CusNutType.sodium]!,
           name: '钠',
           unit: '毫克',
         ),
         CusNutrientInfo(
           label: "cholesterol",
           value: tempCholesterol,
-          color: genRandomColor(),
+          color: cusNutrientColors[CusNutType.cholesterol]!,
           name: '胆固醇',
           unit: '毫克',
         ),
         CusNutrientInfo(
           label: "potassium",
           value: tempPotassium,
-          color: genRandomColor(),
+          color: cusNutrientColors[CusNutType.potassium]!,
           name: '钾',
           unit: '毫克',
         ),

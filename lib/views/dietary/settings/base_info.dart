@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
-import '../../../common/utils/sqlite_db_helper.dart';
+import '../../../common/utils/db_dietary_helper.dart';
 import '../../../models/dietary_state.dart';
 
 class MyProfilePage extends StatefulWidget {

@@ -9,7 +9,7 @@ import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../common/global/constants.dart';
-import '../../../common/utils/sqlite_db_helper.dart';
+import '../../../common/utils/db_training_helper.dart';
 import '../../../models/training_state.dart';
 
 /// 基础活动变更表单（希望新增、修改可通用）
@@ -23,7 +23,7 @@ class ExerciseModifyForm extends StatefulWidget {
 }
 
 class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
-  final DBTrainHelper _dbHelper = DBTrainHelper();
+  final DBTrainingHelper _dbHelper = DBTrainingHelper();
 
   // 这个表单用到了3个库，flutter_form_builder、form_builder_file_picker、multi_select_flutter
   // multi_select_flutter不和前者通用，所以其下拉选择框单独使用key来获取值和验证状态等

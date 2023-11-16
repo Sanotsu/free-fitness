@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/utils/sqlite_db_helper.dart';
+import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
 
@@ -22,7 +22,7 @@ class SimpleExerciseList extends StatefulWidget {
 }
 
 class _SimpleExerciseListState extends State<SimpleExerciseList> {
-  final DBTrainHelper _dbHelper = DBTrainHelper();
+  final DBTrainingHelper _dbHelper = DBTrainingHelper();
 
 // 存锻炼已经加载了的列表
   List<Exercise> exerciseItems = [];
@@ -218,20 +218,6 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
                           context,
                           {"selectedExerciseItem": exerciseItem},
                         );
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => ActionConfiguration(
-                        //       // item 是这里选择的那个运动
-                        //       item: exerciseItem,
-                        //       // source应该是父组件传的，来源可能是 训练计划列表 或者 指定训练计划的动作列表
-                        //       source: widget.source,
-                        //     ),
-                        //   ),
-                        // ).then((value) {
-                        //   print(
-                        //       "如果这里的value有相关属性，根据起止，看是不是在pop到上层action list,还是跳转到新页面action list");
-                        // });
                       },
                       child: Row(
                         children: [

@@ -1,16 +1,14 @@
 // ignore_for_file: avoid_print
 
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/training_state.dart';
-import 'package:intl/intl.dart';
 
 import '../../../common/global/constants.dart';
-import '../../../common/utils/sqlite_db_helper.dart';
-import '../../../common/utils/tools.dart';
+import '../../../common/utils/db_training_helper.dart';
+import '../../me/test_funcs.dart';
 import 'exercise_detail.dart';
 import 'exercise_modify_form.dart';
 import 'exercise_query.dart';
@@ -23,7 +21,7 @@ class TrainingExercise extends StatefulWidget {
 }
 
 class _TrainingExerciseState extends State<TrainingExercise> {
-  final DBTrainHelper _dbHelper = DBTrainHelper();
+  final DBTrainingHelper _dbHelper = DBTrainingHelper();
 
 // 存锻炼加载了的列表
   List<Exercise> exerciseItems = [];
@@ -148,30 +146,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
 
 // 测试新增基础活动的示例
   _demoAddRandomExercise() async {
-    // _dbHelper.deleteDb();
-
-    // return;
-
-    Exercise exercise = Exercise(
-      exerciseCode: getRandomString(4),
-      exerciseName: generateRandomString(5, 50),
-      category: categoryOptions[Random().nextInt(categoryOptions.length)].value,
-      level: levelOptions[Random().nextInt(levelOptions.length)].value,
-      mechanic: mechanicOptions[Random().nextInt(mechanicOptions.length)].value,
-      force: forceOptions[Random().nextInt(forceOptions.length)].value,
-      equipment:
-          equipmentOptions[Random().nextInt(equipmentOptions.length)].value,
-      countingMode:
-          countingOptions[Random().nextInt(countingOptions.length)].value,
-      // standardDuration: "1",
-      instructions: generateRandomString(300, 500),
-      primaryMuscles:
-          musclesOptions[Random().nextInt(musclesOptions.length)].value,
-      gmtCreate: DateFormat.yMMMd().format(DateTime.now()),
-    );
-
-    await _dbHelper.insertExercise(exercise);
-    print("触发了【随机】插入按钮");
+    insertOneRandomExercise();
 
     // 有新增数据，也重新开始查询
     setState(() {

@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:logger/logger.dart';
 
-// import 'action_configuration.dart';
 import '../../../common/global/constants.dart';
-import '../../../common/utils/sqlite_db_helper.dart';
+import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
 import 'action_config_dialog.dart';
@@ -27,7 +26,7 @@ class ActionList extends StatefulWidget {
 class _ActionListState extends State<ActionList> {
   var log = Logger();
 
-  final DBTrainHelper _dbHelper = DBTrainHelper();
+  final DBTrainingHelper _dbHelper = DBTrainingHelper();
 
   // 这里不使用TrainingAction 是因为actionDetail有更多信息可以直接显示
   List<ActionDetail> actionList = [];
@@ -50,42 +49,8 @@ class _ActionListState extends State<ActionList> {
     });
   }
 
-  demoInsertGroupAndAction() async {
-    var groupId = widget.groupItem.groupId!;
-
-    // 主要这里的exerciseId和计时或者计次和示例数据的exercise list中要一样，否则显示不对
-    var tempAction = TrainingAction(
-      groupId: groupId,
-      exerciseId: 2,
-      frequency: 12,
-      equipmentWeight: 5,
-    );
-    var tempAction1 = TrainingAction(
-      groupId: groupId,
-      exerciseId: 1,
-      duration: 30,
-      equipmentWeight: 5,
-    );
-    var tempAction2 = TrainingAction(
-      groupId: groupId,
-      exerciseId: 2,
-      frequency: 30,
-      equipmentWeight: 10,
-    );
-    var rst = await _dbHelper
-        .insertTrainingActionList([tempAction, tempAction1, tempAction2]);
-
-    print("ActionList----$rst");
-  }
-
   // 查询指定训练中的动作列表
   _getActionListByGroupId() async {
-    // await demoInsertGroupAndAction();
-
-    // _dbHelper.deleteDb();
-    // return;
-    log.d("tempaa===============================");
-
     // 如果已经在查询数据中，则忽略此次新的查询
     if (isLoading) return;
 

@@ -6,7 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
 import '../../../common/global/constants.dart';
-import '../../../common/utils/sqlite_db_helper.dart';
+import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
 import 'action_list.dart';
@@ -29,7 +29,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
   /// 点击某一个group，进入action list 页面
   ///
 
-  final DBTrainHelper _dbHelper = DBTrainHelper();
+  final DBTrainingHelper _dbHelper = DBTrainingHelper();
 
   // 展示训练列表(训练列表一次性查询所有，应该不会太多)
   List<GroupWithActions> groupList = [];
@@ -38,8 +38,6 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
   Map<String, dynamic> conditionMap = {};
 
   bool isLoading = false;
-
-  late TrainingGroup demoGroupItem;
 
   final GlobalKey<FormBuilderState> _groupFormKey =
       GlobalKey<FormBuilderState>();
@@ -51,26 +49,11 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
     super.initState();
 
     print("conditionMap.isEmpty---${conditionMap.isEmpty}");
-    // _dbHelper.deleteDb();
-    // return;
 
     setState(() {
       getGroupList();
       // 如果没有传这个标志，则不是计划新增训练调过来的；如果有传，取其bool值
       isPlanAddGroup = (widget.isPlanAdd == null) ? false : widget.isPlanAdd!;
-
-      demoGroupItem = TrainingGroup(
-        groupId: 1,
-        groupName: '测试动作组',
-        groupCategory: '减肥',
-        groupLevel: "beginner",
-        restInterval: 15,
-        consumption: 300,
-        timeSpent: 180,
-        description: "好好减肥",
-        contributor: "<登入用户>",
-        gmtCreate: DateTime.now().toString(),
-      );
     });
   }
 

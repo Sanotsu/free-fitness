@@ -7,7 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
 import '../../../common/global/constants.dart';
-import '../../../common/utils/sqlite_db_helper.dart';
+import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/dietary_state.dart';
 import 'week_intake_bar_chart.dart';
@@ -265,6 +265,11 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                                 .currentState!.fields['protein']!.value);
                           });
                           await _dietaryHelper.updateDietaryUser(user);
+                          
+                          // 平均营养素目标修改后，也更新下方图表的值
+                          setState(() {
+                            formatDailyIntakeMap();
+                          });
                         }
                       }
                       setState(() {

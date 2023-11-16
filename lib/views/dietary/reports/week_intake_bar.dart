@@ -86,7 +86,7 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
               String bfStr = getNutrientString('早餐', 0);
               String lunchStr = getNutrientString('午餐', 1);
               String dinnerStr = getNutrientString('晚餐', 2);
-              String otherStr = getNutrientString('小食', 2);
+              String otherStr = getNutrientString('小食', 3);
 
               // 构建气泡框显示的内容
               return BarTooltipItem(

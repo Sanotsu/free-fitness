@@ -6,7 +6,7 @@ import 'package:free_fitness/models/dietary_state.dart';
 
 import '../../../../common/global/constants.dart' as constants;
 import '../../../../common/global/constants.dart';
-import '../../../../common/utils/sqlite_db_helper.dart';
+import '../../../../common/utils/db_dietary_helper.dart';
 import 'food_modify.dart';
 import 'food_detail.dart';
 
@@ -170,7 +170,6 @@ class _FoodListState extends State<FoodList> {
               IconButton(
                 icon: const Icon(Icons.add),
                 onPressed: () {
-                  // _addFoodDemo();
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const FoodModify()),
@@ -228,7 +227,7 @@ class _FoodListState extends State<FoodList> {
                   return _buildLoader();
                 } else {
                   var food = foodItems[index].food;
-                  var foodName = "${food.product} (${food.brand})";
+                  var foodName = "${food.product}\n(${food.brand})";
 
                   var fistServingInfo = foodItems[index].servingInfoList[0];
                   var foodUnit = fistServingInfo.servingUnit;
@@ -241,7 +240,7 @@ class _FoodListState extends State<FoodList> {
                     title: Text(foodName),
                     // 单份食物营养素
                     subtitle:
-                        Text("$foodUnit - $foodEnergy $currentMealtime 大卡"),
+                        Text("$foodUnit - $foodEnergy 大卡"),
                     trailing: IconButton(
                       onPressed: () async {
                         print("==========在这里直接添加份量值到日记对应餐次======");

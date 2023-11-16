@@ -72,6 +72,21 @@ String getCurrentDate() {
   return formattedDate;
 }
 
+// 获取今天往前指定天数的所有日期字符串
+List<String> getAdjacentDatesInRange(int days) {
+  List<String> dateList = [];
+  DateTime today = DateTime.now();
+  DateFormat formatter = DateFormat('yyyy-MM-dd');
+
+  for (int i = -days; i <= 0; i++) {
+    DateTime date = today.add(Duration(days: i));
+    String formattedDate = formatter.format(date);
+    dateList.add(formattedDate);
+  }
+
+  return dateList;
+}
+
 // 小数转化为2位小数的字符串
 //  如果转换为两位小数的字符串长度超过6(即999.99)，则四舍五入为整数
 String formatDoubleToString(double number, {length = 6}) {

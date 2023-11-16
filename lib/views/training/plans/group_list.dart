@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/views/training/workouts/action_list.dart';
 import 'package:logger/logger.dart';
 
-import '../../../common/utils/sqlite_db_helper.dart';
+import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
 import '../workouts/index.dart';
@@ -25,7 +25,7 @@ class GroupList extends StatefulWidget {
 class _GroupListState extends State<GroupList> {
   var log = Logger();
 
-  final DBTrainHelper _dbHelper = DBTrainHelper();
+  final DBTrainingHelper _dbHelper = DBTrainingHelper();
 
   // 这里不使用TrainingAction 是因为actionDetail有更多信息可以直接显示
   List<GroupWithActions> groupList = [];
@@ -48,40 +48,8 @@ class _GroupListState extends State<GroupList> {
     });
   }
 
-  demoInsertPlanHasGroups() async {
-    var planId = widget.planItem.planId!;
-
-    // 主要这里的exerciseId和计时或者计次和示例数据的exercise list中要一样，否则显示不对
-    var tempAction = PlanHasGroup(
-      planId: planId,
-      dayNumber: 1,
-      groupId: 1,
-    );
-    var tempAction1 = PlanHasGroup(
-      planId: planId,
-      dayNumber: 2,
-      groupId: 2,
-    );
-    var tempAction2 = PlanHasGroup(
-      planId: planId,
-      dayNumber: 3,
-      groupId: 1,
-    );
-    var rst = await _dbHelper.insertPlanHasGroupList(
-      [tempAction, tempAction1, tempAction2],
-    );
-
-    print(" demoInsertPlanHasGroups ----$rst");
-  }
-
   // 查询指定训练中的动作列表
   _getActionListByGroupId() async {
-    // _dbHelper.deleteDb();
-    // await demoInsertPlanHasGroups();
-
-    // return;
-    log.d("tempaa===============================");
-
     // 如果已经在查询数据中，则忽略此次新的查询
     if (isLoading) return;
 

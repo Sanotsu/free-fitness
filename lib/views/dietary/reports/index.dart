@@ -6,7 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common/global/constants.dart';
-import '../../../common/utils/sqlite_db_helper.dart';
+import '../../../common/utils/db_dietary_helper.dart';
 import '../../../models/dietary_state.dart';
 import 'week_intake_bar.dart';
 
@@ -88,11 +88,6 @@ class _DietaryReportsState extends State<DietaryReports> {
   _queryDailyFoodItemList({Map<String, String>? queryDateRange}) async {
     print("开始运行查询当日饮食日记条目---------");
 
-    // _dietaryHelper.deleteDb();
-
-    // await demoInsertDailyLogData();
-    // return;
-
     if (isLoading) return;
 
     setState(() {
@@ -106,10 +101,11 @@ class _DietaryReportsState extends State<DietaryReports> {
     };
 
     // 理论上是默认查询当日的，有选择其他日期则查询指定日期
-    var temp = await _dietaryHelper.queryDailyFoodItemListWithDetail(
+    var temp = (await _dietaryHelper.queryDailyFoodItemListWithDetail(
       startDate: queryDateRange["startDate"],
       endDate: queryDateRange["endDate"],
-    );
+      withDetail: true,
+    ) as List<DailyFoodItemWithFoodServing>);
 
     // 查询用户目标值
     // TODO 这里登入者的id要存在哪里？
@@ -316,7 +312,7 @@ class _DietaryReportsState extends State<DietaryReports> {
         ...chart,
 
         /// 食物摄入条目统计卡片(类型为name表示食物摄入次数)
-        _buildFoodStatsListCard(dfiwfsList, CusChartType.calory),
+        _buildDataTableCard(dfiwfsList, CusChartType.calory),
       ],
     );
   }
@@ -386,7 +382,7 @@ class _DietaryReportsState extends State<DietaryReports> {
         ...chart,
 
         /// 食物摄入宏量统计卡片
-        _buildFoodStatsListCard(dfiwfsList, CusChartType.macro),
+        _buildDataTableCard(dfiwfsList, CusChartType.macro),
       ],
     );
   }
@@ -614,7 +610,7 @@ class _DietaryReportsState extends State<DietaryReports> {
   /// -----------------复用的【食物摄入次数或营养素摄入的表格】 ----------------------
   ///
   /// 按照每种食物统计总卡路里摄入 或 总宏量素摄入 的列表【卡片】
-  _buildFoodStatsListCard(
+  _buildDataTableCard(
     List<DailyFoodItemWithFoodServing> dfiwfsList,
     CusChartType type, // 表示统计食物摄入次数；或统计宏量摄入
   ) {
@@ -634,7 +630,17 @@ class _DietaryReportsState extends State<DietaryReports> {
       if (type == CusChartType.calory) {
         return DataRow(
           cells: [
-            DataCell(Text(entry.key)),
+            DataCell(
+              SizedBox(
+                width: 0.4.sw,
+                child: Text(
+                  entry.key,
+                  softWrap: true,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
             DataCell(Text(entry.value.length.toString())),
             DataCell(Text(tempNt.calorie.toStringAsFixed(2))),
           ],
@@ -642,7 +648,18 @@ class _DietaryReportsState extends State<DietaryReports> {
       } else {
         return DataRow(
           cells: [
-            DataCell(Text(entry.key)),
+            // 食物名称最长占40%,超过2行就变省略号
+            DataCell(
+              SizedBox(
+                width: 0.4.sw,
+                child: Text(
+                  entry.key,
+                  softWrap: true,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
             DataCell(Text(tempNt.totalCHO.toStringAsFixed(2))),
             DataCell(Text(tempNt.totalFat.toStringAsFixed(2))),
             DataCell(Text(tempNt.protein.toStringAsFixed(2))),
@@ -691,25 +708,30 @@ class _DietaryReportsState extends State<DietaryReports> {
       elevation: 10,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           ListTile(title: Text(type == CusChartType.calory ? '食物摄入' : '宏量素摄入')),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 5.sp),
-            child: DataTable(
-              columnSpacing: 10.0,
-              columns: type == CusChartType.calory
-                  ? const [
-                      DataColumn(label: Text('食物名称')),
-                      DataColumn(label: Text('摄入次数'), numeric: true),
-                      DataColumn(label: Text('摄入(大卡)'), numeric: true),
-                    ]
-                  : const [
-                      DataColumn(label: Text('食物名称')),
-                      DataColumn(label: Text('碳水(克)'), numeric: true),
-                      DataColumn(label: Text('脂肪(克)'), numeric: true),
-                      DataColumn(label: Text('蛋白质(克)'), numeric: true),
-                    ],
-              rows: tempRows,
+            // 根据其子部件的大小调整其自身的大小(等比例缩放)，从而使得子部件能够适应父部件的大小。
+            child: FittedBox(
+              // 使用FittedBox来自动调整宽度
+              child: DataTable(
+                columnSpacing: 10.0,
+                columns: type == CusChartType.calory
+                    ? const [
+                        DataColumn(label: Text('食物名称')),
+                        DataColumn(label: Text('摄入次数'), numeric: true),
+                        DataColumn(label: Text('摄入(大卡)'), numeric: true),
+                      ]
+                    : const [
+                        DataColumn(label: Text('食物名称')),
+                        DataColumn(label: Text('碳水(克)'), numeric: true),
+                        DataColumn(label: Text('脂肪(克)'), numeric: true),
+                        DataColumn(label: Text('蛋白质(克)'), numeric: true),
+                      ],
+                rows: tempRows,
+              ),
             ),
           ),
         ],

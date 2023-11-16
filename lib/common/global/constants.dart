@@ -305,7 +305,7 @@ Map<CusNutType, Color> cusNutrientColors = {
   CusNutType.otherCalorie: Colors.deepPurple,
 
   // 憋不出来的颜色
-  CusNutType.calorie: Colors.white10,
+  CusNutType.calorie: Colors.blueAccent,
   CusNutType.lunchEnergy: Colors.black45,
 };
 

@@ -10,7 +10,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../../common/global/constants.dart';
-import '../../../../common/utils/sqlite_db_helper.dart';
+import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../models/dietary_state.dart';
 import 'food_serving_info_modify_form.dart';
 
@@ -41,51 +41,6 @@ class _FoodModifyState extends State<FoodModify> {
   // 上一个map的属性是数据库的栏位，还包含只为null的属性，这个是用于格式化展示的变量，更加可读
   var formattedTempServingFormData = "";
 
-  void handleSave() async {
-    String newFood = foodNameController.text;
-
-    var res = await _addFoodDemo();
-
-    print("res----------$res");
-
-    if (!mounted) return;
-    if (newFood.isNotEmpty) {
-      Navigator.pop(context, newFood);
-    }
-  }
-
-  _addFoodDemo() async {
-    // _dietaryHelper.deleteDb();
-    // return;
-    // var dfood = Food(brand: "重庆", product: '豆豉鲮鱼');
-    var dfood = Food(brand: "重庆", product: '豇豆');
-
-    // 输入公制单位营养素
-    var dserving2 = ServingInfo(
-        energy: 13456,
-        foodId: 1, // 这个id会在insert语句中被成功插入的food的id替代
-        servingSize: 1,
-        servingUnit: "堆",
-        protein: 43.5,
-        totalFat: 56.3,
-        saturatedFat: 10,
-        transFat: 11,
-        polyunsaturatedFat: 12,
-        monounsaturatedFat: 13,
-        totalCarbohydrate: 76.6,
-        sugar: 30.5,
-        dietaryFiber: 34.65,
-        sodium: 555,
-        potassium: 113,
-        cholesterol: 456);
-
-    int ret = await _dietaryHelper.insertFoodWithServingInfoList(
-      food: dfood,
-      servingInfoList: [dserving2],
-    );
-    return ret;
-  }
-
   _addFoodAndServingList() async {
     print("_foodFormKey---${_foodFormKey.currentState?.value}");
 
@@ -111,14 +66,15 @@ class _FoodModifyState extends State<FoodModify> {
       );
 
       try {
-        int ret = await _dietaryHelper.insertFoodWithServingInfoList(
+        Map<String, Object> ret =
+            await _dietaryHelper.insertFoodWithServingInfoList(
           food: food,
           servingInfoList: inputServingInfos,
         );
         print("插入食物和营养素的结果 ---$ret");
 
         // ？？？是返回上一层，还是把当前食物信息带着跳到food detail去？
-        if (ret > 0) {
+        if ((ret["foodId"]!) as int > 0) {
           if (!mounted) return;
 
           // 父组件应该重新加载(传参到父组件中重新加载)
@@ -197,26 +153,6 @@ class _FoodModifyState extends State<FoodModify> {
         title: const Text('Add Food'),
       ),
       body: _buildFoodForm(),
-      // Padding(
-      //   padding: const EdgeInsets.all(16.0),
-      //   child: Column(
-      //     crossAxisAlignment: CrossAxisAlignment.start,
-      //     children: [
-      //       Text(
-      //         'Food Name:',
-      //         style: TextStyle(fontSize: 16.sp),
-      //       ),
-      //       TextField(
-      //         controller: foodNameController,
-      //       ),
-      //       SizedBox(height: 16.sp),
-      //       ElevatedButton(
-      //         onPressed: _handleSave,
-      //         child: const Text('Save'),
-      //       ),
-      //     ],
-      //   ),
-      // ),
     );
   }
 

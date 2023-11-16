@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/utils/sqlite_db_helper.dart';
+import '../../../common/utils/db_dietary_helper.dart';
 import '../../../models/dietary_state.dart';
 import 'base_info.dart';
 import 'intake_target.dart';
@@ -31,33 +31,6 @@ class _DietarySettingsState extends State<DietarySettings> {
 
   // ？？？这里要传入用户信息供查询
   _queryLoginedUserInfo() async {
-    // _dietaryHelper.deleteDb();
-    // return;
-
-    // // 测试，插入先
-    // await _dietaryHelper.deleteDietaryUser(1);
-
-    // var newItem = DietaryUser(
-    //   userId: 1,
-    //   userName: "张三",
-    //   userCode: "测试code",
-    //   gender: "雷霆战机",
-    //   description: "测试描述",
-    //   password: "123",
-    //   dateOfBirth: "1994-07",
-    //   height: 173,
-    //   currentWeight: 68,
-    //   targetWeight: 65.2,
-    //   rdaGoal: 1200,
-    //   proteinGoal: 85.5,
-    //   fatGoal: 45.5,
-    //   choGoal: 65.6,
-    // );
-    // var rst = await _dietaryHelper.insertDietaryUserList([newItem]);
-    // print("_queryLoginedUserInfo-newItem: $newItem--rst: $rst");
-
-    // return;
-
     if (isLoading) return;
     setState(() {
       isLoading = true;

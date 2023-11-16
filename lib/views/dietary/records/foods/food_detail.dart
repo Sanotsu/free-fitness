@@ -8,7 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
 import '../../../../common/global/constants.dart';
-import '../../../../common/utils/sqlite_db_helper.dart';
+import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../models/dietary_state.dart';
 
 class FoodDetail extends StatefulWidget {
