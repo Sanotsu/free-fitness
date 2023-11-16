@@ -62,7 +62,7 @@ class _HomePageState extends State<HomePage> {
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-                icon: Icon(Icons.fitness_center), label: '训练'),
+                icon: Icon(Icons.fitness_center), label: '运动'),
             BottomNavigationBarItem(icon: Icon(Icons.restaurant), label: '饮食'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: '我的'),
           ],

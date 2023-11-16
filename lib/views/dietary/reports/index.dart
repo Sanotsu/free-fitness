@@ -402,13 +402,15 @@ class _DietaryReportsState extends State<DietaryReports> {
       }
     }
 
-    return DataTable(
-      columns: const [
-        DataColumn(label: Text('营养素')),
-        DataColumn(label: Text('摄入量'), numeric: true),
-        DataColumn(label: Text('目标量'), numeric: true),
-      ],
-      rows: rows,
+    return FittedBox(
+      child: DataTable(
+        columns: const [
+          DataColumn(label: Text('营养素')),
+          DataColumn(label: Text('摄入量'), numeric: true),
+          DataColumn(label: Text('目标量'), numeric: true),
+        ],
+        rows: rows,
+      ),
     );
   }
 

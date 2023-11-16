@@ -82,6 +82,7 @@ flutter:
     - assets/profile_icons/
     - assets/exercise_gifs/
     - assets/exercise_gifs/demo2/
+    - assets/covers/
     # - assets/exercise_gifs/demo2/demo2.gif
     # - assets/exercise_gifs/demo1.gif
   #   - images/a_dot_ham.jpeg

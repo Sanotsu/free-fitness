@@ -110,7 +110,7 @@
 
 #### 2023-11-10
 
-后续 exercise 称为**运动**，action 称为**动作**， group/workout 称为**训练**，plan 称为**计划**，整个模块 training 称为**锻炼**。
+后续 exercise 称为**活动**，action 称为**动作**， group/workout 称为**训练**，plan 称为**计划**，整个模块 training 称为**锻炼**。
 
 【注意】：看看 action config 从一个页面，换成一个 dailog 看看，能不能解决 pop 两次的问题？？
 
