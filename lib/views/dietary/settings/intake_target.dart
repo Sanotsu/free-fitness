@@ -156,7 +156,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
             // 定制一周7天的卡路里和宏量素
             buildEditWeekMacrosCard(),
             // 一周7天的摄入宏量素目标条状图
-            buildEditWeekMacrosBarChartCard(),
+            buildWeekMacrosBarChartCard(),
             // 底部稍微一点空隙来显示卡片阴影
             SizedBox(height: 20.sp),
           ],
@@ -165,7 +165,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
     );
   }
 
-  buildEditWeekMacrosBarChartCard() {
+  buildWeekMacrosBarChartCard() {
     return Card(
       elevation: 10,
       child: Padding(

@@ -14,3 +14,4 @@
 #### 2023-11-17
 
 - 整理了 constants 文件的内容，把 CusLabel、ExerciseDefaultOption、CusDropdownOption 类型合并。
+- 简单整理了exercise list主页面，优化了新增基础活动及其条件查询的表单页面。

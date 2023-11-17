@@ -12,7 +12,7 @@ import '../../../common/utils/tool_widgets.dart';
 import '../../me/test_funcs.dart';
 import 'exercise_detail.dart';
 import 'exercise_modify_form.dart';
-import 'exercise_query.dart';
+import 'exercise_query_form.dart';
 
 class TrainingExercise extends StatefulWidget {
   const TrainingExercise({super.key});
@@ -24,21 +24,22 @@ class TrainingExercise extends StatefulWidget {
 class _TrainingExerciseState extends State<TrainingExercise> {
   final DBTrainingHelper _dbHelper = DBTrainingHelper();
 
-// 存锻炼加载了的列表
+  // 存锻炼加载了的列表
   List<Exercise> exerciseItems = [];
+  // 锻炼的总数(查询时则为符合条件的总数，默认一页只有10条，看不到总数量)
+  int itemsCount = 0;
   int currentPage = 1; // 数据库查询的时候会从0开始offset
   int pageSize = 10;
   bool isLoading = false;
+  // 页面滚动控制器
   ScrollController scrollController = ScrollController();
-
+  // 查询条件
   Map<String, dynamic>? queryConditon;
-
-  String placeholderImageUrl = 'assets/images/no_image.png';
 
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadExerciseData();
     scrollController.addListener(_scrollListener);
   }
 
@@ -49,7 +50,8 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     super.dispose();
   }
 
-  void _scrollListener() {
+  // 滚动到最底部加载更多数据
+  _scrollListener() {
     if (isLoading) return;
 
     final maxScrollExtent = scrollController.position.maxScrollExtent;
@@ -57,56 +59,52 @@ class _TrainingExerciseState extends State<TrainingExercise> {
 
     // 上滑滚动到底部加载更多数据
     if (maxScrollExtent <= currentPosition) {
-      _loadData();
+      _loadExerciseData();
     }
   }
 
-  Future<void> _loadData() async {
-    print("进入了_loadData");
-
-    // _dietaryHelper.deleteDb();
-
-    // return;
-
+  // 加载更多数据(一次10条，有初始值)
+  _loadExerciseData() async {
     if (isLoading) return;
 
     setState(() {
       isLoading = true;
     });
 
-    List<Exercise> newData = await searchExercise();
-
-    print("newDatanewDatanewData=$newData");
+    CusDataResult temp = await _searchExercise();
+    List<Exercise> newData = temp.data as List<Exercise>;
 
     // 模拟加载耗时一秒，以明显看到加载圈（实际用删除）
-    await Future.delayed(const Duration(milliseconds: 200));
+    // await Future.delayed(const Duration(milliseconds: 200));
 
     // 如果没有更多数据，则在底部显示
     if (newData.isEmpty) {
       // 显示 "没有更多" 的信息
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Center(child: Text("没有更多")),
-          duration: Duration(seconds: 2),
-        ),
+      // if (!mounted) return;
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Center(child: Text("没有更多")),
+      //     duration: Duration(seconds: 2),
+      //   ),
+      // );
+      // 如果没有更多数据就回弹一下
+      scrollController.animateTo(
+        scrollController.position.pixels - 100, // 回弹的距离
+        duration: const Duration(milliseconds: 300), // 动画持续300毫秒
+        curve: Curves.easeOut,
       );
     }
 
     setState(() {
       exerciseItems.addAll(newData);
+      itemsCount = temp.total;
       currentPage++;
       isLoading = false;
     });
   }
 
-  removeExerciseById(id) async {
-    await _dbHelper.deleteExercise(id);
-    _loadData();
-  }
-
   // 如果是有用户的查询条件，则使用查询条件进行查询（查询条件表单返回的值）；如果没有，则默认查询所有
-  Future<List<Exercise>> searchExercise() async {
+  _searchExercise() async {
     if (queryConditon == null) {
       print("queryConditon is null");
 
@@ -145,20 +143,8 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     }
   }
 
-// 测试新增基础活动的示例
-  _demoAddRandomExercise() async {
-    insertOneRandomExercise();
-
-    // 有新增数据，也重新开始查询
-    setState(() {
-      exerciseItems.clear();
-      currentPage = 1;
-    });
-    _loadData();
-  }
-
-  // 定义回调函数，参数为查询条件的值
-  void handleQuery(Map<String, dynamic> query) {
+  // 定义查询表单点击确认的回调函数，参数为查询条件的值
+  _handleQuery(Map<String, dynamic> query) {
     // 处理查询条件的值
     print(query); // 示例：打印查询条件的值
 
@@ -167,8 +153,26 @@ class _TrainingExerciseState extends State<TrainingExercise> {
       queryConditon = query;
       exerciseItems.clear();
       currentPage = 1;
-      _loadData();
+      _loadExerciseData();
     });
+  }
+
+  // 从数据库移除指定基础活动
+  _removeExerciseById(id) async {
+    await _dbHelper.deleteExercise(id);
+    _loadExerciseData();
+  }
+
+  // 测试新增基础活动的示例
+  _demoAddRandomExercise() async {
+    insertOneRandomExercise();
+
+    // 有新增数据，也重新开始查询
+    setState(() {
+      exerciseItems.clear();
+      currentPage = 1;
+    });
+    _loadExerciseData();
   }
 
   @override
@@ -176,8 +180,16 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('WorkoutDiscovers'),
+        title: Text('动作库 $itemsCount'),
         actions: [
+          /// 测试，新增一条数据的数据
+          TextButton(
+            onPressed: _demoAddRandomExercise,
+            style: ButtonStyle(
+              foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+            ),
+            child: const Text('AddTest'),
+          ),
           TextButton.icon(
             icon: const Icon(Icons.add),
             style: ButtonStyle(
@@ -204,7 +216,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                   // ？？？新增之后重新开始，修改的话有必要吗？
                   currentPage = 1;
                 });
-                _loadData();
+                _loadExerciseData();
               }
             },
             label: const Text('新增'),
@@ -214,28 +226,10 @@ class _TrainingExerciseState extends State<TrainingExercise> {
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            // Expanded(
-            //   child: SizedBox(
-            //     height: 0.1.sh,
-            //     child: const ExerciseQueryForm(),
-            //   ),
-            // ),
-            ExerciseQueryForm(
-              onQuery: handleQuery,
-            ),
+            /// 上方的条件查询区域
+            ExerciseQueryForm(onQuery: _handleQuery),
 
-            /// 显示查询结果的基础活动缩略卡片
-            Center(
-              child: Column(
-                children: [
-                  Text("Exercise 当前结果共 ${exerciseItems.length} 条"),
-                  TextButton(
-                    onPressed: _demoAddRandomExercise,
-                    child: const Text('AddRndExercise'),
-                  ),
-                ],
-              ),
-            ),
+            /// 运动的数据列表
             Expanded(
               child: GridView.builder(
                 itemCount: exerciseItems.length + 1,
@@ -248,13 +242,10 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                   if (index == exerciseItems.length) {
                     return buildLoader(isLoading);
                   } else {
-                    print("xxxxxxxxxxx");
-                    print(exerciseItems[index].images?.split(","));
-
-                    // 示意图可以有多个，就去第一张号了
+                    // 示意图可以有多个，就取第一张好了
                     var exerciseItem = exerciseItems[index];
-                    var imageUrl = exerciseItem.images?.split(",")[0] ?? "";
 
+                    // 向左滑可删除指定行
                     return Dismissible(
                       key: Key(exerciseItem.exerciseCode),
                       direction: DismissDirection.endToStart,
@@ -264,38 +255,37 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                         padding: EdgeInsets.symmetric(horizontal: 20.0.sp),
                         child: const Icon(Icons.delete, color: Colors.white),
                       ),
-                      // ---实际删除应该有弹窗，删除时还要检查删除者是否为创建者，这里只是测试左滑删除卡片
 
+                      // 左滑显示删除确认弹窗，？？？删除时还要检查删除者是否为创建者，这里只是测试左滑删除卡片
                       confirmDismiss: (DismissDirection direction) async {
                         return await showDialog(
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: const Text("Remove Exercise"),
-                              content: const Text(
-                                  "Are you sure you want to remove this item?"),
+                              title: const Text("删除确认"),
+                              content: const Text("确认要删除该动作？删除后不可恢复！"),
                               actions: <Widget>[
-                                ElevatedButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(true),
-                                    child: const Text("Yes")),
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.of(context).pop(true),
+                                  child: const Text("确定"),
+                                ),
                                 ElevatedButton(
                                   onPressed: () =>
                                       Navigator.of(context).pop(false),
-                                  child: const Text("No"),
+                                  child: const Text("取消"),
                                 ),
                               ],
                             );
                           },
                         );
                       },
+                      // 确认删除时的操作
                       onDismissed: (direction) {
                         setState(() {
-                          // _dbHelper.deleteExercise(exerciseItem.exerciseId!);
-                          // futureHandler = _dbHelper.queryExercise();
+                          // 确认要删除后，先从列表中移除，然后从数据库删除
                           exerciseItems.removeAt(index);
-
-                          removeExerciseById(exerciseItem.exerciseId!);
+                          _removeExerciseById(exerciseItem.exerciseId!);
                         });
 
                         if (!mounted) return;
@@ -307,95 +297,8 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                           ),
                         );
                       },
-
-                      child: Card(
-                        child: InkWell(
-                          onTap: () {
-                            // 处理点击事件的逻辑
-                            print("------ tap in card");
-                            showModalBottomSheet(
-                              context: context,
-                              // 设置滚动控制为true，子部件设置dialog的高度才有效，不然固定在9/16左右无法更多。
-                              isScrollControlled: true,
-                              builder: (BuildContext context) {
-                                return ExerciseDetailDialog(
-                                  exerciseItems: exerciseItems,
-                                  exerciseIndex: index,
-                                );
-                              },
-                            ).then((value) {
-                              print("-------sdsdd $value");
-                              // 修改exercise之后，重新加载列表
-                              if (value != null) {
-                                setState(() {
-                                  exerciseItems.clear();
-                                  currentPage = 1;
-                                });
-                                _loadData();
-                              }
-                            });
-                          },
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: 0.4.sw,
-                                height: 0.3.sh,
-                                child: Image.file(
-                                  File(imageUrl),
-                                  errorBuilder: (BuildContext context,
-                                      Object exception,
-                                      StackTrace? stackTrace) {
-                                    return Image.asset(
-                                      placeholderImageUrl,
-                                      fit: BoxFit.cover,
-                                    );
-                                  },
-                                ),
-                              ),
-                              // SizedBox(width: 0.1.sw),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.all(10.sp),
-                                      child: Text(
-                                        "$index-${exerciseItem.exerciseId}-${exerciseItem.exerciseName}",
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                        style: TextStyle(
-                                            fontSize: 16.sp,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                    _buildCardPadding(
-                                      "级别：",
-                                      exerciseItem.level ?? "",
-                                      levelOptions,
-                                    ),
-                                    _buildCardPadding(
-                                      "类型：",
-                                      exerciseItem.category,
-                                      categoryOptions,
-                                    ),
-                                    // _buildCardPadding(
-                                    //   "器械：",
-                                    //   exerciseItem.equipment ?? "",
-                                    //   equipmentOptions,
-                                    // ),
-                                    _buildCardPadding(
-                                      "计量：",
-                                      exerciseItem.countingMode,
-                                      countingOptions,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      // 实际展示的基础活动列表
+                      child: _buildExerciseItemCard(index),
                     );
                   }
                 },
@@ -407,23 +310,94 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     );
   }
 
-  _buildCardPadding(
-    String prefix,
-    String item,
-    List<CusLabel> options,
-  ) {
+  // 构建单个基础活动的卡片信息
+  _buildExerciseItemCard(int index) {
+    var exerciseItem = exerciseItems[index];
+    var imageUrl = exerciseItem.images?.split(",")[0] ?? "";
+
+    return Card(
+      child: InkWell(
+        onTap: () {
+          // 点击卡片，弹窗显示基础活动的基本信息
+          showModalBottomSheet(
+            context: context,
+            // 设置滚动控制为true，子部件设置dialog的高度才有效，不然固定在9/16左右无法更多。
+            isScrollControlled: true,
+            builder: (BuildContext context) => ExerciseDetailDialog(
+              exerciseItems: exerciseItems,
+              exerciseIndex: index,
+            ),
+          ).then((value) {
+            // 修改exercise之后，重新加载列表
+            if (value != null) {
+              setState(() {
+                exerciseItems.clear();
+                currentPage = 1;
+              });
+              _loadExerciseData();
+            }
+          });
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 0.4.sw,
+              height: 0.3.sh,
+              child: Image.file(
+                File(imageUrl),
+                errorBuilder: (BuildContext context, Object exception,
+                    StackTrace? stackTrace) {
+                  return Image.asset(placeholderImageUrl, fit: BoxFit.cover);
+                },
+              ),
+            ),
+
+            // SizedBox(width: 0.1.sw),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(10.sp),
+                    child: Text(
+                      "${index + 1} ${exerciseItem.exerciseName}",
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  _propertyText("级别：", exerciseItem.level ?? "", levelOptions),
+                  _propertyText("类型：", exerciseItem.category, categoryOptions),
+                  _propertyText(
+                      "器械：", exerciseItem.equipment ?? "", equipmentOptions),
+                  _propertyText(
+                      "计量：", exerciseItem.countingMode, countingOptions),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  _propertyText(String prefix, String item, List<CusLabel> options) {
+    // 数据库存的是英文，这里找到对应的中文显示
     var label = options
         .firstWhere(
           (element) => element.value == item,
-          orElse: () => CusLabel(cnLabel: '无数据', value: '', enLabel: 'No Data'),
+          orElse: () => CusLabel(cnLabel: '无数据', enLabel: 'No Data', value: ''),
         )
         .cnLabel;
 
-    return Padding(
-      padding: EdgeInsets.only(left: 10.sp),
-      child: Text(
-        prefix + label,
-        style: TextStyle(fontSize: 14.sp),
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.only(left: 10.sp),
+        child: Text(prefix + label, style: TextStyle(fontSize: 12.sp)),
       ),
     );
   }

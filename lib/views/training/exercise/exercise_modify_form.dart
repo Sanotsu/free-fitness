@@ -238,283 +238,311 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
           )
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: SingleChildScrollView(
-          // 创建表单
-          child: FormBuilder(
-            key: _formKey,
-            child: Column(
-              children: [
-                // 代号和名称
-                FormBuilderTextField(
-                  name: 'exercise_code',
-                  decoration: const InputDecoration(labelText: '*代号'),
-                  initialValue: updateTarget?.exerciseCode,
-                  validator: FormBuilderValidators.compose([
-                    FormBuilderValidators.required(errorText: '代号不可为空'),
-                  ]),
-                ),
-                FormBuilderTextField(
-                  name: 'exercise_name',
-                  decoration: const InputDecoration(labelText: '*名称'),
-                  initialValue: updateTarget?.exerciseName,
-                  validator: FormBuilderValidators.compose([
-                    FormBuilderValidators.required(errorText: '名称不可为空'),
-                  ]),
-                ),
+      body: Card(
+        elevation: 10.sp,
+        child: Padding(
+          padding: EdgeInsets.all(10.sp),
+          child: SingleChildScrollView(
+            // 创建表单
+            child: FormBuilder(
+              key: _formKey,
+              child: Column(
+                children: [
+                  /// 代号和名称
+                  ///
 
-                // 级别和类别（单选）
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Flexible(
-                      child: FormBuilderDropdown(
-                        name: 'level',
-                        decoration: const InputDecoration(
-                          labelText: '*级别',
-                          hintText: '选择级别',
-                        ),
+                  _buildTextField(
+                    "exercise_name",
+                    labelText: '*名称',
+                    initialValue: updateTarget?.exerciseName,
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(errorText: '名称不可为空'),
+                    ]),
+                  ),
+                  _buildTextField(
+                    "exercise_code",
+                    labelText: '*代号',
+                    initialValue: updateTarget?.exerciseCode,
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(errorText: '代号不可为空'),
+                    ]),
+                  ),
+
+                  /// 级别和类别（单选）
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildModifyDropdownFlexible(
+                        "level",
+                        levelOptions,
+                        labelText: '*级别',
+                        initialValue: updateTarget?.level,
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(errorText: '级别不可为空')
                         ]),
-                        items: genDropdownMenuItems(levelOptions),
-                        initialValue: updateTarget?.level,
-                        valueTransformer: (val) => val?.toString(),
                       ),
-                    ),
-                    Flexible(
-                      child: FormBuilderDropdown(
-                        name: 'counting_mode',
-                        decoration: const InputDecoration(
-                          labelText: '*计数方式',
-                          hintText: '选择计数方式',
-                        ),
+                      _buildModifyDropdownFlexible(
+                        "counting_mode",
+                        countingOptions,
+                        labelText: '*计数',
+                        initialValue: updateTarget?.countingMode,
                         validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(errorText: '计数方式不可为空')
+                          FormBuilderValidators.required(errorText: '计数不可为空')
                         ]),
-                        items: genDropdownMenuItems(countingOptions),
-                        initialValue: updateTarget?.level,
-                        valueTransformer: (val) => val?.toString(),
                       ),
-                    ),
-                    Flexible(
-                      child: FormBuilderDropdown(
-                        name: 'force',
-                        decoration: const InputDecoration(
-                          labelText: '发力方式',
-                          hintText: '选择发力方式',
-                        ),
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(errorText: '发力方式不可为空')
-                        ]),
-                        items: genDropdownMenuItems(forceOptions),
+                      _buildModifyDropdownFlexible(
+                        "force",
+                        forceOptions,
+                        labelText: '*发力',
                         initialValue: updateTarget?.force,
-                        valueTransformer: (val) => val?.toString(),
+                        validator: FormBuilderValidators.compose([
+                          FormBuilderValidators.required(errorText: '发力不可为空')
+                        ]),
                       ),
-                    )
-                  ],
-                ),
-                // 分类和类别
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // 分类（单选）
-                    Flexible(
-                      child: FormBuilderDropdown(
-                        name: 'category',
-                        decoration: const InputDecoration(
-                          labelText: '*分类',
-                          hintText: '选择分类',
-                        ),
+                    ],
+                  ),
+                  // 分类和类别
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildModifyDropdownFlexible(
+                        "category",
+                        categoryOptions,
+                        labelText: '*分类',
+                        initialValue: updateTarget?.category,
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(errorText: '分类不可为空')
                         ]),
-                        items: genDropdownMenuItems(categoryOptions),
-                        initialValue: updateTarget?.category,
-                        valueTransformer: (val) => val?.toString(),
                       ),
-                    ),
-                    Flexible(
-                      child: FormBuilderDropdown(
-                        name: 'mechanic',
-                        decoration: const InputDecoration(
-                          labelText: '*类别',
-                          hintText: '选择类别',
-                        ),
+                      _buildModifyDropdownFlexible(
+                        "mechanic",
+                        mechanicOptions,
+                        labelText: '*类别',
+                        initialValue: updateTarget?.mechanic,
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(errorText: '类别不可为空')
                         ]),
-                        items: genDropdownMenuItems(mechanicOptions),
-                        initialValue: updateTarget?.mechanic,
-                        valueTransformer: (val) => val?.toString(),
                       ),
-                    )
-                  ],
-                ),
+                    ],
+                  ),
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Flexible(
-                      child: FormBuilderDropdown(
-                        name: 'equipment',
-                        decoration: const InputDecoration(
-                          labelText: '所需器械',
-                          hintText: '选择所需器械',
-                        ),
-                        items: genDropdownMenuItems(equipmentOptions),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildModifyDropdownFlexible(
+                        "equipment",
+                        equipmentOptions,
+                        labelText: '器械',
                         initialValue: updateTarget?.equipment,
-                        valueTransformer: (val) => val?.toString(),
                       ),
-                    ),
-                    Flexible(
-                      child: FormBuilderDropdown(
-                        name: 'standard_duration',
-                        decoration: const InputDecoration(
-                          labelText: '标准动作耗时',
-                          hintText: '选择标准动作耗时',
-                        ),
-                        items: genDropdownMenuItems(standardDurationOptions),
+                      _buildModifyDropdownFlexible(
+                        "standard_duration",
+                        standardDurationOptions,
+                        labelText: '标准动作耗时',
                         initialValue: updateTarget?.standardDuration,
-                        valueTransformer: (val) => val?.toString(),
                       ),
-                    )
-                  ],
-                ),
-                SizedBox(height: 10.sp),
-                // 主要肌肉(多选)
-                MultiSelectDialogField(
-                  key: _multiPrimarySelectKey,
-                  items: _muscleItems,
-                  // ？？？？ 好像是不带validator用了这个初始值就会报错
-                  initialValue: selectedPrimaryMuscles,
-                  title: const Text("选择主要肌肉"),
-                  selectedColor: Colors.blue,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: const BorderRadius.all(Radius.circular(5)),
-                    border: Border.all(
-                      color: Colors.blue,
-                      width: 2,
-                    ),
+                    ],
                   ),
-                  buttonIcon: const Icon(
-                    Icons.fitness_center,
-                    color: Colors.blue,
-                  ),
-                  buttonText: Text(
-                    "*主要肌肉",
-                    style: TextStyle(
-                      color: Colors.blue[800],
-                      fontSize: 16,
-                    ),
-                  ),
-                  searchable: true,
-                  validator: (values) {
-                    if (values == null || values.isEmpty) {
-                      return "至少选择一个锻炼的主要肌肉";
-                    }
-                    return null;
-                  },
-                  onConfirm: (results) {
-                    selectedPrimaryMuscles = results;
-                  },
-                ),
-                // 次要肌肉(多选)
-                SizedBox(height: 10.sp),
-                MultiSelectDialogField(
-                  key: _multiSecondarySelectKey,
-                  items: _muscleItems,
-                  initialValue: selectedSecondaryMuscles,
-                  title: const Text("选择次要肌肉"),
-                  selectedColor: Colors.blue,
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    borderRadius: const BorderRadius.all(Radius.circular(5)),
-                    border: Border.all(color: Colors.blue, width: 2),
-                  ),
-                  buttonIcon:
-                      const Icon(Icons.fitness_center, color: Colors.blue),
-                  buttonText: Text(
-                    "次要肌肉",
-                    style: TextStyle(color: Colors.blue[800], fontSize: 16),
-                  ),
-                  searchable: true,
-                  onConfirm: (results) {
-                    selectedSecondaryMuscles = results;
-                  },
-                ),
+                  SizedBox(height: 10.sp),
 
-                // 2023-10-23 这个加上初始化值会报错，所以个主要肌肉用一样的
-                // MultiSelectChipField(
-                //   key: _multiSecondarySelectKey,
-                //   items: _muscleItems,
-                // 这样用会报错：
-                //   initialValue:
-                //       _genSelectedMuscleOptions(updateTarget?.secondaryMuscles),
-                //   title: const Text("次要肌肉"),
-                //   headerColor: Colors.blue.withOpacity(0.5),
-                //   decoration: BoxDecoration(
-                //     border: Border.all(color: Colors.blue, width: 1.8),
-                //   ),
-                //   selectedChipColor: Colors.blue.withOpacity(0.5),
-                //   selectedTextStyle: TextStyle(color: Colors.blue[800]),
-                //   onTap: (values) {
-                //     selectedSecondaryMuscles = values;
-                //   },
-                // ),
-
-                //  要点(简介这个动作步骤)
-                FormBuilderTextField(
-                  name: 'instructions',
-                  decoration: const InputDecoration(labelText: '*技术要点'),
-                  initialValue: updateTarget?.instructions,
-                  maxLines: 5,
-                  validator: FormBuilderValidators.compose([
-                    FormBuilderValidators.required(errorText: '技术要点不可为空'),
-                  ]),
-                ),
-                // 语音提醒文本
-                FormBuilderTextField(
-                  name: 'tts_notes',
-                  decoration: const InputDecoration(labelText: '语音提示要点'),
-                  initialValue: updateTarget?.ttsNotes,
-                ),
-
-                const SizedBox(height: 10),
-                // 上传活动示例图片（静态图或者gif）
-                FormBuilderFilePicker(
-                  name: 'images',
-                  decoration: const InputDecoration(labelText: '演示图片'),
-                  initialValue: exerciseImages,
-                  maxFiles: null,
-                  allowMultiple: true,
-                  previewImages: true,
-                  onChanged: (val) => debugPrint(val.toString()),
-                  typeSelectors: const [
-                    TypeSelector(
-                      type: FileType.image,
-                      selector: Row(
-                        children: <Widget>[
-                          Icon(Icons.file_upload),
-                          Text('图片上传'),
-                        ],
-                      ),
-                    )
-                  ],
-                  customTypeViewerBuilder: (children) => Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: children,
+                  // 主要肌肉(多选)
+                  _buildModifyMultiSelectDialogField(
+                    key: _multiPrimarySelectKey,
+                    items: _muscleItems,
+                    initialValue: selectedPrimaryMuscles,
+                    labelText: "*主要肌肉",
+                    hintText: "选择主要肌肉",
+                    validator: (values) {
+                      if (values == null || values.isEmpty) {
+                        return "至少选择一个锻炼的主要肌肉";
+                      }
+                      return null;
+                    },
+                    onConfirm: (results) {
+                      selectedPrimaryMuscles = results;
+                    },
                   ),
-                  onFileLoading: (val) {
-                    debugPrint(val.toString());
-                  },
-                ),
-              ],
+
+                  // 次要肌肉(多选)
+                  SizedBox(height: 10.sp),
+                  _buildModifyMultiSelectDialogField(
+                    key: _multiSecondarySelectKey,
+                    items: _muscleItems,
+                    initialValue: selectedSecondaryMuscles,
+                    labelText: "次要肌肉",
+                    hintText: "选择次要肌肉",
+                    onConfirm: (results) {
+                      selectedSecondaryMuscles = results;
+                    },
+                  ),
+
+                  //  要点(简介这个动作步骤)
+                  _buildTextField(
+                    "instructions",
+                    labelText: '*技术要点',
+                    initialValue: updateTarget?.instructions,
+                    maxLines: 5,
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(errorText: '技术要点不可为空'),
+                    ]),
+                  ),
+                  // 语音提醒文本
+                  _buildTextField(
+                    "tts_notes",
+                    labelText: '语音提示要点',
+                    initialValue: updateTarget?.ttsNotes,
+                  ),
+
+                  const SizedBox(height: 10),
+                  // 上传活动示例图片（静态图或者gif）
+
+                  _buildFilePicker(
+                    'images',
+                    initialValue: exerciseImages,
+                    labelText: "演示图片",
+                    hintText: "图片上传",
+                  ),
+                ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // 构建查询表单的文本输入框
+  Widget _buildTextField(
+    String name, {
+    String? initialValue,
+    int? maxLines,
+    String? hintText, // 可不传提示语
+    String? labelText, // 可不传栏位标签，在输入框前面有就行
+    String? Function(Object?)? validator,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10.sp),
+      child: FormBuilderTextField(
+        name: name,
+        initialValue: initialValue,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          isDense: true, // 边框没有默认是紧凑型
+          labelText: labelText,
+          hintText: hintText,
+          // 调整内边距，使得下拉框更紧凑
+          contentPadding: EdgeInsets.symmetric(horizontal: 5.sp, vertical: 5),
+        ),
+        validator: validator,
+      ),
+    );
+  }
+
+  _buildModifyDropdownFlexible(
+    String name,
+    List<CusLabel> options, {
+    Object? initialValue,
+    String? labelText,
+    double? optionFontSize,
+    String? Function(Object?)? validator,
+  }) {
+    return Flexible(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 10.sp),
+        child: FormBuilderDropdown(
+          name: name,
+          decoration: InputDecoration(
+            labelText: labelText,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 5.sp,
+              vertical: 5.sp,
+            ),
+          ),
+          validator: validator,
+          items: genDropdownMenuItems(options, textSize: optionFontSize),
+          initialValue: initialValue,
+          valueTransformer: (val) => val?.toString(),
+        ),
+      ),
+    );
+  }
+
+  _buildFilePicker(
+    String name, {
+    List<PlatformFile>? initialValue,
+    String? labelText,
+    String? hintText, // 可不传提示语
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10.sp),
+      child: FormBuilderFilePicker(
+        name: name,
+        decoration: InputDecoration(
+          labelText: labelText,
+          labelStyle: TextStyle(fontSize: 16.sp),
+        ),
+        initialValue: initialValue,
+        maxFiles: null,
+        allowMultiple: true,
+        previewImages: true,
+        onChanged: (val) => debugPrint(val.toString()),
+        typeSelectors: [
+          TypeSelector(
+            type: FileType.image,
+            selector: Row(
+              children: <Widget>[
+                const Icon(Icons.file_upload),
+                Text(
+                  hintText ?? '',
+                  style: TextStyle(fontSize: 16.sp),
+                ),
+              ],
+            ),
+          )
+        ],
+        customTypeViewerBuilder: (children) => Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: children,
+        ),
+        onFileLoading: (val) {
+          debugPrint(val.toString());
+        },
+      ),
+    );
+  }
+
+  // 构建下拉多选弹窗模块栏位(主要为了样式统一)
+  _buildModifyMultiSelectDialogField({
+    required List<MultiSelectItem<dynamic>> items,
+    GlobalKey<FormFieldState<dynamic>>? key,
+    List<dynamic> initialValue = const [],
+    String? labelText,
+    String? hintText,
+    String? Function(List<dynamic>?)? validator,
+    required void Function(List<dynamic>) onConfirm,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10.sp),
+      child: MultiSelectDialogField(
+        key: key,
+        items: items,
+        // ？？？？ 好像是不带validator用了这个初始值就会报错
+        initialValue: initialValue,
+        title: Text(hintText ?? ''),
+        selectedColor: Colors.blue,
+        decoration: BoxDecoration(
+          color: Colors.blue.withOpacity(0.1),
+          borderRadius: const BorderRadius.all(Radius.circular(5)),
+          border: Border.all(color: Colors.blue, width: 2),
+        ),
+        buttonIcon: const Icon(Icons.fitness_center, color: Colors.blue),
+        buttonText: Text(
+          labelText ?? "",
+          style: TextStyle(color: Colors.blue[800], fontSize: 16),
+        ),
+        searchable: true,
+        validator: validator,
+        onConfirm: onConfirm,
       ),
     );
   }

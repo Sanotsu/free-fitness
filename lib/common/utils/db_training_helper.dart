@@ -180,7 +180,7 @@ class DBTrainingHelper {
   }
 
   // 指定栏位查询基础运动
-  Future<List<Exercise>> queryExercise({
+  Future<CusDataResult> queryExercise({
     int? exerciseId,
     String? exerciseCode,
     String? exerciseName,
@@ -230,7 +230,24 @@ class DBTrainingHelper {
       offset: (page - 1) * pageSize,
     );
 
-    return maps.map((row) => Exercise.fromMap(row)).toList();
+    // 数据是分页查询的，但这里带上满足条件的一共多少条
+    String sql = 'SELECT COUNT(*) FROM ${TrainingDdl.tableNameOfExercise}';
+    if (where.isNotEmpty) {
+      sql += ' WHERE ${where.join(' AND ')}';
+    }
+
+    print(sql);
+    print("whereArgs $whereArgs");
+
+    int totalCount =
+        Sqflite.firstIntValue(await db.rawQuery(sql, whereArgs)) ?? 0;
+
+    print('Total count: $totalCount');
+
+    final list = maps.map((row) => Exercise.fromMap(row)).toList();
+
+    // 返回时数据列表(使用时先转型)和总数
+    return CusDataResult(data: list, total: totalCount);
   }
 
   ///***********************************************/
