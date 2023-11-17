@@ -10,3 +10,7 @@
 - 修正饮食日记主页下方图表营养素图例的颜色为统一枚举值
 
 开始处理主要界面的布局和文字描述
+
+#### 2023-11-17
+
+- 整理了 constants 文件的内容，把 CusLabel、ExerciseDefaultOption、CusDropdownOption 类型合并。

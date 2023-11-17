@@ -7,6 +7,7 @@ import 'package:free_fitness/models/dietary_state.dart';
 import '../../../../common/global/constants.dart' as constants;
 import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
+import '../../../../common/utils/tool_widgets.dart';
 import 'food_modify.dart';
 import 'food_detail.dart';
 
@@ -14,7 +15,7 @@ class FoodList extends StatefulWidget {
   // 2023-10-26
   // 目前能进入食物列表的入口的，只有在饮食主界面点击顶部搜索按钮、知道餐次添加食物信息的时候。
   // 如果是顶部搜索，默认为早餐；其他指定餐次点击添加时也会自动带上对应餐次。
-  final Mealtimes mealtime;
+  final CusMeals mealtime;
 
   // 当前日期，由主界面传入。
   // 理论上主界面可以选择任意日期进入此列表进行食物摄入添加，比如过去的日期补上，未来的日期预估。
@@ -42,9 +43,9 @@ class _FoodListState extends State<FoodList> {
   String query = '';
 
   // 当前食物食用量管理的餐次 (传入的值，可以在这个列表页面进行修改，后续到详情页面进行添加时就是添加到对应的餐次)
-  late Mealtimes currentMealtime;
+  late CusMeals currentMealtime;
   // 被选中的餐次（和传入的类型不一样）
-  CusDropdownOption dropdownValue = mealtimeList.first;
+  CusLabel dropdownValue = mealtimeList.first;
 
   // 这次食物摄入的查询或者预计新增的meal item，属于哪一天的(也是用来查daily log的条件，应该不会变)
   late String currentDate;
@@ -140,9 +141,9 @@ class _FoodListState extends State<FoodList> {
           // 这里使用DropdownButton可以控制显示的大小，用DropdownMenu暂时没搞定，会挤掉子标题文字
           title: SizedBox(
             height: 20.sp,
-            child: DropdownButton<CusDropdownOption>(
+            child: DropdownButton<CusLabel>(
               value: dropdownValue,
-              onChanged: (CusDropdownOption? newValue) {
+              onChanged: (CusLabel? newValue) {
                 setState(() {
                   // 修改下拉按钮的显示值
                   dropdownValue = newValue!;
@@ -150,11 +151,13 @@ class _FoodListState extends State<FoodList> {
                   currentMealtime = newValue.value;
                 });
               },
-              items: mealtimeList.map<DropdownMenuItem<CusDropdownOption>>(
-                  (CusDropdownOption value) {
-                return DropdownMenuItem<CusDropdownOption>(
+              items: mealtimeList
+                  .map<DropdownMenuItem<CusLabel>>((CusLabel value) {
+                return DropdownMenuItem<CusLabel>(
                   value: value,
-                  child: Text(value.label),
+                  child: Text(value.enLabel),
+
+                  ///？？？
                 );
               }).toList(),
               underline: Container(), // 将下划线设置为空的Container
@@ -224,7 +227,7 @@ class _FoodListState extends State<FoodList> {
               itemCount: foodItems.length + 1,
               itemBuilder: (context, index) {
                 if (index == foodItems.length) {
-                  return _buildLoader();
+                  return buildLoader(isLoading);
                 } else {
                   var food = foodItems[index].food;
                   var foodName = "${food.product}\n(${food.brand})";
@@ -239,8 +242,7 @@ class _FoodListState extends State<FoodList> {
                     // 食物名称
                     title: Text(foodName),
                     // 单份食物营养素
-                    subtitle:
-                        Text("$foodUnit - $foodEnergy 大卡"),
+                    subtitle: Text("$foodUnit - $foodEnergy 大卡"),
                     trailing: IconButton(
                       onPressed: () async {
                         print("==========在这里直接添加份量值到日记对应餐次======");
@@ -257,7 +259,7 @@ class _FoodListState extends State<FoodList> {
                         // 如果没有当前日，则完全新增
                         var dailyFoodItem = DailyFoodItem(
                           date: currentDate,
-                          mealCategory: tempStr.label,
+                          mealCategory: tempStr.enLabel,
                           foodId: foodItems[index].food.foodId!,
                           servingInfoId: fistServingInfo.servingInfoId!,
                           foodIntakeSize:
@@ -296,16 +298,6 @@ class _FoodListState extends State<FoodList> {
         ],
       ),
     );
-  }
-
-  Widget _buildLoader() {
-    if (isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    } else {
-      return Container();
-    }
   }
 }
 

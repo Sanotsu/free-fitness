@@ -22,7 +22,7 @@ class FoodDetail extends StatefulWidget {
   final DailyFoodItemWithFoodServing? dfiwfs;
 
   // 新增时(food list 进入)需要带上新增属于哪个餐次和那个日期，修改时饮食日记条目详情都有
-  final Mealtimes? mealtime;
+  final CusMeals? mealtime;
   final String? logDate;
 
   const FoodDetail({
@@ -54,7 +54,7 @@ class _FoodDetailState extends State<FoodDetail> {
   late ServingInfo nutrientsInfo;
 
   // 要移动到的目标餐次（原始餐次直接去widget的值即可，新的则需要根据用户选择而改变）
-  late CusDropdownOption inputMealtimeValue;
+  late CusLabel inputMealtimeValue;
 
   @override
   void initState() {
@@ -93,7 +93,7 @@ class _FoodDetailState extends State<FoodDetail> {
       inputServingUnit = nutrientsInfo.servingUnit;
       // 构建初始的目标餐次(移除或修改时不会单独传日期和餐次的)
       inputMealtimeValue = mealtimeList.firstWhere(
-          (e) => e.label == widget.dfiwfs!.dailyFoodItem.mealCategory);
+          (e) => e.enLabel == widget.dfiwfs!.dailyFoodItem.mealCategory);
     } else {
       print("点击food list 进入【新增】");
 
@@ -151,7 +151,7 @@ class _FoodDetailState extends State<FoodDetail> {
     var updatedMfi = widget.dfiwfs!.dailyFoodItem;
     updatedMfi.foodIntakeSize = inputServingValue;
     updatedMfi.servingInfoId = nutrientsInfo.servingInfoId!;
-    updatedMfi.mealCategory = inputMealtimeValue.label;
+    updatedMfi.mealCategory = inputMealtimeValue.enLabel;
 
     log("修改后的详情条目：$updatedMfi");
 
@@ -192,7 +192,7 @@ class _FoodDetailState extends State<FoodDetail> {
     var temp = DailyFoodItem(
       // 主键数据库自增
       date: widget.logDate!,
-      mealCategory: inputMealtimeValue.label,
+      mealCategory: inputMealtimeValue.enLabel,
       foodId: widget.foodItem.food.foodId!,
       servingInfoId: nutrientsInfo.servingInfoId!,
       foodIntakeSize: inputServingValue,
@@ -320,7 +320,7 @@ class _FoodDetailState extends State<FoodDetail> {
                       )
                     ],
                   ),
-                  FormBuilderDropdown<CusDropdownOption>(
+                  FormBuilderDropdown<CusLabel>(
                     name: 'new_mealtime',
                     decoration: const InputDecoration(
                       labelText: '餐次',
@@ -330,7 +330,7 @@ class _FoodDetailState extends State<FoodDetail> {
                         .map((unit) => DropdownMenuItem(
                               alignment: AlignmentDirectional.center,
                               value: unit,
-                              child: Text('${unit.name}'),
+                              child: Text(unit.cnLabel),
                             ))
                         .toList(),
                     onChanged: (val) {

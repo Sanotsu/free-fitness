@@ -10,6 +10,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
+import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
 
 /// 基础活动变更表单（希望新增、修改可通用）
@@ -33,8 +34,8 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
 
   // 把预设的基础活动选项列表转化为 MultiSelectDialogField 支持的列表
   final _muscleItems = musclesOptions
-      .map<MultiSelectItem<ExerciseDefaultOption>>(
-          (opt) => MultiSelectItem<ExerciseDefaultOption>(opt, opt.label))
+      .map<MultiSelectItem<CusLabel>>(
+          (opt) => MultiSelectItem<CusLabel>(opt, opt.cnLabel))
       .toList();
 
   // 被选中的主要、次要肌肉
@@ -94,7 +95,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
   }
 
   // 根据数据库拼接的字符串值转回对应选项
-  List<ExerciseDefaultOption> _genSelectedMuscleOptions(String? muscleStr) {
+  List<CusLabel> _genSelectedMuscleOptions(String? muscleStr) {
     if (muscleStr == null) {
       return [];
     }
@@ -102,10 +103,10 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
     print("muscleStr-------------$muscleStr");
     List<String> selectedValues = muscleStr.split(',');
 
-    List<ExerciseDefaultOption> selectedLabels = [];
+    List<CusLabel> selectedLabels = [];
 
     for (String selectedValue in selectedValues) {
-      for (ExerciseDefaultOption option in musclesOptions) {
+      for (CusLabel option in musclesOptions) {
         if (option.value == selectedValue) {
           selectedLabels.add(option);
         }
@@ -115,17 +116,6 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
     print("selectedLabels-------------$selectedLabels");
 
     return selectedLabels;
-  }
-
-  // 把预设的基础活动选项列表转化为 FormBuilderDropdown 支持的列表
-  _genItems(List<ExerciseDefaultOption> options) {
-    return options
-        .map((option) => DropdownMenuItem(
-              alignment: AlignmentDirectional.centerStart,
-              value: option.value,
-              child: Text(option.label),
-            ))
-        .toList();
   }
 
   _saveNewExercise() async {
@@ -279,7 +269,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Flexible(
-                      child: FormBuilderDropdown<String>(
+                      child: FormBuilderDropdown(
                         name: 'level',
                         decoration: const InputDecoration(
                           labelText: '*级别',
@@ -288,13 +278,13 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(errorText: '级别不可为空')
                         ]),
-                        items: _genItems(levelOptions),
+                        items: genDropdownMenuItems(levelOptions),
                         initialValue: updateTarget?.level,
                         valueTransformer: (val) => val?.toString(),
                       ),
                     ),
                     Flexible(
-                      child: FormBuilderDropdown<String>(
+                      child: FormBuilderDropdown(
                         name: 'counting_mode',
                         decoration: const InputDecoration(
                           labelText: '*计数方式',
@@ -303,13 +293,13 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(errorText: '计数方式不可为空')
                         ]),
-                        items: _genItems(countingOptions),
+                        items: genDropdownMenuItems(countingOptions),
                         initialValue: updateTarget?.level,
                         valueTransformer: (val) => val?.toString(),
                       ),
                     ),
                     Flexible(
-                      child: FormBuilderDropdown<String>(
+                      child: FormBuilderDropdown(
                         name: 'force',
                         decoration: const InputDecoration(
                           labelText: '发力方式',
@@ -318,7 +308,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(errorText: '发力方式不可为空')
                         ]),
-                        items: _genItems(forceOptions),
+                        items: genDropdownMenuItems(forceOptions),
                         initialValue: updateTarget?.force,
                         valueTransformer: (val) => val?.toString(),
                       ),
@@ -331,7 +321,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                   children: [
                     // 分类（单选）
                     Flexible(
-                      child: FormBuilderDropdown<String>(
+                      child: FormBuilderDropdown(
                         name: 'category',
                         decoration: const InputDecoration(
                           labelText: '*分类',
@@ -340,13 +330,13 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(errorText: '分类不可为空')
                         ]),
-                        items: _genItems(categoryOptions),
+                        items: genDropdownMenuItems(categoryOptions),
                         initialValue: updateTarget?.category,
                         valueTransformer: (val) => val?.toString(),
                       ),
                     ),
                     Flexible(
-                      child: FormBuilderDropdown<String>(
+                      child: FormBuilderDropdown(
                         name: 'mechanic',
                         decoration: const InputDecoration(
                           labelText: '*类别',
@@ -355,7 +345,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(errorText: '类别不可为空')
                         ]),
-                        items: _genItems(mechanicOptions),
+                        items: genDropdownMenuItems(mechanicOptions),
                         initialValue: updateTarget?.mechanic,
                         valueTransformer: (val) => val?.toString(),
                       ),
@@ -367,25 +357,25 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Flexible(
-                      child: FormBuilderDropdown<String>(
+                      child: FormBuilderDropdown(
                         name: 'equipment',
                         decoration: const InputDecoration(
                           labelText: '所需器械',
                           hintText: '选择所需器械',
                         ),
-                        items: _genItems(equipmentOptions),
+                        items: genDropdownMenuItems(equipmentOptions),
                         initialValue: updateTarget?.equipment,
                         valueTransformer: (val) => val?.toString(),
                       ),
                     ),
                     Flexible(
-                      child: FormBuilderDropdown<String>(
+                      child: FormBuilderDropdown(
                         name: 'standard_duration',
                         decoration: const InputDecoration(
                           labelText: '标准动作耗时',
                           hintText: '选择标准动作耗时',
                         ),
-                        items: _genItems(standardDurationOptions),
+                        items: genDropdownMenuItems(standardDurationOptions),
                         initialValue: updateTarget?.standardDuration,
                         valueTransformer: (val) => val?.toString(),
                       ),

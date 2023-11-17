@@ -43,12 +43,12 @@ class _TrainingPlansState extends State<TrainingPlans> {
 
   // 把预设的基础活动选项列表转化为 FormBuilderDropdown 支持的列表
   // ？？？这个函数到处都在用，要么改改常量列表，要么改改这个函数复用
-  _genItems(List<ExerciseDefaultOption> options) {
+  _genItems(List<CusLabel> options) {
     return options
         .map((option) => DropdownMenuItem(
               alignment: AlignmentDirectional.centerStart,
               value: option.value,
-              child: Text(option.label),
+              child: Text(option.cnLabel),
             ))
         .toList();
   }

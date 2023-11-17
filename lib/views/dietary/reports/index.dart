@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
+import '../../../common/utils/tool_widgets.dart';
 import '../../../models/dietary_state.dart';
 import 'week_intake_bar.dart';
 
@@ -36,7 +37,7 @@ class _DietaryReportsState extends State<DietaryReports> {
   bool isLoading = false;
 
   // 下拉切换的日期范围(默认今天)
-  CusDropdownOption dropdownValue = dietaryReportDisplayModeList.first;
+  CusLabel dropdownValue = dietaryReportDisplayModeList.first;
 
   @override
   void initState() {
@@ -137,13 +138,13 @@ class _DietaryReportsState extends State<DietaryReports> {
       var cate = item.dailyFoodItem.mealCategory;
 
       // 按餐次统计总量
-      if (cate == "breakfast") {
+      if (cate == mealNameMap[CusMeals.breakfast]!.enLabel) {
         nt.bfEnergy += foodIntakeSize * servingInfo.energy;
-      } else if (cate == "lunch") {
+      } else if (cate == mealNameMap[CusMeals.lunch]!.enLabel) {
         nt.lunchEnergy += foodIntakeSize * servingInfo.energy;
-      } else if (cate == "dinner") {
+      } else if (cate == mealNameMap[CusMeals.dinner]!.enLabel) {
         nt.dinnerEnergy += foodIntakeSize * servingInfo.energy;
-      } else if (cate == "other") {
+      } else if (cate == mealNameMap[CusMeals.other]!.enLabel) {
         nt.otherEnergy += foodIntakeSize * servingInfo.energy;
       }
 
@@ -222,12 +223,11 @@ class _DietaryReportsState extends State<DietaryReports> {
                   ),
 
                   items: dietaryReportDisplayModeList
-                      .map<DropdownMenuItem<CusDropdownOption>>(
-                        (CusDropdownOption value) =>
-                            DropdownMenuItem<CusDropdownOption>(
+                      .map<DropdownMenuItem<CusLabel>>(
+                        (CusLabel value) => DropdownMenuItem<CusLabel>(
                           value: value,
                           child: Text(
-                            value.name!,
+                            value.cnLabel,
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 20.sp,
@@ -237,7 +237,7 @@ class _DietaryReportsState extends State<DietaryReports> {
                       )
                       .toList(),
                   value: dropdownValue,
-                  onChanged: (CusDropdownOption? newValue) {
+                  onChanged: (CusLabel? newValue) {
                     setState(() {
                       // 修改下拉按钮的显示值
                       dropdownValue = newValue!;
@@ -260,7 +260,7 @@ class _DietaryReportsState extends State<DietaryReports> {
           ],
         ),
         body: isLoading
-            ? _buildLoader()
+            ? buildLoader(isLoading)
             : TabBarView(
                 children: [
                   SingleChildScrollView(child: buildCalorieTabView()),
@@ -270,16 +270,6 @@ class _DietaryReportsState extends State<DietaryReports> {
               ),
       ),
     );
-  }
-
-  Widget _buildLoader() {
-    if (isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    } else {
-      return Container();
-    }
   }
 
   /// *******************************卡路里 tabview *****************************************
@@ -756,16 +746,15 @@ class _DietaryReportsState extends State<DietaryReports> {
             Radius.circular(10),
           ),
           items: dietaryReportDisplayModeList
-              .map<DropdownMenuItem<CusDropdownOption>>(
-                (CusDropdownOption value) =>
-                    DropdownMenuItem<CusDropdownOption>(
+              .map<DropdownMenuItem<CusLabel>>(
+                (CusLabel value) => DropdownMenuItem<CusLabel>(
                   value: value,
-                  child: Text(value.label),
+                  child: Text(value.enLabel),
                 ),
               )
               .toList(),
           value: dropdownValue,
-          onChanged: (CusDropdownOption? newValue) {
+          onChanged: (CusLabel? newValue) {
             setState(() {
               // 修改下拉按钮的显示值
               dropdownValue = newValue!;

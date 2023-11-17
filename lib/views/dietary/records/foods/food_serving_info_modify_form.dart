@@ -11,7 +11,7 @@ import '../../../../models/dietary_state.dart';
 
 class FoodServingInfoModifyForm extends StatefulWidget {
   // 一定会传单份食物营养素的分类(度量的metric 或者自定义的custom)
-  final CusDropdownOption servingType;
+  final CusLabel servingType;
 
   // 可能会传指定营养素信息(修改的时候)
   final ServingInfo? servingInfo;

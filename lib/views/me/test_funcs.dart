@@ -137,8 +137,6 @@ insertDailyLogDataDemo(
 }) async {
   print("【【【 插入测试数据 start-->:insertDailyLogDataDemo ");
 
-  List<String> meals = ["breakfast", "lunch", "dinner", "other"];
-
   Map<int, List<int>> foodServings = {};
   List<int> foodIds = [];
   // 1 插入指定数量随机食物 ,并记录每个食物对应的营养素编号列表
@@ -176,7 +174,7 @@ insertDailyLogDataDemo(
     var temp = DailyFoodItem(
       // 主键数据库自增
       date: dates[Random().nextInt(dates.length)],
-      mealCategory: meals[Random().nextInt(meals.length)],
+      mealCategory: mealNameList[Random().nextInt(mealNameList.length)],
       foodId: usedFoodId,
       servingInfoId: usedServingId,
       foodIntakeSize: Random().nextDouble() * 100,

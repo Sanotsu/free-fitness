@@ -57,18 +57,6 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
     });
   }
 
-  // 把预设的基础活动选项列表转化为 FormBuilderDropdown 支持的列表
-  // ？？？这个函数到处都在用，要么改改常量列表，要么改改这个函数复用
-  _genItems(List<ExerciseDefaultOption> options) {
-    return options
-        .map((option) => DropdownMenuItem(
-              alignment: AlignmentDirectional.centerStart,
-              value: option.value,
-              child: Text(option.label),
-            ))
-        .toList();
-  }
-
   // 查询已有的训练
   getGroupList() async {
     // 如果已经在查询数据中，则忽略此次新的查询
@@ -238,7 +226,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
                                   Flexible(
-                                    child: FormBuilderDropdown<String>(
+                                    child: FormBuilderDropdown(
                                       name: 'group_category',
                                       decoration: const InputDecoration(
                                         labelText: '*分类',
@@ -248,13 +236,13 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                                         FormBuilderValidators.required(
                                             errorText: '分类不可为空')
                                       ]),
-                                      items: _genItems(levelOptions),
+                                      items: genDropdownMenuItems(levelOptions),
                                       valueTransformer: (val) =>
                                           val?.toString(),
                                     ),
                                   ),
                                   Flexible(
-                                    child: FormBuilderDropdown<String>(
+                                    child: FormBuilderDropdown(
                                       name: 'group_level',
                                       decoration: const InputDecoration(
                                         labelText: '*难度',
@@ -264,7 +252,8 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                                         FormBuilderValidators.required(
                                             errorText: '难度不可为空')
                                       ]),
-                                      items: _genItems(categoryOptions),
+                                      items:
+                                          genDropdownMenuItems(categoryOptions),
                                       valueTransformer: (val) =>
                                           val?.toString(),
                                     ),

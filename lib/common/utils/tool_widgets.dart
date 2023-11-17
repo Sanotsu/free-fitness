@@ -40,7 +40,6 @@ IconData genRandomIcon() =>
 String caloryToKjStr(int calory) =>
     "${(calory / oneCalToKjRatio).toStringAsFixed(2)} 千焦";
 
-
 // 绘制转圈圈
 Widget buildLoader(bool isLoading) {
   if (isLoading) {
@@ -50,4 +49,18 @@ Widget buildLoader(bool isLoading) {
   } else {
     return Container();
   }
+}
+
+/// 构建供frombuilder库创建的下拉选择框的选项列表(这里不声明返回类型)
+/// 目前主要用在基础活动exercise的一些分类选项
+//    返回的是List<DropdownMenuItem<Object>>，
+//    表单使用是FormBuilderDropdown<String>但要注意类型改为匹配的，或者不指定String
+List<DropdownMenuItem<Object>> genDropdownMenuItems(List<CusLabel> options) {
+  return options
+      .map((option) => DropdownMenuItem(
+            alignment: AlignmentDirectional.centerStart,
+            value: option.value,
+            child: Text(option.cnLabel),
+          ))
+      .toList();
 }

@@ -5,7 +5,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/global/constants.dart';
-import '../../../models/training_state.dart';
+import '../../../common/utils/tool_widgets.dart';
 
 class ExerciseQueryForm extends StatefulWidget {
   final Function(Map<String, dynamic>) onQuery; // 定义回调函数属性
@@ -48,7 +48,7 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
     // print("查询条件表单点击了");
     // debugPrint(_formKey.currentState?.value.toString());
     // if (_formKey.currentState!.validate()) {
-    //   print("查询条件表单认证通过了${_genItems(levelOptions)}");
+    //   print("查询条件表单认证通过了${genDropdownMenuItems(levelOptions)}");
 
     //   print(_formKey.currentState?.fields['exercise_code']?.value);
     //   print(_formKey.currentState?.fields['exercise_name']?.value);
@@ -59,17 +59,6 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
     //   Map<String, dynamic> formData = _formKey.currentState!.value;
     //   print(formData); // 输出查询条件
     // }
-  }
-
-  // 把预设的基础活动选项列表转化为 FormBuilderDropdown 支持的列表
-  _genItems(List<ExerciseDefaultOption> options) {
-    return options
-        .map((option) => DropdownMenuItem(
-              alignment: AlignmentDirectional.centerStart,
-              value: option.value,
-              child: Text(option.label),
-            ))
-        .toList();
   }
 
 // 在重置更多查询条件时,只能一个个表单栏位进行重置
@@ -129,13 +118,13 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
               children: [
                 Expanded(
                   flex: 5,
-                  child: FormBuilderDropdown<String>(
+                  child: FormBuilderDropdown(
                     name: 'primary_muscles',
                     decoration: const InputDecoration(
                       labelText: '部位',
                       hintText: '选择训练部位',
                     ),
-                    items: _genItems(musclesOptions),
+                    items: genDropdownMenuItems(musclesOptions),
                     valueTransformer: (val) => val?.toString(),
                   ),
                 ),
@@ -238,24 +227,24 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Flexible(
-                  child: FormBuilderDropdown<String>(
+                  child: FormBuilderDropdown(
                     name: 'level',
                     decoration: const InputDecoration(
                       labelText: '级别',
                       hintText: '选择级别',
                     ),
-                    items: _genItems(levelOptions),
+                    items: genDropdownMenuItems(levelOptions),
                     valueTransformer: (val) => val?.toString(),
                   ),
                 ),
                 Flexible(
-                  child: FormBuilderDropdown<String>(
+                  child: FormBuilderDropdown(
                     name: 'mechanic',
                     decoration: const InputDecoration(
                       labelText: '类别',
                       hintText: '选择类别',
                     ),
-                    items: _genItems(mechanicOptions),
+                    items: genDropdownMenuItems(mechanicOptions),
                     valueTransformer: (val) => val?.toString(),
                   ),
                 ),
@@ -266,24 +255,24 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
               children: [
                 // 分类（单选）
                 Flexible(
-                  child: FormBuilderDropdown<String>(
+                  child: FormBuilderDropdown(
                     name: 'category',
                     decoration: const InputDecoration(
                       labelText: '*分类',
                       hintText: '选择分类',
                     ),
-                    items: _genItems(categoryOptions),
+                    items: genDropdownMenuItems(categoryOptions),
                     valueTransformer: (val) => val?.toString(),
                   ),
                 ),
                 Flexible(
-                  child: FormBuilderDropdown<String>(
+                  child: FormBuilderDropdown(
                     name: 'equipment',
                     decoration: const InputDecoration(
                       labelText: '所需器械',
                       hintText: '选择所需器械',
                     ),
-                    items: _genItems(equipmentOptions),
+                    items: genDropdownMenuItems(equipmentOptions),
                     valueTransformer: (val) => val?.toString(),
                   ),
                 ),

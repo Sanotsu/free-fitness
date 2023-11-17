@@ -8,6 +8,7 @@ import 'package:free_fitness/models/training_state.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
+import '../../../common/utils/tool_widgets.dart';
 import '../../me/test_funcs.dart';
 import 'exercise_detail.dart';
 import 'exercise_modify_form.dart';
@@ -245,7 +246,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                 controller: scrollController,
                 itemBuilder: (context, index) {
                   if (index == exerciseItems.length) {
-                    return _buildLoader();
+                    return buildLoader(isLoading);
                   } else {
                     print("xxxxxxxxxxx");
                     print(exerciseItems[index].images?.split(","));
@@ -406,27 +407,17 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     );
   }
 
-  Widget _buildLoader() {
-    if (isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    } else {
-      return Container();
-    }
-  }
-
   _buildCardPadding(
     String prefix,
     String item,
-    List<ExerciseDefaultOption> options,
+    List<CusLabel> options,
   ) {
     var label = options
         .firstWhere(
           (element) => element.value == item,
-          orElse: () => ExerciseDefaultOption(label: 'No Data', value: ''),
+          orElse: () => CusLabel(cnLabel: '无数据', value: '', enLabel: 'No Data'),
         )
-        .label;
+        .cnLabel;
 
     return Padding(
       padding: EdgeInsets.only(left: 10.sp),

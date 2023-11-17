@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/utils/db_dietary_helper.dart';
+import '../../../common/utils/tool_widgets.dart';
 import '../../../models/dietary_state.dart';
 import 'base_info.dart';
 import 'intake_target.dart';
@@ -60,7 +61,7 @@ class _DietarySettingsState extends State<DietarySettings> {
         ],
       ),
       body: isLoading
-          ? _buildLoader()
+          ? buildLoader(isLoading)
           : Container(
               color: Colors.white54,
               child: ListView(
@@ -254,16 +255,6 @@ class _DietarySettingsState extends State<DietarySettings> {
               ),
             ),
     );
-  }
-
-  Widget _buildLoader() {
-    if (isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    } else {
-      return Container();
-    }
   }
 }
 

@@ -8,6 +8,7 @@ import 'package:free_fitness/models/dietary_state.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common/utils/db_dietary_helper.dart';
+import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
 import 'foods/food_detail.dart';
 import 'foods/food_list.dart';
@@ -24,8 +25,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
   /// 根据条件查询的日记条目数据
   List<DailyFoodItemWithFoodServing> dfiwfsList = [];
-
-// 数据是否加载中
+  // 数据是否加载中
   bool isLoading = false;
 
   /// 用户可能切换日期，但显示的内容是一样的
@@ -49,10 +49,10 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
 // 用于存储预设4个餐次的ExpansionTile的展开状态
   Map<String, bool> isExpandedList = {
-    'breakfast': false,
-    'lunch': false,
-    'dinner': false,
-    'other': false,
+    mealNameMap[CusMeals.breakfast]!.enLabel: false,
+    mealNameMap[CusMeals.lunch]!.enLabel: false,
+    mealNameMap[CusMeals.dinner]!.enLabel: false,
+    mealNameMap[CusMeals.other]!.enLabel: false,
   };
 
   @override
@@ -117,7 +117,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => FoodList(
-                    mealtime: Mealtimes.breakfast,
+                    mealtime: CusMeals.breakfast,
                     // 注意，这里应该是一个日期选择器插件选中的值，格式化为固定字符串，子组件就不再处理
                     logDate: selectedDateStr,
                   ),
@@ -138,7 +138,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
         ],
       ),
       body: isLoading
-          ? _buildLoader()
+          ? buildLoader(isLoading)
           : SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -547,12 +547,12 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   }
 
   // 早中晚夜各个餐次的卡片
-  Card _buildMealCard(CusDropdownOption mealtime) {
+  Card _buildMealCard(CusLabel mealtime) {
     // 从查询的日记条目中过滤当前餐次的数据
     // DailyFoodItemWithFoodServingMealItems 太长了，缩写 dfiwfsMealItems
     var dfiwfsMealItems = dfiwfsList
         .where(
-          (e) => e.dailyFoodItem.mealCategory == mealtime.label,
+          (e) => e.dailyFoodItem.mealCategory == mealtime.enLabel,
         )
         .toList();
 
@@ -590,7 +590,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                 flex: 2,
                 child: ListTile(
                   leading: const Icon(Icons.food_bank_sharp),
-                  title: _buildListTileText("${mealtime.name}"),
+                  title: _buildListTileText(mealtime.cnLabel),
                   subtitle: _buildListTileText('${dfiwfsMealItems.length} 项'),
                   dense: true,
                 ),
@@ -674,14 +674,14 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                 trailing: SizedBox(
                   width: 0.15.sw, // 将屏幕宽度的四分之一作为trailing的宽度
                   child: Icon(
-                    isExpandedList[mealtime.label]!
+                    isExpandedList[mealtime.enLabel]!
                         ? Icons.arrow_drop_up
                         : Icons.arrow_drop_down,
                   ),
                 ),
                 onExpansionChanged: (isExpanded) {
                   setState(() {
-                    isExpandedList[mealtime.label] = isExpanded; // 更新展开状态列表
+                    isExpandedList[mealtime.enLabel] = isExpanded; // 更新展开状态列表
                   });
                 },
                 // 展开显示食物详情
@@ -708,7 +708,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
   // 各餐次卡片点击展开的食物条目
   List<Widget> _buildListTile(
-    CusDropdownOption curMeal,
+    CusLabel curMeal,
     List<DailyFoodItemWithFoodServing> list,
   ) {
     List<Widget> temp = [
@@ -732,7 +732,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
       return GestureDetector(
         onTap: () async {
-          print("cutMeal-----${curMeal.label}");
+          print("cutMeal-----${curMeal.enLabel}");
 
           print(
             "daily log index 的 指定餐次 点击了meal food item ，跳转到food detail ---> ",
@@ -853,16 +853,6 @@ class _DietaryRecordsState extends State<DietaryRecords> {
         ),
       );
     }).toList();
-  }
-
-  Widget _buildLoader() {
-    if (isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    } else {
-      return Container();
-    }
   }
 
   // 详情展示时表格显示依次碳水物、蛋白质、脂肪、RDA比例的数据，以及文本大小

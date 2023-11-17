@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../common/components/cus_cards.dart';
+import '../../common/global/constants.dart';
 import 'exercise/index.dart';
 import 'plans/index.dart';
 import 'reports/index.dart';
@@ -17,16 +19,6 @@ class Training extends StatefulWidget {
 }
 
 class _TrainingState extends State<Training> {
-  String placeholderImageUrl = 'assets/images/no_image.png';
-  String workoutManImageUrl = 'assets/covers/workout-man.png';
-  String workoutWomanImageUrl = 'assets/covers/workout-woman.png';
-  String workoutCalendarImageUrl = 'assets/covers/workout-calendar-dark.png';
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +31,7 @@ class _TrainingState extends State<Training> {
     );
   }
 
-  /// 构建主体内容(是个 GridView)
+  /// 构建模块首页主体内容
   _buildBody() {
     return SingleChildScrollView(
       scrollDirection: Axis.vertical,
@@ -55,14 +47,22 @@ class _TrainingState extends State<Training> {
                   flex: 1,
                   child: SizedBox(
                     height: 100.sp,
-                    child: _buildSmallCard(const TrainingReports(), "报告"),
+                    child: buildSmallCoverCard(
+                      context,
+                      const TrainingReports(),
+                      "报告",
+                    ),
                   ),
                 ),
                 Expanded(
                   flex: 1,
                   child: SizedBox(
                     height: 100.sp,
-                    child: _buildSmallCard(const TrainingSettings(), "设置"),
+                    child: buildSmallCoverCard(
+                      context,
+                      const TrainingSettings(),
+                      "设置",
+                    ),
                   ),
                 ),
               ],
@@ -79,19 +79,22 @@ class _TrainingState extends State<Training> {
             mainAxisSpacing: 10.0, // 交叉轴间隔
             childAspectRatio: 3, // 子组件的宽高比
             children: <Widget>[
-              _buildCard(
+              buildCoverCard(
+                context,
                 const TrainingExercise(),
                 "动作",
                 "动作库管理模块",
                 workoutWomanImageUrl,
               ),
-              _buildCard(
+              buildCoverCard(
+                context,
                 const TrainingWorkouts(),
                 "训练",
                 "训练组管理模块",
                 workoutManImageUrl,
               ),
-              _buildCard(
+              buildCoverCard(
+                context,
                 const TrainingPlans(),
                 "计划",
                 "计划库管理模块",
@@ -100,71 +103,6 @@ class _TrainingState extends State<Training> {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  _buildSmallCard(Widget widget, String title) {
-    return Card(
-      clipBehavior: Clip.hardEdge,
-      child: InkWell(
-        splashColor: Colors.blue.withAlpha(30),
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext ctx) => widget,
-            ),
-          );
-        },
-        child: Container(
-          color: Colors.lightBlue[100],
-          child: Center(
-            child: Text(
-              title,
-              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  _buildCard(Widget widget, String title, String subtitle, String imageUrl) {
-    return Card(
-      clipBehavior: Clip.hardEdge,
-      child: Container(
-        color: Colors.lightBlue[100],
-        child: Center(
-          child: Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: Padding(
-                  padding: EdgeInsets.all(5.sp),
-                  child: Image.asset(imageUrl, fit: BoxFit.scaleDown),
-                ),
-              ),
-              Expanded(
-                flex: 3,
-                child: ListTile(
-                  title: Text(
-                    title,
-                    style:
-                        TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(subtitle),
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext ctx) => widget,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

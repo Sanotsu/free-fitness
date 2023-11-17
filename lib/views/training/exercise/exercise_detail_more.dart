@@ -204,13 +204,13 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
   }
 
   // 根据数据库值从预设选项中显示对应标签
-  _getOptionLabel(String? value, List<ExerciseDefaultOption> options) {
+  _getOptionLabel(String? value, List<CusLabel> options) {
     if (value == null) {
       return "";
     }
-    for (ExerciseDefaultOption option in options) {
+    for (CusLabel option in options) {
       if (option.value == value) {
-        return option.label;
+        return option.cnLabel;
       }
     }
     return "";

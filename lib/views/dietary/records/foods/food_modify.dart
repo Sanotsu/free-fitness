@@ -34,7 +34,7 @@ class _FoodModifyState extends State<FoodModify> {
   List<ServingInfo> inputServingInfos = [];
 
   // 当前选中的单份食物营养素类型
-  late CusDropdownOption servingType;
+  late CusLabel servingType;
 
   // 如果是有进入了营养素表单并且填了值返回，则保存该表单的值
   Map<String, dynamic>? tempServingFormData;
@@ -134,7 +134,7 @@ class _FoodModifyState extends State<FoodModify> {
         var temp = nutrientList.where((e) => e.value == key).toList();
 
         if (temp.isNotEmpty) {
-          tempList.add('${temp[0].name}:$value');
+          tempList.add('${temp[0].cnLabel}:$value');
         }
       });
 
@@ -399,7 +399,7 @@ class _FoodModifyState extends State<FoodModify> {
                       options: servingTypeList
                           .map(
                             (servingType) => FormBuilderFieldOption(
-                              value: servingType.name,
+                              value: servingType.cnLabel,
                               // 当点击被选中的单选框的文本时，弹出的营养素表单才带有之前返回的数据
                               // 单选框值变化后的弹窗，则是全新的表单
                               child: GestureDetector(
@@ -407,7 +407,7 @@ class _FoodModifyState extends State<FoodModify> {
                                   final currentValue = _foodFormKey.currentState
                                       ?.fields['serving_info_type']?.value;
 
-                                  if (currentValue == servingType.name) {
+                                  if (currentValue == servingType.cnLabel) {
                                     print(
                                         "之前传回的表单数据:---------$tempServingFormData");
 
@@ -460,7 +460,7 @@ class _FoodModifyState extends State<FoodModify> {
                                     // );
                                   }
                                 },
-                                child: Text("${servingType.name}"),
+                                child: Text(servingType.cnLabel),
                               ),
                             ),
                           )
@@ -473,7 +473,7 @@ class _FoodModifyState extends State<FoodModify> {
                           tempServingFormData = null;
                           inputServingInfos = [];
                           servingType = servingTypeList
-                              .firstWhere((e) => e.name == value);
+                              .firstWhere((e) => e.cnLabel == value);
                         });
 
                         Navigator.push(
