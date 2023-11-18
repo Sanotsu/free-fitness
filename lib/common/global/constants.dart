@@ -186,23 +186,23 @@ enum CusChartType {
 // 餐次的魔法值，这里有列表和对象两个
 Map<CusMeals, CusLabel> mealNameMap = {
   CusMeals.breakfast: CusLabel(
-    cnLabel: "breakfast",
-    enLabel: '早餐',
+    enLabel: "breakfast",
+    cnLabel: '早餐',
     value: CusMeals.breakfast,
   ),
   CusMeals.lunch: CusLabel(
-    cnLabel: "lunch",
-    enLabel: '午餐',
+    enLabel: "lunch",
+    cnLabel: '午餐',
     value: CusMeals.lunch,
   ),
   CusMeals.dinner: CusLabel(
-    cnLabel: "dinner",
-    enLabel: '晚餐',
+    enLabel: "dinner",
+    cnLabel: '晚餐',
     value: CusMeals.dinner,
   ),
   CusMeals.other: CusLabel(
-    cnLabel: "other",
-    enLabel: '小食',
+    enLabel: "other",
+    cnLabel: '小食',
     value: CusMeals.other,
   ),
 };
@@ -342,17 +342,17 @@ List<String> mealNameList = mealNameMap.values.map((cl) => cl.enLabel).toList();
 List<CusLabel> mealtimeList = [
   CusLabel(
     enLabel: mealNameMap[CusMeals.breakfast]!.enLabel,
-    cnLabel: mealNameMap[CusMeals.other]!.cnLabel,
+    cnLabel: mealNameMap[CusMeals.breakfast]!.cnLabel,
     value: CusMeals.breakfast,
   ),
   CusLabel(
     enLabel: mealNameMap[CusMeals.lunch]!.enLabel,
-    cnLabel: mealNameMap[CusMeals.other]!.cnLabel,
+    cnLabel: mealNameMap[CusMeals.lunch]!.cnLabel,
     value: CusMeals.lunch,
   ),
   CusLabel(
     enLabel: mealNameMap[CusMeals.dinner]!.enLabel,
-    cnLabel: mealNameMap[CusMeals.other]!.cnLabel,
+    cnLabel: mealNameMap[CusMeals.dinner]!.cnLabel,
     value: CusMeals.dinner,
   ),
   CusLabel(

@@ -60,27 +60,12 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
             Expanded(
               flex: 3,
               // FormBuilderDropdown需要指定外部容器大小，或者放在类似expanded中自动扩展
-              child: FormBuilderDropdown(
-                name: "primary_muscles",
-                isDense: true, // 默认就是紧凑型
-                decoration: InputDecoration(
-                  labelText: "锻炼部位",
-                  hintText: "选择锻炼部位",
-                  hintStyle: TextStyle(fontSize: 14.sp),
-                  isDense: true, // 边框没有默认是紧凑型
-                  // 调整内边距
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 5.sp,
-                    vertical: 5.sp,
-                  ),
-                  // 这是下划线，如果要四周包裹，用 OutlineInputBorder
-                  border: const OutlineInputBorder(),
-                ),
-                items: genDropdownMenuItems(
-                  musclesOptions,
-                  textSize: 16.sp,
-                ),
-                valueTransformer: (val) => val?.toString(),
+              child: cusFormBuilerDropdown(
+                "primary_muscles",
+                musclesOptions,
+                labelText: '锻炼部位',
+                hintText: "选择锻炼部位",
+                hintStyle: TextStyle(fontSize: 14.sp),
               ),
             ),
             Expanded(
@@ -136,119 +121,75 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
 
     // 否则，展示更多查询条件
     return Card(
-        elevation: 5.sp,
-        child: Padding(
-            padding: EdgeInsets.all(10.sp),
-            child: Column(
+      elevation: 5.sp,
+      child: Padding(
+        padding: EdgeInsets.all(10.sp),
+        child: Column(
+          children: [
+            // 更多查询条件
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // 更多查询条件
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    const Text("代号"),
-                    Flexible(
-                      child: _buildTextField("exercise_code", hintText: "输入代号"),
-                    ),
-                    const Text("名称"),
-                    Flexible(
-                      child: _buildTextField("exercise_name", hintText: "输入名称"),
-                    ),
-                  ],
+                const Text("代号"),
+                Flexible(
+                  child: cusFormBuilerTextField(
+                    "exercise_code",
+                    hintText: "输入代号",
+                  ),
                 ),
-                // 级别和类别（单选）
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    const Text("级别"),
-                    Flexible(
-                      child: _buildQueryDropdown(
-                        "level",
-                        levelOptions,
-                        hintText: "选择级别",
-                      ),
-                    ),
-                    const Text("类型"),
-                    Flexible(
-                      child: _buildQueryDropdown(
-                        "mechanic",
-                        mechanicOptions,
-                        hintText: "选择类型",
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    const Text("分类"),
-                    Flexible(
-                      child: _buildQueryDropdown(
-                        "category",
-                        categoryOptions,
-                        hintText: "选择分类",
-                      ),
-                    ),
-                    const Text("器械"),
-                    Flexible(
-                      child: _buildQueryDropdown(
-                        "equipment",
-                        equipmentOptions,
-                        hintText: "选择器械",
-                      ),
-                    ),
-                  ],
+                const Text("名称"),
+                Flexible(
+                  child: cusFormBuilerTextField(
+                    "exercise_name",
+                    hintText: "输入名称",
+                  ),
                 ),
               ],
-            )));
-  }
-
-  /// 以下下拉选择框和文本输入框的主要目的都是尽量紧凑
-  // 构建查询表单的下拉选择框
-  Widget _buildQueryDropdown(
-    String name,
-    List<CusLabel> options, {
-    String? labelText,
-    String? hintText,
-    double? optionFontSize,
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10.sp),
-      child: FormBuilderDropdown(
-        name: name,
-        isDense: true, // 默认就是紧凑型
-        decoration: InputDecoration(
-          labelText: labelText,
-          hintText: hintText,
-          isDense: true, // 边框没有默认是紧凑型
-          // 调整内边距，使得下拉框更紧凑
-          contentPadding: EdgeInsets.symmetric(horizontal: 5.sp, vertical: 5),
-          // 这是下划线，如果要四周包裹，用OutlineInputBorder
-          border: const UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey),
-          ),
-        ),
-        items: genDropdownMenuItems(options, textSize: optionFontSize),
-        valueTransformer: (val) => val?.toString(),
-      ),
-    );
-  }
-
-  // 构建查询表单的文本输入框
-  Widget _buildTextField(
-    String name, {
-    String? hintText, // 可不传提示语
-    String? labelText, // 可不传栏位标签，在输入框前面有就行
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10.sp),
-      child: FormBuilderTextField(
-        name: name,
-        decoration: InputDecoration(
-          isDense: true, // 边框没有默认是紧凑型
-          labelText: labelText,
-          hintText: hintText,
-          // 调整内边距，使得下拉框更紧凑
-          contentPadding: EdgeInsets.symmetric(horizontal: 5.sp, vertical: 5),
+            ),
+            // 级别和类别（单选）
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                const Text("级别"),
+                Flexible(
+                  child: cusFormBuilerDropdown(
+                    "level",
+                    levelOptions,
+                    hintText: "选择级别",
+                  ),
+                ),
+                const Text("类型"),
+                Flexible(
+                  child: cusFormBuilerDropdown(
+                    "mechanic",
+                    mechanicOptions,
+                    hintText: "选择类型",
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                const Text("分类"),
+                Flexible(
+                  child: cusFormBuilerDropdown(
+                    "category",
+                    categoryOptions,
+                    hintText: "选择分类",
+                  ),
+                ),
+                const Text("器械"),
+                Flexible(
+                  child: cusFormBuilerDropdown(
+                    "equipment",
+                    equipmentOptions,
+                    hintText: "选择器械",
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:math' as math;
 
 import '../global/constants.dart';
@@ -68,4 +70,136 @@ List<DropdownMenuItem<Object>> genDropdownMenuItems(
         ),
       )
       .toList();
+}
+
+///
+/// form builder 库中文本栏位和下拉选择框组件的二次封装
+///
+// 构建表单的文本输入框
+Widget cusFormBuilerTextField(
+  String name, {
+  String? initialValue,
+  int? maxLines,
+  String? hintText, // 可不传提示语
+  TextStyle? hintStyle,
+  String? labelText, // 可不传栏位标签，在输入框前面有就行
+  String? Function(Object?)? validator,
+  bool? isOutline = false, // 输入框是否有线条
+}) {
+  return Padding(
+    padding: EdgeInsets.symmetric(horizontal: 10.sp),
+    child: FormBuilderTextField(
+      name: name,
+      initialValue: initialValue,
+      maxLines: maxLines,
+      decoration: _buildInputDecoration(
+        isOutline,
+        labelText,
+        hintText,
+        hintStyle,
+      ),
+      // decoration: isOutline != null && isOutline
+      //     ? InputDecoration(
+      //         isDense: true, // 边框没有默认是紧凑型
+      //         labelText: labelText,
+      //         hintText: hintText,
+      //         // 调整内边距，使得下拉框更紧凑
+      //         contentPadding:
+      //             EdgeInsets.symmetric(horizontal: 5.sp, vertical: 15),
+      //         border: OutlineInputBorder(
+      //           borderRadius: BorderRadius.circular(10.0), // 设置圆弧半径
+      //         ),
+      //       )
+      //     : InputDecoration(
+      //         isDense: true, // 边框没有默认是紧凑型
+      //         labelText: labelText,
+      //         hintText: hintText,
+      //         // 调整内边距，使得下拉框更紧凑
+      //         contentPadding:
+      //             EdgeInsets.symmetric(horizontal: 5.sp, vertical: 5),
+      //       ),
+      validator: validator,
+    ),
+  );
+}
+
+// 构建表单的下拉选择框
+Widget cusFormBuilerDropdown(
+  String name,
+  List<CusLabel> options, {
+  Object? initialValue,
+  String? labelText,
+  String? hintText,
+  TextStyle? hintStyle,
+  double? optionFontSize,
+  String? Function(Object?)? validator,
+  bool? isOutline = false, // 输入框是否有线条
+}) {
+  return Padding(
+    padding: EdgeInsets.symmetric(horizontal: 10.sp),
+    child: FormBuilderDropdown(
+      borderRadius: BorderRadius.all(Radius.circular(10.sp)),
+      name: name,
+      initialValue: initialValue,
+      // 是否显示四面边框线(默认只有底线)
+      decoration: _buildInputDecoration(
+        isOutline,
+        labelText,
+        hintText,
+        hintStyle,
+      ),
+
+      // decoration: isOutline != null && isOutline
+      //     ? InputDecoration(
+      //         isDense: true, // 边框没有默认是紧凑型
+      //         labelText: labelText,
+      //         hintText: hintText,
+      //         hintStyle: hintStyle,
+      //         // 调整内边距，使得下拉框更紧凑
+      //         contentPadding:
+      //             EdgeInsets.symmetric(horizontal: 5.sp, vertical: 15),
+      //         border: OutlineInputBorder(
+      //           borderRadius: BorderRadius.circular(10.0), // 设置圆弧半径
+      //         ),
+      //       )
+      //     : InputDecoration(
+      //         isDense: true, // 边框没有默认是紧凑型
+      //         labelText: labelText,
+      //         hintText: hintText,
+      //         // 调整内边距，使得下拉框更紧凑
+      //         contentPadding:
+      //             EdgeInsets.symmetric(horizontal: 5.sp, vertical: 5),
+      //       ),
+      validator: validator,
+      items: genDropdownMenuItems(options, textSize: optionFontSize),
+      menuMaxHeight: 0.5.sh,
+      // alignment: AlignmentDirectional.bottomEnd,
+      valueTransformer: (val) => val?.toString(),
+    ),
+  );
+}
+
+// formbuilder 下拉框和文本输入框的样式等内容
+InputDecoration _buildInputDecoration(
+  bool? isOutline,
+  String? labelText,
+  String? hintText,
+  TextStyle? hintStyle,
+) {
+  final contentPadding = isOutline != null && isOutline
+      ? EdgeInsets.symmetric(horizontal: 5.sp, vertical: 15.sp)
+      : EdgeInsets.symmetric(horizontal: 5.sp, vertical: 5.sp);
+
+  return InputDecoration(
+    isDense: true,
+    labelText: labelText,
+    hintText: hintText,
+    hintStyle: hintStyle,
+    contentPadding: contentPadding,
+    border: isOutline != null && isOutline
+        ? OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          )
+        : null,
+  );
 }

@@ -251,7 +251,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                   /// 代号和名称
                   ///
 
-                  _buildTextField(
+                  cusFormBuilerTextField(
                     "exercise_name",
                     labelText: '*名称',
                     initialValue: updateTarget?.exerciseName,
@@ -259,7 +259,7 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                       FormBuilderValidators.required(errorText: '名称不可为空'),
                     ]),
                   ),
-                  _buildTextField(
+                  cusFormBuilerTextField(
                     "exercise_code",
                     labelText: '*代号',
                     initialValue: updateTarget?.exerciseCode,
@@ -272,32 +272,38 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildModifyDropdownFlexible(
-                        "level",
-                        levelOptions,
-                        labelText: '*级别',
-                        initialValue: updateTarget?.level,
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(errorText: '级别不可为空')
-                        ]),
+                      Flexible(
+                        child: cusFormBuilerDropdown(
+                          "level",
+                          levelOptions,
+                          labelText: '*级别',
+                          initialValue: updateTarget?.level,
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(errorText: '级别不可为空')
+                          ]),
+                        ),
                       ),
-                      _buildModifyDropdownFlexible(
-                        "counting_mode",
-                        countingOptions,
-                        labelText: '*计数',
-                        initialValue: updateTarget?.countingMode,
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(errorText: '计数不可为空')
-                        ]),
+                      Flexible(
+                        child: cusFormBuilerDropdown(
+                          "counting_mode",
+                          countingOptions,
+                          labelText: '*计数',
+                          initialValue: updateTarget?.countingMode,
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(errorText: '计数不可为空')
+                          ]),
+                        ),
                       ),
-                      _buildModifyDropdownFlexible(
-                        "force",
-                        forceOptions,
-                        labelText: '*发力',
-                        initialValue: updateTarget?.force,
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(errorText: '发力不可为空')
-                        ]),
+                      Flexible(
+                        child: cusFormBuilerDropdown(
+                          "force",
+                          forceOptions,
+                          labelText: '*发力',
+                          initialValue: updateTarget?.force,
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(errorText: '发力不可为空')
+                          ]),
+                        ),
                       ),
                     ],
                   ),
@@ -305,23 +311,27 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildModifyDropdownFlexible(
-                        "category",
-                        categoryOptions,
-                        labelText: '*分类',
-                        initialValue: updateTarget?.category,
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(errorText: '分类不可为空')
-                        ]),
+                      Flexible(
+                        child: cusFormBuilerDropdown(
+                          "category",
+                          categoryOptions,
+                          labelText: '*分类',
+                          initialValue: updateTarget?.category,
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(errorText: '分类不可为空')
+                          ]),
+                        ),
                       ),
-                      _buildModifyDropdownFlexible(
-                        "mechanic",
-                        mechanicOptions,
-                        labelText: '*类别',
-                        initialValue: updateTarget?.mechanic,
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(errorText: '类别不可为空')
-                        ]),
+                      Flexible(
+                        child: cusFormBuilerDropdown(
+                          "mechanic",
+                          mechanicOptions,
+                          labelText: '*类别',
+                          initialValue: updateTarget?.mechanic,
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(errorText: '类别不可为空')
+                          ]),
+                        ),
                       ),
                     ],
                   ),
@@ -329,22 +339,26 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildModifyDropdownFlexible(
-                        "equipment",
-                        equipmentOptions,
-                        labelText: '器械',
-                        initialValue: updateTarget?.equipment,
+                      Flexible(
+                        child: cusFormBuilerDropdown(
+                          "equipment",
+                          equipmentOptions,
+                          labelText: '器械',
+                          initialValue: updateTarget?.equipment,
+                        ),
                       ),
-                      _buildModifyDropdownFlexible(
-                        "standard_duration",
-                        standardDurationOptions,
-                        labelText: '标准动作耗时',
-                        initialValue: updateTarget?.standardDuration,
+                      Flexible(
+                        child: cusFormBuilerDropdown(
+                          "standard_duration",
+                          standardDurationOptions,
+                          labelText: '标准动作耗时',
+                          initialValue: updateTarget?.standardDuration,
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 10.sp),
 
+                  SizedBox(height: 10.sp),
                   // 主要肌肉(多选)
                   _buildModifyMultiSelectDialogField(
                     key: _multiPrimarySelectKey,
@@ -376,26 +390,31 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
                     },
                   ),
 
+                  const SizedBox(height: 10),
                   //  要点(简介这个动作步骤)
-                  _buildTextField(
+                  cusFormBuilerTextField(
                     "instructions",
                     labelText: '*技术要点',
                     initialValue: updateTarget?.instructions,
                     maxLines: 5,
+                    isOutline: true,
                     validator: FormBuilderValidators.compose([
                       FormBuilderValidators.required(errorText: '技术要点不可为空'),
                     ]),
                   ),
+
+                  const SizedBox(height: 10),
                   // 语音提醒文本
-                  _buildTextField(
+                  cusFormBuilerTextField(
                     "tts_notes",
                     labelText: '语音提示要点',
                     initialValue: updateTarget?.ttsNotes,
+                    maxLines: 5,
+                    isOutline: true,
                   ),
 
                   const SizedBox(height: 10),
                   // 上传活动示例图片（静态图或者gif）
-
                   _buildFilePicker(
                     'images',
                     initialValue: exerciseImages,
@@ -406,62 +425,6 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  // 构建查询表单的文本输入框
-  Widget _buildTextField(
-    String name, {
-    String? initialValue,
-    int? maxLines,
-    String? hintText, // 可不传提示语
-    String? labelText, // 可不传栏位标签，在输入框前面有就行
-    String? Function(Object?)? validator,
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10.sp),
-      child: FormBuilderTextField(
-        name: name,
-        initialValue: initialValue,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          isDense: true, // 边框没有默认是紧凑型
-          labelText: labelText,
-          hintText: hintText,
-          // 调整内边距，使得下拉框更紧凑
-          contentPadding: EdgeInsets.symmetric(horizontal: 5.sp, vertical: 5),
-        ),
-        validator: validator,
-      ),
-    );
-  }
-
-  _buildModifyDropdownFlexible(
-    String name,
-    List<CusLabel> options, {
-    Object? initialValue,
-    String? labelText,
-    double? optionFontSize,
-    String? Function(Object?)? validator,
-  }) {
-    return Flexible(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10.sp),
-        child: FormBuilderDropdown(
-          name: name,
-          decoration: InputDecoration(
-            labelText: labelText,
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 5.sp,
-              vertical: 5.sp,
-            ),
-          ),
-          validator: validator,
-          items: genDropdownMenuItems(options, textSize: optionFontSize),
-          initialValue: initialValue,
-          valueTransformer: (val) => val?.toString(),
         ),
       ),
     );
