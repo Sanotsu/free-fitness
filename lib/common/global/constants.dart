@@ -287,6 +287,13 @@ List<CusLabel> categoryOptions = [
   CusLabel(enLabel: '', cnLabel: "无氧", value: 'anaerobic'),
 ];
 
+// 训练组的分类示例
+List<CusLabel> groupCategoryOptions = [
+  CusLabel(enLabel: 'chest training', cnLabel: "练胸", value: 'chest_training'),
+  CusLabel(enLabel: 'arm training', cnLabel: "练臂", value: 'arm_training'),
+  CusLabel(enLabel: 'slimming', cnLabel: "减肥", value: 'slimming'),
+];
+
 List<CusLabel> equipmentOptions = [
   CusLabel(enLabel: '', cnLabel: "无器械", value: 'body'),
   CusLabel(enLabel: '', cnLabel: "杠铃", value: 'barbell'),

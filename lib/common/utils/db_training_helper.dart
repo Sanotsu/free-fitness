@@ -268,6 +268,15 @@ class DBTrainingHelper {
   Future<int> insertTrainingGroup(TrainingGroup group) async =>
       (await database).insert(TrainingDdl.tableNameOfGroup, group.toMap());
 
+// 修改指定训练基本信息（指定id修改）
+  Future<int> updateTrainingGroup(int groupId, TrainingGroup group) async =>
+      (await database).update(
+        TrainingDdl.tableNameOfGroup,
+        group.toMap(),
+        where: "group_id = ? ",
+        whereArgs: [groupId],
+      );
+
   // 查询指定训练以及其所有动作
   // 训练支持条件查询，估计训练的数量不会多，就暂时不分页；同事关联的动作就全部带出。
   Future<List<GroupWithActions>> searchGroupWithActions({

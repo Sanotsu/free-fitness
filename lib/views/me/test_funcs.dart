@@ -237,7 +237,8 @@ Future<int> _insertOneRandomGroup() async {
   var group = TrainingGroup(
     groupName: generateRandomString(5, 20),
     groupCategory:
-        categoryOptions[Random().nextInt(categoryOptions.length)].value,
+        groupCategoryOptions[Random().nextInt(groupCategoryOptions.length)]
+            .value,
     groupLevel: levelOptions[Random().nextInt(levelOptions.length)].value,
     restInterval: Random().nextInt(50),
     consumption: Random().nextInt(1000),

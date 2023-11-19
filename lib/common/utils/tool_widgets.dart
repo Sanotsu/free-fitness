@@ -79,6 +79,7 @@ List<DropdownMenuItem<Object>> genDropdownMenuItems(
 Widget cusFormBuilerTextField(
   String name, {
   String? initialValue,
+  double? valueFontSize,
   int? maxLines,
   String? hintText, // 可不传提示语
   TextStyle? hintStyle,
@@ -94,6 +95,7 @@ Widget cusFormBuilerTextField(
       initialValue: initialValue,
       maxLines: maxLines,
       readOnly: isReadOnly,
+      style: TextStyle(fontSize: valueFontSize),
       decoration: _buildInputDecoration(
         isOutline,
         isReadOnly,
