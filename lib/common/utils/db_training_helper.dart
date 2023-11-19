@@ -142,6 +142,15 @@ class DBTrainingHelper {
       (await database).delete(TrainingDdl.tableNameOfExercise,
           where: "exercise_id=?", whereArgs: [id]);
 
+  // 通过编号查询单条数据(返回exercise_id)
+  Future<Exercise> queryExerciseById(int id) async =>
+      Exercise.fromMap((await (await database).query(
+        TrainingDdl.tableNameOfExercise,
+        where: 'exercise_id = ? ',
+        whereArgs: [id],
+      ))
+          .first);
+
   // 关键字模糊查询基础活动
   Future<CusDataResult> queryExerciseByKeyword({
     required String keyword,
@@ -307,35 +316,39 @@ class DBTrainingHelper {
         whereArgs: [group.groupId],
       );
 
-      final adList = await Future.wait(actionRows.map((a) async {
-        final action = TrainingAction.fromMap(a);
-        // 理论上一个action一定能查到且仅查到一个exercise，不会为空
-        final exercise = Exercise.fromMap((await db.query(
-          TrainingDdl.tableNameOfExercise,
-          where: 'exercise_id = ?',
-          whereArgs: [action.exerciseId],
-        ))
-            .first);
-
-        return ActionDetail(action: action, exercise: exercise);
-      }));
-
-      // 上面是异步的，说是性能要好些
-      // final adList = <ActionDetail>[];
-      // for (final r in actionRows) {
-      //   final action = TrainingAction.fromMap(r);
-      //   final exerciseRows = await db.query(
+      // final adList = await Future.wait(actionRows.map((a) async {
+      //   final action = TrainingAction.fromMap(a);
+      //   // 理论上一个action一定能查到且仅查到一个exercise，不会为空
+      //   final exercise = Exercise.fromMap((await db.query(
       //     TrainingDdl.tableNameOfExercise,
       //     where: 'exercise_id = ?',
       //     whereArgs: [action.exerciseId],
-      //   );
-      //   // ？？？理论上这里只有查到1个exercise，且不应该差不多(暂不考虑异常情况)
-      //   var ad = ActionDetail(
-      //     action: action,
-      //     exercise: Exercise.fromMap(exerciseRows[0]),
-      //   );
-      //   adList.add(ad);
-      // }
+      //   ))
+      //       .first);
+
+      //   return ActionDetail(action: action, exercise: exercise);
+      // }));
+
+      // 上面是异步的，说是性能要好些
+      final adList = <ActionDetail>[];
+      for (final r in actionRows) {
+        final action = TrainingAction.fromMap(r);
+        final exerciseRows = await db.query(
+          TrainingDdl.tableNameOfExercise,
+          where: 'exercise_id = ?',
+          whereArgs: [action.exerciseId],
+        );
+
+        print("exerciseRows----${exerciseRows.length}");
+        // ？？？理论上这里只有查到1个exercise，且不应该差不多(暂不考虑异常情况)
+        if (exerciseRows.isNotEmpty) {
+          var ad = ActionDetail(
+            action: action,
+            exercise: Exercise.fromMap(exerciseRows[0]),
+          );
+          adList.add(ad);
+        }
+      }
 
       list.add(GroupWithActions(group: group, actionDetailList: adList));
     }
@@ -486,16 +499,21 @@ class DBTrainingHelper {
         for (final a in actionRows) {
           final action = TrainingAction.fromMap(a);
           // ？？？理论上这里1个动作只有查到1个基础运动，且不应该查不到(暂不考虑异常情况)
-          final exercise = Exercise.fromMap((await db.query(
-                  TrainingDdl.tableNameOfExercise,
-                  where: 'exercise_id = ?',
-                  whereArgs: [action.exerciseId]))
-              .first);
 
-          adList.add(ActionDetail(
-            action: action,
-            exercise: exercise,
-          ));
+          var exerciseRows = await db.query(
+            TrainingDdl.tableNameOfExercise,
+            where: 'exercise_id = ?',
+            whereArgs: [action.exerciseId],
+          );
+
+          if (exerciseRows.isNotEmpty) {
+            final exercise = Exercise.fromMap(exerciseRows.first);
+
+            adList.add(ActionDetail(
+              action: action,
+              exercise: exercise,
+            ));
+          }
         }
 
         gwaList.add(GroupWithActions(group: group, actionDetailList: adList));

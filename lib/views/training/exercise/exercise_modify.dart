@@ -14,16 +14,16 @@ import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
 
 /// 基础活动变更表单（希望新增、修改可通用）
-class ExerciseModifyForm extends StatefulWidget {
+class ExerciseModify extends StatefulWidget {
   final Exercise? item;
 
-  const ExerciseModifyForm({Key? key, this.item}) : super(key: key);
+  const ExerciseModify({Key? key, this.item}) : super(key: key);
 
   @override
-  State<ExerciseModifyForm> createState() => _ExerciseModifyFormState();
+  State<ExerciseModify> createState() => _ExerciseModifyState();
 }
 
-class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
+class _ExerciseModifyState extends State<ExerciseModify> {
   final DBTrainingHelper _dbHelper = DBTrainingHelper();
 
   // 这个表单用到了3个库，flutter_form_builder、form_builder_file_picker、multi_select_flutter
@@ -188,16 +188,11 @@ class _ExerciseModifyFormState extends State<ExerciseModifyForm> {
             duration: const Duration(seconds: 3),
           );
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-          print("==========有修改成功弹窗但是没有返回值？");
-
           Navigator.pop(context, 'exerciseModified');
         }
       } catch (e) {
         // 或者显示一个SnackBar
-
         var errorMessage = "数据插入数据库失败";
-
         if (e is DatabaseException) {
           // 这里可以直接去sqlite的结果代码 e.getResultCode()，
           // 具体代码含义参看文档： https://www.sqlite.org/rescode.html

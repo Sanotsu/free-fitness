@@ -1,186 +1,13 @@
-// // ignore_for_file: avoid_print
-
-// import 'dart:io';
-
-// import 'package:flutter/material.dart';
-// import 'package:flutter_screenutil/flutter_screenutil.dart';
-
-// import '../../../common/global/constants.dart';
-// import '../../../models/training_state.dart';
-
-// class ExerciseDetailMore extends StatefulWidget {
-//   final Exercise exerciseItem;
-
-//   const ExerciseDetailMore({super.key, required this.exerciseItem});
-
-//   @override
-//   State<ExerciseDetailMore> createState() => _ExerciseDetailMoreState();
-// }
-
-// class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
-//   String placeholderImageUrl = 'assets/images/no_image.png';
-
-//   late Exercise _currentItem;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _currentItem = widget.exerciseItem;
-
-//     print("_currentItem------------$_currentItem");
-//   }
-
-//   // 根据数据库值显示对应标签
-//   _genMuscleText(String? muscleStr) {
-//     if (muscleStr == null) {
-//       return "";
-//     }
-//     List<String> selectedValues = muscleStr.split(',');
-//     String labelText = "";
-
-//     for (String selectedValue in selectedValues) {
-//       for (ExerciseDefaultOption option in musclesOptions) {
-//         if (option.value == selectedValue) {
-//           labelText += "${option.label}, ";
-//           break;
-//         }
-//       }
-//     }
-
-//     if (labelText.isNotEmpty) {
-//       // 去掉最后一个逗号和空格
-//       labelText = labelText.substring(0, labelText.length - 2);
-//     }
-
-//     return labelText;
-//   }
-
-//   _genOptionLabel(List<ExerciseDefaultOption> options, String label) {
-//     return options.where((e) => e.value == label).first.label;
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('ExerciseDetailMore'),
-//       ),
-//       body: SingleChildScrollView(
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             // 顶部图片
-//             Image.file(
-//               File(_currentItem.images?.split(",")[0] ?? ""),
-//               errorBuilder: (BuildContext context, Object exception,
-//                   StackTrace? stackTrace) {
-//                 return Image.asset(
-//                   placeholderImageUrl,
-//                   fit: BoxFit.scaleDown,
-//                 );
-//               },
-//             ),
-//             Padding(
-//               padding: EdgeInsets.symmetric(horizontal: 16.0.sp),
-//               child: ListTile(
-//                 title: const Text("代号"),
-//                 trailing: Text(
-//                   _currentItem.exerciseCode,
-//                   style:
-//                       TextStyle(fontSize: 24.0.sp, fontWeight: FontWeight.bold),
-//                 ),
-//               ),
-//             ),
-//             Padding(
-//               padding: EdgeInsets.symmetric(horizontal: 16.0.sp),
-//               child: ListTile(
-//                 title: const Text("名称"),
-//                 trailing: Text(_currentItem.exerciseName),
-//               ),
-//             ),
-//             ListTile(
-//               title: const Text("主要肌肉"),
-//               trailing: Text(
-//                 _genMuscleText(_currentItem.primaryMuscles),
-//                 style: TextStyle(fontSize: 16.0.sp),
-//               ),
-//             ),
-//             ListTile(
-//               title: const Text("次要肌肉"),
-//               trailing: Text(
-//                 _genMuscleText(_currentItem.secondaryMuscles),
-//                 style: TextStyle(fontSize: 16.0.sp),
-//               ),
-//             ),
-//             ListTile(
-//               title: const Text("发力方式"),
-//               trailing: Text(
-//                 _currentItem.force != null
-//                     ? _genOptionLabel(forceOptions, _currentItem.force!)
-//                     : "",
-//                 style: TextStyle(fontSize: 16.0.sp),
-//               ),
-//             ),
-//             ListTile(
-//               title: const Text("级别"),
-//               trailing: Text(
-//                 _currentItem.force != null
-//                     ? _genOptionLabel(levelOptions, _currentItem.level!)
-//                     : "",
-//                 style: TextStyle(fontSize: 16.0.sp),
-//               ),
-//             ),
-//             ListTile(
-//               title: const Text("基础活动类别"),
-//               trailing: Text(
-//                 _currentItem.force != null
-//                     ? _genOptionLabel(mechanicOptions, _currentItem.mechanic!)
-//                     : "",
-//                 style: TextStyle(fontSize: 16.0.sp),
-//               ),
-//             ),
-//             ListTile(
-//               title: const Text("所需器械"),
-//               trailing: Text(
-//                 _currentItem.force != null
-//                     ? _genOptionLabel(equipmentOptions, _currentItem.equipment!)
-//                     : "",
-//                 style: TextStyle(fontSize: 16.0.sp),
-//               ),
-//             ),
-//             ListTile(
-//               title: const Text("分类"),
-//               trailing: Text(
-//                 _currentItem.force != null
-//                     ? _genOptionLabel(categoryOptions, _currentItem.category)
-//                     : "",
-//                 style: TextStyle(fontSize: 16.0.sp),
-//               ),
-//             ),
-//             ListTile(
-//               title: const Text("是否用户上传"),
-//               trailing: Text(
-//                 "${_currentItem.isCustom}",
-//                 style: TextStyle(fontSize: 16.0.sp),
-//               ),
-//             ),
-//             Text(
-//               "${_currentItem.instructions}",
-//               style: TextStyle(fontSize: 16.0.sp),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
+// ignore_for_file: avoid_print
 
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/global/constants.dart';
+import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
 
 class ExerciseDetailMore extends StatefulWidget {
@@ -193,18 +20,19 @@ class ExerciseDetailMore extends StatefulWidget {
 }
 
 class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
-  String placeholderImageUrl = 'assets/images/no_image.png';
+  // 当前基础活动详情数据
+  late Exercise _item;
 
-  late Exercise _currentItem;
+  final _formKey = GlobalKey<FormBuilderState>();
 
   @override
   void initState() {
     super.initState();
-    _currentItem = widget.exerciseItem;
+    _item = widget.exerciseItem;
   }
 
   // 根据数据库值从预设选项中显示对应标签
-  _getOptionLabel(String? value, List<CusLabel> options) {
+  _getCnLabel(String? value, List<CusLabel> options) {
     if (value == null) {
       return "";
     }
@@ -225,7 +53,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
     List<String> selectedLabels = [];
 
     for (String selectedValue in selectedValues) {
-      String selectedLabel = _getOptionLabel(selectedValue, musclesOptions);
+      String selectedLabel = _getCnLabel(selectedValue, musclesOptions);
       if (selectedLabel.isNotEmpty) {
         selectedLabels.add(selectedLabel);
       }
@@ -234,119 +62,231 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
     return selectedLabels.join(", ");
   }
 
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('动作详情'),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // 顶部图片(有多张也显示第一张)
+            Padding(
+              padding: EdgeInsets.all(10.sp),
+              child: SizedBox(
+                height: 0.3.sh,
+                child: Image.file(
+                  File(_item.images?.split(",")[0] ?? ""),
+                  errorBuilder: (BuildContext context, Object exception,
+                      StackTrace? stackTrace) {
+                    return Image.asset(placeholderImageUrl,
+                        fit: BoxFit.scaleDown);
+                  },
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16.0.sp),
+              child: Text(
+                "更多详情",
+                style: TextStyle(fontSize: 16.0.sp),
+              ),
+            ),
+
+            // const Text('Table 样式'),
+            ...buildTableData(),
+
+            // const Text('ListTile 样式'),
+            // ...buildListTileData(),
+            // const Text('Form 样式'),
+            // buildFormData(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  buildTableData() {
+    return [
+      Padding(
+        padding: EdgeInsets.all(10.sp),
+        child: Table(
+          border: TableBorder.all(), // 设置表格边框
+          // 设置每列的宽度占比
+          columnWidths: const {
+            0: FlexColumnWidth(1),
+            1: FlexColumnWidth(3),
+          },
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          children: [
+            _buildTableRow("代号", _item.exerciseCode),
+            _buildTableRow("名称", _item.exerciseName),
+            _buildTableRow("发力", _getCnLabel(_item.force, forceOptions)),
+            _buildTableRow(
+                "计数", _getCnLabel(_item.countingMode, countingOptions)),
+            _buildTableRow("级别", _getCnLabel(_item.level, levelOptions)),
+            _buildTableRow("类别", _getCnLabel(_item.mechanic, mechanicOptions)),
+            _buildTableRow(
+                "器械", _getCnLabel(_item.equipment, equipmentOptions)),
+            _buildTableRow("分类", _getCnLabel(_item.category, categoryOptions)),
+            _buildTableRow("主要肌肉", _genMuscleOptionLabel(_item.primaryMuscles)),
+            _buildTableRow(
+                "次要肌肉", _genMuscleOptionLabel(_item.secondaryMuscles)),
+            _buildTableRow(
+              "用户上传",
+              (_item.isCustom != null && _item.isCustom == 'true') ? '是' : '否',
+            ),
+            _buildTableRow("技术要点", _item.instructions ?? ""),
+            _buildTableRow("语言提示", _item.ttsNotes ?? ""),
+          ],
+        ),
+      ),
+    ];
+  }
+
+  // 构建表格行数据
   _buildTableRow(String label, String value) {
     return TableRow(
       children: [
         Padding(
-          padding: EdgeInsets.only(left: 16.0.sp),
-          child: Text(label),
+          padding: EdgeInsets.symmetric(horizontal: 10.sp),
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+          ),
         ),
         Padding(
-          padding: EdgeInsets.only(right: 16.0.sp),
+          padding: EdgeInsets.symmetric(horizontal: 10.sp),
           child: Text(
             value,
-            style: TextStyle(fontSize: 16.0.sp),
-            textAlign: TextAlign.right,
+            style: TextStyle(fontSize: 14.0.sp, color: Colors.grey),
+            textAlign: TextAlign.left,
           ),
         ),
       ],
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('ExerciseDetailMore'),
+  buildListTileData() {
+    return [
+      _buildListTile("代号", _item.exerciseCode),
+      _buildListTile("名称", _item.exerciseName),
+      _buildListTile("发力", _getCnLabel(_item.force, forceOptions)),
+      _buildListTile("计数", _getCnLabel(_item.countingMode, countingOptions)),
+      _buildListTile("级别", _getCnLabel(_item.level, levelOptions)),
+      _buildListTile("类别", _getCnLabel(_item.mechanic, mechanicOptions)),
+      _buildListTile("器械", _getCnLabel(_item.equipment, equipmentOptions)),
+      _buildListTile("分类", _getCnLabel(_item.category, categoryOptions)),
+      _buildListTile("主要肌肉", _genMuscleOptionLabel(_item.primaryMuscles)),
+      _buildListTile("次要肌肉", _genMuscleOptionLabel(_item.secondaryMuscles)),
+      _buildListTile(
+        "用户上传",
+        (_item.isCustom != null && _item.isCustom == 'true') ? '是' : '否',
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // 顶部图片
-            Image.file(
-              File(_currentItem.images?.split(",")[0] ?? ""),
-              errorBuilder: (BuildContext context, Object exception,
-                  StackTrace? stackTrace) {
-                return Image.asset(
-                  placeholderImageUrl,
-                  fit: BoxFit.scaleDown,
-                );
-              },
-            ),
-            SizedBox(
-              height: 16.0.sp,
-            ),
-            Table(
-              columnWidths: const {
-                0: FlexColumnWidth(1),
-                1: FlexColumnWidth(2),
-              },
-              children: [
-                _buildTableRow(
-                  "代号",
-                  _currentItem.exerciseCode,
-                ),
-                _buildTableRow(
-                  "名称",
-                  _currentItem.exerciseName,
-                ),
-                _buildTableRow(
-                  "发力方式",
-                  _getOptionLabel(_currentItem.force, forceOptions),
-                ),
-                _buildTableRow(
-                  "计数方式",
-                  _getOptionLabel(_currentItem.countingMode, countingOptions),
-                ),
-                _buildTableRow(
-                  "级别",
-                  _getOptionLabel(_currentItem.level, levelOptions),
-                ),
-                _buildTableRow(
-                  "基础活动类别",
-                  _getOptionLabel(_currentItem.mechanic, mechanicOptions),
-                ),
-                _buildTableRow(
-                  "所需器械",
-                  _getOptionLabel(_currentItem.equipment, equipmentOptions),
-                ),
-                _buildTableRow(
-                  "分类",
-                  _getOptionLabel(_currentItem.category, categoryOptions),
-                ),
-                _buildTableRow(
-                  "主要肌肉",
-                  _genMuscleOptionLabel(_currentItem.primaryMuscles),
-                ),
-                _buildTableRow(
-                  "次要肌肉",
-                  _genMuscleOptionLabel(_currentItem.secondaryMuscles),
-                ),
-                _buildTableRow(
-                  "是否用户上传",
-                  "${_currentItem.isCustom}",
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 16.0.sp,
-            ),
-            Padding(
-              padding: EdgeInsets.all(16.0.sp),
-              child: Text(
-                "基础活动要点",
-                style: TextStyle(fontSize: 24.0.sp),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0.sp),
-              child: Text(
-                "${_currentItem.instructions}",
-                style: TextStyle(fontSize: 16.0.sp),
-              ),
-            ),
-          ],
-        ),
+      _buildListTile("技术要点", _item.instructions ?? ""),
+      _buildListTile("语言提示", _item.ttsNotes ?? ""),
+    ];
+  }
+
+  _buildListTile(String title, String subtitle) {
+    return ListTile(
+      title: Text(title),
+      subtitle: Padding(
+        padding: EdgeInsets.only(left: 30.sp),
+        child: Text(subtitle),
+      ),
+    );
+  }
+
+  buildFormData() {
+    return FormBuilder(
+      key: _formKey,
+      child: Column(
+        children: [
+          /// 代号和名称
+
+          cusFormBuilerTextField(
+            "exercise_name",
+            labelText: '*名称',
+            initialValue: _item.exerciseName,
+            isReadOnly: true,
+          ),
+          cusFormBuilerTextField(
+            "exercise_code",
+            labelText: '*代号',
+            initialValue: _item.exerciseCode,
+            isReadOnly: true,
+          ),
+
+          /// 级别和类别（单选）
+          cusFormBuilerTextField(
+            "level",
+            labelText: '*级别',
+            initialValue: _getCnLabel(_item.level, levelOptions),
+            isReadOnly: true,
+          ),
+          cusFormBuilerTextField(
+            "counting_mode",
+            labelText: '*计数',
+            initialValue: _getCnLabel(_item.countingMode, countingOptions),
+            isReadOnly: true,
+          ),
+
+          cusFormBuilerTextField(
+            "force",
+            labelText: '*发力',
+            initialValue: _getCnLabel(_item.force, forceOptions),
+            isReadOnly: true,
+          ),
+
+          cusFormBuilerTextField(
+            "category",
+            labelText: '*分类',
+            initialValue: _getCnLabel(_item.category, categoryOptions),
+            isReadOnly: true,
+          ),
+          cusFormBuilerTextField(
+            "mechanic",
+            labelText: '*类别',
+            initialValue: _getCnLabel(_item.mechanic, mechanicOptions),
+            isReadOnly: true,
+          ),
+
+          cusFormBuilerTextField(
+            "equipment",
+            labelText: '器械',
+            initialValue: _getCnLabel(_item.equipment, equipmentOptions),
+            isReadOnly: true,
+          ),
+          cusFormBuilerTextField(
+            "standard_duration",
+            labelText: '标准动作耗时',
+            initialValue:
+                _getCnLabel(_item.standardDuration, standardDurationOptions),
+            isReadOnly: true,
+          ),
+
+          const SizedBox(height: 10),
+          //  要点(简介这个动作步骤)
+          cusFormBuilerTextField(
+            "instructions",
+            labelText: '*技术要点',
+            initialValue: _item.instructions,
+            maxLines: 5,
+            isReadOnly: true,
+          ),
+
+          const SizedBox(height: 10),
+          // 语音提醒文本
+          cusFormBuilerTextField(
+            "tts_notes",
+            labelText: '语音提示要点',
+            initialValue: _item.ttsNotes ?? "",
+            maxLines: 5,
+            isReadOnly: true,
+          ),
+        ],
       ),
     );
   }

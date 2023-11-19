@@ -85,6 +85,7 @@ Widget cusFormBuilerTextField(
   String? labelText, // 可不传栏位标签，在输入框前面有就行
   String? Function(Object?)? validator,
   bool? isOutline = false, // 输入框是否有线条
+  bool isReadOnly = false, // 输入框是否有线条
 }) {
   return Padding(
     padding: EdgeInsets.symmetric(horizontal: 10.sp),
@@ -92,8 +93,10 @@ Widget cusFormBuilerTextField(
       name: name,
       initialValue: initialValue,
       maxLines: maxLines,
+      readOnly: isReadOnly,
       decoration: _buildInputDecoration(
         isOutline,
+        isReadOnly,
         labelText,
         hintText,
         hintStyle,
@@ -134,6 +137,7 @@ Widget cusFormBuilerDropdown(
   double? optionFontSize,
   String? Function(Object?)? validator,
   bool? isOutline = false, // 输入框是否有线条
+  bool isReadOnly = false, // 输入框是否有线条
 }) {
   return Padding(
     padding: EdgeInsets.symmetric(horizontal: 10.sp),
@@ -144,6 +148,7 @@ Widget cusFormBuilerDropdown(
       // 是否显示四面边框线(默认只有底线)
       decoration: _buildInputDecoration(
         isOutline,
+        isReadOnly,
         labelText,
         hintText,
         hintStyle,
@@ -182,6 +187,7 @@ Widget cusFormBuilerDropdown(
 // formbuilder 下拉框和文本输入框的样式等内容
 InputDecoration _buildInputDecoration(
   bool? isOutline,
+  bool isReadOnly,
   String? labelText,
   String? hintText,
   TextStyle? hintStyle,
@@ -200,6 +206,8 @@ InputDecoration _buildInputDecoration(
         ? OutlineInputBorder(
             borderRadius: BorderRadius.circular(10.0),
           )
-        : null,
+        : isReadOnly
+            ? InputBorder.none
+            : null,
   );
 }
