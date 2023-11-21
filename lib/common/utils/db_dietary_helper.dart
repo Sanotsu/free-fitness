@@ -7,6 +7,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../models/dietary_state.dart';
+import '../global/constants.dart';
 import 'ddl_dietary.dart';
 
 class DBDietaryHelper {
@@ -136,17 +137,37 @@ class DBDietaryHelper {
           // 1 食物不为空
           // 由于food_id列被设置为自增属性的主键，因此在调用insert方法时，返回值应该是新插入行的food_id值。
           // 如果不是自增主键，则返回的是行号row 的id。
-          foodId = await txn.insert(DietaryDdl.tableNameOfFood, food.toMap());
-          // 2 食物不为空、营养素不为空
-          if (servingInfoList != null && servingInfoList.isNotEmpty) {
-            // 多个单个营养素的食物都是同一个
-            for (var e in servingInfoList) {
-              e.foodId = foodId;
-              var servingId = await txn.insert(
-                DietaryDdl.tableNameOfServingInfo,
-                e.toMap(),
+          // ？？？如果食物自带有编号，这里后续取值就不是返回的行号了？？？
+
+          try {
+            foodId = await txn.insert(DietaryDdl.tableNameOfFood, food.toMap());
+            // 2 食物不为空、营养素不为空
+            if (servingInfoList != null && servingInfoList.isNotEmpty) {
+              // 多个单个营养素的食物都是同一个
+              for (var e in servingInfoList) {
+                e.foodId = foodId;
+                var servingId = await txn.insert(
+                  DietaryDdl.tableNameOfServingInfo,
+                  e.toMap(),
+                );
+                servingIds.add(servingId);
+              }
+            }
+          } on DatabaseException catch (e) {
+            // 唯一值重复
+            if (e.isUniqueConstraintError()) {
+              // 抛出自定义异常并携带错误信息
+              throw Exception(
+                '该食物已存在:\n ${food.brand} - ${food.product}',
               );
-              servingIds.add(servingId);
+            } else if (e.isDuplicateColumnError()) {
+              // 抛出自定义异常并携带错误信息
+              throw Exception(
+                '该食物已存在 \n ${food.foodId}-${food.brand}-${food.product}',
+              );
+            } else {
+              // 其他错误(抛出异常来触发回滚的方式是 sqflite 中常用的做法)
+              rethrow;
             }
           }
         } else if (servingInfoList != null && servingInfoList.isNotEmpty) {
@@ -231,7 +252,7 @@ class DBDietaryHelper {
   }
 
   // 关键字查询食物及其不同单份食物营养素
-  Future<List<FoodAndServingInfo>> searchFoodWithServingInfoWithPagination(
+  Future<CusDataResult> searchFoodWithServingInfoWithPagination(
     String keyword,
     int page,
     int pageSize,
@@ -265,7 +286,21 @@ class DBDietaryHelper {
         servingInfoList: servingInfoList,
       ));
     }
-    return foods;
+
+    // 数据是分页查询的，但这里带上满足条件的一共多少条
+    // 获取满足查询条件的数据总量
+    int? totalCount = Sqflite.firstIntValue(
+      await db.rawQuery(
+        'SELECT COUNT(*) FROM ${DietaryDdl.tableNameOfFood} '
+        'WHERE brand LIKE ? OR product LIKE ?',
+        ['%$keyword%', '%$keyword%'],
+      ),
+    );
+
+    print('Total count: $totalCount');
+
+    // 查询每页指定数量的数据，但带上总条数
+    return CusDataResult(data: foods, total: totalCount ?? 0);
   }
 
   // 查询指定食物的单份营养素信息

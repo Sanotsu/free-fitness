@@ -51,6 +51,7 @@ dependencies:
   # 图表
   fl_chart: ^0.64.0
   logger: ^2.0.2+1
+  file_picker: ^5.5.0
 
 dev_dependencies:
   flutter_test:

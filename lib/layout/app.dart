@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import '../views/dietary/foods/index.dart';
 import '../views/dietary/records/index.dart';
 import '../views/dietary/reports/index.dart';
 import '../views/dietary/settings/index.dart';
@@ -74,6 +75,8 @@ class FreeFitnessApp extends StatelessWidget {
               );
             } else if (settings.name == "/dietarySettings") {
               return MaterialPageRoute(builder: (_) => const DietarySettings());
+            } else if (settings.name == "/dietaryFoods") {
+              return MaterialPageRoute(builder: (_) => const DietaryFoods());
             } else if (settings.name == "/") {
               // 可带上自定义参数
               return MaterialPageRoute(builder: (_) => const HomePage());
