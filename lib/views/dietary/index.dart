@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../common/components/cus_cards.dart';
 import '../../common/global/constants.dart';
+import 'foods/index.dart';
 import 'records/index.dart';
 import 'reports/index.dart';
 import 'settings/index.dart';
@@ -17,7 +18,6 @@ class Dietary extends StatefulWidget {
 }
 
 class _DietaryState extends State<Dietary> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,6 +88,14 @@ class _DietaryState extends State<Dietary> {
                 "每日饮食记录数据管理",
                 dietaryLogCoverImageUrl,
                 routeName: "/dietaryRecords",
+              ),
+              buildCoverCard(
+                context,
+                const DietaryFoods(),
+                "食物成分",
+                "中国食物营养成分标准",
+                dietaryLogCoverImageUrl,
+                routeName: "/dietaryFoods",
               ),
             ],
           ),

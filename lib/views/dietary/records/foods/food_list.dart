@@ -90,8 +90,10 @@ class _FoodListState extends State<FoodList> {
       isLoading = true;
     });
 
-    List<FoodAndServingInfo> newData =
+    CusDataResult temp =
         await _queryFood(page: currentPage, size: pageSize, query: query);
+
+    List<FoodAndServingInfo> newData = temp.data as List<FoodAndServingInfo>;
 
     setState(() {
       foodItems.addAll(newData);
@@ -122,7 +124,7 @@ class _FoodListState extends State<FoodList> {
     _loadData();
   }
 
-  Future<List<FoodAndServingInfo>> _queryFood(
+  Future<CusDataResult> _queryFood(
       {required int page, required int size, String query = ''}) async {
     print("进入了_queryFood");
 
