@@ -11,7 +11,7 @@ import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../me/test_funcs.dart';
 import 'exercise_detail.dart';
-import 'exercise_modify_form.dart';
+import 'exercise_modify.dart';
 import 'exercise_query_form.dart';
 
 class TrainingExercise extends StatefulWidget {
@@ -180,7 +180,17 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text('动作库 $itemsCount'),
+        title: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(text: '动作库    ', style: TextStyle(fontSize: 20.sp)),
+              TextSpan(
+                text: "共 $itemsCount 条",
+                style: TextStyle(fontSize: 12.sp),
+              ),
+            ],
+          ),
+        ),
         actions: [
           /// 测试，新增一条数据的数据
           TextButton(
@@ -188,10 +198,10 @@ class _TrainingExerciseState extends State<TrainingExercise> {
             style: ButtonStyle(
               foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
             ),
-            child: const Text('AddTest'),
+            child: const Text('<导入>'),
           ),
-          TextButton.icon(
-            icon: const Icon(Icons.add),
+          IconButton(
+            icon: Icon(Icons.add, size: 30.sp),
             style: ButtonStyle(
               foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
             ),
@@ -200,15 +210,12 @@ class _TrainingExerciseState extends State<TrainingExercise> {
               final result = await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (BuildContext ctx) {
-                    return const ExerciseModifyForm();
+                    return const ExerciseModify();
                   },
                 ),
               );
 
               // 如果新增基础活动成功，会有指定返回值。这里拿到之后，加载最新的活动列表
-
-              print(
-                  'exerciseModifiedexerciseModifiedexerciseModified--$result');
               // ？？？2023-11-05 这里的新增和下面的展开详情的修改之后返回列表页面，都可以考虑直接重新加载页面，不管子组件返回值
               if (result != null) {
                 setState(() {
@@ -219,7 +226,6 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                 _loadExerciseData();
               }
             },
-            label: const Text('新增'),
           )
         ],
       ),

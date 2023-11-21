@@ -58,7 +58,7 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
-              flex: 3,
+              flex: 6,
               // FormBuilderDropdown需要指定外部容器大小，或者放在类似expanded中自动扩展
               child: cusFormBuilerDropdown(
                 "primary_muscles",
@@ -66,10 +66,11 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
                 labelText: '锻炼部位',
                 hintText: "选择锻炼部位",
                 hintStyle: TextStyle(fontSize: 14.sp),
+                isOutline: true,
               ),
             ),
             Expanded(
-              flex: 1,
+              flex: 2,
               child: TextButton(
                 onPressed: () {
                   setState(() {
@@ -83,7 +84,7 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
               ),
             ),
             Expanded(
-              flex: 1,
+              flex: 2,
               child: TextButton(
                 onPressed: () {
                   // todo 如果有高级查询条件被选择，但是被折叠了，点击重置是不会清除的。
@@ -95,14 +96,14 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
               ),
             ),
             Expanded(
-              flex: 1,
+              flex: 2,
               child: IconButton(
                 onPressed: _showHintDialog,
                 icon: Icon(Icons.warning, size: 16.sp, color: Colors.black),
               ),
             ),
             Expanded(
-              flex: 2,
+              flex: 3,
               child: ElevatedButton(
                 onPressed: _submitForm,
                 child: const Text('查询'),
