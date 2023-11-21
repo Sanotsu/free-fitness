@@ -1,12 +1,10 @@
 // ignore_for_file: avoid_print
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/views/training/exercise/exercise_modify.dart';
 
-import '../../../common/global/constants.dart';
+import '../../../common/components/dialog_widgets.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../models/training_state.dart';
 import 'exercise_detail_more.dart';
@@ -55,6 +53,8 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
     double desiredHeight = screenHeight * 0.8;
     print("desiredHeight=====$screenHeight $desiredHeight $_totalSize");
 
+    var tempImage = _currentItem.images?.split(",")[0] ?? "";
+
     return WillPopScope(
       onWillPop: () async {
         // 点击返回按钮后，如果是修改之后有返回修改成功的标志，则再返回该值给父组件进行刷新；
@@ -71,104 +71,26 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
           children: [
             // ？？？关闭按钮考虑和下面的修改和详情放一起，但3个按钮怎么排都显示很奇怪
             // _buildCloseButton(),
-            SizedBox(height: 40.sp, child: _buildCloseButton()),
-            Expanded(flex: 2, child: _buildImageArea()),
-            Expanded(flex: 3, child: _buildTitleAndDescription()),
+            SizedBox(
+                height: 40.sp,
+                child: buildCloseButton(
+                  context,
+                  popValue: modifiedFlag,
+                )),
+            Expanded(flex: 2, child: buildImageArea(context, tempImage)),
+            Expanded(
+              flex: 3,
+              child: buildTitleAndDescription(
+                _buildMoreAndEditButton(),
+                _currentItem.instructions ?? "",
+              ),
+            ),
             // 单独一行放在底部。这个有指定高度，尽量不那么高
             // buildMoreAndEditButtonRow(),
             // Expanded(flex: 1, child: _buildPageButton()),
             // 固定高度更好看
             SizedBox(height: 60.sp, child: _buildPageButton())
           ],
-        ),
-      ),
-    );
-  }
-
-  // 关闭按钮
-  _buildCloseButton() {
-    return Container(
-      color: Colors.white,
-      child: Padding(
-        padding: EdgeInsets.only(right: 10.sp),
-        child: Align(
-          alignment: Alignment.topRight,
-          child: IconButton(
-            icon: Icon(Icons.close_rounded, color: Colors.blue, size: 30.sp),
-            onPressed: () {
-              Navigator.of(context).pop(modifiedFlag); // 关闭弹窗
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  // 示例图显示区域
-  _buildImageArea() {
-    return Container(
-      // 预设的图片背景色一般是白色，所以这里也设置为白色，看起来一致
-      color: Colors.white,
-      child: Center(
-        child: Padding(
-          padding: EdgeInsets.only(bottom: 10.sp),
-          child: GestureDetector(
-            onTap: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return Dialog(
-                    child: Hero(
-                      tag: 'imageTag',
-                      child: Image.file(
-                        File(_currentItem.images?.split(",")[0] ?? ""),
-                        errorBuilder: (BuildContext context, Object exception,
-                            StackTrace? stackTrace) {
-                          return Image.asset(
-                            placeholderImageUrl,
-                            fit: BoxFit.fitWidth,
-                          );
-                        },
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-            child: Hero(
-              tag: 'imageTag',
-              child: Image.file(
-                File(_currentItem.images?.split(",")[0] ?? ""),
-                errorBuilder: (BuildContext context, Object exception,
-                    StackTrace? stackTrace) {
-                  return Image.asset(placeholderImageUrl, fit: BoxFit.cover);
-                },
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-// 基础活动名称和技术要点描述
-  _buildTitleAndDescription() {
-    return Container(
-      color: const Color.fromARGB(255, 239, 243, 244),
-      child: Padding(
-        // 避免和下方的修改按钮重叠遮挡，这里下边框多留点(按钮的高度)
-        padding: EdgeInsets.fromLTRB(0, 0, 0, 50.sp),
-        child: ListTile(
-          title: _buildMoreAndEditButton(),
-          subtitle: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: Text(
-              _currentItem.instructions ?? "",
-              // 设置文字溢出时的处理方式
-              overflow: TextOverflow.clip,
-            ),
-          ),
-          onTap: () {},
         ),
       ),
     );

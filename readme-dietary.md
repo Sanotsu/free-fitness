@@ -222,3 +222,9 @@ Generators for routes are searched for in the following order:
  4. Finally if all else fails onUnknownRoute is called.
 Unfortunately, onUnknownRoute was not set.
 ```
+
+3. ListTile 的 leading/trailing 无法设置高度
+
+截止到 2023-11-20 时，组件还是默认限制了高度 48/56，目前无法修改。
+
+参看 issue: https://github.com/flutter/flutter/issues/98178

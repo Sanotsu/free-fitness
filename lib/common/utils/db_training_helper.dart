@@ -362,7 +362,7 @@ class DBTrainingHelper {
       list.add(GroupWithActions(group: group, actionDetailList: adList));
     }
 
-    log.d("searchAllGroupWithActions---$list");
+    // log.d("searchAllGroupWithActions---$list");
     return list;
   }
 

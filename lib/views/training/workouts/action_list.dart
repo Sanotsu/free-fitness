@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_print
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:logger/logger.dart';
@@ -64,8 +66,6 @@ class _ActionListState extends State<ActionList> {
       groupId: widget.groupItem.groupId,
     );
 
-    log.d("tempGWA------$tempGWA");
-
     // 设置查询结果
     setState(() {
       // ？？？因为没有分页查询，所有这里直接替换已有的数组
@@ -83,25 +83,21 @@ class _ActionListState extends State<ActionList> {
 
     log.i(tempList);
 
-    var renewRst = await _dbHelper.renewGroupWithActionsList(
+    await _dbHelper.renewGroupWithActionsList(
       widget.groupItem.groupId!,
       tempList,
     );
-
-    print("_saveActionList---$renewRst");
   }
 
+  // 点击顶部修改按钮时，把页面状态改为修改中，显示所有修改香瓜的功能
   void _onEditPressed() {
-    print("点击了修改按钮，进入了_onEditPressed");
-
     setState(() {
       _isEditing = true;
     });
   }
 
+  // 点击了顶部保存按钮，把新的动作列表存入数据库，并更新动作列表页面
   void _onSavePressed() async {
-    log.i("点击了保存按钮，进入了_onSavePressed $actionList");
-
     await _saveActionList();
     setState(() {
       _isEditing = false;
@@ -110,6 +106,7 @@ class _ActionListState extends State<ActionList> {
     await _getActionListByGroupId();
   }
 
+  // 当对列表重新排序后，更新当前列表的数据
   void _onReorder(int oldIndex, int newIndex) {
     setState(() {
       if (newIndex > oldIndex) {
@@ -120,9 +117,8 @@ class _ActionListState extends State<ActionList> {
     });
   }
 
+  // 当点击了删除按钮后，冲列表中移除该数据
   void _onDelete(int index) {
-    // 进入了移除功能
-    print("点击进入了移除功能 $index");
     setState(() {
       actionList.removeAt(index);
     });
@@ -133,19 +129,12 @@ class _ActionListState extends State<ActionList> {
     // 弹出配置弹窗的逻辑
     print("预留点击进入action配置，使用弹窗 $index");
 
-    // showConfigurationDialog(context, adItem, onConfigurationDialogClosed);
-
     showConfigDialog(context, adItem, index, onConfiguClosed);
-    // ...
   }
 
   // 关闭动作弹窗时，根据其回调函数中的值，修改当前显示的动作配置为修改后的值
   void onConfiguClosed(int index, ActionDetail adItem) {
     // 在这里处理从弹窗中获得的数据
-    print(
-      "Received data from ------------: ${adItem.action} $index > ${actionList.length}",
-    );
-
     setState(() {
       // 如果索引大于等于(理论上就是等于)原本的列表长度，说明是新增的，直接添加到底部
       if (index >= actionList.length) {
@@ -155,15 +144,6 @@ class _ActionListState extends State<ActionList> {
         actionList[index] = adItem;
       }
     });
-  }
-
-  // 关闭动作弹窗时，根据其回调函数中的值，修改当前显示的动作配置为修改后的值
-  void onConfigurationDialogClosed(
-    ActionDetail adItem,
-    Map<String, dynamic> data,
-  ) {
-    // 在这里处理从弹窗中获得的数据
-    log.d("Received data from dialog: $data");
   }
 
   @override
@@ -186,7 +166,21 @@ class _ActionListState extends State<ActionList> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text('ActionList ${actionList.length}个动作'),
+          title: RichText(
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                    text: '${widget.groupItem.groupName} ',
+                    style: TextStyle(fontSize: 20.sp)),
+                TextSpan(
+                  text: " 共 ${actionList.length} 个动作",
+                  style: TextStyle(fontSize: 12.sp),
+                ),
+              ],
+            ),
+          ),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -225,134 +219,8 @@ class _ActionListState extends State<ActionList> {
             ? buildLoader(isLoading)
             : Column(
                 children: [
-                  const Center(
-                    child: Text(
-                      'ActionList.点击某一个group进来。 如果训练计划没有任何action，说明是全新的训练计划新增。如果已有action，则是对group添加action（group没有任何action是否可以自动删除该group）',
-                    ),
-                  ),
                   Expanded(
-                    child: ReorderableListView.builder(
-                      buildDefaultDragHandles: _isEditing, // 如果是修改，才允许长按进行拖拽
-                      itemCount: actionList.length,
-                      itemBuilder: (context, index) {
-                        // actionDetailItem
-                        var adItem = actionList[index];
-                        var actionItem = adItem.action;
-
-                        // 显示次数、持续时间、器械重量
-                        String result = "";
-
-                        String? formatValue(value, unit) {
-                          return value != null ? "$value $unit" : null;
-                        }
-
-                        var frequency = formatValue(actionItem.frequency, '次');
-                        var duration = formatValue(actionItem.duration, '秒');
-                        var equipmentWeight =
-                            formatValue(actionItem.equipmentWeight, '公斤');
-
-                        if (adItem.exercise.countingMode ==
-                            countingOptions.first.value) {
-                          result = [duration, equipmentWeight]
-                              .where((element) => element != null)
-                              .join(' + ');
-                        } else {
-                          result = [frequency, equipmentWeight]
-                              .where((element) => element != null)
-                              .join(' + ');
-                        }
-
-                        // String result = "";
-
-                        // var temp1 = actionItem.frequency != null
-                        //     ? "${actionItem.frequency} 次"
-                        //     : null;
-                        // var temp2 = actionItem.duration != null
-                        //     ? "${actionItem.duration} 秒"
-                        //     : null;
-                        // var temp3 = actionItem.equipmentWeight != null
-                        //     ? "${actionItem.equipmentWeight} 公斤"
-                        //     : null;
-
-                        // // 第一个是计时，最后一个是计次（就两个，后续看改枚举）
-                        // if (adItem.exercise.countingMode ==
-                        //     countingOptions.first.value) {
-                        //   List<String?> tempList = [temp2, temp3];
-                        //   result = tempList
-                        //       .where((element) => element != null)
-                        //       .join(' + ');
-                        // } else {
-                        //   List<String?> tempList = [temp1, temp3];
-                        //   result = tempList
-                        //       .where((element) => element != null)
-                        //       .join(' + ');
-                        // }
-
-                        return Card(
-                          key: Key('$index'),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              ListTile(
-                                leading:
-                                    _isEditing ? const Icon(Icons.menu) : null,
-                                // 不存在action name，就是exercise name就好
-                                title: Text(adItem.exercise.exerciseName),
-                                subtitle: Text(result),
-                                // 如果没有缩略图，就应该显示技术动作要点的文本
-                                // trailing: const Text("这里应该是缩略图"),
-                                // 应该是上方点击了【编辑】之后，才能对列表进行调整、修改、删除、新增
-                                onTap: () {
-                                  if (_isEditing) {
-                                    print(
-                                        "修改时点击了action 指定卡片 ${adItem.exercise.countingMode}");
-
-                                    _onConfigure(context, adItem, index);
-                                  }
-                                  if (!_isEditing) {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      // 设置滚动控制为true，子部件设置dialog的高度才有效，不然固定在9/16左右无法更多。
-                                      isScrollControlled: true,
-                                      builder: (BuildContext context) {
-                                        return ActionDetailDialog(
-                                          adItems: actionList,
-                                          adIndex: index,
-                                        );
-                                      },
-                                    ).then((value) {
-                                      print(
-                                          "-------打开action detail 弹窗后的返回 $value");
-                                      // 修改exercise之后，重新加载列表
-                                    });
-                                  }
-                                },
-                                trailing: _isEditing
-                                    ? SizedBox(
-                                        width: 70.sp,
-                                        child: Row(
-                                          children: [
-                                            const Expanded(child: Text("图片")),
-                                            Expanded(
-                                                child: IconButton(
-                                              icon: const Icon(Icons.delete),
-                                              onPressed: () => _onDelete(index),
-                                            ))
-                                          ],
-                                        ),
-                                      )
-                                    : SizedBox(
-                                        width: 70.sp,
-                                        child: const Text("这是图片"),
-                                      ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      // onReorder: _isEditing ? _onReorder : null, // 根据编辑状态设置是否允许拖动
-                      onReorder: _onReorder, // 根据编辑状态设置是否允许拖动
-                    ),
+                    child: _buildReorderableList(),
                   ),
                   // 避免修改时新增按钮遮住最后一条列表
                   if (_isEditing) SizedBox(height: 80.sp),
@@ -360,46 +228,7 @@ class _ActionListState extends State<ActionList> {
               ),
         // 这里点击新增按钮，新增新的action，还是跳转到查询的exercise list
         floatingActionButton: _isEditing
-            ? FloatingActionButton(
-                onPressed: () {
-                  // 处理按钮点击事件
-                  // 这里点击新增训练计划，一定是要新增一个 group和action，后续在对应action list中新增action，都需要带上这个group id（group_has_action多一条数据）
-
-                  //  在训练计划中点击【新增】，此时没有group id，先跳转到
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SimpleExerciseList(
-                        // 如果是已存在的训练计划新增，则会有group id；如果是全新的训练计划新增，则暂时还没有id
-                        source: widget.groupItem.groupId.toString(),
-                      ),
-                    ),
-                  ).then((value) {
-                    print("simple exercise list 返回的数据: $value");
-
-                    if (value["selectedExerciseItem"] != null) {
-                      var selectedExerciseItem =
-                          value["selectedExerciseItem"] as Exercise;
-
-                      var tempAction = TrainingAction(
-                        exerciseId: selectedExerciseItem.exerciseId!,
-                        groupId: widget.groupItem.groupId!,
-                      );
-
-                      var temp = ActionDetail(
-                        exercise: selectedExerciseItem,
-                        action: tempAction,
-                      );
-
-                      // 索引从0开始，所以新增的时候就从 actionList.length 开始
-                      showConfigDialog(
-                          context, temp, actionList.length, onConfiguClosed);
-                    }
-                  });
-                },
-                // backgroundColor: Colors.yellow,
-                child: const Icon(Icons.add),
-              )
+            ? _buildAddActionButton()
             : SizedBox(
                 height: 50.sp,
                 width: 0.6.sw,
@@ -421,6 +250,165 @@ class _ActionListState extends State<ActionList> {
             ? FloatingActionButtonLocation.endFloat
             : FloatingActionButtonLocation.centerFloat,
       ),
+    );
+  }
+
+  // 构建可以重新排序的动作列表
+  _buildReorderableList() {
+    return ReorderableListView.builder(
+      buildDefaultDragHandles: _isEditing, // 如果是修改，才允许长按进行拖拽
+      itemCount: actionList.length,
+      itemBuilder: (context, index) {
+        // actionDetailItem
+        var adItem = actionList[index];
+        var actionItem = adItem.action;
+
+        // 基础活动的缩略图
+        var imageUrl = adItem.exercise.images?.split(",")[0] ?? "";
+
+        // 显示次数、持续时间、器械重量
+        String subTitle = "";
+        var frequency =
+            actionItem.frequency != null ? "${actionItem.frequency}次" : null;
+        var duration =
+            actionItem.duration != null ? "${actionItem.duration}秒" : null;
+        // 值是double类型，转2位小数的字符串
+        var equipmentWeight = actionItem.equipmentWeight != null
+            ? "${actionItem.equipmentWeight!.toStringAsFixed(2)}公斤"
+            : null;
+        // 如果是计时的运动，子标题显示持续时间和器械重量(如果有的话)
+        if (adItem.exercise.countingMode == countingOptions.first.value) {
+          subTitle = [duration, equipmentWeight]
+              .where((element) => element != null)
+              .join(' + ');
+        } else {
+          // 如果是计次的运动，子标题显示重复次数和器械重量(如果有的话)
+          subTitle = [frequency, equipmentWeight]
+              .where((element) => element != null)
+              .join(' + ');
+        }
+
+        return Card(
+          elevation: 3,
+          key: Key('$index'),
+          child: InkWell(
+            onTap: () {
+              // 应该是上方点击了【编辑】之后，才能对列表进行调整、修改、删除、新增
+              if (_isEditing) {
+                print("修改时点击了action 指定卡片 ${adItem.exercise.countingMode}");
+
+                _onConfigure(context, adItem, index);
+              }
+              if (!_isEditing) {
+                showModalBottomSheet(
+                  context: context,
+                  // 设置滚动控制为true，子部件设置dialog的高度才有效，不然固定在9/16左右无法更多。
+                  isScrollControlled: true,
+                  builder: (BuildContext context) {
+                    return ActionDetailDialog(
+                      adItems: actionList,
+                      adIndex: index,
+                    );
+                  },
+                ).then((value) {
+                  print("-------打开action detail 弹窗后的返回 $value");
+                  // 修改exercise之后，重新加载列表
+                });
+              }
+            },
+            // 由于ListTile的 trailing 无法自定义高度，这里就用Row来构建显示
+            child: SizedBox(
+              height: 0.15.sh,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  if (_isEditing)
+                    const Expanded(
+                      flex: 2,
+                      child: Icon(Icons.menu, color: Colors.blue),
+                    ),
+                  Expanded(
+                    flex: 9,
+                    child: ListTile(
+                      // 不存在action name，就是exercise name就好
+                      title:
+                          Text("${index + 1} ${adItem.exercise.exerciseName}"),
+                      subtitle: Text(subTitle),
+                      // 如果没有缩略图，就应该显示技术动作要点的文本
+                      // trailing: const Text("这里应该是缩略图"),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 6,
+                    child: Padding(
+                      padding: EdgeInsets.all(_isEditing ? 5.sp : 10.sp),
+                      child: Image.file(
+                        File(imageUrl),
+                        errorBuilder: (BuildContext context, Object exception,
+                            StackTrace? stackTrace) {
+                          return Image.asset(placeholderImageUrl,
+                              fit: BoxFit.scaleDown);
+                        },
+                      ),
+                    ),
+                  ),
+                  if (_isEditing)
+                    Expanded(
+                      flex: 2,
+                      child: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.blue),
+                        onPressed: () => _onDelete(index),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      onReorder: _onReorder, // 根据编辑状态设置是否允许拖动
+    );
+  }
+
+  _buildAddActionButton() {
+    return FloatingActionButton(
+      onPressed: () {
+        // 处理按钮点击事件
+        // 这里点击新增训练计划，一定是要新增一个 group和action，后续在对应action list中新增action，都需要带上这个group id（group_has_action多一条数据）
+
+        //  在训练计划中点击【新增】，此时没有group id，先跳转到
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SimpleExerciseList(
+              // 如果是已存在的训练计划新增，则会有group id；如果是全新的训练计划新增，则暂时还没有id
+              source: widget.groupItem.groupId.toString(),
+            ),
+          ),
+        ).then((value) {
+          print("simple exercise list 返回的数据: $value");
+
+          if (value["selectedExerciseItem"] != null) {
+            var selectedExerciseItem =
+                value["selectedExerciseItem"] as Exercise;
+
+            var tempAction = TrainingAction(
+              exerciseId: selectedExerciseItem.exerciseId!,
+              groupId: widget.groupItem.groupId!,
+            );
+
+            var temp = ActionDetail(
+              exercise: selectedExerciseItem,
+              action: tempAction,
+            );
+
+            // 索引从0开始，所以新增的时候就从 actionList.length 开始
+            showConfigDialog(context, temp, actionList.length, onConfiguClosed);
+          }
+        });
+      },
+      // backgroundColor: Colors.yellow,
+      child: const Icon(Icons.add),
     );
   }
 }

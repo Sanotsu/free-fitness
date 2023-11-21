@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
@@ -38,8 +39,6 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
   final queryTextController = TextEditingController();
   // 输入的条件查询关键字
   String queryConditon = "";
-
-  String placeholderImageUrl = 'assets/images/no_image.png';
 
   @override
   void initState() {
@@ -87,17 +86,22 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
     List<Exercise> newData = temp.data as List<Exercise>;
 
     // 模拟加载耗时一秒，以明显看到加载圈（实际用删除）
-    await Future.delayed(const Duration(milliseconds: 100));
+    // await Future.delayed(const Duration(milliseconds: 100));
 
     // 如果没有更多数据，则在底部显示
     if (newData.isEmpty) {
       // 显示 "没有更多" 的信息
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Center(child: Text("没有更多")),
-          duration: Duration(seconds: 2),
-        ),
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Center(child: Text("没有更多")),
+      //     duration: Duration(seconds: 2),
+      //   ),
+      // );
+      scrollController.animateTo(
+        scrollController.position.pixels, // 回弹的距离
+        duration: const Duration(milliseconds: 1000), // 动画持续300毫秒
+        curve: Curves.easeOut,
       );
     }
 
@@ -129,147 +133,126 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SimpleExerciseList'),
+        title: const Text('选择指定动作'),
       ),
       body: Column(
         children: [
-          const Center(
-            child: Text(
-              'SimpleExerciseList. 添加action的时候，先要选择exercise。这里就最简单名称搜索，显示名称（代号）和动作示意图.点击这个的list的某一个，跳转到action配置页面',
-            ),
-          ),
-          // 整个查询区域都带上边框
-          // Container(
-          //   decoration: BoxDecoration(
-          //     border: Border.all(color: Colors.grey), // 设置边框样式
-          //     borderRadius: BorderRadius.circular(10), // 设置圆角
-          //   ),
-          //   child:
-          Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: TextField(
-                    // 设置文本大小
-                    style: TextStyle(fontSize: 12.sp),
-                    decoration: const InputDecoration(
-                      // 四周带上边框
-                      border: OutlineInputBorder(),
-                      // 设置输入框大小
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 10,
-                        horizontal: 12,
-                      ),
-                      // 占位符文本
-                      hintText: '输入动作名称或代号关键字',
-                    ),
-                    controller: queryTextController,
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Center(child: Text('共$exerciseCount条')),
-              ),
-              Expanded(
-                flex: 1,
-                child: Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // 点击查询按钮时收起键盘
-                      FocusScope.of(context).unfocus();
-                      // 执行条件查询
-                      handleQuery(queryTextController.text);
-                    },
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min, // 根据需要调整
-                      children: [
-                        Icon(Icons.search), // 图标
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          // ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: exerciseItems.length + 1,
-              controller: scrollController,
-              itemBuilder: (context, index) {
-                if (index == exerciseItems.length) {
-                  return buildLoader(isLoading);
-                } else {
-                  // 示意图可以有多个，就去第一张号了
-                  var exerciseItem = exerciseItems[index];
-                  var imageUrl = exerciseItem.images?.split(",")[0] ?? "";
-
-                  return Card(
-                    elevation: 10,
-                    child: GestureDetector(
-                      onTap: () {
-                        // 在这里添加你想要执行的点击事件逻辑
-                        print('Row clicked--widget.source ${widget.source}');
-
-                        Navigator.pop(
-                          context,
-                          {"selectedExerciseItem": exerciseItem},
-                        );
-                      },
-                      child: Row(
-                        children: [
-                          const Expanded(
-                            flex: 1,
-                            child: Icon(
-                              Icons.add_circle_outline_outlined,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          Expanded(
-                            flex: 3,
-                            child: ListTile(
-                              title: Text(
-                                "$index-${exerciseItem.exerciseName}",
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 2,
-                                style: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              subtitle: Text(exerciseItem.countingMode),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: SizedBox(
-                              height: 100.sp,
-                              child: Image.file(
-                                File(imageUrl),
-                                errorBuilder: (BuildContext context,
-                                    Object exception, StackTrace? stackTrace) {
-                                  return Image.asset(
-                                    placeholderImageUrl,
-                                    fit: BoxFit.cover,
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-              },
-            ),
-          ),
-
-          // SizedBox(height: 20.sp),
+          Card(elevation: 5, child: _buildQueryRow()),
+          Expanded(child: _buildListArea()),
         ],
       ),
+    );
+  }
+
+  _buildQueryRow() {
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: TextField(
+              // 设置文本大小
+              style: TextStyle(fontSize: 14.sp),
+              decoration: const InputDecoration(
+                // 四周带上边框
+                border: OutlineInputBorder(),
+                // 设置输入框大小
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 12,
+                ),
+                // 占位符文本
+                hintText: '动作名称或代号关键字',
+              ),
+              controller: queryTextController,
+            ),
+          ),
+        ),
+        Expanded(flex: 1, child: Center(child: Text('共$exerciseCount条'))),
+        Expanded(
+          flex: 1,
+          child: Center(
+            child: ElevatedButton(
+              onPressed: () {
+                // 点击查询按钮时收起键盘
+                FocusScope.of(context).unfocus();
+                // 执行条件查询
+                handleQuery(queryTextController.text);
+              },
+              child: const Icon(Icons.search),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  _buildListArea() {
+    return ListView.builder(
+      itemCount: exerciseItems.length + 1,
+      controller: scrollController,
+      itemBuilder: (context, index) {
+        if (index == exerciseItems.length) {
+          return buildLoader(isLoading);
+        } else {
+          // 示意图可以有多个，就去第一张号了
+          var exerciseItem = exerciseItems[index];
+          var imageUrl = exerciseItem.images?.split(",")[0] ?? "";
+
+          return Card(
+            elevation: 10,
+            child: GestureDetector(
+              onTap: () {
+                // 在这里添加你想要执行的点击事件逻辑
+                print('Row clicked--widget.source ${widget.source}');
+
+                Navigator.pop(context, {"selectedExerciseItem": exerciseItem});
+              },
+              child: Row(
+                children: [
+                  const Expanded(
+                    flex: 2,
+                    child: Icon(Icons.add_circle_outline, color: Colors.grey),
+                  ),
+                  Expanded(
+                    flex: 9,
+                    child: ListTile(
+                      title: Text(
+                        "$index-${exerciseItem.exerciseName}",
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                        style: TextStyle(
+                            fontSize: 16.sp, fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(exerciseItem.countingMode),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 6,
+                    child: SizedBox(
+                      height: 80.sp,
+                      child: Padding(
+                        padding: EdgeInsets.all(5.sp),
+                        child: Image.file(
+                          File(imageUrl),
+                          errorBuilder: (BuildContext context, Object exception,
+                              StackTrace? stackTrace) {
+                            return Image.asset(
+                              placeholderImageUrl,
+                              fit: BoxFit.scaleDown,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 }
