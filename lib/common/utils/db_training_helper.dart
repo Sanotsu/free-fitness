@@ -531,7 +531,7 @@ class DBTrainingHelper {
       pwgList.add(PlanWithGroups(plan: plan, groupDetailList: gwaList));
     }
 
-    log.d("searchPlanWithGroups---$pwgList");
+    // log.d("searchPlanWithGroups---$pwgList");
     return pwgList;
   }
 

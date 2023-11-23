@@ -38,13 +38,21 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        // 在这里执行返回按钮被点击时的逻辑
-        // 比如执行 Navigator.pop() 返回前一个页面并携带数据
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+
         Navigator.pop(context, {"refreshData": true});
-        return true; // 返回true表示允许退出当前页面
       },
+
+      // WillPopScope(
+      //   onWillPop: () async {
+      //     // 在这里执行返回按钮被点击时的逻辑
+      //     // 比如执行 Navigator.pop() 返回前一个页面并携带数据
+      //     Navigator.pop(context, {"refreshData": true});
+      //     return true; // 返回true表示允许退出当前页面
+      //   },
       child: Scaffold(
         appBar: AppBar(
           title: const Text('基本信息'),
@@ -158,7 +166,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
       });
 
       await _dietaryHelper.updateDietaryUser(user);
-    });
+    }, isDecimalKeyboard: false);
   }
 
   void _showWeightDialog(BuildContext context) {
@@ -203,8 +211,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
     String title,
     String suffixText,
     TextEditingController controller,
-    Function(dynamic) onConfirm,
-  ) {
+    Function(dynamic) onConfirm, {
+    bool isDecimalKeyboard = true,
+  }) {
 // 是否默认打开数字键盘（身高、体重、rda则打开，根据提示的单位来判断）
 
     bool showDecimal = false;
@@ -226,8 +235,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
               decoration: InputDecoration(
                 suffixText: suffixText,
               ),
-              keyboardType:
-                  TextInputType.numberWithOptions(decimal: showDecimal),
+              keyboardType: isDecimalKeyboard
+                  ? TextInputType.numberWithOptions(decimal: showDecimal)
+                  : null,
               inputFormatters: <TextInputFormatter>[
                 FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
               ],

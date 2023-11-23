@@ -55,13 +55,11 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
 
     var tempImage = _currentItem.images?.split(",")[0] ?? "";
 
-    return WillPopScope(
-      onWillPop: () async {
-        // 点击返回按钮后，如果是修改之后有返回修改成功的标志，则再返回该值给父组件进行刷新；
-        // 否则返回的是null，父组件不做任何事。
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
         Navigator.pop(context, modifiedFlag);
-        // 返回true表示允许退出当前页面
-        return true;
       },
       child: SizedBox(
         height: desiredHeight,

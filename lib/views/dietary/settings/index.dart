@@ -197,7 +197,7 @@ class _DietarySettingsState extends State<DietarySettings> {
                       ).then((value) {
                         // 确认新增成功后重新加载当前日期的条目数据
 
-                        print("我的设置返回带过来的结果$value");
+                        print("我的设置返回带过来的结果==========$value");
                         _queryLoginedUserInfo();
                       });
                     },
@@ -224,7 +224,7 @@ class _DietarySettingsState extends State<DietarySettings> {
                   ),
                   CusSettingCard(
                     leadingIcon: Icons.photo_album_outlined,
-                    title: '饮食相册',
+                    title: '饮食相册(tbd)',
                     onTap: () {
                       // 处理相应的点击事件
                       print("(点击进入相册页面)……");

@@ -196,7 +196,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Flexible(
-                              child: FormBuilderDropdown<String>(
+                              child: FormBuilderDropdown(
                                 name: 'plan_category',
                                 decoration: const InputDecoration(
                                   labelText: '*计划分类',
@@ -211,7 +211,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
                               ),
                             ),
                             Flexible(
-                              child: FormBuilderDropdown<String>(
+                              child: FormBuilderDropdown(
                                 name: 'plan_level',
                                 decoration: const InputDecoration(
                                   labelText: '*难度',

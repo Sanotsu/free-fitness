@@ -433,3 +433,31 @@ List<CusLabel> dietaryReportDisplayModeList = [
   CusLabel(enLabel: "ThisWeek", cnLabel: "本周", value: "this_week"),
   CusLabel(enLabel: "Lastweek", cnLabel: "上周", value: "last_week"),
 ];
+
+// 手记中的情绪标签选择项
+List<CusLabel> diaryMoodList = [
+  CusLabel(enLabel: "Joy", cnLabel: "喜悦", value: "joy"),
+  CusLabel(enLabel: "Anger", cnLabel: "愤怒", value: "anger"),
+  CusLabel(enLabel: "Sadness", cnLabel: "悲伤", value: "sadness"),
+  CusLabel(enLabel: "Fear", cnLabel: "恐惧", value: "fear"),
+  CusLabel(enLabel: "Disgust", cnLabel: "厌恶", value: "disgust"),
+  CusLabel(enLabel: "Surprise", cnLabel: "惊奇", value: "surprise"),
+  CusLabel(enLabel: "Envy", cnLabel: "羡慕", value: "envy"),
+];
+
+// 手记中的分类标签选择项
+List<CusLabel> diaryCategoryList = [
+  CusLabel(enLabel: "Life", cnLabel: "生活", value: "life"),
+  CusLabel(enLabel: "Learning", cnLabel: "学习", value: "learning"),
+  CusLabel(enLabel: "Major", cnLabel: "大事", value: "major"),
+  CusLabel(enLabel: "Weekly", cnLabel: "周报", value: "weekly"),
+  CusLabel(enLabel: "Motion", cnLabel: "运动", value: "motion"),
+  CusLabel(enLabel: "Work", cnLabel: "工作", value: "work"),
+  CusLabel(enLabel: "Game", cnLabel: "游戏", value: "game"),
+  CusLabel(enLabel: "Film", cnLabel: "电影", value: "film"),
+  CusLabel(enLabel: "Article", cnLabel: "文章", value: "article"),
+  CusLabel(enLabel: "Bill", cnLabel: "账单", value: "bill"),
+  CusLabel(enLabel: "Notes", cnLabel: "备忘", value: "notes"),
+  CusLabel(enLabel: "Script", cnLabel: "剧本", value: "script"),
+  CusLabel(enLabel: "Emotion", cnLabel: "情感", value: "emotion"),
+];

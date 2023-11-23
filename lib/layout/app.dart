@@ -40,6 +40,8 @@ class FreeFitnessApp extends StatelessWidget {
           locale: const Locale('zh'),
           theme: ThemeData(
             primarySwatch: Colors.blue,
+            // ？？？2023-11-22：升级到flutter 3.16 之后默认为true，现在还没有兼容修改部件，后续再启用
+            useMaterial3: false,
           ),
 
           initialRoute: '/',

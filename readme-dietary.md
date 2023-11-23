@@ -178,6 +178,14 @@ pause：修改旧的某一天某一餐次的条目，需要从早餐移到晚餐
 
 tobed: 目标卡路里折线图是实际摄入的条状图放到一起？
 
+- 2023-11-22
+
+  - dev_ubt 下 flutter 升级到了 3.16.0, WillPopScope 将被弃用，【目前迁移工作还没做】。
+  - 2023-11-23 已处理
+
+- 2023-11-23
+  - 完成手记用富文本组件进行新增、编辑、预览的初版。
+
 ### 问题记录
 
 1. 同样的 Text()大小的中英文看起来不在一条线上。
@@ -228,3 +236,28 @@ Unfortunately, onUnknownRoute was not set.
 截止到 2023-11-20 时，组件还是默认限制了高度 48/56，目前无法修改。
 
 参看 issue: https://github.com/flutter/flutter/issues/98178
+
+4. 下方 BottomNavigationBar 的 item 超过 4 个后，背景色消失
+
+解决: 给他指定类型 : type: BottomNavigationBarType.fixed,
+
+参看： https://blog.csdn.net/weixin_46005137/article/details/107049867
+
+5. 好像是 flutter 更新到 3.16.0 后 AppBar 背景色消失
+
+解决：因为 3.16 主题默认启用 material3,手动修改为 false 即可。
+
+```dart
+MaterialApp(
+   theme: ThemeData(
+        primarySwatch: Colors.blue,
+        // ？？？2023-11-22：升级到flutter 3.16 之后默认为true，现在还没有兼容修改部件，后续再启用
+        useMaterial3: false,
+    ),
+    // ……
+)
+```
+
+6. 【unsolved】2023-11-22 不知道什么原因，使用 formbuilder 构建文本输入框，一定是安全键盘，无法切换。即便手动设置`keyboardType: TextInputType.text,`也不行。原因不明
+
+但是使用自带的 TextField 就不会有这个问题

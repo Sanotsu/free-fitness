@@ -148,20 +148,24 @@ class _ActionListState extends State<ActionList> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        // 如果是编辑中，点击下方返回按钮取消编辑状态；如果不是编辑中，则返回上一页
+    return PopScope(
+      // 在修改中就不能返回
+      canPop: !_isEditing,
+      // 处理pop操作。如果 didPop 为false，则pop被阻止，进行执行后面代码块的操作。
+      // 如果didPop为true，则直接返回。
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
+        // ？？？这下面好像没生效，但返回上一层的逻辑又是正确的
+        // (修改中点击返回按钮变为非修改中；非修改中点击返回则返回尚义页)
         if (_isEditing) {
           // 取消时数据恢复原本的内容
           await _getActionListByGroupId();
           setState(() {
             _isEditing = !_isEditing;
           });
-          return false; // 返回true表示不返回上一页
         } else {
           // 在这里添加处理返回按钮的逻辑
           Navigator.of(context).pop();
-          return true; // 返回true表示允许返回
         }
       },
       child: Scaffold(

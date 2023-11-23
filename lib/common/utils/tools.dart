@@ -72,6 +72,10 @@ String getCurrentDate() {
   return formattedDate;
 }
 
+// 获取当前格式化的日期时间字符串
+String getCurrentDateTime() =>
+    DateFormat('yyyy-MM-dd HH:MM:SS').format(DateTime.now());
+
 // 获取今天往前指定天数的所有日期字符串
 List<String> getAdjacentDatesInRange(int days) {
   List<String> dateList = [];
