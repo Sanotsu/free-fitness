@@ -10,6 +10,14 @@ import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
 import '../workouts/index.dart';
 
+///
+/// 这个 GroupList 和训练的列表首页 TrainingWorkouts 的区别:
+///
+///   这个是指定plan 的内容，后者是所有的训练数据；
+///   在这个知道plan中新增训练，就需要跳转到后者列表去选择指定的训练，再带回来进行新增。
+///   这里删除某个训练只是从plan中移除某一个训练，后者删除某个训练就是直接从数据库删除了。
+///
+///
 class GroupList extends StatefulWidget {
 //  从已存在的计划进入group list，会带上plan信息去查询已存在的group list
   final TrainingPlan planItem;
@@ -64,7 +72,7 @@ class _GroupListState extends State<GroupList> {
       planId: widget.planItem.planId,
     );
 
-    log.d("tempPWG------$tempPWG");
+    // log.d("tempPWG------$tempPWG");
 
     // 设置查询结果
     setState(() {
@@ -157,7 +165,20 @@ class _GroupListState extends State<GroupList> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('GroupList'),
+          title: RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: '${widget.planItem.planName}  ',
+                  style: TextStyle(fontSize: 20.sp),
+                ),
+                TextSpan(
+                  text: "有 ${groupList.length} 个周期",
+                  style: TextStyle(fontSize: 12.sp),
+                ),
+              ],
+            ),
+          ),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
             onPressed: () async {
@@ -196,11 +217,6 @@ class _GroupListState extends State<GroupList> {
             ? buildLoader(isLoading)
             : Column(
                 children: [
-                  const Center(
-                    child: Text(
-                      'GroupList.点击某一个plan进来。 如果计划没有任何group，说明是全新的计划，可能需要新增。如果已有group，则是对plan 中的group进行添加修改调顺序等，或者直接跟着做',
-                    ),
-                  ),
                   Expanded(
                     child: ReorderableListView.builder(
                       buildDefaultDragHandles: _isEditing, // 如果是修改，才允许长按进行拖拽
@@ -221,6 +237,7 @@ class _GroupListState extends State<GroupList> {
                                 // 不存在action name，就是exercise name就好
                                 title: Text(
                                   "第${index + 1}天 - ${groupItem.groupName}",
+                                  style: TextStyle(fontSize: 20.sp),
                                 ),
                                 subtitle: Text(
                                   "${groupItem.groupLevel}- 共${gwaItem.actionDetailList.length}个动作",
@@ -246,9 +263,11 @@ class _GroupListState extends State<GroupList> {
                                     });
                                   }
                                 },
+                                // trailing 是有高度上限的56好像是
                                 trailing: _isEditing
                                     ? SizedBox(
-                                        width: 70.sp,
+                                        width: 80.sp,
+                                        height: 100,
                                         child: Row(
                                           children: [
                                             const Expanded(child: Text("图片")),
@@ -261,8 +280,14 @@ class _GroupListState extends State<GroupList> {
                                         ),
                                       )
                                     : SizedBox(
-                                        width: 70.sp,
-                                        child: const Text("这是图片"),
+                                        width: 80.sp,
+                                        height: 100,
+                                        // 跟练状态和上次运动时间？---如果点击时是修改状态，不做任何操作（修改group的基本信息在group模块点击省略号的时候去做
+                                        child: Text(
+                                          "跟练状态和上次运动时间？",
+                                          style: TextStyle(fontSize: 12.sp),
+                                        ),
+                                        // ？？？融合训练记录，展示上次运动时间和跟练过多少次？？？
                                       ),
                               ),
                             ],

@@ -25,8 +25,10 @@ class TrainingWorkouts extends StatefulWidget {
 
 class _TrainingWorkoutsState extends State<TrainingWorkouts> {
   final DBTrainingHelper _dbHelper = DBTrainingHelper();
-
+  // 查询表单的key
   final _queryFormKey = GlobalKey<FormBuilderState>();
+  // 新增表单的key
+  final _groupFormKey = GlobalKey<FormBuilderState>();
 
   // 展示训练列表(训练列表一次性查询所有，应该不会太多)
   List<GroupWithActions> groupList = [];
@@ -35,8 +37,6 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
   Map<String, dynamic> conditionMap = {};
 
   bool isLoading = false;
-
-  final _groupFormKey = GlobalKey<FormBuilderState>();
 
   bool isPlanAddGroup = false;
 
@@ -102,16 +102,22 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
             ],
           ),
         ),
-        actions: [
-          /// 新增训练组基本信息
-          IconButton(
-            icon: Icon(Icons.add, size: 30.sp),
-            style: ButtonStyle(
-              foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-            ),
-            onPressed: _modifyGroupInfo,
-          ),
-        ],
+
+        // 2023-11-23 如果是计划新增训练跳转来的,则不允许修改已有的训练或者新增训练，还是严格各自模块去完成各自的内容。
+        // 如果说需要计划新增训练时可以再新增训练或者修改指定训练，则不做下面这个限制
+        actions: isPlanAddGroup
+            ? null
+            : [
+                /// 新增训练组基本信息
+                IconButton(
+                  icon: Icon(Icons.add, size: 30.sp),
+                  style: ButtonStyle(
+                    foregroundColor:
+                        MaterialStateProperty.all<Color>(Colors.white),
+                  ),
+                  onPressed: _modifyGroupInfo,
+                ),
+              ],
       ),
       body: Column(
         children: [
@@ -159,6 +165,8 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                           conditionMap = {};
                           getGroupList();
                         });
+                        // 如果有键盘就收起键盘
+                        FocusScope.of(context).focusedChild?.unfocus();
                       },
                       child: Text(
                         "重置",
@@ -172,6 +180,19 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   Text(
+                    "分类",
+                    style: TextStyle(fontSize: 14.sp, color: Colors.black),
+                  ),
+                  Flexible(
+                    child: cusFormBuilerDropdown(
+                      "group_category",
+                      groupCategoryOptions,
+                      hintText: "选择分类",
+                      hintStyle: TextStyle(fontSize: 14.sp),
+                      optionFontSize: 14,
+                    ),
+                  ),
+                  Text(
                     "难度",
                     style: TextStyle(fontSize: 14.sp, color: Colors.black),
                   ),
@@ -184,19 +205,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                       optionFontSize: 14,
                     ),
                   ),
-                  Text(
-                    "类型",
-                    style: TextStyle(fontSize: 14.sp, color: Colors.black),
-                  ),
-                  Flexible(
-                    child: cusFormBuilerDropdown(
-                      "group_category",
-                      mechanicOptions,
-                      hintText: "选择类别",
-                      hintStyle: TextStyle(fontSize: 14.sp),
-                      optionFontSize: 14,
-                    ),
-                  ),
+
                   // SizedBox(
                   //   width: 30.sp,
                   //   child: IconButton(
@@ -225,6 +234,8 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                         getGroupList();
                       });
                     }
+                    // 如果有键盘就收起键盘
+                    FocusScope.of(context).focusedChild?.unfocus();
                   },
                 ),
               ),
@@ -254,21 +265,26 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
               ),
             ),
             subtitle: Text(
-                "${groupItem.group.groupCategory}-${groupItem.group.groupLevel}-${groupItem.actionDetailList.length}",
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                )),
-            trailing: SizedBox(
-              width: 30.sp,
-              child: IconButton(
-                icon: Icon(Icons.edit, size: 20.sp, color: Colors.blue),
-                onPressed: () {
-                  print("indexindexindex=$index ${groupItem.group}");
-                  _modifyGroupInfo(groupItem: groupItem.group);
-                },
+              "${groupItem.group.groupCategory}-${groupItem.group.groupLevel}-${groupItem.actionDetailList.length}",
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
               ),
             ),
+            // 2023-11-23 如果是计划新增训练跳转来的,则不允许修改已有的训练或者新增训练，还是严格各自模块去完成各自的内容。
+            // 如果说需要计划新增训练时可以再新增训练或者修改指定训练，则不做下面这个限制
+            trailing: isPlanAddGroup
+                ? null
+                : SizedBox(
+                    width: 30.sp,
+                    child: IconButton(
+                      icon: Icon(Icons.edit, size: 20.sp, color: Colors.blue),
+                      onPressed: () {
+                        print("indexindexindex=$index ${groupItem.group}");
+                        _modifyGroupInfo(groupItem: groupItem.group);
+                      },
+                    ),
+                  ),
             onTap: () {
               // 如果是计划新增训练跳转过来的，点击条目直接带值返回
               // (类型要一致，是GroupWithActions就好)

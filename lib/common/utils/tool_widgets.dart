@@ -87,6 +87,7 @@ Widget cusFormBuilerTextField(
   String? Function(Object?)? validator,
   bool? isOutline = false, // 输入框是否有线条
   bool isReadOnly = false, // 输入框是否有线条
+  TextInputType? keyboardType,
 }) {
   return Padding(
     padding: EdgeInsets.symmetric(horizontal: 10.sp),
@@ -96,6 +97,7 @@ Widget cusFormBuilerTextField(
       maxLines: maxLines,
       readOnly: isReadOnly,
       style: TextStyle(fontSize: valueFontSize),
+      keyboardType: keyboardType,
       decoration: _buildInputDecoration(
         isOutline,
         isReadOnly,

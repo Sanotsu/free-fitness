@@ -11,6 +11,10 @@ import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
 import 'group_list.dart';
 
+///
+/// 2023-11-22 和workout index 基本类似，几乎一模一样
+///
+///
 class TrainingPlans extends StatefulWidget {
   const TrainingPlans({super.key});
 
@@ -20,6 +24,10 @@ class TrainingPlans extends StatefulWidget {
 
 class _TrainingPlansState extends State<TrainingPlans> {
   final DBTrainingHelper _dbHelper = DBTrainingHelper();
+  // plan查询表单的key
+  final _queryFormKey = GlobalKey<FormBuilderState>();
+  // plan新增保单的key
+  final _addFormKey = GlobalKey<FormBuilderState>();
 
   // 展示计划列表(训练列表一次性查询所有，应该不会太多)
   List<PlanWithGroups> planList = [];
@@ -29,28 +37,10 @@ class _TrainingPlansState extends State<TrainingPlans> {
 
   bool isLoading = false;
 
-  final _planFormKey = GlobalKey<FormBuilderState>();
-
   @override
   void initState() {
     super.initState();
-
-    print("conditionMap.isEmpty---${conditionMap.isEmpty}");
-
-    setState(() {});
     getPlanList();
-  }
-
-  // 把预设的基础活动选项列表转化为 FormBuilderDropdown 支持的列表
-  // ？？？这个函数到处都在用，要么改改常量列表，要么改改这个函数复用
-  _genItems(List<CusLabel> options) {
-    return options
-        .map((option) => DropdownMenuItem(
-              alignment: AlignmentDirectional.centerStart,
-              value: option.value,
-              child: Text(option.cnLabel),
-            ))
-        .toList();
   }
 
   // 查询已有的训练
@@ -68,8 +58,11 @@ class _TrainingPlansState extends State<TrainingPlans> {
     if (conditionMap.isEmpty) {
       temp = await _dbHelper.searchPlanWithGroups();
     } else {
-      // TODO 处理条件，使用条件查询
-      temp = await _dbHelper.searchPlanWithGroups();
+      temp = await _dbHelper.searchPlanWithGroups(
+        planName: conditionMap["plan_name"],
+        planCategory: conditionMap["plan_category"],
+        planLevel: conditionMap["plan_level"],
+      );
     }
 
     print("getPlanList---$temp");
@@ -88,220 +81,352 @@ class _TrainingPlansState extends State<TrainingPlans> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TrainingPlans'),
+        title: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(text: '周期计划    ', style: TextStyle(fontSize: 20.sp)),
+              TextSpan(
+                text: "共 ${planList.length} 个",
+                style: TextStyle(fontSize: 12.sp),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          /// 新增训练组基本信息
+          IconButton(
+            icon: Icon(Icons.add, size: 30.sp),
+            style: ButtonStyle(
+              foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+            ),
+            onPressed: _modifyPlanInfo,
+          ),
+        ],
       ),
-      body: isLoading
-          ? buildLoader(isLoading)
-          : Column(
-              children: [
-                const Center(
-                  child: Text(
-                    'TrainingWorkouts index，这里是已存在的训练计划列表（不多的话一次性展示所有，多的话还是分页。现在先直接展示所有）',
+      body: Column(
+        children: [
+          _buildQueryArea(),
+          isLoading
+              ? buildLoader(isLoading)
+              : Expanded(child: _buildPlanList()),
+        ],
+      ),
+    );
+  }
+
+  // 条件查询区域
+  _buildQueryArea() {
+    return FormBuilder(
+      key: _queryFormKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Card(
+            elevation: 5.sp,
+            child: ListTile(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "名称",
+                    style: TextStyle(fontSize: 14.sp, color: Colors.black),
                   ),
-                ),
-                Card(
-                  elevation: 10,
-                  child: SizedBox(
-                    height: 50.sp,
-                    child: const Center(
+                  Flexible(
+                    child: cusFormBuilerTextField(
+                      "plan_name",
+                      hintText: "输入名称",
+                      hintStyle: TextStyle(fontSize: 14.sp),
+                      valueFontSize: 14.sp,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 40.sp,
+                    height: 36,
+                    child: TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _queryFormKey.currentState?.reset();
+                          conditionMap = {};
+                          getPlanList();
+                        });
+                        // 如果有键盘就收起键盘
+                        FocusScope.of(context).focusedChild?.unfocus();
+                      },
                       child: Text(
-                        '这里预留【计划】的条件查询位置，名称关键字、难度、级别 ',
+                        "重置",
+                        style: TextStyle(fontSize: 12.sp, color: Colors.blue),
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: planList.length,
-                    itemBuilder: (context, index) {
-                      final planItem = planList[index];
-
-                      return Card(
-                        elevation: 5.sp,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            ListTile(
-                              leading: Icon(Icons.alarm_on, size: 36.sp),
-                              title: Text(
-                                planItem.plan.planName,
-                                style: TextStyle(
-                                  fontSize: 24.sp,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              subtitle: Text(
-                                  "${planItem.plan.planCategory}-${planItem.plan.planLevel}-${planItem.groupDetailList.length}",
-                                  style: TextStyle(
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.w500,
-                                  )),
-                              trailing: const Icon(Icons.more_vert),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => GroupList(
-                                      planItem: planItem.plan,
-                                    ),
-                                  ),
-                                ).then((value) {
-                                  print("GroupList list 返回的数据 $value");
-                                  // ？？？暂时返回这个页面时都重新加载最新的训练列表数据
-
-                                  setState(() {
-                                    getPlanList();
-                                  });
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                ],
+              ),
+              subtitle: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    "分类",
+                    style: TextStyle(fontSize: 14.sp, color: Colors.black),
                   ),
-                ),
-              ],
-            ),
-      // 悬浮按钮
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // 点击新增，简单弹窗用户输入训练计划名称
-
-          // _dbHelper.deleteDb();
-          // return;
-
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('新建计划'),
-                content: FormBuilder(
-                  key: _planFormKey,
-                  autovalidateMode: AutovalidateMode.always,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: <Widget>[
-                        FormBuilderTextField(
-                          name: 'plan_name',
-                          decoration: const InputDecoration(labelText: '名称'),
-                          validator: FormBuilderValidators.required(),
-                        ),
-                        FormBuilderTextField(
-                          name: 'plan_code',
-                          decoration: const InputDecoration(labelText: '代号'),
-                          validator: FormBuilderValidators.required(),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Flexible(
-                              child: FormBuilderDropdown<String>(
-                                name: 'plan_category',
-                                decoration: const InputDecoration(
-                                  labelText: '*计划分类',
-                                  hintText: '选择分类',
-                                ),
-                                validator: FormBuilderValidators.compose([
-                                  FormBuilderValidators.required(
-                                      errorText: '分类不可为空')
-                                ]),
-                                items: _genItems(levelOptions),
-                                valueTransformer: (val) => val?.toString(),
-                              ),
-                            ),
-                            Flexible(
-                              child: FormBuilderDropdown<String>(
-                                name: 'plan_level',
-                                decoration: const InputDecoration(
-                                  labelText: '*难度',
-                                  hintText: '选择难度',
-                                ),
-                                validator: FormBuilderValidators.compose([
-                                  FormBuilderValidators.required(
-                                      errorText: '难度不可为空')
-                                ]),
-                                items: _genItems(categoryOptions),
-                                valueTransformer: (val) => val?.toString(),
-                              ),
-                            ),
-                          ],
-                        ),
-                        FormBuilderTextField(
-                          name: 'plan_period',
-                          decoration: const InputDecoration(labelText: '训练周期'),
-                          validator: FormBuilderValidators.required(),
-                        ),
-                        FormBuilderTextField(
-                          name: 'description',
-                          decoration: const InputDecoration(labelText: '概述'),
-                          validator: FormBuilderValidators.required(),
-                        ),
-                      ],
+                  Flexible(
+                    child: cusFormBuilerDropdown(
+                      "plan_category",
+                      categoryOptions,
+                      hintText: "选择分类",
+                      hintStyle: TextStyle(fontSize: 14.sp),
+                      optionFontSize: 14,
                     ),
                   ),
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    child: const Text('取消'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+                  Text(
+                    "难度",
+                    style: TextStyle(fontSize: 14.sp, color: Colors.black),
                   ),
-                  ElevatedButton(
-                    child: const Text('确认'),
-                    onPressed: () async {
-                      if (_planFormKey.currentState!.saveAndValidate()) {
-                        // 获取表单数值
-                        Map<String, dynamic> formData =
-                            _planFormKey.currentState!.value;
-                        // 处理数据提交逻辑
-                        print(formData);
-
-                        // 对周期进行类型转换
-                        var planPeriod = int.parse(formData['plan_period']);
-                        // 再放回去
-                        // 深拷贝表单数据的Map，修改拷贝后的(原始的那个好像是不可修改的，会报错)
-                        var copiedFormData =
-                            Map<String, dynamic>.from(formData);
-                        copiedFormData["plan_period"] = planPeriod;
-
-                        var temp = TrainingPlan.fromMap(copiedFormData);
-
-                        // ？？？这里应该验证是否新增成功
-                        var planId = await _dbHelper.insertTrainingPlan(temp);
-                        temp.planId = planId;
-
-                        if (!mounted) return;
-                        Navigator.of(context).pop();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => GroupList(
-                              planItem: temp,
-                            ),
-                          ),
-                        ).then((value) {
-                          print("新增计划，push到group list然后 返回的数据 $value");
-                          // ？？？暂时返回这个页面时都重新加载最新的计划列表数据
-
-                          setState(() {
-                            getPlanList();
-                          });
-                        });
-                      }
-                    },
+                  Flexible(
+                    child: cusFormBuilerDropdown(
+                      "plan_level",
+                      levelOptions,
+                      hintText: "选择难度",
+                      hintStyle: TextStyle(fontSize: 14.sp),
+                      optionFontSize: 14,
+                    ),
                   ),
                 ],
-              );
-            },
-          );
-        },
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.add),
+              ),
+              dense: true,
+              trailing: Container(
+                width: 24.sp,
+                alignment: Alignment.center,
+                child: IconButton(
+                  icon: const Icon(Icons.search, color: Colors.blue),
+                  onPressed: () {
+                    if (_queryFormKey.currentState!.saveAndValidate()) {
+                      setState(() {
+                        conditionMap = _queryFormKey.currentState!.value;
+                        getPlanList();
+                      });
+                    }
+                    FocusScope.of(context).focusedChild?.unfocus();
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
-      // 悬浮按钮位置
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    );
+  }
+
+  // 数据列表区域
+  _buildPlanList() {
+    return ListView.builder(
+      itemCount: planList.length,
+      itemBuilder: (context, index) {
+        final planItem = planList[index];
+
+        return Card(
+          elevation: 5.sp,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.alarm_on, size: 36.sp),
+                title: Text(
+                  planItem.plan.planName,
+                  style: TextStyle(
+                    fontSize: 24.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                    "${planItem.plan.planCategory}-${planItem.plan.planLevel}-${planItem.groupDetailList.length}",
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w500,
+                    )),
+                trailing: SizedBox(
+                  width: 30.sp,
+                  child: IconButton(
+                    icon: Icon(Icons.edit, size: 20.sp, color: Colors.blue),
+                    onPressed: () {
+                      print("indexindexinde--------x=$index ${planItem.plan}");
+                      _modifyPlanInfo(planItem: planItem.plan);
+                    },
+                  ),
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GroupList(
+                        planItem: planItem.plan,
+                      ),
+                    ),
+                  ).then((value) {
+                    setState(() {
+                      getPlanList();
+                    });
+                  });
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // 修改计划基本信息的弹窗
+  // ？？？这和训练的基本信息修改也一样，但弹窗的宽度可以想办法在自定义下
+  _modifyPlanInfo({TrainingPlan? planItem}) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("${planItem != null ? '修改' : '新建'}计划"),
+          content: FormBuilder(
+            key: _addFormKey,
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  cusFormBuilerTextField(
+                    "plan_name",
+                    labelText: '*名称',
+                    hintText: "输入名称",
+                    hintStyle: TextStyle(fontSize: 14.sp),
+                    initialValue: planItem?.planName,
+                    validator: FormBuilderValidators.compose(
+                        [FormBuilderValidators.required(errorText: '名称不可为空')]),
+                  ),
+                  cusFormBuilerTextField(
+                    "plan_code",
+                    labelText: '*代号',
+                    hintText: "输入代号",
+                    hintStyle: TextStyle(fontSize: 14.sp),
+                    initialValue: planItem?.planCode,
+                    validator: FormBuilderValidators.compose(
+                        [FormBuilderValidators.required(errorText: '代号不可为空')]),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Flexible(
+                        child: cusFormBuilerDropdown(
+                          "plan_category",
+                          categoryOptions,
+                          labelText: '*分类',
+                          initialValue: planItem?.planCategory,
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(errorText: '分类不可为空')
+                          ]),
+                        ),
+                      ),
+                      Flexible(
+                        child: cusFormBuilerDropdown(
+                          "plan_level",
+                          levelOptions,
+                          labelText: '*级别',
+                          initialValue: planItem?.planLevel,
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(errorText: '级别不可为空')
+                          ]),
+                        ),
+                      ),
+                    ],
+                  ),
+                  cusFormBuilerTextField(
+                    "plan_period",
+                    labelText: '*训练周期',
+                    initialValue: planItem?.planPeriod.toString(),
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(errorText: '训练周期不可为空'),
+                      // FormBuilderValidators.numeric(),
+                    ]),
+                    keyboardType: TextInputType.number,
+                  ),
+                  cusFormBuilerTextField(
+                    "description",
+                    labelText: '*概述',
+                    initialValue: planItem?.description,
+                    maxLines: 3,
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(errorText: '概述不可为空'),
+                    ]),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('取消'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('确认'),
+              onPressed: () async {
+                if (_addFormKey.currentState!.saveAndValidate()) {
+                  // 获取表单数值
+                  Map<String, dynamic> formData =
+                      _addFormKey.currentState!.value;
+                  // 处理数据提交逻辑
+                  print(formData);
+
+                  // 对周期进行类型转换
+                  var planPeriod = int.parse(formData['plan_period']);
+                  // 再放回去
+                  // 深拷贝表单数据的Map，修改拷贝后的(原始的那个好像是不可修改的，会报错)
+                  var copiedFormData = Map<String, dynamic>.from(formData);
+                  copiedFormData["plan_period"] = planPeriod;
+
+                  var temp = TrainingPlan.fromMap(copiedFormData);
+
+                  // 如果是新增
+                  if (planItem == null) {
+                    // ？？？这里应该验证是否新增成功
+                    var planId = await _dbHelper.insertTrainingPlan(temp);
+                    temp.planId = planId;
+
+                    if (!mounted) return;
+                    Navigator.of(context).pop();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GroupList(
+                          planItem: temp,
+                        ),
+                      ),
+                    ).then((value) {
+                      print("新增计划，push到group list然后 返回的数据 $value");
+                      // ？？？暂时返回这个页面时都重新加载最新的计划列表数据
+
+                      setState(() {
+                        getPlanList();
+                      });
+                    });
+                  } else {
+                    // 如果是修改
+                    // ？？？这里应该验证是否修成功
+                    temp.planId = planItem.planId!;
+                    await _dbHelper.updateTrainingPlanById(
+                      planItem.planId!,
+                      temp,
+                    );
+
+                    // 如果是修改就返回训练组列表，而不是进入动作列表
+                    if (!mounted) return;
+                    Navigator.of(context).pop();
+                    setState(() {
+                      getPlanList();
+                    });
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
