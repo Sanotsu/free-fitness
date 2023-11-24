@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../common/utils/db_diary_helper.dart';
 import '../../common/utils/db_dietary_helper.dart';
 import '../../common/utils/db_training_helper.dart';
 import 'test_funcs.dart';
@@ -17,6 +18,7 @@ class UserCenter extends StatefulWidget {
 class _UserCenterState extends State<UserCenter> {
   final DBTrainingHelper _trainingHelper = DBTrainingHelper();
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
+  final DBDiaryHelper _diaryHelper = DBDiaryHelper();
 
   Future<void> _showSimpleDialog(BuildContext context, String msg) async {
     return showDialog<void>(
@@ -66,6 +68,13 @@ class _UserCenterState extends State<UserCenter> {
               child: const Text("delete training db"),
             ),
             TextButton(
+              onPressed: () {
+                _diaryHelper.deleteDB();
+                _showSimpleDialog(context, "已删除 diary db");
+              },
+              child: const Text("delete diary db"),
+            ),
+            TextButton(
               // onPressed: () async {
               //   await insertOneDietaryUser();
               //   if (!mounted) return;
@@ -101,6 +110,14 @@ class _UserCenterState extends State<UserCenter> {
                 _showSimpleDialog(context, "已新增【训练】模块示例");
               },
               child: const Text("新增训练模块示例"),
+            ),
+            TextButton(
+              onPressed: () async {
+                await insertOneQuillDemo();
+                if (!mounted) return;
+                _showSimpleDialog(context, "已新增一篇【手记】示例");
+              },
+              child: const Text("新增一篇手记"),
             ),
             ListView.builder(
               // 解决 NEEDS-PAINT ……的问题

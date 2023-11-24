@@ -184,7 +184,12 @@ tobed: 目标卡路里折线图是实际摄入的条状图放到一起？
   - 2023-11-23 已处理
 
 - 2023-11-23
+
   - 完成手记用富文本组件进行新增、编辑、预览的初版。
+
+- 2023-11-24
+  - 添加了手记日历，基本完成整个'手记'模块的初始功能。
+  - 同时添加了插入随机手记的测试数据。
 
 ### 问题记录
 
@@ -261,3 +266,11 @@ MaterialApp(
 6. 【unsolved】2023-11-22 不知道什么原因，使用 formbuilder 构建文本输入框，一定是安全键盘，无法切换。即便手动设置`keyboardType: TextInputType.text,`也不行。原因不明
 
 但是使用自带的 TextField 就不会有这个问题
+
+7. Chip 部件的默认高度
+
+对于 chip 也有设置默认 MaterialTapTargetSize.padded, 也就是说 chip 有个最小高度 48px。
+
+所以为了缩小尺寸，可以修改为 MaterialTapTargetSize.shrinkWrap ,这将移除额外的空间。
+
+参看：https://stackoverflow.com/questions/51440984/how-to-adjust-the-size-of-a-chip-in-flutter.

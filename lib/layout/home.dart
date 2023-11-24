@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../views/diary/index.dart';
+import '../views/diary/index_table_calendar.dart';
 import '../views/dietary/index.dart';
 import '../views/me/index.dart';
 import '../views/training/index.dart';
@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> {
   static const List<Widget> _widgetOptions = <Widget>[
     Training(),
     Dietary(),
-    DiaryIndex(),
+    DiaryTableCalendar(),
     UserCenter()
   ];
 

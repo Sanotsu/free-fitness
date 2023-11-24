@@ -9,6 +9,7 @@ import '../../common/utils/tool_widgets.dart';
 import '../../models/diary_state.dart';
 
 import 'diary_modify_rich_text.dart';
+import 'index_table_calendar.dart';
 
 class DiaryIndex extends StatefulWidget {
   const DiaryIndex({super.key});
@@ -140,6 +141,23 @@ class _DiaryIndexState extends State<DiaryIndex> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.min,
               children: [
+                Expanded(
+                  flex: 1,
+                  child: SizedBox(
+                    height: 100.sp,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const DiaryTableCalendar(),
+                          ),
+                        );
+                      },
+                      child: const Text("日历手记"),
+                    ),
+                  ),
+                ),
                 Expanded(
                   flex: 1,
                   child: SizedBox(

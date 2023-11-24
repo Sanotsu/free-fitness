@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:intl/intl.dart';
@@ -8,11 +9,15 @@ import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../common/utils/tools.dart';
 import '../../../../models/dietary_state.dart';
 import '../../common/global/constants.dart';
+import '../../common/utils/db_diary_helper.dart';
 import '../../common/utils/db_training_helper.dart';
+import '../../models/diary_state.dart';
 import '../../models/training_state.dart';
+import 'quill_samples.dart';
 
 final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
 final DBTrainingHelper _trainingHelper = DBTrainingHelper();
+final DBDiaryHelper _diaryHelper = DBDiaryHelper();
 
 ///
 /// ---------- 饮食模块相关--------------
@@ -370,4 +375,58 @@ insertOneDietaryUser() async {
   );
   await _dietaryHelper.insertDietaryUserList([newItem]);
   print("【【【 插入测试数据 end-->:insertOneDietaryUser ");
+}
+
+// 插入一个固定内容随机题目的手记
+insertOneQuillDemo() async {
+  print("【【【 插入测试数据 start-->:insertOneQuillDemo ");
+
+  var quillList = [
+    quillDefaultSample,
+    quillTextSample,
+    quillVideosSample,
+    quillImagesSample,
+    quillTextSample2,
+  ];
+
+  String jsonString = json.encode(
+    quillList[Random().nextInt(quillList.length)],
+  );
+
+  print("富文本的内容 jsonString---------$jsonString");
+
+  // 生成一个随机数来获取分类列表
+  var tempNum = Random().nextInt(5);
+  var tempCates = [];
+  for (var i = 0; i < tempNum; i++) {
+    tempCates.add(
+      diaryCategoryList[Random().nextInt(diaryCategoryList.length)].cnLabel,
+    );
+  }
+
+  // 生成一个随机数来获取标签列表
+  var tempNum2 = Random().nextInt(8);
+  var tempTags = [];
+  for (var i = 0; i < tempNum2; i++) {
+    tempTags.add(generateRandomString(5, 10));
+  }
+
+  // 随机插入的手记在今天往前10天的随机一天中
+  var dates = getAdjacentDatesInRange(10);
+
+  var tempDiary = Diary(
+    date: dates[Random().nextInt(dates.length)],
+    title: "【测试】${generateRandomString(5, 10)}",
+    content: jsonString,
+    tags: tempTags.join(","),
+    category: tempCates.join(","),
+    mood: diaryMoodList[Random().nextInt(diaryMoodList.length)].cnLabel,
+    userId: 1, // ？？？实际用户的编号
+    gmtCreate: getCurrentDateTime(),
+  );
+
+  // ？？？这里应该有错误检查
+  var newDiaryId = await _diaryHelper.insertDiary(tempDiary);
+
+  print("【【【 插入测试数据 end-->:insertOneQuillDemo  newDiaryId: $newDiaryId");
 }

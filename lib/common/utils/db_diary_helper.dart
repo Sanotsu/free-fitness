@@ -156,4 +156,42 @@ class DBDiaryHelper {
       rethrow;
     }
   }
+
+  // 按日期范围查询(查询某一天也要起止为同一个即可)，查询所有
+  Future<List<Diary>> queryDiaryByDateRange({
+    String? startDate,
+    String? endDate,
+  }) async {
+    Database db = await database;
+
+    final where = <String>[];
+    final whereArgs = <dynamic>[];
+
+    if (startDate != null) {
+      where.add('date >= ?');
+      whereArgs.add(startDate);
+    }
+
+    if (endDate != null) {
+      where.add('date <= ?');
+      whereArgs.add(endDate);
+    }
+
+    try {
+      // 查询指定关键字当前页的数据
+      List<Map<String, dynamic>> maps = await db.query(
+        DiaryDdl.tableNameOfDiary,
+        where: where.isNotEmpty ? where.join(' AND ') : null,
+        whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
+      );
+      final list = maps.map((row) => Diary.fromMap(row)).toList();
+
+      // 查询每页指定数量的数据，但带上总条数
+      return list;
+    } catch (e) {
+      print('Error at queryDiaryByDateRange: $e');
+      // ？？？抛出异常来触发回滚的方式是 sqflite 中常用的做法
+      rethrow;
+    }
+  }
 }

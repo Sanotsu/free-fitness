@@ -233,3 +233,40 @@ commonExceptionDialog(BuildContext context, String title, String message) {
     },
   );
 }
+
+buildSmallChip(
+  String labelText, {
+  Color? bgColor,
+  double? labelTextSize,
+}) {
+  return Chip(
+    label: Text(labelText),
+    backgroundColor: bgColor,
+    labelStyle: TextStyle(fontSize: labelTextSize),
+    labelPadding: EdgeInsets.zero,
+    // 设置负数会报错，但好像看到有点效果呢
+    // labelPadding: EdgeInsets.fromLTRB(0, -6.sp, 0, -6.sp),
+    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  );
+}
+
+// 用一个按钮假装是一个标签，用来展示
+buildSmallButtonTag(
+  String labelText, {
+  Color? bgColor,
+  double? labelTextSize,
+}) {
+  return RawMaterialButton(
+    onPressed: () {},
+    constraints: const BoxConstraints(),
+    padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10.0),
+    ),
+    fillColor: bgColor ?? Colors.grey[300],
+    child: Text(
+      labelText,
+      style: TextStyle(fontSize: labelTextSize ?? 12.sp),
+    ),
+  );
+}

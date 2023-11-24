@@ -99,3 +99,13 @@ String formatDoubleToString(double number, {length = 6}) {
       ? number.toStringAsFixed(0)
       : numberString;
 }
+
+/// Returns a list of [DateTime] objects from [first] to [last], inclusive.
+/// 返回从[第一个]到[最后一个]（包括首尾两个）的[DateTime]对象列表。
+List<DateTime> daysInRange(DateTime first, DateTime last) {
+  final dayCount = last.difference(first).inDays + 1;
+  return List.generate(
+    dayCount,
+    (index) => DateTime.utc(first.year, first.month, first.day + index),
+  );
+}
