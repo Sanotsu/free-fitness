@@ -274,3 +274,9 @@ MaterialApp(
 所以为了缩小尺寸，可以修改为 MaterialTapTargetSize.shrinkWrap ,这将移除额外的空间。
 
 参看：https://stackoverflow.com/questions/51440984/how-to-adjust-the-size-of-a-chip-in-flutter.
+
+8. 【unsolved】2023-11-25 一个很严重的 bug：在手记修改页面，标题或者标签的文本输入框中是编辑状态，打开了键盘，点击收起键盘之后，又会立马聚焦到输入框，然后弹出键盘，重复收起又弹窗很多次键盘后，才会不自动聚焦到输入框。
+
+同样，只要点击了这两个输入框进行文本修改，再点击 rich text 修改正文也无法聚焦，要重复点击多次，鼠标跳过去了，但完成 rich text 编辑收起键盘，还是会聚焦到标题或者标签的文本输入框去，然后弹出键盘。再点击收起又弹出多次，才失去焦点。
+
+文本输入框换成 Formbuilder 的也一样，**原因不知**。

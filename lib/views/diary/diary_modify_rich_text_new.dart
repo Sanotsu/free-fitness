@@ -20,19 +20,21 @@ import '../../common/utils/tools.dart';
 /// ？？？quill还是不太会用。
 /// ？？？title和content默认为空字符串，依旧可以保存。如果一直保存，则很多空日记。
 ///
+/// 2023-11-25 好像文本输入框和富文本输入框无法共存，只要聚焦了文本输入框，
+/// 即便点击了收起键盘，还是会自动聚焦，弹窗键盘
 ///
 ///
-class DiaryModifyRichText extends StatefulWidget {
+class NewDiaryModifyRichText extends StatefulWidget {
   // 传入的手记数据(修改或预览时会传，新增时不会)
   final Diary? diaryItem;
 
-  const DiaryModifyRichText({super.key, this.diaryItem});
+  const NewDiaryModifyRichText({super.key, this.diaryItem});
 
   @override
-  State<DiaryModifyRichText> createState() => _DiaryModifyRichTextState();
+  State<NewDiaryModifyRichText> createState() => _NewDiaryModifyRichTextState();
 }
 
-class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
+class _NewDiaryModifyRichTextState extends State<NewDiaryModifyRichText> {
   final DBDiaryHelper _dbHelper = DBDiaryHelper();
 
   final QuillController _controller = QuillController.basic();
@@ -60,6 +62,9 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
 
   // 富文本编辑框上面的工具栏是否展开
   bool isQuillToolbarExpanded = false;
+
+  // 标题编辑框上面的工具栏是否展开
+  bool istTitleExpanded = true;
 
   @override
   void initState() {
@@ -258,14 +263,41 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
           ],
         ),
         body: SingleChildScrollView(
-          child: Column(
-            children: [
-              buildTitleArea(),
-              ...buildTagsArea(),
-              buildRichTextArea(),
-            ],
+          child: GestureDetector(
+            onTap: () {
+              FocusScope.of(context).unfocus();
+            },
+            child: Column(
+              children: [
+                _buildTitleAndTags(),
+                buildRichTextArea(),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  _buildTitleAndTags() {
+    return Card(
+      elevation: 3,
+      child: ExpansionTile(
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: EdgeInsets.zero,
+        // title: const Text("展示标题"),
+        title: buildTitleArea(),
+        backgroundColor: Colors.white,
+        initiallyExpanded: istTitleExpanded, // 是否默认展开
+        onExpansionChanged: (isExpanded) {
+          setState(() {
+            istTitleExpanded = isExpanded;
+          });
+        },
+        children: <Widget>[
+          // buildTitleArea(),
+          ...buildTagsArea(),
+        ],
       ),
     );
   }
@@ -279,7 +311,8 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           // 当处于编辑时才显示标签
-          if (isEditing)
+          // 后面这个不折叠才显示，是临时解决点击了收起键盘后还是会重新聚焦输入框而又弹出键盘的问题
+          if (isEditing && istTitleExpanded)
             const Expanded(
               flex: 1,
               child: Center(
@@ -293,11 +326,14 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             flex: 5,
             child: TextField(
               controller: _titleTextController,
-              readOnly: !isEditing,
+              // 后面这个折叠收起来让它只读，是临时解决点击了收起键盘后还是会重新聚焦输入框而又弹出键盘的问题
+              readOnly: !isEditing || (isEditing && !istTitleExpanded),
+              // readOnly: !isEditing,
+              maxLines: 2,
               // 预览时居中，编辑时靠左
               textAlign: isEditing ? TextAlign.start : TextAlign.center,
               decoration: InputDecoration(
-                hintText: '  一句话也好，哪怕想写的不多。',
+                hintText: ' 一句话标题也好，哪怕想写的不多^~^',
                 contentPadding: EdgeInsets.symmetric(vertical: 2.sp),
                 // 预览时不显示边框
                 border: isEditing
@@ -320,28 +356,9 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
 
   // 预览时显示各个标签
   buildTagsArea() {
-    /* 标签、心情、分类统一样式显示
-   var showTags = [...initTags, ...initCategorys, initMood];
-
-    return [
-      if (isEditing) Card(elevation: 3, child: buildTagSelectExpansionTile()),
-      if (!isEditing)
-        Wrap(
-          children: showTags.map((tag) {
-            return Chip(
-              label: Text(tag.toString()),
-              labelStyle: TextStyle(fontSize: 12.sp),
-              padding: EdgeInsets.zero,
-              // labelPadding: EdgeInsets.zero,
-            );
-          }).toList(),
-        ),
-    ];
-    */
-
     // 标签、心情、分类不同样式显示
     return [
-      if (isEditing) Card(elevation: 3, child: buildTagSelectExpansionTile()),
+      if (isEditing) ...buildTagSelectArea(),
       if (!isEditing)
         // 这个更小
         Wrap(
@@ -368,83 +385,41 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             ),
           ],
         ),
-
-      // 原始的
-      // Wrap(
-      //   spacing: 5,
-      //   // runSpacing: 5,
-      //   children: [
-      //     ...initTags.map((tag) {
-      //       return Chip(
-      //         label: Text(tag),
-      //         backgroundColor: Colors.lightGreen,
-      //         labelStyle: TextStyle(fontSize: 12.sp),
-      //         // padding: EdgeInsets.zero,
-      //         labelPadding: EdgeInsets.zero,
-      //       );
-      //     }).toList(),
-      //     ...initCategorys.map((tag) {
-      //       return Chip(
-      //         label: Text(tag as String),
-      //         backgroundColor: Colors.limeAccent,
-      //         labelStyle: TextStyle(fontSize: 12.sp),
-      //         labelPadding: EdgeInsets.zero,
-      //       );
-      //     }).toList(),
-      //     Chip(
-      //       label: Text(initMood),
-      //       backgroundColor: Colors.lightBlue,
-      //       labelStyle: TextStyle(fontSize: 12.sp),
-      //       labelPadding: EdgeInsets.zero,
-      //     ),
-      //   ],
-      // ),
     ];
   }
 
-  // 编辑时折叠展开各个标签分类选择
-  buildTagSelectExpansionTile() {
-    return ExpansionTile(
-      title: const Text('展开选择心情、分类和标签'),
-      leading: const Icon(Icons.tag, color: Colors.green),
-      backgroundColor: Colors.white,
-      initiallyExpanded: false, // 是否默认展开
-      children: <Widget>[
-        // 这个只能单选，表现类似 radio
-        _buildSingleSelectRow(
-          "心情",
-          "mood",
-          _moodChipOptions(),
-          initialValue: initMood,
-          onChanged: (value) {
-            print("_buildSingleSelectRow value------------$value");
-            setState(() {
-              initMood = value;
-            });
-          },
-        ),
-        // 这个可以多选，表现类似 checkbox
-        _buildMultiSelectRow(
-          "分类",
-          "category",
-          _categoryChipOptions(),
-          initialValue: initCategorys,
-          onChanged: (value) {
-            print("_buildMultiSelectRow value------------$value");
+  // 编辑时各个标签分类选择
+  buildTagSelectArea() {
+    return [
+      // 这个只能单选，表现类似 radio
+      _buildSingleSelectRow(
+        "心情",
+        "mood",
+        _moodChipOptions(),
+        initialValue: initMood,
+        onChanged: (value) {
+          print("_buildSingleSelectRow value------------$value");
+          setState(() {
+            initMood = value;
+          });
+        },
+      ),
+      // 这个可以多选，表现类似 checkbox
+      _buildMultiSelectRow(
+        "分类",
+        "category",
+        _categoryChipOptions(),
+        initialValue: initCategorys,
+        onChanged: (value) {
+          setState(() {
+            initCategorys = value?.map((v) => v.toString()).toList() ?? [];
+          });
+        },
+      ),
 
-            setState(() {
-              initCategorys = value?.map((v) => v.toString()).toList() ?? [];
-
-              print(
-                  "_buildMultiSelectRow initCategorys------------$initCategorys");
-            });
-          },
-        ),
-
-        // 手动输入标签，逗号和分号自动切分
-        _buildInputTagsArea(),
-      ],
-    );
+      // 手动输入标签，逗号和分号自动切分
+      _buildInputTagsArea(),
+    ];
   }
 
   // 富文本编辑预览区域
@@ -505,9 +480,12 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                   child: QuillEditor.basic(
                     configurations: QuillEditorConfigurations(
                       autoFocus: false,
-                      readOnly: !isEditing,
+                      // 后面这个标题不折叠不让编辑富文本，是临时解决标题输入框点击了收起键盘后还是会重新聚焦输入框而又弹出键盘的问题
+                      // readOnly: !isEditing,
+                      readOnly: !isEditing || (isEditing && istTitleExpanded),
                       scrollable: true,
                       expands: true,
+
                       padding: EdgeInsets.all(5.sp),
                       embedBuilders: FlutterQuillEmbeds.editorBuilders(),
                     ),
@@ -630,6 +608,8 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
           padding: EdgeInsets.all(5.sp),
           child: TextField(
             controller: _tagTextController,
+            // 后面这个折叠收起来让它只读，是临时解决点击了收起键盘后还是会重新聚焦输入框而又弹出键盘的问题
+            readOnly: !isEditing || (isEditing && !istTitleExpanded),
             decoration: InputDecoration(
                 hintText: '  输入标签(输入逗号或分号自动分割)',
                 contentPadding: EdgeInsets.symmetric(vertical: 2.sp),

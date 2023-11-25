@@ -9,7 +9,7 @@ import '../../common/utils/db_diary_helper.dart';
 import '../../common/utils/tool_widgets.dart';
 import '../../common/utils/tools.dart';
 import '../../models/diary_state.dart';
-import 'diary_modify_rich_text.dart';
+import 'diary_modify_rich_text_new.dart';
 import 'index.dart';
 
 /// 默认的日历显示范围，当前月的前后3个月
@@ -166,7 +166,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const DiaryModifyRichText(),
+                  builder: (context) => const NewDiaryModifyRichText(),
                 ),
               );
             },
@@ -288,6 +288,8 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
             children: [
               // Wrap最小高度48吧，调不了
               Wrap(
+                // spacing: 5,
+                alignment: WrapAlignment.spaceAround,
                 children: [
                   ...[
                     buildSmallButtonTag(
@@ -295,25 +297,37 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                       bgColor: Colors.lightBlue,
                       labelTextSize: 10.sp,
                     ),
-                    ...initTags.map((tag) {
-                      return buildSmallButtonTag(
-                        tag,
-                        bgColor: Colors.lightGreen,
-                        labelTextSize: 10.sp,
-                      );
-                    }).toList(),
-                    ...initCategorys.map((tag) {
-                      return buildSmallButtonTag(
-                        tag,
-                        bgColor: Colors.limeAccent,
-                        labelTextSize: 10.sp,
-                      );
-                    }).toList(),
-                  ].sublist(0, chipLength > 3 ? 3 : chipLength),
-                  // 如果标签很多，只显示3个，剩下的用一个数字代替
-                  if (chipLength > 3)
+                    // 如果标签很多，只显示2个，然后整体剩下的用一个数字代替
+                    ...initCategorys
+                        .map((cate) {
+                          return buildSmallButtonTag(
+                            cate,
+                            bgColor: Colors.limeAccent,
+                            labelTextSize: 10.sp,
+                          );
+                        })
+                        .toList()
+                        .sublist(
+                          0,
+                          initCategorys.length > 2 ? 2 : initCategorys.length,
+                        ),
+                    ...initTags
+                        .map((tag) {
+                          return buildSmallButtonTag(
+                            tag,
+                            bgColor: Colors.lightGreen,
+                            labelTextSize: 10.sp,
+                          );
+                        })
+                        .toList()
+                        .sublist(
+                          0,
+                          initTags.length > 2 ? 2 : initTags.length,
+                        ),
+                  ],
+                  if (chipLength > 5)
                     buildSmallButtonTag(
-                      '+${chipLength - 3}',
+                      '+${chipLength - 5}',
                       bgColor: Colors.white,
                       labelTextSize: 10.sp,
                     ),
@@ -325,7 +339,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          DiaryModifyRichText(diaryItem: diary),
+                          NewDiaryModifyRichText(diaryItem: diary),
                     ),
                   );
                 },
