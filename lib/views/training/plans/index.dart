@@ -68,6 +68,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
     print("getPlanList---$temp");
 
     // 设置查询结果
+    if (!mounted) return;
     setState(() {
       // ？？？因为没有分页查询，所有这里直接替换已有的数组
       planList = temp;

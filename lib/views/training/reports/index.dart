@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '_demos/cd_demo2.dart';
+
 class TrainingReports extends StatefulWidget {
   const TrainingReports({super.key});
 
@@ -14,7 +16,21 @@ class _TrainingReportsState extends State<TrainingReports> {
       appBar: AppBar(
         title: const Text('TrainingReports'),
       ),
-      body: const Center(child: Text('TrainingReports index')),
+      body: Column(
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MyHomePage(),
+                ),
+              );
+            },
+            child: const Text("跟练示例"),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -10,6 +10,7 @@ const double oneCalToKjRatio = 4.18400;
 /// 一个封面图或示意图在asset的固定位置
 const String placeholderImageUrl = 'assets/images/no_image.png';
 const String dietaryLogCoverImageUrl = 'assets/covers/dietary-log-cover.jpg';
+const String dietaryNutritionImageUrl = 'assets/covers/dietary-nutrition.jpg';
 const String workoutManImageUrl = 'assets/covers/workout-man.png';
 const String workoutWomanImageUrl = 'assets/covers/workout-woman.png';
 const String workoutCalendarImageUrl =

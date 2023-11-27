@@ -76,6 +76,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
 
     print("getGroupList---$temp");
 
+    if (!mounted) return;
     // 设置查询结果
     setState(() {
       // 因为没有分页查询，所有这里直接替换已有的数组
