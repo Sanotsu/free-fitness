@@ -170,7 +170,10 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                 MaterialPageRoute(
                   builder: (context) => const DiaryModifyRichText(),
                 ),
-              );
+              ).then((value) {
+                // 编辑页面返回后，重新加载手记数据
+                _getEventsForInitDay();
+              });
             },
             label: const Text("添加手记"),
             icon: const Icon(Icons.add),
@@ -343,7 +346,10 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                       builder: (context) =>
                           DiaryModifyRichText(diaryItem: diary),
                     ),
-                  );
+                  ).then((value) {
+                    // 编辑页面返回后，重新加载手记数据
+                    _getEventsForInitDay();
+                  });
                 },
                 title: Text(diary.title),
                 subtitle: Text(

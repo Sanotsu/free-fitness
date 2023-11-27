@@ -301,13 +301,22 @@ class _IndexTimelineState extends State<IndexTimeline> {
                 ),
               ),
               onTap: () {
-                Navigator.of(context).push(
+                Navigator.of(context)
+                    .push(
                   MaterialPageRoute(
                     builder: (BuildContext ctx) => DiaryModifyRichText(
                       diaryItem: diaryItem,
                     ),
                   ),
-                );
+                )
+                    .then((value) {
+                  // 编辑页面返回后，重新加载手记数据
+                  setState(() {
+                    currentPage = 1; // 数据库查询的时候会从0开始offset
+                    pageSize = 10;
+                  });
+                  loadMoreDiary();
+                });
               },
             ),
           );
