@@ -10,7 +10,7 @@ import '../../common/utils/tool_widgets.dart';
 import '../../common/utils/tools.dart';
 import '../../models/diary_state.dart';
 import 'diary_modify_rich_text.dart';
-import 'index.dart';
+import 'index_timeline.dart';
 
 /// 默认的日历显示范围，当前月的前后3个月
 /// ？？？实际手记的日历显示范围的话，就第一个手记的月份，到当前月份即可
@@ -148,17 +148,19 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
       appBar: AppBar(
         title: const Text('手记日历'),
         actions: [
-          ElevatedButton(
+          TextButton(
             onPressed: () {
-              print("保留测试的旧版本主页");
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const DiaryIndex(),
+                  builder: (context) => const IndexTimeline(),
                 ),
               );
             },
-            child: const Text("<old>"),
+            style: ButtonStyle(
+              foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+            ),
+            child: const Text("时间线模式"),
           ),
           TextButton.icon(
             onPressed: () {

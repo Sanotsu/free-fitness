@@ -270,3 +270,36 @@ buildSmallButtonTag(
     ),
   );
 }
+
+// 一般当做标签用，比上面个还小
+// 传入的字体最好不超过10
+buildTinyButtonTag(
+  String labelText, {
+  Color? bgColor,
+  double? labelTextSize,
+}) {
+  return SizedBox(
+    // 传入大于12的字体，修正为12；不传则默认12
+    height: ((labelTextSize != null && labelTextSize > 10.sp)
+            ? 10.sp
+            : labelTextSize ?? 10.sp) +
+        10.sp,
+    child: RawMaterialButton(
+      onPressed: () {},
+      constraints: const BoxConstraints(),
+      padding: EdgeInsets.fromLTRB(4.sp, 2.sp, 4.sp, 2.sp),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.sp),
+      ),
+      fillColor: bgColor ?? Colors.grey[300],
+      child: Text(
+        labelText,
+        style: TextStyle(
+            // 传入大于12的字体，修正为12；不传则默认12
+            fontSize: (labelTextSize != null && labelTextSize > 10.sp)
+                ? 10.sp
+                : labelTextSize ?? 10.sp),
+      ),
+    ),
+  );
+}

@@ -10,6 +10,7 @@ import '../../models/diary_state.dart';
 
 import 'diary_modify_rich_text.dart';
 import 'index_table_calendar.dart';
+import 'index_timeline.dart';
 
 class DiaryIndex extends StatefulWidget {
   const DiaryIndex({super.key});
@@ -173,6 +174,20 @@ class _DiaryIndexState extends State<DiaryIndex> {
                   ),
                 ),
               ],
+            ),
+          ),
+          SizedBox(
+            height: 100.sp,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const IndexTimeline(),
+                  ),
+                );
+              },
+              child: const Text("时间线手记"),
             ),
           ),
           const Text(
