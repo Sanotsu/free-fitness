@@ -9,7 +9,7 @@ import '../../common/utils/db_diary_helper.dart';
 import '../../common/utils/tool_widgets.dart';
 import '../../common/utils/tools.dart';
 import '../../models/diary_state.dart';
-import 'diary_modify_rich_text_new.dart';
+import 'diary_modify_rich_text.dart';
 import 'index.dart';
 
 /// 默认的日历显示范围，当前月的前后3个月
@@ -166,7 +166,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const NewDiaryModifyRichText(),
+                  builder: (context) => const DiaryModifyRichText(),
                 ),
               );
             },
@@ -339,7 +339,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          NewDiaryModifyRichText(diaryItem: diary),
+                          DiaryModifyRichText(diaryItem: diary),
                     ),
                   );
                 },

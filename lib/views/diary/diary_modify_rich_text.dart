@@ -20,8 +20,12 @@ import '../../common/utils/tools.dart';
 /// ？？？quill还是不太会用。
 /// ？？？title和content默认为空字符串，依旧可以保存。如果一直保存，则很多空日记。
 ///
+/// 2023-11-25 好像文本输入框和富文本输入框无法共存，只要聚焦了文本输入框，
+/// 即便点击了收起键盘，还是会自动聚焦，弹窗键盘
 ///
+/// 2023-11-27 修复了文本输入框和富文本输入框聚焦冲突的问题
 ///
+
 class DiaryModifyRichText extends StatefulWidget {
   // 传入的手记数据(修改或预览时会传，新增时不会)
   final Diary? diaryItem;
@@ -35,7 +39,24 @@ class DiaryModifyRichText extends StatefulWidget {
 class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
   final DBDiaryHelper _dbHelper = DBDiaryHelper();
 
+  // 使用formbuilder管理的心情和分类多选表单组件在重置数据时需要表单key
+  final _formKey = GlobalKey<FormBuilderState>();
+
+  // 富文本编辑器的控制器
   final QuillController _controller = QuillController.basic();
+
+  // 页面添加了滚动条
+  final ScrollController _scrollController = ScrollController();
+
+  /// 2023-11-27
+  /// 因为同时存在标题和标签输入框textField、富文本输入框 quillEditor.
+  /// 在我点击了标题或者标签之后，再点击富文本，焦点会重新聚焦到textField而不是quillEditor。
+  /// 为了解决这个问题，给他们三者都添加对应的focusNode，
+  ///     这样，在点击富文本的时候，手动让textField失去聚焦，手动让quillEditor获得焦点，以便正确修改。
+  /// 又因为点击textField时能够正确获取焦点，所以不用手动在点击textField时让quillEditor失去焦点。
+  final quillFocusNode = FocusNode();
+  final tagTextFocusNode = FocusNode();
+  final titleTextFocusNode = FocusNode();
 
   // 手动输入标签的文本框控制器，和存放标签的数组
   final _tagTextController = TextEditingController();
@@ -71,6 +92,14 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
     }
   }
 
+  @override
+  void dispose() {
+    quillFocusNode.dispose();
+    tagTextFocusNode.dispose();
+    titleTextFocusNode.dispose();
+    super.dispose();
+  }
+
   // 除了初始化的时候，如果要重置修改，也可能需要调用这个函数
   // ？？？但修改已经保存过几次，再重置也不会是上次保存的结果了。
   // 所以本次修改不管保存了多少次，点击重置之后都恢复到最初传过来的这个数据，还是查询数据库现存的数据？
@@ -91,6 +120,27 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
 
       isEditing = false;
     });
+  }
+
+  // 新增手记时，在没有保存的情况下点击重置，则不将修改状态改为false，只是清空当前的内容；只有点击返回时才退出当前页面。
+  resetInitData() {
+    // 标签清空
+    _formKey.currentState?.fields['mood']?.didChange("");
+    _formKey.currentState?.fields['category']?.didChange([]);
+    initTags = [];
+    _tagTextController.text = "";
+
+    // 标题清空
+    _titleTextController.text = "";
+    // 富文本正文清空
+    _controller.clear();
+
+    // 输入框的焦点也先全部取消
+    quillFocusNode.unfocus();
+    tagTextFocusNode.unfocus();
+    // titleTextFocusNode.unfocus();
+    // ？？？这样才失去焦点，上面那样还会聚焦？？？
+    FocusScope.of(context).requestFocus(titleTextFocusNode);
   }
 
   _handleSaveButtonClick() async {
@@ -162,6 +212,11 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
         if (didPop) {
           return;
         }
+        // 点击了返回，就先取消所有焦点
+        tagTextFocusNode.unfocus();
+        titleTextFocusNode.unfocus();
+        quillFocusNode.unfocus();
+
         final NavigatorState navigator = Navigator.of(context);
 
         // 如果在编辑中点击返回，则弹窗提示返回会丢失未修改的内容
@@ -211,12 +266,17 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
         }
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: RichText(
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: (initDiaryId != null) ? '手记' : '新增手记',
+                  text: (initDiaryId == null)
+                      ? '新增手记'
+                      : isEditing
+                          ? "编辑手记"
+                          : '手记',
                   style: TextStyle(fontSize: 20.sp),
                 ),
                 if (lastSavedTime != null)
@@ -242,11 +302,28 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             // 试试保存的话，如何确定唯一id，日期+标题吗？
             if (isEditing)
               IconButton(
-                onPressed: () {
-                  print("？？？重置是恢复到第一次传过来的手记数据，还是从数据库查询最后一次保存的数据？");
-                  setState(() {
-                    isEditing = !isEditing;
-                  });
+                onPressed: () async {
+                  // ？？？重置是恢复到第一次传过来的手记数据，还是从数据库查询最后一次保存的数据？
+                  // 2023-11-27 暂时恢复到上一次修改后的数据(先查询当前编号最新的手记并更新到当前数据中)
+                  if (initDiaryId != null) {
+                    // 正常来讲这个查询有结果就是一个数据的数组，在helper的时候就这样判断？
+                    var temp = await _dbHelper.queryDiaryById(initDiaryId!);
+
+                    print("temp  --${temp.first}");
+                    // 能查到结果，将其数据格式化显示
+                    if (temp.isNotEmpty) {
+                      setState(() {
+                        initFormatData(temp.first);
+                      });
+                    }
+                  } else {
+                    // ？？？如果是新增时的撤销，那就退出当前页面，还是清空已有数据但还是修改状态？？
+                    setState(() {
+                      // 2023-11-27 暂时先清空已有数据，并保持编辑状态；再点击退出时才手动退出
+                      resetInitData();
+                    });
+                    // Navigator.of(context).pop();
+                  }
                 },
                 icon: const Icon(Icons.refresh),
               ),
@@ -257,60 +334,59 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
               ),
           ],
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              buildTitleArea(),
-              ...buildTagsArea(),
-              buildRichTextArea(),
-            ],
+        body: Scrollbar(
+          thickness: 10,
+          // 设置交互模式后，滚动条和手势滚动方向才一致
+          interactive: true,
+          radius: Radius.circular(5.sp),
+          // 不设置这个，滚动条默认不显示，在滚动时才显示
+          thumbVisibility: true,
+          // trackVisibility: true,
+          // 滚动条默认在右边，要改在左边就配合Transform进行修改(此例没必要)
+          // 刻意预留一点空间给滚动条
+          controller: _scrollController,
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            child: GestureDetector(
+              onTap: () {
+                FocusScope.of(context).unfocus();
+              },
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(5, 5, 10, 5.sp),
+                child: Column(
+                  children: [
+                    _buildTitleAndTags(),
+                    buildRichTextArea(),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  /// 主体从上到下应该是:标题、各项标签选择折叠框、富文本工具框、富文本编辑器。
-  /// 当在预览时，只有：标题、标签、富文本编辑器，都是只读
-  buildTitleArea() {
-    return Padding(
-      padding: EdgeInsets.all(5.sp),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // 当处于编辑时才显示标签
-          if (isEditing)
-            const Expanded(
-              flex: 1,
-              child: Center(
-                child: Text(
-                  "标题",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          Expanded(
-            flex: 5,
-            child: TextField(
-              controller: _titleTextController,
-              readOnly: !isEditing,
-              // 预览时居中，编辑时靠左
-              textAlign: isEditing ? TextAlign.start : TextAlign.center,
-              decoration: InputDecoration(
-                hintText: '  一句话也好，哪怕想写的不多。',
-                contentPadding: EdgeInsets.symmetric(vertical: 2.sp),
-                // 预览时不显示边框
-                border: isEditing
-                    ? OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      )
-                    : InputBorder.none,
-              ),
-              onChanged: (value) {
-                setState(() {
-                  initTitle = value;
-                });
-              },
+  // 标题和标签选择放在一个折叠栏中，方便修改正文时折叠起来能显示更多内容
+  _buildTitleAndTags() {
+    return Card(
+      elevation: 3,
+      child: ExpansionTile(
+        title: buildTitleArea(),
+        tilePadding: EdgeInsets.symmetric(horizontal: 5.sp),
+        childrenPadding: EdgeInsets.zero,
+        backgroundColor: Colors.white,
+        // 如果是编辑状态，默认展开；否则预览时不展开
+        // initiallyExpanded: isEditing ? true : false, // 是否默认展开
+        initiallyExpanded: true,
+        children: <Widget>[
+          FormBuilder(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...buildTagsArea(),
+              ],
             ),
           ),
         ],
@@ -318,30 +394,45 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
     );
   }
 
+  /// 主体从上到下应该是:标题和各项标签选择折叠框、富文本工具框折叠框、富文本编辑器。
+  /// 当在预览时，只有：标题、标签、富文本编辑器，都是只读
+  buildTitleArea() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _titleTextController,
+            readOnly: !isEditing,
+            maxLines: !isEditing ? 1 : 2,
+            // 预览时居中，编辑时靠左
+            textAlign: isEditing ? TextAlign.start : TextAlign.center,
+            decoration: InputDecoration(
+              hintText: ' 一句话也好，哪怕想写的不多^~^',
+              contentPadding: EdgeInsets.symmetric(vertical: 2.sp),
+              // 预览时不显示边框
+              border: isEditing
+                  ? OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    )
+                  : InputBorder.none,
+            ),
+            onChanged: (value) {
+              setState(() {
+                initTitle = value;
+              });
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   // 预览时显示各个标签
   buildTagsArea() {
-    /* 标签、心情、分类统一样式显示
-   var showTags = [...initTags, ...initCategorys, initMood];
-
-    return [
-      if (isEditing) Card(elevation: 3, child: buildTagSelectExpansionTile()),
-      if (!isEditing)
-        Wrap(
-          children: showTags.map((tag) {
-            return Chip(
-              label: Text(tag.toString()),
-              labelStyle: TextStyle(fontSize: 12.sp),
-              padding: EdgeInsets.zero,
-              // labelPadding: EdgeInsets.zero,
-            );
-          }).toList(),
-        ),
-    ];
-    */
-
     // 标签、心情、分类不同样式显示
     return [
-      if (isEditing) Card(elevation: 3, child: buildTagSelectExpansionTile()),
+      if (isEditing) ...buildTagSelectArea(),
       if (!isEditing)
         // 这个更小
         Wrap(
@@ -368,105 +459,74 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             ),
           ],
         ),
-
-      // 原始的
-      // Wrap(
-      //   spacing: 5,
-      //   // runSpacing: 5,
-      //   children: [
-      //     ...initTags.map((tag) {
-      //       return Chip(
-      //         label: Text(tag),
-      //         backgroundColor: Colors.lightGreen,
-      //         labelStyle: TextStyle(fontSize: 12.sp),
-      //         // padding: EdgeInsets.zero,
-      //         labelPadding: EdgeInsets.zero,
-      //       );
-      //     }).toList(),
-      //     ...initCategorys.map((tag) {
-      //       return Chip(
-      //         label: Text(tag as String),
-      //         backgroundColor: Colors.limeAccent,
-      //         labelStyle: TextStyle(fontSize: 12.sp),
-      //         labelPadding: EdgeInsets.zero,
-      //       );
-      //     }).toList(),
-      //     Chip(
-      //       label: Text(initMood),
-      //       backgroundColor: Colors.lightBlue,
-      //       labelStyle: TextStyle(fontSize: 12.sp),
-      //       labelPadding: EdgeInsets.zero,
-      //     ),
-      //   ],
-      // ),
     ];
   }
 
-  // 编辑时折叠展开各个标签分类选择
-  buildTagSelectExpansionTile() {
-    return ExpansionTile(
-      title: const Text('展开选择心情、分类和标签'),
-      leading: const Icon(Icons.tag, color: Colors.green),
-      backgroundColor: Colors.white,
-      initiallyExpanded: false, // 是否默认展开
-      children: <Widget>[
-        // 这个只能单选，表现类似 radio
-        _buildSingleSelectRow(
-          "心情",
-          "mood",
-          _moodChipOptions(),
-          initialValue: initMood,
-          onChanged: (value) {
-            print("_buildSingleSelectRow value------------$value");
-            setState(() {
-              initMood = value;
-            });
-          },
-        ),
-        // 这个可以多选，表现类似 checkbox
-        _buildMultiSelectRow(
-          "分类",
-          "category",
-          _categoryChipOptions(),
-          initialValue: initCategorys,
-          onChanged: (value) {
-            print("_buildMultiSelectRow value------------$value");
+  // 编辑时各个标签分类选择
+  buildTagSelectArea() {
+    return [
+      // 这个只能单选，表现类似 radio
+      _buildSingleSelectRow(
+        "心情",
+        "mood",
+        _moodChipOptions(),
+        initialValue: initMood,
+        onChanged: (value) {
+          setState(() {
+            initMood = value;
+          });
+        },
+      ),
+      // 这个可以多选，表现类似 checkbox
+      _buildMultiSelectRow(
+        "分类",
+        "category",
+        _categoryChipOptions(),
+        initialValue: initCategorys,
+        onChanged: (value) {
+          setState(() {
+            initCategorys = value?.map((v) => v.toString()).toList() ?? [];
+          });
+        },
+      ),
 
-            setState(() {
-              initCategorys = value?.map((v) => v.toString()).toList() ?? [];
-
-              print(
-                  "_buildMultiSelectRow initCategorys------------$initCategorys");
-            });
-          },
-        ),
-
-        // 手动输入标签，逗号和分号自动切分
-        _buildInputTagsArea(),
-      ],
-    );
+      // 手动输入标签，逗号和分号自动切分
+      _buildInputTagsArea(),
+    ];
   }
 
   // 富文本编辑预览区域
   buildRichTextArea() {
-    return SizedBox(
-      height: isQuillToolbarExpanded ? 1.2.sh : 0.65.sh,
-      width: 1.sw,
-      child: QuillProvider(
-        configurations: QuillConfigurations(
-          controller: _controller,
-          sharedConfigurations: const QuillSharedConfigurations(
-            locale: Locale('zh', 'CN'),
+    return GestureDetector(
+      onTap: () {
+        /// 不这样手动跳转，编辑时焦点可能会冲突
+        // 清除textField的文本框焦点
+        tagTextFocusNode.unfocus();
+        titleTextFocusNode.unfocus();
+        // 设置焦点到quillEditor
+        FocusScope.of(context).requestFocus(quillFocusNode);
+      },
+      child: SizedBox(
+        // 2023-11-27 实测富文本工具栏展开时该Card高度为242,折叠时66，
+        // 所以展开时这个外层box加一个176让编辑区域显示高度一致。
+
+        // 默认的0.75sh，是(状态栏+appbar+标题折叠后)大概480, 剩下高度(1-480/1920)=0.75.
+        // 所以实际使用时，可以大概在(1.sh-480/1.sh)=>？？？但实际显示不太对，不是这样算的？？？
+        height: isQuillToolbarExpanded ? (0.75.sh + 176.sp) : 0.75.sh,
+        width: 1.sw,
+        child: QuillProvider(
+          configurations: QuillConfigurations(
+            controller: _controller,
+            sharedConfigurations: const QuillSharedConfigurations(
+              locale: Locale('zh', 'CN'),
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            // 在编辑状态下才显示工具栏
-            if (isEditing)
-              Card(
-                elevation: 3,
-                child: Padding(
-                  padding: EdgeInsets.all(3.sp),
+          child: Column(
+            children: [
+              // 在编辑状态下才显示工具栏
+              if (isEditing)
+                Card(
+                  elevation: 3,
                   child: ExpansionTile(
                     title: const Text('展开富文本编辑工具栏'),
                     leading: const Icon(Icons.tag, color: Colors.green),
@@ -491,31 +551,34 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                     ],
                   ),
                 ),
-              ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.all(5.sp),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                        color: isEditing ? Colors.grey : Colors.white),
-                    borderRadius: BorderRadius.circular(8.0),
-                    color: Colors.white,
-                  ),
-                  child: QuillEditor.basic(
-                    configurations: QuillEditorConfigurations(
-                      autoFocus: false,
-                      readOnly: !isEditing,
-                      scrollable: true,
-                      expands: true,
-                      padding: EdgeInsets.all(5.sp),
-                      embedBuilders: FlutterQuillEmbeds.editorBuilders(),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(5.sp),
+                  child: DecoratedBox(
+                    // 边框在编辑时显示灰色，预览时显示白色(假装没有)
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: isEditing ? Colors.grey : Colors.white,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
+                      color: Colors.white,
+                    ),
+                    child: QuillEditor.basic(
+                      focusNode: quillFocusNode,
+                      configurations: QuillEditorConfigurations(
+                        autoFocus: false,
+                        readOnly: !isEditing,
+                        scrollable: true,
+                        expands: true,
+                        padding: EdgeInsets.all(5.sp),
+                        embedBuilders: FlutterQuillEmbeds.editorBuilders(),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -629,7 +692,9 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
         Padding(
           padding: EdgeInsets.all(5.sp),
           child: TextField(
+            focusNode: tagTextFocusNode,
             controller: _tagTextController,
+            readOnly: !isEditing,
             decoration: InputDecoration(
                 hintText: '  输入标签(输入逗号或分号自动分割)',
                 contentPadding: EdgeInsets.symmetric(vertical: 2.sp),

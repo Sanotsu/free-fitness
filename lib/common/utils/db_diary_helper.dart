@@ -194,4 +194,14 @@ class DBDiaryHelper {
       rethrow;
     }
   }
+
+  // 按指定编号查询
+  Future<List<Diary>> queryDiaryById(int id) async =>
+      (await (await database).query(
+        DiaryDdl.tableNameOfDiary,
+        where: "diary_id = ? ",
+        whereArgs: [id],
+      ))
+          .map((row) => Diary.fromMap(row))
+          .toList();
 }
