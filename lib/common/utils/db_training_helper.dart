@@ -422,6 +422,15 @@ class DBTrainingHelper {
     return batch.commit();
   }
 
+  // 修改指定计划基本信息（指定id修改）
+  Future<int> updateTrainingPlanById(int planId, TrainingPlan plan) async =>
+      (await database).update(
+        TrainingDdl.tableNameOfPlan,
+        plan.toMap(),
+        where: "plan_id = ? ",
+        whereArgs: [planId],
+      );
+
   /// ？？？查询指定计划以及其所有训练（3层嵌套，看怎么优化）
   // 计划支持条件查询，估计计划的数量不会多，就暂时不分页；同时关联的训练就全部带出。
   Future<List<PlanWithGroups>> searchPlanWithGroups({
@@ -441,7 +450,7 @@ class DBTrainingHelper {
       whereArgs.add(planId);
     }
     if (planName != null) {
-      where.add("plan_ame like ? ");
+      where.add("plan_name like ? ");
       whereArgs.add("%$planName%");
     }
     if (planCategory != null) {

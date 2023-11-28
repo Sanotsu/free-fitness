@@ -12,6 +12,7 @@ import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
 import 'action_config_dialog.dart';
 import 'action_detail.dart';
+import 'action_follow_practice.dart';
 import 'simple_exercise_list.dart';
 
 class ActionList extends StatefulWidget {
@@ -239,6 +240,20 @@ class _ActionListState extends State<ActionList> {
                 child: ElevatedButton(
                   onPressed: () {
                     // 【点击开始跟练
+
+                    log.d("开始跟练的数据 $actionList");
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ActionFollowPractice(
+                          actionList: actionList,
+                        ),
+                      ),
+                    ).then((value) {
+                      print("跟练完成之后，返回的数据---: $value");
+                      print("跟练完成之后，也可能直接push and replace到报告页面？？？");
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(

@@ -6,6 +6,8 @@ class Exercise {
   String exerciseCode, exerciseName, category, countingMode, gmtCreate;
   String? force, level, mechanic, equipment, instructions, ttsNotes;
   String? primaryMuscles, secondaryMuscles, images, standardDuration;
+  // standardDuration 应该是整数或者小数的，但这里用的字符串，虽然都是下拉选择的可以转，但看着不太好
+  // int? standardDuration;
   String? gmtModified, isCustom, contributor;
 
   Exercise({
@@ -358,6 +360,24 @@ class PlanWithGroups {
   final List<GroupWithActions> groupDetailList;
 
   PlanWithGroups({required this.plan, required this.groupDetailList});
+
+  @override
+  String toString() {
+    return '''
+    PlanWithGroups {
+      plan: $plan, groupDetailList: $groupDetailList,
+    ''';
+  }
+}
+
+// 跟练时需要的简单处理动作详情后的数据格式
+// ？？？？
+class ActionPractice {
+  final TrainingPlan plan;
+  // 这里列表的索引，就是plan周期的训练日顺序了
+  final List<GroupWithActions> groupDetailList;
+
+  ActionPractice({required this.plan, required this.groupDetailList});
 
   @override
   String toString() {

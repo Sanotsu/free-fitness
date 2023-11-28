@@ -94,7 +94,7 @@ class _DietaryState extends State<Dietary> {
                 const DietaryFoods(),
                 "食物成分",
                 "中国食物营养成分标准",
-                dietaryLogCoverImageUrl,
+                dietaryNutritionImageUrl,
                 routeName: "/dietaryFoods",
               ),
             ],

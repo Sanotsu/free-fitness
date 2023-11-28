@@ -52,6 +52,7 @@ dependencies:
   fl_chart: ^0.64.0
   logger: ^2.0.2+1
   file_picker: ^5.5.0
+  circular_countdown_timer: ^0.2.3
   # 富文本编辑
   flutter_quill: ^8.6.1
   # 富文本编辑扩展(插入图片之类的)
