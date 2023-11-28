@@ -350,8 +350,11 @@ class _ActionListState extends State<ActionList> {
                     flex: 9,
                     child: ListTile(
                       // 不存在action name，就是exercise name就好
-                      title:
-                          Text("${index + 1} ${adItem.exercise.exerciseName}"),
+                      title: Text(
+                        "${index + 1} ${adItem.exercise.exerciseName}",
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       subtitle: Text(subTitle),
                       // 如果没有缩略图，就应该显示技术动作要点的文本
                       // trailing: const Text("这里应该是缩略图"),

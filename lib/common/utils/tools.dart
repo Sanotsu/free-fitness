@@ -28,6 +28,13 @@ String formatDurationToString2(Duration duration) {
   return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
 }
 
+// 格式化秒数为HH:mm:ss样式
+String formatSeconds(double seconds, {String? formatString = "HH:mm:ss"}) {
+  Duration duration = Duration(seconds: seconds.round());
+  DateFormat formatter = DateFormat(formatString);
+  return formatter.format(DateTime(0).add(duration));
+}
+
 // 音频大小，从int的byte数值转为xxMB(保留2位小数)
 String formatAudioSizeToString(int num) =>
     "${(num / 1024 / 1024).toStringAsFixed(2)} MB";

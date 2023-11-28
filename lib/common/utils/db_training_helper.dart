@@ -207,10 +207,11 @@ class DBTrainingHelper {
     final where = <String>[];
     final whereArgs = <dynamic>[];
 
+    // 这些条件是准确查询
     final conditions = {
       'exercise_id': exerciseId,
-      'exercise_code': exerciseCode,
-      'exercise_name': exerciseName,
+      // 'exercise_code': exerciseCode,
+      // 'exercise_name': exerciseName,
       'force': force,
       'level': level,
       'mechanic': mechanic,
@@ -218,13 +219,26 @@ class DBTrainingHelper {
       'category': category,
     };
 
-    // 一般的条件是精确查询，肌肉是模糊查询
+    // 一般的条件是精确查询
     conditions.forEach((key, value) {
       if (value != null) {
         where.add('$key = ?');
         whereArgs.add(value);
       }
     });
+
+    // 代号、名称、肌肉都是模糊查询
+    if (exerciseCode != null) {
+      where.add('exercise_code LIKE ? OR exercise_name LIKE ? ');
+      whereArgs.add('%$exerciseCode%');
+      whereArgs.add('%$exerciseCode%');
+    }
+
+    if (exerciseName != null) {
+      where.add('exercise_code LIKE ? OR exercise_name LIKE ? ');
+      whereArgs.add('%$exerciseName%');
+      whereArgs.add('%$exerciseName%');
+    }
 
     if (primaryMuscle != null) {
       where.add('primary_muscles LIKE ?');
