@@ -1,11 +1,10 @@
 // ignore_for_file: avoid_print
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:logger/logger.dart';
 
+import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
@@ -282,9 +281,6 @@ class _ActionListState extends State<ActionList> {
         var adItem = actionList[index];
         var actionItem = adItem.action;
 
-        // 基础活动的缩略图
-        var imageUrl = adItem.exercise.images?.split(",")[0] ?? "";
-
         // 显示次数、持续时间、器械重量
         String subTitle = "";
         var frequency =
@@ -364,14 +360,7 @@ class _ActionListState extends State<ActionList> {
                     flex: 6,
                     child: Padding(
                       padding: EdgeInsets.all(_isEditing ? 5.sp : 10.sp),
-                      child: Image.file(
-                        File(imageUrl),
-                        errorBuilder: (BuildContext context, Object exception,
-                            StackTrace? stackTrace) {
-                          return Image.asset(placeholderImageUrl,
-                              fit: BoxFit.scaleDown);
-                        },
-                      ),
+                      child: buildExerciseImage(adItem.exercise),
                     ),
                   ),
                   if (_isEditing)

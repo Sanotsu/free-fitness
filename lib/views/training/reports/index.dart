@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// import '_demos/cd_demo2.dart';
+import '../exercise/_demos/image_demo.dart';
 
 class TrainingReports extends StatefulWidget {
   const TrainingReports({super.key});
@@ -20,14 +20,14 @@ class _TrainingReportsState extends State<TrainingReports> {
         children: [
           ElevatedButton(
             onPressed: () {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => const MyHomePage(),
-              //   ),
-              // );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ExerciseImages(),
+                ),
+              );
             },
-            child: const Text("跟练示例"),
+            child: const Text("图片示例"),
           ),
         ],
       ),

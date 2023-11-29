@@ -66,6 +66,8 @@ dependencies:
   timeline_tile: ^2.0.0
   # 文本转语音
   flutter_tts: ^3.8.5
+  # 权限处理
+  permission_handler: ^11.1.0
   
 
 dev_dependencies:

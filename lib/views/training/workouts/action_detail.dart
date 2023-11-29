@@ -43,7 +43,6 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
     double desiredHeight = screenHeight * 0.8;
     print("desiredHeight=====$screenHeight $desiredHeight $_totalSize");
 
-    var tempImage = _currentItem.exercise.images?.split(",")[0] ?? "";
     return SizedBox(
       height: desiredHeight,
       child: Column(
@@ -51,7 +50,10 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
         // 从上到下依次为关闭按钮、图片、动作名称及其技术要点、翻页按钮
         children: [
           SizedBox(height: 40.sp, child: buildCloseButton(context)),
-          Expanded(flex: 2, child: buildImageArea(context, tempImage)),
+          Expanded(
+            flex: 2,
+            child: buildImageArea(context, _currentItem.exercise),
+          ),
           Expanded(child: _buildCountArea()),
           Expanded(
             flex: 3,

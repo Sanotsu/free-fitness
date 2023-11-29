@@ -128,6 +128,31 @@ class DBTrainingHelper {
         exercise.toMap(),
       );
 
+  Future<int> insertExerciseThrowError(Exercise exercise) async {
+    try {
+      return (await database).insert(
+        TrainingDdl.tableNameOfExercise,
+        exercise.toMap(),
+      );
+    } on DatabaseException catch (e) {
+      // 唯一值重复
+      if (e.isUniqueConstraintError()) {
+        // 抛出自定义异常并携带错误信息
+        throw Exception(
+          '该动作代号或名称已存在:\n ${exercise.exerciseCode} - ${exercise.exerciseName}',
+        );
+      } else if (e.isDuplicateColumnError()) {
+        // 抛出自定义异常并携带错误信息
+        throw Exception(
+          '该动作重复:\n ${exercise.exerciseId}-${exercise.exerciseCode} - ${exercise.exerciseName}',
+        );
+      } else {
+        // 其他错误(抛出异常来触发回滚的方式是 sqflite 中常用的做法)
+        rethrow;
+      }
+    }
+  }
+
   // 修改单条数据
   Future<int> updateExercise(Exercise exercise) async =>
       (await database).update(

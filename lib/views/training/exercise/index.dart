@@ -1,16 +1,16 @@
 // ignore_for_file: avoid_print
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/training_state.dart';
 
+import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
-import '../../me/test_funcs.dart';
+
 import 'exercise_detail.dart';
+import 'exercise_json_import.dart';
 import 'exercise_modify.dart';
 import 'exercise_query_form.dart';
 
@@ -163,18 +163,6 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     _loadExerciseData();
   }
 
-  // 测试新增基础活动的示例
-  _demoAddRandomExercise() async {
-    insertOneRandomExercise();
-
-    // 有新增数据，也重新开始查询
-    setState(() {
-      exerciseItems.clear();
-      currentPage = 1;
-    });
-    _loadExerciseData();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -194,7 +182,20 @@ class _TrainingExerciseState extends State<TrainingExercise> {
         actions: [
           /// 测试，新增一条数据的数据
           TextButton(
-            onPressed: _demoAddRandomExercise,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ExerciseJsonImport(),
+                ),
+              ).then((value) {
+                setState(() {
+                  exerciseItems.clear();
+                  currentPage = 1;
+                });
+                _loadExerciseData();
+              });
+            },
             style: ButtonStyle(
               foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
             ),
@@ -319,7 +320,6 @@ class _TrainingExerciseState extends State<TrainingExercise> {
   // 构建单个基础活动的卡片信息
   _buildExerciseItemCard(int index) {
     var exerciseItem = exerciseItems[index];
-    var imageUrl = exerciseItem.images?.split(",")[0] ?? "";
 
     return Card(
       child: InkWell(
@@ -350,13 +350,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
             SizedBox(
               width: 0.4.sw,
               height: 0.3.sh,
-              child: Image.file(
-                File(imageUrl),
-                errorBuilder: (BuildContext context, Object exception,
-                    StackTrace? stackTrace) {
-                  return Image.asset(placeholderImageUrl, fit: BoxFit.cover);
-                },
-              ),
+              child: buildExerciseImage(exerciseItem),
             ),
 
             // SizedBox(width: 0.1.sw),

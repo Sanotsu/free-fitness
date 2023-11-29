@@ -16,6 +16,10 @@ const String workoutWomanImageUrl = 'assets/covers/workout-woman.png';
 const String workoutCalendarImageUrl =
     'assets/covers/workout-calendar-dark.png';
 
+/// 导入的图片默认的地址前缀
+/// (安卓的话指定位置.../DCIM/free-fitness/exercise-images/)下才能读到图片文件
+const cusExImgPre = "/storage/emulated/0/DCIM/free-fitness/exercise-images/";
+
 // 常量声明的示例,上面那种单个变量或者这种class
 class LocalStorageKey {
   // add a private constructor to prevent this class being instantiated

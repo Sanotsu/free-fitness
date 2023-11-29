@@ -1,11 +1,9 @@
 // ignore_for_file: avoid_print
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/global/constants.dart';
+import '../../../common/components/dialog_widgets.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
@@ -196,9 +194,8 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
         if (index == exerciseItems.length) {
           return buildLoader(isLoading);
         } else {
-          // 示意图可以有多个，就去第一张号了
+          // 示意图可以有多个，就取第一张好了
           var exerciseItem = exerciseItems[index];
-          var imageUrl = exerciseItem.images?.split(",")[0] ?? "";
 
           return Card(
             elevation: 10,
@@ -234,16 +231,7 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
                       height: 80.sp,
                       child: Padding(
                         padding: EdgeInsets.all(5.sp),
-                        child: Image.file(
-                          File(imageUrl),
-                          errorBuilder: (BuildContext context, Object exception,
-                              StackTrace? stackTrace) {
-                            return Image.asset(
-                              placeholderImageUrl,
-                              fit: BoxFit.scaleDown,
-                            );
-                          },
-                        ),
+                        child: buildExerciseImage(exerciseItem),
                       ),
                     ),
                   ),

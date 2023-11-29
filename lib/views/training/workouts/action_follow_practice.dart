@@ -9,6 +9,7 @@ import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
+import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/tools.dart';
 import '../../../models/training_state.dart';
@@ -28,7 +29,8 @@ class ActionFollowPracticeWithTTS extends StatefulWidget {
 
 enum TtsState { playing, stopped, paused, continued }
 
-class _ActionFollowPracticeWithTTSState extends State<ActionFollowPracticeWithTTS> {
+class _ActionFollowPracticeWithTTSState
+    extends State<ActionFollowPracticeWithTTS> {
   // 一般的倒计时控制器
   final _actionController = CountDownController();
   // 倒计时组件控制器
@@ -93,7 +95,7 @@ class _ActionFollowPracticeWithTTSState extends State<ActionFollowPracticeWithTT
   String? engine;
   double volume = 0.5;
   double pitch = 1.0;
-  double rate = 1;
+  double rate = 0.5;
   bool isCurrentLanguageInstalled = false;
 
   TtsState ttsState = TtsState.stopped;
@@ -330,14 +332,7 @@ class _ActionFollowPracticeWithTTSState extends State<ActionFollowPracticeWithTT
       Expanded(
         // 这里的盒子，只是单纯区分休息时显示下一个要小点，跟练时图片大点
         flex: 5,
-        child: Image.file(
-          // 预备的时候，肯定显示第一个动作的图片
-          File(actions[0].exercise.images?.split(",")[0] ?? ""),
-          errorBuilder:
-              (BuildContext context, Object exception, StackTrace? stackTrace) {
-            return Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown);
-          },
-        ),
+        child: buildExerciseImage(actions[0].exercise),
       ),
       Expanded(
         flex: 2,
@@ -466,14 +461,7 @@ class _ActionFollowPracticeWithTTSState extends State<ActionFollowPracticeWithTT
       Expanded(
         // 这里的盒子，只是单纯区分休息时显示下一个要小点，跟练时图片大点
         flex: 4,
-        child: Image.file(
-          // 预备的时候，肯定显示第一个动作的图片
-          File(actions[_currentIndex].exercise.images?.split(",")[0] ?? ""),
-          errorBuilder:
-              (BuildContext context, Object exception, StackTrace? stackTrace) {
-            return Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown);
-          },
-        ),
+        child: buildExerciseImage(actions[_currentIndex].exercise),
       ),
       // 在跟练页面显示当前训练占全部的进度条
       SizedBox(
@@ -1080,13 +1068,7 @@ class _ActionFollowPracticeWithTTSState extends State<ActionFollowPracticeWithTT
 
       Expanded(
         flex: 3,
-        child: Image.file(
-          File(actions[_currentIndex].exercise.images?.split(",")[0] ?? ""),
-          errorBuilder:
-              (BuildContext context, Object exception, StackTrace? stackTrace) {
-            return Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown);
-          },
-        ),
+        child: buildExerciseImage(actions[_currentIndex].exercise),
       ),
     ];
   }

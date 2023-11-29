@@ -1,11 +1,10 @@
 // ignore_for_file: avoid_print
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/training_state.dart';
@@ -76,14 +75,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
               padding: EdgeInsets.all(10.sp),
               child: SizedBox(
                 height: 0.3.sh,
-                child: Image.file(
-                  File(_item.images?.split(",")[0] ?? ""),
-                  errorBuilder: (BuildContext context, Object exception,
-                      StackTrace? stackTrace) {
-                    return Image.asset(placeholderImageUrl,
-                        fit: BoxFit.scaleDown);
-                  },
-                ),
+                child: buildExerciseImage(_item),
               ),
             ),
             Padding(

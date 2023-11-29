@@ -53,8 +53,6 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
     double desiredHeight = screenHeight * 0.8;
     print("desiredHeight=====$screenHeight $desiredHeight $_totalSize");
 
-    var tempImage = _currentItem.images?.split(",")[0] ?? "";
-
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -75,7 +73,7 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
                   context,
                   popValue: modifiedFlag,
                 )),
-            Expanded(flex: 2, child: buildImageArea(context, tempImage)),
+            Expanded(flex: 2, child: buildImageArea(context, _currentItem)),
             Expanded(
               flex: 3,
               child: buildTitleAndDescription(

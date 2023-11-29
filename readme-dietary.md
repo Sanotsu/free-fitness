@@ -204,6 +204,7 @@ tobed: 目标卡路里折线图是实际摄入的条状图放到一起？
 
 - 2023-11-29
   - 完成"运动"模块的训练跟练的 tts 功能雏形。
+  - 完成 [yuhonas/free-exercise-db](https://github.com/yuhonas/free-exercise-db)格式的json文件导入的功能，并修改了图片显示组件。
 
 ### 问题记录
 

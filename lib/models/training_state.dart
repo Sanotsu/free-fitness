@@ -77,7 +77,7 @@ class Exercise {
       secondaryMuscles: map['secondary_muscles'],
       images: map['images'],
       // ？？？明明sql语句设置了默认值，但是不传还是null
-      isCustom: map['is_custom'] ?? '0',
+      isCustom: map['is_custom'] ?? 'true',
       contributor: map['contributor'],
       gmtCreate: map['gmt_create'],
       gmtModified: map['gmt_modified'],

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../common/components/cus_cards.dart';
 import '../../common/global/constants.dart';
@@ -19,6 +20,26 @@ class Training extends StatefulWidget {
 }
 
 class _TrainingState extends State<Training> {
+  // 查看和请求存储权限
+  _requestPermission() async {
+    // 获取权限
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.accessMediaLocation,
+      Permission.storage,
+    ].request();
+
+    print("------------statuses $statuses");
+    final info = statuses[Permission.storage].toString();
+    print("获取存取权限--------------$info");
+  }
+
+  @override
+  void initState() {
+    // 进入运动模块就获取存储授权(应该是启动app就需要这个请求)
+    _requestPermission();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
