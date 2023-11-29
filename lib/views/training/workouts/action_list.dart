@@ -246,7 +246,7 @@ class _ActionListState extends State<ActionList> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ActionFollowPractice(
+                        builder: (context) => ActionFollowPracticeWithTTS(
                           actionList: actionList,
                         ),
                       ),

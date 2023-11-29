@@ -314,6 +314,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
                   setState(() {
                     currentPage = 1; // 数据库查询的时候会从0开始offset
                     pageSize = 10;
+                    diaryList = [];
                   });
                   loadMoreDiary();
                 });

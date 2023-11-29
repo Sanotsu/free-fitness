@@ -1,35 +1,38 @@
 // ignore_for_file: avoid_print
 
+import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import 'package:flutter/material.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:timer_count_down/timer_controller.dart';
-import 'package:timer_count_down/timer_count_down.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/tools.dart';
 import '../../../models/training_state.dart';
 import '../reports/index.dart';
 
-class ActionFollowPractice extends StatefulWidget {
+class ActionFollowPracticeWithTTS extends StatefulWidget {
   // 跟练需要传入动作组数据
   final List<ActionDetail> actionList;
 
-  const ActionFollowPractice({Key? key, required this.actionList})
+  const ActionFollowPracticeWithTTS({Key? key, required this.actionList})
       : super(key: key);
 
   @override
-  State<ActionFollowPractice> createState() =>
-      _ActionFollowPracticeState();
+  State<ActionFollowPracticeWithTTS> createState() =>
+      _ActionFollowPracticeWithTTSState();
 }
 
-class _ActionFollowPracticeState extends State<ActionFollowPractice> {
+enum TtsState { playing, stopped, paused, continued }
+
+class _ActionFollowPracticeWithTTSState extends State<ActionFollowPracticeWithTTS> {
   // 一般的倒计时控制器
-  final _actionController = CountdownController(autoStart: true);
+  final _actionController = CountDownController();
   // 倒计时组件控制器
-  late CountDownController _restController;
+  final _restController = CountDownController();
 
   // 当前的动作列表
   late List<ActionDetail> actions;
@@ -37,14 +40,21 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
   int _currentIndex = -1;
 
   // 预设的休息时间(从用户配置表读取的，是不变的。每次休息完成之后都要重置为这个时间)
-  final _defaultCusRestTime = 500;
+  final _defaultCusRestTime = 10;
   // 当前休息的倒计时时间(每个跟练间隔的休息时间用户可以调整)
-  int _cusRestTime = 500;
+  int _cusRestTime = 10;
 
   // 当前是否是休息时间
   bool isRestTurn = false;
   // 当前跟练是否已暂停(该组件的控制器没办法获取组件状态，所以自定义标识)
   bool isActionPause = false;
+
+  // 是否点击了增加休息时间的标志
+  // 在休息的倒计时点击+10s后，倒计时组件是重新开始的，但是休息的提示音是在onstart的回调函数中发出的。
+  // 也就是说，不处理的话，每点击一次+10s就会重复触发休息的语言提示。
+  // 因此增加这个是否点击了+10s的标志，如果是true，倒计时的onstart回调中就不触发语音。
+  // 【注意】在休息倒计时自然结束或者跳过休息时间时，要重置为false
+  bool isClickPlusRestTime = false;
 
   // 整个动作开始的瞬间，就是进入此页面的时间(开起自动倒计时)或者点击了开始的时间
   DateTime startedMoment = DateTime.now();
@@ -75,11 +85,32 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
   ///     这点最简单就是在跟练倒计时结束的时候，记录一下此处结束的是哪个动作就好，有重复的就是多次锻炼的，预设动作没在这个列表中就是跳过的。
   ///
 
+  ///
+  /// TTS 相关的变量 ===============
+  ///
+  late FlutterTts flutterTts;
+  String? language;
+  String? engine;
+  double volume = 0.5;
+  double pitch = 1.0;
+  double rate = 1;
+  bool isCurrentLanguageInstalled = false;
+
+  TtsState ttsState = TtsState.stopped;
+
+  get isPlaying => ttsState == TtsState.playing;
+  get isStopped => ttsState == TtsState.stopped;
+  get isPaused => ttsState == TtsState.paused;
+  get isContinued => ttsState == TtsState.continued;
+
+  bool get isIOS => !kIsWeb && Platform.isIOS;
+  bool get isAndroid => !kIsWeb && Platform.isAndroid;
+  bool get isWindows => !kIsWeb && Platform.isWindows;
+  bool get isWeb => kIsWeb;
+
   @override
   void initState() {
     super.initState();
-
-    _restController = CountDownController();
 
     setState(() {
       // 一定要传动作组数据
@@ -87,10 +118,16 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
       // 进入此跟练页面自动开始
       startedMoment = DateTime.now();
     });
+
+    initTts();
   }
 
+  ///
+  /// 倒计时相关的操作===============
+  ///
+
   /// 获取当前动作的耗时
-  _getCurrentActionDuration() {
+  int _getCurrentActionDuration() {
     // currentActionDetail
     var curAd = actions[_currentIndex];
     // currentExercisecountingMode
@@ -108,7 +145,7 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
       times = temp1 * temp2;
     }
 
-    print("跟练动作的倒计时时间---times   $times");
+    // print("跟练动作的倒计时时间---times   $times");
     // 【注意】这个跟练动作为0的时候，倒计时可能会出问题,正常是不一样有0的
     // (在跟练的Countdown的onFInish的回调中使用setState处)
     return times > 0 ? times : 1;
@@ -148,6 +185,114 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
       // 修改索引为-1就直接到准备页面了
       _currentIndex = -1;
     });
+  }
+
+  ///
+  /// TTS 相关的操作===============
+  ///
+  ///
+
+  // 初始化tts服务
+  initTts() {
+    flutterTts = FlutterTts();
+
+    _setAwaitOptions();
+
+    if (isAndroid) {
+      _getDefaultEngine();
+      _getDefaultVoice();
+    }
+
+    flutterTts.setStartHandler(() {
+      setState(() {
+        print("Playing");
+        ttsState = TtsState.playing;
+      });
+    });
+
+    if (isAndroid) {
+      flutterTts.setInitHandler(() {
+        setState(() {
+          print("TTS Initialized");
+        });
+      });
+    }
+
+    flutterTts.setCompletionHandler(() {
+      setState(() {
+        print("Complete");
+        ttsState = TtsState.stopped;
+      });
+    });
+
+    flutterTts.setCancelHandler(() {
+      setState(() {
+        print("Cancel");
+        ttsState = TtsState.stopped;
+      });
+    });
+
+    flutterTts.setPauseHandler(() {
+      setState(() {
+        print("Paused");
+        ttsState = TtsState.paused;
+      });
+    });
+
+    flutterTts.setContinueHandler(() {
+      setState(() {
+        print("Continued");
+        ttsState = TtsState.continued;
+      });
+    });
+
+    flutterTts.setErrorHandler((msg) {
+      setState(() {
+        print("error: $msg");
+        ttsState = TtsState.stopped;
+      });
+    });
+  }
+
+  Future _getDefaultEngine() async {
+    var engine = await flutterTts.getDefaultEngine;
+    if (engine != null) {
+      print(engine);
+    }
+  }
+
+  Future _getDefaultVoice() async {
+    var voice = await flutterTts.getDefaultVoice;
+    if (voice != null) {
+      print(voice);
+    }
+  }
+
+  Future _speak(String voiceText, {double? cusRate}) async {
+    await flutterTts.setVolume(volume);
+    await flutterTts.setSpeechRate(cusRate ?? rate);
+    await flutterTts.setPitch(pitch);
+    await flutterTts.speak(voiceText);
+  }
+
+  Future _setAwaitOptions() async {
+    await flutterTts.awaitSpeakCompletion(true);
+  }
+
+  Future _stop() async {
+    var result = await flutterTts.stop();
+    if (result == 1) setState(() => ttsState = TtsState.stopped);
+  }
+
+  Future _pause() async {
+    var result = await flutterTts.pause();
+    if (result == 1) setState(() => ttsState = TtsState.paused);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    flutterTts.stop();
   }
 
   @override
@@ -258,6 +403,14 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
                 isReverseAnimation: false,
                 isTimerTextShown: true,
                 autoStart: true,
+                // 当进入预备倒计时时，开始语音提示.
+                onStart: () {
+                  // Here, do whatever you want
+                  debugPrint('Countdown Started');
+                  var prepareText =
+                      "预备开始，下一个动作：${actions.first.exercise.exerciseName}";
+                  _speak(prepareText);
+                },
                 onComplete: () {
                   debugPrint('休息 Countdown Ended-- $_currentIndex');
                   setState(() {
@@ -277,6 +430,8 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
                     _currentIndex = 0;
                     isRestTurn = false;
                   });
+                  // 跳过预备时也停止语音
+                  _stop();
                 },
                 icon: const Icon(Icons.arrow_forward),
               ),
@@ -285,6 +440,24 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
         ),
       ),
     ];
+  }
+
+  // 倒计时的tts语言
+  void countdownTts(int seconds) {
+    if (seconds > 0) {
+      print('倒计时剩余时间：$seconds 秒');
+      // _pause();
+      // 倒计时非常快才有可能能不重复
+      // ？？？ 实测跟速度也没关系，就是倒计时的onChange时间的问题？
+      if (!isPlaying) {
+        _speak("$seconds");
+      }
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        countdownTts(seconds - 1);
+      });
+    } else {
+      print('倒计时结束');
+    }
   }
 
   /// 跟练时的主要部件
@@ -413,7 +586,7 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
         ),
       ),
       Expanded(
-        flex: 1,
+        flex: 2,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -426,16 +599,97 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
                 textAlign: TextAlign.start,
               ),
             ),
-            Countdown(
+
+            // 跟练的倒计时和休息(含预备)的稍微不一样，用于区分(一个重点在环，一个重点在数字)
+            CircularCountDownTimer(
               controller: _actionController,
-              seconds: _getCurrentActionDuration(),
-              // 这里可以格式化为hh:mm:ss 的样子
-              build: (_, double time) => Text(
-                formatSeconds(time, formatString: "mm:ss"),
-                style: TextStyle(fontSize: 50.sp),
+              duration: _getCurrentActionDuration(),
+              initialDuration: 0,
+              width: 0.3.sw,
+              height: 0.3.sw,
+              ringColor: Colors.grey[300]!,
+              fillColor: Colors.green,
+              strokeWidth: 5.0,
+              strokeCap: StrokeCap.round,
+              textStyle: TextStyle(
+                fontSize: 36.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
               ),
-              interval: const Duration(milliseconds: 1000),
-              onFinished: () {
+              textFormat: CountdownTextFormat.MM_SS,
+              isReverse: true,
+              isReverseAnimation: false,
+              isTimerTextShown: true,
+              autoStart: true,
+
+              // 【原部件bug】timeFormatterFunction设置之后onChange不会触发
+              timeFormatterFunction: (_, duration) {
+                // ？？？2023-11-29 实际测试和在onChange中一样，倒计时到2的时候，会重复两次
+                // 所以没办法在倒计时等于3时延迟tts语音
+                if (duration.inSeconds == 3) {
+                  // countdownTts(3);
+                  _speak("3");
+                }
+                // 在小米6上会发两次2的语言，所以这里stop或者pause一下的话，就只有一次2的语音了，当然间隔也不一致了。
+                // 也很怪，3、1、和其他文本都没有这个问题
+                if (duration.inSeconds == 2) {
+                  _speak("2");
+                  // _stop();
+                  _pause();
+                }
+                if (duration.inSeconds == 1) {
+                  _speak("1");
+                }
+
+                // 如果这个时间不准的话，一半时间、语音提示等内容这里也放不出来了
+                if (duration.inSeconds ==
+                    int.parse(
+                        (_getCurrentActionDuration() / 2).toStringAsFixed(0))) {
+                  _speak("一半时间了");
+                }
+
+                // 倒计时不是从最大的数值开始的，+1才对得上
+                return formatSeconds(
+                  duration.inSeconds + 1,
+                  formatString: "mm:ss",
+                );
+              },
+
+              // onChange: (String timeStamp) {
+              //   print("跟练 ---- timeStamp----------$timeStamp");
+
+              //   print(
+              //       "在跟练中---_actionController ${_actionController.getTime()}");
+
+              //   var curCountTime =
+              //       convertToDuration(timeStamp, CountdownTextFormat.MM_SS);
+              //   // 跟练时间最后3秒，有语音倒计时
+
+              //   /// 2023-11-29 目前这个倒计时2时会重复触发，其他还没有
+              //   // ？？？这个change不是按秒变化的，那么这里可能会触发很多次，导致倒计时tts不准确。
+              //   if (curCountTime?.inSeconds == 3) {
+              //     print("跟练333 timeStamp----------$timeStamp");
+              //     countdownTts(3);
+              //     // _speak("3");
+              //   }
+
+              //   // if (curCountTime?.inSeconds == 1) {
+              //   //   print("跟练1111 timeStamp----------$timeStamp");
+              //   //   _speak("1");
+              //   // }
+              //   // 如果这个时间不准的话，一半时间、语音提示等内容这里也放不出来了
+              //   if (curCountTime?.inSeconds ==
+              //       int.parse(
+              //         (_getCurrentActionDuration() / 2).toStringAsFixed(0),
+              //       )) {
+              //     _speak("一半时间");
+              //   }
+              // },
+              onStart: () {
+                // 进入开始倒计时，语音提示开始
+                _speak("开始");
+              },
+              onComplete: () {
                 debugPrint('跟练 Countdown Ended-- $_currentIndex');
 
                 // 如果当前跟练动作还不是最后一个，则进行下一个
@@ -450,6 +704,7 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
                 } else {
                   // 如果已经是最后一个了，弹窗显示已结束
                   // 所有锻炼完成，显示弹窗
+                  _speak("祝贺，锻炼已结束");
                   _showFinishedDialog();
                 }
               },
@@ -467,7 +722,6 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
       ),
 
       /// 暂停继续按钮(注意，在点击上一个和跳过时，把暂停状态修改为false，因为组件是自动开始的)
-
       Expanded(
         flex: 1,
         child: Row(
@@ -540,6 +794,9 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
               onPressed: _currentIndex <= 0
                   ? () {}
                   : () {
+                      // 点击上一个，先停止之前的语言(进入跟练倒计时时会自动播放开始的语音)
+                      _stop();
+
                       //  点击上一个就直接调到上一个去了
                       setState(() {
                         _currentIndex--;
@@ -560,7 +817,9 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
                       // ？？？这里有个小问题，如果当前倒计时执行了一部分时间，
                       // 再点击上一个后，虽然索引已经变了，但是时间还是点击上一个动作之前动作剩下的时间
                       // 所以这里要手动调用重新开始
-                      _actionController.restart();
+                      _actionController.restart(
+                        duration: _getCurrentActionDuration(),
+                      );
                     },
             ),
             Container(
@@ -579,6 +838,8 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
                       _showFinishedDialog();
                       // 已经是最后一个的话，就重置？？？
                       _actionController.pause();
+                      // 所有锻炼完成，语音提示
+                      _speak("祝贺，锻炼已结束");
                     }
                   : () {
                       // 点击跳过就直接到下一个休息去
@@ -642,6 +903,9 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
                   print("点击了加10s，累加后的倒计时数值newtime $newtime ");
                   setState(() {
                     _cusRestTime = newtime;
+
+                    // 将是否点击了增加休息时间按钮的标志设为true，用于休息的tts的判断
+                    isClickPlusRestTime = true;
                   });
 
                   //  其他不用表，只是修改休息倒计时的显示数字
@@ -682,9 +946,22 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
                 isReverseAnimation: false,
                 isTimerTextShown: true,
                 autoStart: true,
-                onStart: () {
-                  debugPrint('Countdown Started');
+                timeFormatterFunction: (_, duration) {
+                  return '${duration.inSeconds + 1}';
                 },
+                // 当进入休息倒计时时，开始语音提示下一个动作.
+                onStart: () {
+                  // Here, do whatever you want
+                  debugPrint('Countdown Started');
+
+                  // 只有正常进入休息倒计时才发tts，点击了+10s后的restart不发语音
+                  if (!isClickPlusRestTime) {
+                    var restText =
+                        "休息一下，下一个动作：${actions[_currentIndex].exercise.exerciseName}";
+                    _speak(restText);
+                  }
+                },
+
                 onComplete: () {
                   debugPrint('休息 Countdown Ended-- $_currentIndex');
                   setState(() {
@@ -697,17 +974,10 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
                     isRestTurn = false;
                     // 注意，休息倒计时可能会被用户手动加一部分时间，所以当前休息倒计时结束时，还原为原始的休息时间
                     _cusRestTime = _defaultCusRestTime;
+
+                    // 正常结束休息倒计时重置是否点击增加休息时间按钮的标志
+                    isClickPlusRestTime = false;
                   });
-                },
-                onChange: (String timeStamp) {
-                  debugPrint('Countdown Changed $timeStamp');
-                },
-                timeFormatterFunction: (defaultFormatterFunction, duration) {
-                  if (duration.inSeconds == 0) {
-                    return "Start";
-                  } else {
-                    return Function.apply(defaultFormatterFunction, [duration]);
-                  }
                 },
               ),
             ),
@@ -736,6 +1006,12 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
                     // 在跳过休息前，可能还有+10s的操作，但这里跳过了就不会倒计时完成，所有这里跳过时重置为默认的
                     _cusRestTime = _defaultCusRestTime;
                   });
+
+                  // 跳过休息时也停止语音
+                  _stop();
+
+                  // 跳过休息倒计时也要重置是否点击增加休息时间按钮的标志
+                  isClickPlusRestTime = false;
                 },
                 style: ButtonStyle(
                   backgroundColor:
@@ -820,17 +1096,26 @@ class _ActionFollowPracticeState extends State<ActionFollowPractice> {
     var tempTime = DateTime.now().millisecondsSinceEpoch -
         startedMoment.millisecondsSinceEpoch;
 
+    var totolTime = (tempTime / 1000).toStringAsFixed(0);
+    var pausedTime = (totalPausedTimes / 1000).toStringAsFixed(0);
+    var workoutTime =
+        (tempTime / 1000 - totalPausedTimes / 1000 - totalRestTimes)
+            .toStringAsFixed(0);
+
     showDialog(
       context: context,
       barrierDismissible: false, // 禁止点击空白处隐藏弹窗
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('恭喜你！'),
+        title: const Text('恭喜！'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('你已完成所有锻炼\n 总耗时 ${(tempTime / 1000).toStringAsFixed(2)} 秒'),
-            Text('其中暂停耗时${(totalPausedTimes / 1000).toStringAsFixed(2)} 秒'),
-            Text('其中休息耗时$totalRestTimes 秒'),
+            Text('你已完成所有锻炼\n总耗时 $totolTime 秒，其中：'),
+            Text('  暂停耗时约 $pausedTime 秒'),
+            Text('  休息耗时约 $totalRestTimes 秒'),
+            Text('  锻炼耗时约 $workoutTime 秒'),
           ],
         ),
         actions: [

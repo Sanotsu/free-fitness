@@ -35,6 +35,35 @@ String formatSeconds(double seconds, {String? formatString = "HH:mm:ss"}) {
   return formatter.format(DateTime(0).add(duration));
 }
 
+// HH:mm:ss样式格式化为 Duration
+Duration? convertToDuration(String timeStr, formatString) {
+  List<String> parts = timeStr.split(':');
+
+  if (formatString == "HH:mm:ss") {
+    return Duration(
+      hours: int.parse(parts[0]),
+      minutes: int.parse(parts[1]),
+      seconds: int.parse(parts[2]),
+    );
+  }
+
+  if (formatString == "mm:ss") {
+    return Duration(minutes: int.parse(parts[0]), seconds: int.parse(parts[1]));
+  }
+
+  if (formatString == "ss") {
+    return Duration(seconds: int.parse(parts[1]));
+  }
+
+  // 如果传入的格式化不是HH:mm:ss的任何一种，返回null(之前的当前时间的duration)
+  // return Duration(
+  //   hours: DateTime.now().hour,
+  //   minutes: DateTime.now().minute,
+  //   seconds: DateTime.now().second,
+  // );
+  return null;
+}
+
 // 音频大小，从int的byte数值转为xxMB(保留2位小数)
 String formatAudioSizeToString(int num) =>
     "${(num / 1024 / 1024).toStringAsFixed(2)} MB";
