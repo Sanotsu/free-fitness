@@ -5,10 +5,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../common/components/cus_cards.dart';
 import '../../common/global/constants.dart';
+import '../me/_feature_mock_data/index.dart';
 import 'foods/index.dart';
 import 'records/index.dart';
 import 'reports/index.dart';
-import 'settings/index.dart';
 
 class Dietary extends StatefulWidget {
   const Dietary({super.key});
@@ -59,11 +59,17 @@ class _DietaryState extends State<Dietary> {
                   flex: 1,
                   child: SizedBox(
                     height: 100.sp,
-                    child: buildSmallCoverCard(
-                      context,
-                      const DietarySettings(),
-                      "设置",
-                      routeName: "/dietarySettings",
+                    child: TextButton.icon(
+                      label: const Text("占位，后续调整"),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const FeatureMockDemo(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.bug_report_outlined),
                     ),
                   ),
                 ),

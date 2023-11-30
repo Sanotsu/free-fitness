@@ -116,9 +116,9 @@ class FoodComposition {
     cu = json['Cu'];
     mn = json['Mn'];
     remark = json['remark'];
-    tags = json['tags'].cast<String>();
-    category = json['category'].cast<String>();
-    photos = json['photos'].cast<String>();
+    tags = json['tags']?.cast<String>();
+    category = json['category']?.cast<String>();
+    photos = json['photos']?.cast<String>();
   }
 
   Map<String, dynamic> toJson() {

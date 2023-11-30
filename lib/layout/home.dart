@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
     Training(),
     Dietary(),
     DiaryTableCalendar(),
-    UserCenter()
+    UserAndSettings()
   ];
 
   void _onItemTapped(int index) {

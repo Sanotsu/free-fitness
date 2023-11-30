@@ -221,6 +221,9 @@ Ab_Roller.json:
 
   // 讲json数据保存到数据库中
   _saveToDb() async {
+    // 已经在保存中路，再点击保存直接返回即可
+    if (isLoading) return;
+
     setState(() {
       isLoading = true;
     });

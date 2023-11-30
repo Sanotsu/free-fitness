@@ -2,147 +2,296 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:free_fitness/models/user_state.dart';
 
-import '../../common/utils/db_diary_helper.dart';
-import '../../common/utils/db_dietary_helper.dart';
-import '../../common/utils/db_training_helper.dart';
-import 'test_funcs.dart';
+import '../../../common/utils/tool_widgets.dart';
+import '../../common/utils/db_user_helper.dart';
+import '_feature_mock_data/index.dart';
+import '_feature_mock_data/test_funcs.dart';
+import 'intake_goals/intake_target.dart';
+import 'user_info/base_info.dart';
 
-class UserCenter extends StatefulWidget {
-  const UserCenter({super.key});
+class UserAndSettings extends StatefulWidget {
+  const UserAndSettings({super.key});
 
   @override
-  State<UserCenter> createState() => _UserCenterState();
+  State<UserAndSettings> createState() => _UserAndSettingsState();
 }
 
-class _UserCenterState extends State<UserCenter> {
-  final DBTrainingHelper _trainingHelper = DBTrainingHelper();
-  final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
-  final DBDiaryHelper _diaryHelper = DBDiaryHelper();
+class _UserAndSettingsState extends State<UserAndSettings> {
+  final DBUserHelper _userHelper = DBUserHelper();
 
-  Future<void> _showSimpleDialog(BuildContext context, String msg) async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('提示'),
-          content: Text(msg),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('确定'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+// ？？？登录用户信息，怎么在app中记录用户信息？缓存一个用户id每次都查？记住状态实时更新？……
+  late User userInfo;
+
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _queryLoginedUserInfo();
+  }
+
+  // ？？？这里要传入用户信息供查询
+  _queryLoginedUserInfo() async {
+    if (isLoading) return;
+    setState(() {
+      isLoading = true;
+    });
+
+    // ？？？这个是测试的实例，实际的时候不是这样的------
+    // 如果没有userid为1的用户，新增一个测试的，那就一定存在了
+    if ((await _userHelper.queryUser(userId: 1)) == null) {
+      await insertOneUser();
+    }
+    var tempUser = (await _userHelper.queryUser(userId: 1))!;
+
+    print("_queryLoginedUserInfo---tempUser: $tempUser");
+
+    setState(() {
+      userInfo = tempUser;
+      isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("我的"),
+        title: const Text('UserAndSettings'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FeatureMockDemo(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.bug_report),
+          ),
+          const Icon(Icons.menu),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.sp),
+            child: const Icon(Icons.settings),
+          )
+        ],
       ),
-      // ??? 从上倒下预计是:个人信息、功能按钮、软件信息等区块
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            /// ？？？在此处集中添加测试数据
-            TextButton(
-              onPressed: () {
-                _dietaryHelper.deleteDB();
-                _showSimpleDialog(context, "已删除 dietary db");
-              },
-              child: const Text("delete dietary db"),
-            ),
-            TextButton(
-              onPressed: () {
-                _trainingHelper.deleteDB();
-                _showSimpleDialog(context, "已删除 training db");
-              },
-              child: const Text("delete training db"),
-            ),
-            TextButton(
-              onPressed: () {
-                _diaryHelper.deleteDB();
-                _showSimpleDialog(context, "已删除 diary db");
-              },
-              child: const Text("delete diary db"),
-            ),
-            TextButton(
-              // onPressed: () async {
-              //   await insertOneDietaryUser();
-              //   if (!mounted) return;
-              //   _showSimpleDialog(context, "已新增用户营养素目标");
-              // },
-              onPressed: () {},
-              child: const Text("新增用户营养素目标(todo)"),
-            ),
-            TextButton(
-              onPressed: () async {
-                await insertOneDietaryUser();
-                if (!mounted) return;
-                _showSimpleDialog(context, "已新增唯一用户");
-              },
-              child: const Text("新增唯一用户"),
-            ),
-            TextButton(
-              onPressed: () async {
-                // 新增饮食模块需要有个人信息，避免没有点击上面那个按钮
-                await insertOneDietaryUser();
-                // 7种食物(对应7*3种单份营养素)、70条饮食日记条目、随机插入最近7天中
-                // (一日四餐，每餐1个条目，7天都是7*4=28条数据)
-                await insertDailyLogDataDemo(7, 30, 7);
-                if (!mounted) return;
-                _showSimpleDialog(context, "已新增【饮食】模块示例");
-              },
-              child: const Text("新增饮食模块示例"),
-            ),
-            TextButton(
-              onPressed: () async {
-                await insertOneRandomPlanHasGroup();
-                if (!mounted) return;
-                _showSimpleDialog(context, "已新增【训练】模块示例");
-              },
-              child: const Text("新增训练模块示例"),
-            ),
-            TextButton(
-              onPressed: () async {
-                await insertOneQuillDemo();
-                if (!mounted) return;
-                _showSimpleDialog(context, "已新增一篇【手记】示例");
-              },
-              child: const Text("新增一篇手记"),
-            ),
-            ListView.builder(
-              // 解决 NEEDS-PAINT ……的问题
-              shrinkWrap: true,
-              // 只有外部的 SingleChildScrollView 滚动，这个内部的listview不滚动
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 4,
-              //列表项构造器
-              itemBuilder: (BuildContext context, int index) {
-                return Card(
-                  child: ListTile(
-                    title: Text('预留设置 $index'),
-                    subtitle: Text('预留设置 $index 子标题'),
-                    minLeadingWidth: 20.sp, // 左侧缩略图标的最小宽度
-                    // 这个小部件将查询/加载图像。
-                    leading: const Icon(Icons.album),
-                    onTap: () {/* ... */},
-                    trailing: const Icon(Icons.arrow_forward),
+      body: isLoading
+          ? buildLoader(isLoading)
+          : Container(
+              color: Colors.white54,
+              child: ListView(
+                children: [
+                  /// 用户信息区
+                  SizedBox(height: 10.sp),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      CircleAvatar(
+                        maxRadius: 60.sp,
+                        backgroundImage:
+                            const AssetImage("assets/profile_icons/Avatar.jpg"),
+                      ),
+                      Positioned(
+                        top: 40.sp,
+                        right: 0.5.sw - 75.sp,
+                        child: Icon(
+                          userInfo.gender == "男"
+                              ? Icons.male
+                              : (userInfo.gender == "女"
+                                  ? Icons.female
+                                  : Icons.circle_outlined),
+                          size: 30.sp,
+                          color: userInfo.gender == "男"
+                              ? Colors.red
+                              : userInfo.gender == "女"
+                                  ? Colors.green
+                                  : Colors.black,
+                        ),
+                      ),
+                    ],
                   ),
-                );
-              },
-            )
-          ],
+                  SizedBox(height: 10.sp),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CircleAvatar(
+                        // maxRadius: 20.sp, // 最大半径
+                        backgroundImage:
+                            AssetImage("assets/profile_icons/Facebook.png"),
+                      ),
+                      SizedBox(width: 10.sp),
+                      const CircleAvatar(
+                        backgroundImage:
+                            AssetImage("assets/profile_icons/GooglePlus.png"),
+                      ),
+                      SizedBox(width: 10.sp),
+                      const CircleAvatar(
+                        backgroundImage:
+                            AssetImage("assets/profile_icons/Twitter.jpg"),
+                      ),
+                      SizedBox(width: 10.sp),
+                      const CircleAvatar(
+                        backgroundImage:
+                            AssetImage("assets/profile_icons/LinkedIn.png"),
+                      )
+                    ],
+                  ),
+                  SizedBox(height: 10.sp),
+                  // username
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        userInfo.userName,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 26.sp,
+                        ),
+                      )
+                    ],
+                  ),
+                  // usercode
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text("@${userInfo.userCode ?? 'unkown'}"),
+                    ],
+                  ),
+                  SizedBox(height: 10.sp),
+                  // 用户简介 description
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        userInfo.description ?? 'no description',
+                        style: TextStyle(fontSize: 20.sp),
+                      )
+                    ],
+                  ),
+                  SizedBox(height: 10.sp),
+
+                  /// 功能区
+                  // 参看别的app大概留几个
+                  CusSettingCard(
+                    leadingIcon: Icons.account_circle_outlined,
+                    title: '基本信息',
+                    onTap: () {
+                      // 处理相应的点击事件
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              MyProfilePage(userInfo: userInfo),
+                        ),
+                      ).then((value) {
+                        // 确认新增成功后重新加载当前日期的条目数据
+
+                        print("我的设置返回带过来的结果==========$value");
+                        _queryLoginedUserInfo();
+                      });
+                    },
+                  ),
+                  CusSettingCard(
+                    leadingIcon: Icons.flag_circle,
+                    title: '摄入目标',
+                    onTap: () {
+                      // 处理相应的点击事件
+                      print("(点击进入摄入目标页面)……");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              IntakeTargetPage(userInfo: userInfo),
+                        ),
+                      ).then((value) {
+                        // 确认新增成功后重新加载当前日期的条目数据
+
+                        print("我的设置返回带过来的结果$value");
+                        _queryLoginedUserInfo();
+                      });
+                    },
+                  ),
+                  CusSettingCard(
+                    leadingIcon: Icons.photo_album_outlined,
+                    title: '饮食相册(tbd)',
+                    onTap: () {
+                      // 处理相应的点击事件
+                      print("(点击进入相册页面)……");
+                    },
+                  ),
+                  CusSettingCard(
+                    leadingIcon: Icons.privacy_tip_sharp,
+                    title: '语言选择(tbd)',
+                    onTap: () {
+                      // 处理相应的点击事件
+                    },
+                  ),
+                  CusSettingCard(
+                    leadingIcon: Icons.privacy_tip_sharp,
+                    title: '到点提醒(tbd)',
+                    onTap: () {
+                      // 处理相应的点击事件
+                    },
+                  ),
+                  CusSettingCard(
+                    leadingIcon: Icons.privacy_tip_sharp,
+                    title: '常见问题(tbd)',
+                    onTap: () {
+                      // 处理相应的点击事件
+                    },
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+}
+
+// 每个设置card抽出来复用
+class CusSettingCard extends StatelessWidget {
+  final IconData leadingIcon;
+  final String title;
+  final VoidCallback onTap;
+
+  const CusSettingCard({
+    Key? key,
+    required this.leadingIcon,
+    required this.title,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Card(
+          color: Colors.white70,
+          margin: const EdgeInsets.only(left: 35, right: 35, bottom: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: ListTile(
+            leading: Icon(
+              leadingIcon,
+              color: Colors.black54,
+            ),
+            title: Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            trailing: const Icon(Icons.arrow_forward, color: Colors.black54),
+            onTap: onTap,
+          ),
         ),
-      ),
+        const SizedBox(
+          height: 10,
+        ),
+      ],
     );
   }
 }

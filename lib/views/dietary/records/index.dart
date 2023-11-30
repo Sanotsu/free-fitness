@@ -8,6 +8,7 @@ import 'package:free_fitness/models/dietary_state.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common/utils/db_dietary_helper.dart';
+import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
 import 'foods/food_detail.dart';
@@ -22,6 +23,7 @@ class DietaryRecords extends StatefulWidget {
 
 class _DietaryRecordsState extends State<DietaryRecords> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
+  final DBUserHelper _userHelper = DBUserHelper();
 
   /// 根据条件查询的日记条目数据
   List<DailyFoodItemWithFoodServing> dfiwfsList = [];
@@ -59,22 +61,31 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   void initState() {
     super.initState();
 
-    setState(() {
-      valueRDA = 1800;
-    });
-
     _queryDailyFoodItemList();
   }
 
   // 有指定日期查询指定日期的饮食记录条目，没有就当前日期
   _queryDailyFoodItemList() async {
-    print("开始运行查询当日饮食日记条目---------");
-
     if (isLoading) return;
 
     setState(() {
       isLoading = true;
     });
+
+    // 查询用户目标值
+    // TODO 这里登入者的id要存在哪里？这里还应该根据今天是星期几显示对应的RDA值
+    var tempUser = await _userHelper.queryUser(userId: 1);
+
+    print("开始运行查询当日饮食日记条目---------");
+    if (tempUser != null) {
+      setState(() {
+        valueRDA = tempUser.rdaGoal != null
+            ? tempUser.rdaGoal!
+            : tempUser.gender == "男"
+                ? 2250
+                : 1766;
+      });
+    }
 
     // 理论上是默认查询当日的，有选择其他日期则查询指定日期
     List<DailyFoodItemWithFoodServing> temp =

@@ -54,11 +54,11 @@ class CustomExercise {
     level = json['level'];
     mechanic = json['mechanic'];
     equipment = json['equipment'];
-    primaryMuscles = json['primaryMuscles'].cast<String>();
-    secondaryMuscles = json['secondaryMuscles'].cast<String>();
-    instructions = json['instructions'].cast<String>();
+    primaryMuscles = json['primaryMuscles']?.cast<String>();
+    secondaryMuscles = json['secondaryMuscles']?.cast<String>();
+    instructions = json['instructions']?.cast<String>();
     category = json['category'];
-    images = json['images'].cast<String>();
+    images = json['images']?.cast<String>();
     // 其他可能必要的栏位(不填导入时也有默认值)
     code = json['code'];
     countingMode = json['countingMode'];

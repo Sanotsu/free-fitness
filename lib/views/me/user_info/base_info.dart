@@ -2,13 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:free_fitness/models/user_state.dart';
 import 'package:intl/intl.dart';
 
-import '../../../common/utils/db_dietary_helper.dart';
-import '../../../models/dietary_state.dart';
+import '../../../common/utils/db_user_helper.dart';
 
 class MyProfilePage extends StatefulWidget {
-  final DietaryUser userInfo;
+  final User userInfo;
 
   const MyProfilePage({super.key, required this.userInfo});
 
@@ -17,7 +17,8 @@ class MyProfilePage extends StatefulWidget {
 }
 
 class _MyProfilePageState extends State<MyProfilePage> {
-  final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
+  final DBUserHelper _userHelper = DBUserHelper();
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final List<String> genders = ['男', '女', '雷霆战机', '其他'];
@@ -27,8 +28,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
   final TextEditingController weightController = TextEditingController();
   final TextEditingController userNameController = TextEditingController();
   final TextEditingController rdaController = TextEditingController();
+  final TextEditingController restTimeController = TextEditingController();
 
-  late DietaryUser user;
+  late User user;
 
   @override
   void initState() {
@@ -68,14 +70,17 @@ class _MyProfilePageState extends State<MyProfilePage> {
             _buildListItem('出生年月', user.dateOfBirth ?? "", () {
               _showBirthdayDialog(context);
             }),
-            _buildListItem('身高', '${user.height ?? ""} cm', () {
+            _buildListItem('身高', '${user.height ?? ""} 公分', () {
               _showHeightDialog(context);
             }),
-            _buildListItem('体重', '${user.currentWeight ?? ""} kg', () {
+            _buildListItem('体重', '${user.currentWeight ?? ""} 公斤', () {
               _showWeightDialog(context);
             }),
-            _buildListItem('RDA', '${user.rdaGoal ?? ""} kcal', () {
+            _buildListItem('RDA', '${user.rdaGoal ?? ""} 大卡', () {
               _showRDADialog(context);
+            }),
+            _buildListItem('锻炼休息时间', '${user.actionRestTime ?? ""} 秒', () {
+              _showRestTimeDialog(context);
             }),
           ],
         ),
@@ -125,7 +130,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
                 print("user.gender --${user.gender}");
 
-                await _dietaryHelper.updateDietaryUser(user);
+                await _userHelper.updateUser(user);
 
                 if (!mounted) return;
                 Navigator.of(context).pop();
@@ -152,7 +157,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
           user.dateOfBirth = DateFormat('yyyy-MM-dd').format(selectedDate);
         });
 
-        await _dietaryHelper.updateDietaryUser(user);
+        await _userHelper.updateUser(user);
       }
     });
   }
@@ -165,20 +170,20 @@ class _MyProfilePageState extends State<MyProfilePage> {
         user.userName = value.toString();
       });
 
-      await _dietaryHelper.updateDietaryUser(user);
+      await _userHelper.updateUser(user);
     }, isDecimalKeyboard: false);
   }
 
   void _showWeightDialog(BuildContext context) {
     weightController.text = user.currentWeight.toString();
 
-    _showInputDialog(context, '修改体重', 'kg', weightController, (value) async {
+    _showInputDialog(context, '修改体重', '公斤', weightController, (value) async {
       // ？？？这里是回调函数中把修改后的数据保存到数据库？？？
       setState(() {
         double newWeight = double.parse(value);
         user.currentWeight = newWeight;
       });
-      await _dietaryHelper.updateDietaryUser(user);
+      await _userHelper.updateUser(user);
     });
   }
 
@@ -190,19 +195,32 @@ class _MyProfilePageState extends State<MyProfilePage> {
         int newRdaGoal = int.parse(value);
         user.rdaGoal = newRdaGoal;
       });
-      await _dietaryHelper.updateDietaryUser(user);
+      await _userHelper.updateUser(user);
     });
   }
 
   void _showHeightDialog(BuildContext context) {
     heightController.text = user.height.toString();
 
-    _showInputDialog(context, '修改身高', 'cm', heightController, (value) async {
+    _showInputDialog(context, '修改身高', '公分', heightController, (value) async {
       setState(() {
         double newHeight = double.parse(value);
         user.height = newHeight;
       });
-      await _dietaryHelper.updateDietaryUser(user);
+      await _userHelper.updateUser(user);
+    });
+  }
+
+  void _showRestTimeDialog(BuildContext context) {
+    restTimeController.text = user.actionRestTime.toString();
+
+    _showInputDialog(context, '修改锻炼间隔休息时间', '秒', restTimeController,
+        (value) async {
+      setState(() {
+        int newRestTime = int.tryParse(value) ?? 0;
+        user.actionRestTime = newRestTime;
+      });
+      await _userHelper.updateUser(user);
     });
   }
 
@@ -217,8 +235,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
 // 是否默认打开数字键盘（身高、体重、rda则打开，根据提示的单位来判断）
 
     bool showDecimal = false;
-    if (suffixText.toLowerCase() == 'cm' ||
-        suffixText.toLowerCase() == 'kg' ||
+    if (suffixText.toLowerCase() == '公分' ||
+        suffixText.toLowerCase() == '公斤' ||
+        suffixText.toLowerCase() == '秒' ||
         suffixText.toLowerCase() == '大卡') {
       showDecimal = true;
     }

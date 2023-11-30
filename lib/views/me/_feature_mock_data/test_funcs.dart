@@ -3,21 +3,24 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:free_fitness/models/user_state.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../common/utils/db_dietary_helper.dart';
-import '../../../../common/utils/tools.dart';
-import '../../../../models/dietary_state.dart';
-import '../../common/global/constants.dart';
-import '../../common/utils/db_diary_helper.dart';
-import '../../common/utils/db_training_helper.dart';
-import '../../models/diary_state.dart';
-import '../../models/training_state.dart';
+import '../../../../../common/utils/db_dietary_helper.dart';
+import '../../../../../common/utils/tools.dart';
+import '../../../../../models/dietary_state.dart';
+import '../../../common/global/constants.dart';
+import '../../../common/utils/db_diary_helper.dart';
+import '../../../common/utils/db_training_helper.dart';
+import '../../../common/utils/db_user_helper.dart';
+import '../../../models/diary_state.dart';
+import '../../../models/training_state.dart';
 import 'quill_samples.dart';
 
 final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
 final DBTrainingHelper _trainingHelper = DBTrainingHelper();
 final DBDiaryHelper _diaryHelper = DBDiaryHelper();
+final DBUserHelper _userHelper = DBUserHelper();
 
 ///
 /// ---------- 饮食模块相关--------------
@@ -351,13 +354,13 @@ Future<int> insertOneRandomPlanHasGroup() async {
 
 // 插入一条用户信息
 // 因为没有缓存用户信息，逻辑中有测试数据userId=1,所以插入也只插入这一条
-insertOneDietaryUser() async {
-  print("【【【 插入测试数据 start-->:insertOneDietaryUser ");
+insertOneUser() async {
+  print("【【【 插入测试数据 start-->:insertOneUser ");
 
   // 测试，插入先删除
-  await _dietaryHelper.deleteDietaryUser(1);
+  await _userHelper.deleteUser(1);
 
-  var newItem = DietaryUser(
+  var newItem = User(
     userId: 1,
     userName: "张三",
     userCode: "测试code",
@@ -373,8 +376,8 @@ insertOneDietaryUser() async {
     fatGoal: 45.5,
     choGoal: 65.6,
   );
-  await _dietaryHelper.insertDietaryUserList([newItem]);
-  print("【【【 插入测试数据 end-->:insertOneDietaryUser ");
+  await _userHelper.insertUserList([newItem]);
+  print("【【【 插入测试数据 end-->:insertOneUser ");
 }
 
 // 插入一个固定内容随机题目的手记

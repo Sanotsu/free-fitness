@@ -5,15 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:free_fitness/models/user_state.dart';
 
 import '../../../common/global/constants.dart';
-import '../../../common/utils/db_dietary_helper.dart';
+import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
-import '../../../models/dietary_state.dart';
 import 'week_intake_bar_chart.dart';
 
 class IntakeTargetPage extends StatefulWidget {
-  final DietaryUser userInfo;
+  final User userInfo;
   const IntakeTargetPage({super.key, required this.userInfo});
 
   @override
@@ -21,8 +21,9 @@ class IntakeTargetPage extends StatefulWidget {
 }
 
 class _IntakeTargetPageState extends State<IntakeTargetPage> {
-  final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
-  late DietaryUser user;
+  final DBUserHelper _userHelper = DBUserHelper();
+
+  late User user;
 
   // 是否在修改整体卡路里和宏量素
   bool _isEditing = false;
@@ -87,7 +88,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
 
   // 格式化已经存在的每日卡路里和营养素目标
   formatDailyIntakeMap() async {
-    var temp = await _dietaryHelper.queryDietaryUserWithIntakeGoal();
+    var temp = await _userHelper.queryUserWithIntakeDailyGoal();
 
     // 如果没有每周设定的值，就使用总体平均值；如果后者都没有，则是显示推荐值(中国居民膳食指南18岁~。)
     // ？？？具体细节再考虑
@@ -96,8 +97,8 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
     // 构建周一到周日的营养素目标，如果不存在，则使用基础预设值
     for (int i = 1; i <= 7; i++) {
       // 如果没有每周几的预设值或者某个值不存在则使用基础预设值
-      if (temp.goals.isEmpty ||
-          temp.goals.every((goal) => int.parse(goal.dayOfWeek) != i)) {
+      if (temp.intakeGoals.isEmpty ||
+          temp.intakeGoals.every((goal) => int.parse(goal.dayOfWeek) != i)) {
         tempIntakes[i] = CusMacro(
           calory: temp.user.rdaGoal ?? 2250,
           carbs: temp.user.choGoal ?? 120,
@@ -108,7 +109,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
     }
 
     // 有设置的则直接使用（注意，dayOfWeek 存入的也就是1-7的字符串，后续可以改为统一的int型）
-    for (var goal in temp.goals) {
+    for (var goal in temp.intakeGoals) {
       tempIntakes[int.parse(goal.dayOfWeek)] = CusMacro(
         calory: goal.rdaDailyGoal,
         carbs: goal.choDailyGoal,
@@ -264,8 +265,8 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                             user.proteinGoal = double.parse(_macrosFormKey
                                 .currentState!.fields['protein']!.value);
                           });
-                          await _dietaryHelper.updateDietaryUser(user);
-                          
+                          await _userHelper.updateUser(user);
+
                           // 平均营养素目标修改后，也更新下方图表的值
                           setState(() {
                             formatDailyIntakeMap();
@@ -495,10 +496,12 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
           choDailyGoal: newData.carbs,
         );
 
-        await _dietaryHelper.updateUserIntakeDailyGoal([temp]);
+        await _userHelper.updateIntakeDailyGoalByUser([temp]);
         // 修改了数据库，也修改对应显示内容
         setState(() {
           intakeData[selectedDay] = newData;
+
+          refreshWeekMacrosData();
         });
       }
     }

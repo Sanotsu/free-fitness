@@ -119,6 +119,8 @@ buildExerciseImageCarouselSlider(Exercise exercise) {
       enlargeCenterPage: true, // 居中图片放大
       aspectRatio: 16 / 9, // 图片宽高比
       viewportFraction: 1, // 图片占屏幕宽度的比例
+      // 只有一张图片时不滚动
+      enableInfiniteScroll: imageList.length > 1,
     ),
     items: imageList.map((imageUrl) {
       return Builder(

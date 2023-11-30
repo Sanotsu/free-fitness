@@ -8,10 +8,6 @@ class DietaryDdl {
   static const tableNameOfServingInfo = 'ff_serving_info';
   // 日记条目表（一天多餐多条目，空间换时间的设计）
   static const tableNameOfDailyFoodItem = 'ff_daily_food_item';
-  // 用户基础表
-  static const tableNameOfDietaryUser = 'ff_dietary_user';
-  // 饮食摄入目标表
-  static const tableNameOfIntakeDailyGoal = 'ff_intake_daily_goal';
 
   static const String ddlForFood = """
     CREATE TABLE IF NOT EXISTS $tableNameOfFood (
@@ -65,37 +61,6 @@ class DietaryDdl {
       gmt_create TEXT,
       update_user TEXT,
       gmt_modified TEXT
-    );
-    """;
-
-  static const String ddlForDietaryUser = """
-    CREATE TABLE $tableNameOfDietaryUser (
-      user_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-      user_name TEXT NOT NULL,
-      user_code TEXT,
-      gender TEXT,
-      password TEXT,
-      description TEXT,
-      date_of_birth TEXT,
-      height REAL,
-      current_weight REAL,
-      target_weight REAL,
-      rda_goal INTEGER,
-      protein_goal REAL,
-      fat_goal REAL,
-      cho_goal REAL
-    );
-    """;
-
-  static const String ddlForIntakeDailyGoal = """
-    CREATE TABLE IF NOT EXISTS $tableNameOfIntakeDailyGoal (
-      intake_daily_goal_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-      user_id INTEGER NOT NULL,
-      day_of_week TEXT NOT NULL,
-      rda_daily_goal INTEGER NOT NULL,
-      protein_daily_goal REAL NOT NULL,
-      fat_daily_goal REAL NOT NULL,
-      cho_daily_goal REAL NOT NULL
     );
     """;
 }

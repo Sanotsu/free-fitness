@@ -3,10 +3,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:free_fitness/models/user_state.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
+import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/dietary_state.dart';
 import 'week_intake_bar.dart';
@@ -24,14 +26,15 @@ class DietaryReports extends StatefulWidget {
 
 class _DietaryReportsState extends State<DietaryReports> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
+  final DBUserHelper _userHelper = DBUserHelper();
 
   /// 根据条件查询的日记条目数据(所有数据的来源，格式化成VO可以在指定函数中去做)
   List<DailyFoodItemWithFoodServing> dfiwfsList = [];
 
   // RDA 的值应该在用户配置表里面带出来，在init的时候赋值。现在没有实现所以列个示例在这里
-  late DietaryUser loginUser;
+  late User loginUser;
   // 如果用户没有设定，则使用预设值2250或1800
-  int valueRDA = 0;
+  int valueRDA = 1800;
 
   // 数据是否加载中
   bool isLoading = false;
@@ -101,7 +104,7 @@ class _DietaryReportsState extends State<DietaryReports> {
       "endDate": DateFormat('yyyy-MM-dd').format(DateTime.now()),
     };
 
-    // 理论上是默认查询当日的，有选择其他日期则查询指定日期
+    // 理论上是默认查询当日的，有选择其他日期则查询指定日期？？？还要是登录者这个用户编号的
     var temp = (await _dietaryHelper.queryDailyFoodItemListWithDetail(
       startDate: queryDateRange["startDate"],
       endDate: queryDateRange["endDate"],
@@ -110,7 +113,7 @@ class _DietaryReportsState extends State<DietaryReports> {
 
     // 查询用户目标值
     // TODO 这里登入者的id要存在哪里？
-    var tempUser = await _dietaryHelper.queryDietaryUser(userId: 1);
+    var tempUser = await _userHelper.queryUser(userId: 1);
 
     print("queryDateRange--$queryDateRange ${temp.length}");
 
@@ -118,12 +121,16 @@ class _DietaryReportsState extends State<DietaryReports> {
 
     setState(() {
       dfiwfsList = temp;
-      loginUser = tempUser;
-      valueRDA = tempUser.rdaGoal != null
-          ? tempUser.rdaGoal!
-          : tempUser.gender == "男"
-              ? 2250
-              : 1800;
+      // loginUser = tempUser;
+
+      if (tempUser != null) {
+        valueRDA = tempUser.rdaGoal != null
+            ? tempUser.rdaGoal!
+            : tempUser.gender == "男"
+                ? 2250
+                : 1800;
+      }
+
       isLoading = false;
     });
   }

@@ -163,6 +163,8 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
 
   // 讲json数据保存到数据库中
   _saveToDb() async {
+    if (isLoading) return;
+
     setState(() {
       isLoading = true;
     });

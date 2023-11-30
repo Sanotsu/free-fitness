@@ -124,7 +124,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
         title: RichText(
           text: TextSpan(
             children: [
-              TextSpan(text: '食物    ', style: TextStyle(fontSize: 20.sp)),
+              TextSpan(text: '食物\n', style: TextStyle(fontSize: 20.sp)),
               TextSpan(
                 text: "共 $itemsCount 条",
                 style: TextStyle(fontSize: 12.sp),
