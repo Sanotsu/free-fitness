@@ -68,6 +68,10 @@ dependencies:
   flutter_tts: ^3.8.5
   # 权限处理
   permission_handler: ^11.1.0
+  # 轮播组件
+  carousel_slider: ^4.2.1
+  # 控制屏幕保持亮屏
+  wakelock_plus: ^1.1.4
   
 
 dev_dependencies:

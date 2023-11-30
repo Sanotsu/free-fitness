@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
@@ -113,6 +114,8 @@ class _ActionFollowPracticeWithTTSState
   @override
   void initState() {
     super.initState();
+    // 进入跟练页面就保持不熄屏
+    WakelockPlus.enable();
 
     setState(() {
       // 一定要传动作组数据
@@ -122,6 +125,14 @@ class _ActionFollowPracticeWithTTSState
     });
 
     initTts();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    flutterTts.stop();
+    // 退出页面时恢复屏幕熄屏设置
+    WakelockPlus.disable();
   }
 
   ///
@@ -292,12 +303,6 @@ class _ActionFollowPracticeWithTTSState
   }
 
   @override
-  void dispose() {
-    super.dispose();
-    flutterTts.stop();
-  }
-
-  @override
   Widget build(BuildContext context) {
     // 完成之后，这里页面点返回按钮，应该和弹窗中跳到报告页面一样。
     // ？？？或者正式的时候，弹窗就直接改为跳到报告页面即可
@@ -332,7 +337,7 @@ class _ActionFollowPracticeWithTTSState
       Expanded(
         // 这里的盒子，只是单纯区分休息时显示下一个要小点，跟练时图片大点
         flex: 5,
-        child: buildExerciseImage(actions[0].exercise),
+        child: buildExerciseImageCarouselSlider(actions[0].exercise),
       ),
       Expanded(
         flex: 2,
@@ -461,7 +466,9 @@ class _ActionFollowPracticeWithTTSState
       Expanded(
         // 这里的盒子，只是单纯区分休息时显示下一个要小点，跟练时图片大点
         flex: 4,
-        child: buildExerciseImage(actions[_currentIndex].exercise),
+        child: buildExerciseImageCarouselSlider(
+          actions[_currentIndex].exercise,
+        ),
       ),
       // 在跟练页面显示当前训练占全部的进度条
       SizedBox(
@@ -1068,7 +1075,9 @@ class _ActionFollowPracticeWithTTSState
 
       Expanded(
         flex: 3,
-        child: buildExerciseImage(actions[_currentIndex].exercise),
+        child: buildExerciseImageCarouselSlider(
+          actions[_currentIndex].exercise,
+        ),
       ),
     ];
   }
@@ -1083,6 +1092,9 @@ class _ActionFollowPracticeWithTTSState
     var workoutTime =
         (tempTime / 1000 - totalPausedTimes / 1000 - totalRestTimes)
             .toStringAsFixed(0);
+
+    // 跟练结束后就可以停止禁止熄屏
+    WakelockPlus.disable();
 
     showDialog(
       context: context,

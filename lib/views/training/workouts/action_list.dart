@@ -240,7 +240,7 @@ class _ActionListState extends State<ActionList> {
                   onPressed: () {
                     // 【点击开始跟练
 
-                    log.d("开始跟练的数据 $actionList");
+                    // log.d("开始跟练的数据 $actionList");
 
                     Navigator.push(
                       context,
@@ -360,7 +360,7 @@ class _ActionListState extends State<ActionList> {
                     flex: 6,
                     child: Padding(
                       padding: EdgeInsets.all(_isEditing ? 5.sp : 10.sp),
-                      child: buildExerciseImage(adItem.exercise),
+                      child: buildExerciseImageCarouselSlider(adItem.exercise),
                     ),
                   ),
                   if (_isEditing)

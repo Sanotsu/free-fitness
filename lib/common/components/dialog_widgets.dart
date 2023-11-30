@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -46,7 +47,7 @@ buildImageArea(BuildContext context, Exercise exercise) {
                 return Dialog(
                   child: Hero(
                     tag: 'imageTag',
-                    child: buildExerciseImage(exercise),
+                    child: buildExerciseImageCarouselSlider(exercise),
                   ),
                 );
               },
@@ -54,7 +55,8 @@ buildImageArea(BuildContext context, Exercise exercise) {
           },
           child: Hero(
             tag: 'imageTag',
-            child: buildExerciseImage(exercise),
+            // child: buildExerciseImage(exercise),
+            child: buildExerciseImageCarouselSlider(exercise),
           ),
         ),
       ),
@@ -104,5 +106,40 @@ Image buildExerciseImage(Exercise exercise) {
         (BuildContext context, Object exception, StackTrace? stackTrace) {
       return Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown);
     },
+  );
+}
+
+// 锻炼的图片轮播图(后续如果食物的图片或者其他图片有类似功能，可能再抽一次)
+buildExerciseImageCarouselSlider(Exercise exercise) {
+  var imageList = exercise.images?.split(",") ?? [];
+
+  return CarouselSlider(
+    options: CarouselOptions(
+      autoPlay: true, // 自动播放
+      enlargeCenterPage: true, // 居中图片放大
+      aspectRatio: 16 / 9, // 图片宽高比
+      viewportFraction: 1, // 图片占屏幕宽度的比例
+    ),
+    items: imageList.map((imageUrl) {
+      return Builder(
+        builder: (BuildContext context) {
+          return Container(
+            width: MediaQuery.of(context).size.width,
+            margin: const EdgeInsets.symmetric(horizontal: 5.0),
+            decoration: const BoxDecoration(
+              color: Colors.grey,
+            ),
+            child: Image.file(
+              // 预备的时候，肯定显示第一个动作的图片
+              File(imageUrl),
+              errorBuilder: (BuildContext context, Object exception,
+                  StackTrace? stackTrace) {
+                return Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown);
+              },
+            ),
+          );
+        },
+      );
+    }).toList(),
   );
 }

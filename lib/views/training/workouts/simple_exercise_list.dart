@@ -231,7 +231,7 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
                       height: 80.sp,
                       child: Padding(
                         padding: EdgeInsets.all(5.sp),
-                        child: buildExerciseImage(exerciseItem),
+                        child: buildExerciseImageCarouselSlider(exerciseItem),
                       ),
                     ),
                   ),

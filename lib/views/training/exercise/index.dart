@@ -350,7 +350,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
             SizedBox(
               width: 0.4.sw,
               height: 0.3.sh,
-              child: buildExerciseImage(exerciseItem),
+              child: buildExerciseImageCarouselSlider(exerciseItem),
             ),
 
             // SizedBox(width: 0.1.sw),

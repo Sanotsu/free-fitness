@@ -75,7 +75,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
               padding: EdgeInsets.all(10.sp),
               child: SizedBox(
                 height: 0.3.sh,
-                child: buildExerciseImage(_item),
+                child: buildExerciseImageCarouselSlider(_item),
               ),
             ),
             Padding(
