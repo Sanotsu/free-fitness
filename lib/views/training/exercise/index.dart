@@ -180,8 +180,8 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           ),
         ),
         actions: [
-          /// 测试，新增一条数据的数据
-          TextButton(
+          /// 导入json文件
+          IconButton(
             onPressed: () {
               Navigator.push(
                 context,
@@ -199,7 +199,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
             style: ButtonStyle(
               foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
             ),
-            child: const Text('<导入>'),
+            icon: const Icon(Icons.import_export),
           ),
           IconButton(
             icon: Icon(Icons.add, size: 30.sp),

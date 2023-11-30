@@ -222,7 +222,7 @@ commonExceptionDialog(BuildContext context, String title, String message) {
     builder: (context) {
       return AlertDialog(
         title: Text(title),
-        content: Text(message),
+        content: Text(message, style: TextStyle(fontSize: 12.sp)),
         actions: [
           TextButton(
             onPressed: () {

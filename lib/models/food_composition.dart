@@ -36,42 +36,50 @@ class FoodComposition {
   String? cu;
   String? mn;
   String? remark;
+  // 上面是《中国食物成分表标准版第6版》书上的内容，下面这几个是内部数据库可以有的栏位
+  List<String>? tags;
+  List<String>? category;
+  List<String>? photos;
 
-  FoodComposition(
-      {this.foodCode,
-      this.foodName,
-      this.edible,
-      this.water,
-      this.energyKCal,
-      this.energyKJ,
-      this.protein,
-      this.fat,
-      this.cHO,
-      this.dietaryFiber,
-      this.cholesterol,
-      this.ash,
-      this.vitaminA,
-      this.carotene,
-      this.retinol,
-      this.thiamin,
-      this.riboflavin,
-      this.niacin,
-      this.vitaminC,
-      this.vitaminETotal,
-      this.vitaminE1,
-      this.vitaminE2,
-      this.vitaminE3,
-      this.ca,
-      this.p,
-      this.k,
-      this.na,
-      this.mg,
-      this.fe,
-      this.zn,
-      this.se,
-      this.cu,
-      this.mn,
-      this.remark});
+  FoodComposition({
+    this.foodCode,
+    this.foodName,
+    this.edible,
+    this.water,
+    this.energyKCal,
+    this.energyKJ,
+    this.protein,
+    this.fat,
+    this.cHO,
+    this.dietaryFiber,
+    this.cholesterol,
+    this.ash,
+    this.vitaminA,
+    this.carotene,
+    this.retinol,
+    this.thiamin,
+    this.riboflavin,
+    this.niacin,
+    this.vitaminC,
+    this.vitaminETotal,
+    this.vitaminE1,
+    this.vitaminE2,
+    this.vitaminE3,
+    this.ca,
+    this.p,
+    this.k,
+    this.na,
+    this.mg,
+    this.fe,
+    this.zn,
+    this.se,
+    this.cu,
+    this.mn,
+    this.remark,
+    this.photos,
+    this.tags,
+    this.category,
+  });
 
   FoodComposition.fromJson(Map<String, dynamic> json) {
     foodCode = json['foodCode'];
@@ -108,6 +116,9 @@ class FoodComposition {
     cu = json['Cu'];
     mn = json['Mn'];
     remark = json['remark'];
+    tags = json['tags'].cast<String>();
+    category = json['category'].cast<String>();
+    photos = json['photos'].cast<String>();
   }
 
   Map<String, dynamic> toJson() {
@@ -146,6 +157,10 @@ class FoodComposition {
     data['Cu'] = cu;
     data['Mn'] = mn;
     data['remark'] = remark;
+    data['tags'] = tags;
+    data['category'] = category;
+    data['photos'] = photos;
+
     return data;
   }
 }

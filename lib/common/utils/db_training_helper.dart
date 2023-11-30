@@ -129,8 +129,9 @@ class DBTrainingHelper {
       );
 
   Future<int> insertExerciseThrowError(Exercise exercise) async {
+    final db = await database;
     try {
-      return (await database).insert(
+      return await db.insert(
         TrainingDdl.tableNameOfExercise,
         exercise.toMap(),
       );
