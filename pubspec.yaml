@@ -72,6 +72,10 @@ dependencies:
   carousel_slider: ^4.2.1
   # 控制屏幕保持亮屏
   wakelock_plus: ^1.1.4
+  # 数字选择器
+  numberpicker: ^2.1.2
+  # 保存图片
+  image_gallery_saver: ^2.0.3
   
 
 dev_dependencies:

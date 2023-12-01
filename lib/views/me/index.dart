@@ -9,7 +9,9 @@ import '../../common/utils/db_user_helper.dart';
 import '_feature_mock_data/index.dart';
 import '_feature_mock_data/test_funcs.dart';
 import 'intake_goals/intake_target.dart';
+import 'training_setting/index.dart';
 import 'user_info/base_info.dart';
+import 'weight_change_record/index.dart';
 
 class UserAndSettings extends StatefulWidget {
   const UserAndSettings({super.key});
@@ -176,46 +178,106 @@ class _UserAndSettingsState extends State<UserAndSettings> {
 
                   /// 功能区
                   // 参看别的app大概留几个
-                  CusSettingCard(
-                    leadingIcon: Icons.account_circle_outlined,
-                    title: '基本信息',
-                    onTap: () {
-                      // 处理相应的点击事件
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              MyProfilePage(userInfo: userInfo),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: NewCusSettingCard(
+                          leadingIcon: Icons.account_circle_outlined,
+                          title: '基本信息',
+                          onTap: () {
+                            // 处理相应的点击事件
+
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    MyProfilePage(userInfo: userInfo),
+                              ),
+                            ).then((value) {
+                              // 确认新增成功后重新加载当前日期的条目数据
+
+                              print("我的设置返回带过来的结果==========$value");
+                              _queryLoginedUserInfo();
+                            });
+                          },
                         ),
-                      ).then((value) {
-                        // 确认新增成功后重新加载当前日期的条目数据
+                      ),
+                      Expanded(
+                        child: NewCusSettingCard(
+                          leadingIcon: Icons.flag_circle,
+                          title: '体重趋势',
+                          onTap: () {
+                            // 处理相应的点击事件
+                            print("(点击进入体重趋势页面)……");
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    WeightChangeRecord(userInfo: userInfo),
+                              ),
+                            ).then((value) {
+                              // 确认新增成功后重新加载当前日期的条目数据
 
-                        print("我的设置返回带过来的结果==========$value");
-                        _queryLoginedUserInfo();
-                      });
-                    },
-                  ),
-                  CusSettingCard(
-                    leadingIcon: Icons.flag_circle,
-                    title: '摄入目标',
-                    onTap: () {
-                      // 处理相应的点击事件
-                      print("(点击进入摄入目标页面)……");
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              IntakeTargetPage(userInfo: userInfo),
+                              print("运动设置返回带过来的结果$value");
+                              _queryLoginedUserInfo();
+                            });
+                          },
                         ),
-                      ).then((value) {
-                        // 确认新增成功后重新加载当前日期的条目数据
-
-                        print("我的设置返回带过来的结果$value");
-                        _queryLoginedUserInfo();
-                      });
-                    },
+                      ),
+                    ],
                   ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: NewCusSettingCard(
+                          leadingIcon: Icons.flag_circle,
+                          title: '摄入目标',
+                          onTap: () {
+                            // 处理相应的点击事件
+                            print("(点击进入摄入目标页面)……");
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    IntakeTargetPage(userInfo: userInfo),
+                              ),
+                            ).then((value) {
+                              // 确认新增成功后重新加载当前日期的条目数据
+
+                              print("我的设置返回带过来的结果$value");
+                              _queryLoginedUserInfo();
+                            });
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: NewCusSettingCard(
+                          leadingIcon: Icons.flag_circle,
+                          title: '运动设置',
+                          onTap: () {
+                            // 处理相应的点击事件
+                            print("(点击进入运动设置页面)……");
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    TrainingSetting(userInfo: userInfo),
+                              ),
+                            ).then((value) {
+                              // 确认新增成功后重新加载当前日期的条目数据
+
+                              print("运动设置返回带过来的结果$value");
+                              _queryLoginedUserInfo();
+                            });
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 10.sp),
+
                   CusSettingCard(
                     leadingIcon: Icons.photo_album_outlined,
                     title: '饮食相册(tbd)',
@@ -248,6 +310,43 @@ class _UserAndSettingsState extends State<UserAndSettings> {
                 ],
               ),
             ),
+    );
+  }
+}
+
+// 每个设置card抽出来复用
+class NewCusSettingCard extends StatelessWidget {
+  final IconData leadingIcon;
+  final String title;
+  final VoidCallback onTap;
+
+  const NewCusSettingCard({
+    Key? key,
+    required this.leadingIcon,
+    required this.title,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(2.sp),
+      // height: 100.sp,
+      child: Card(
+        elevation: 5,
+        color: Colors.white70,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: ListTile(
+          leading: Icon(leadingIcon, color: Colors.black54),
+          title: Text(
+            title,
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+          ),
+          onTap: onTap,
+        ),
+      ),
     );
   }
 }

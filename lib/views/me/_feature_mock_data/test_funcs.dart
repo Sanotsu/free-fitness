@@ -433,3 +433,44 @@ insertOneQuillDemo() async {
 
   print("【【【 插入测试数据 end-->:insertOneQuillDemo  newDiaryId: $newDiaryId");
 }
+
+// 插入一个固定内容随机题目的手记
+insertBMIDemo({int? size = 10}) async {
+  print("【【【 插入测试数据 start-->:insertBMIDemo ");
+
+// 模拟身高， [165.0,175.0) 的一个随机数
+  var tempHeight = Random().nextInt(10) + 165 + Random().nextDouble();
+
+// 随机插入的体重记录在今天往前15天的随机一天中
+  var dates = getAdjacentDatesInRange(10);
+
+  // 一次性插入多条数据，身高是一样的，但体重稍微变化一下
+  List<WeightTrend> weightTrendList = [];
+  for (var i = 0; i < (size ?? 10); i++) {
+    // 模拟体重， [70.0,80.0)的一个随机数，刻意的一位小数
+    var tempweight = Random().nextInt(10) + 70 + Random().nextDouble();
+    //  BMI = 体重(公斤) / 身高^2(公分^2)
+    var bmi = double.tryParse(
+            (tempweight / (tempHeight * tempHeight)).toStringAsFixed(2)) ??
+        70.5;
+
+    var temp = WeightTrend(
+      userId: 1,
+      weight: tempweight,
+      weightUnit: 'kg',
+      height: tempHeight,
+      heightUnit: 'cm',
+      bmi: bmi,
+      // 日期随机，带上一个插入时的time
+      gmtCreate:
+          "${dates[Random().nextInt(dates.length)]} ${getCurrentDateTime().split(" ")[1]}",
+    );
+
+    weightTrendList.add(temp);
+  }
+
+  // ？？？这里应该有错误检查
+  List<Object?> rst = await _userHelper.insertWeightTrendList(weightTrendList);
+
+  print("【【【 插入测试数据 end-->:insertBMIDemo List<Object?> rst: $rst");
+}

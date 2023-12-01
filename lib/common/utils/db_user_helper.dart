@@ -101,7 +101,7 @@ class DBUserHelper {
         .map((row) => row['name'] as String)
         .toList(growable: false);
 
-    print("DietaryDB中拥有的表名:------------");
+    print("User DB中拥有的表名:------------");
     print(tableNames);
   }
 
@@ -110,7 +110,7 @@ class DBUserHelper {
   ///
 
   ///***********************************************/
-  /// dietary_user 的相关操作
+  /// user 的相关操作
   ///
 
   // 查询用户
@@ -263,5 +263,56 @@ class DBUserHelper {
       // 抛出异常来触发回滚的方式是 sqflite 中常用的做法
       rethrow;
     }
+  }
+
+  ///***********************************************/
+  /// weight_trent 的相关操作
+  ///
+
+// 批量插入体重趋势数据(有单条的，也放到list)
+  Future<List<Object?>> insertWeightTrendList(
+    List<WeightTrend> weightTrendList,
+  ) async {
+    var batch = (await database).batch();
+
+    for (var item in weightTrendList) {
+      batch.insert(UserDdl.tableNameWeightTrend, item.toMap());
+    }
+
+    return batch.commit();
+  }
+
+  // 查询用户体重数据，查不到是空数组
+  Future<List<WeightTrend>> queryWeightTrendByUser({
+    int? userId,
+    String? startDate,
+    String? endDate,
+  }) async {
+    Database db = await database;
+
+    var where = [];
+    var whereArgs = [];
+
+    if (userId != null) {
+      where.add(" user_id = ? ");
+      whereArgs.add(userId);
+    }
+    if (startDate != null) {
+      where.add(" gmt_create >= ? ");
+      whereArgs.add(startDate);
+    }
+    if (endDate != null) {
+      where.add(" gmt_create <= ? ");
+      whereArgs.add(endDate);
+    }
+
+    final userRows = await db.query(
+      UserDdl.tableNameWeightTrend,
+      where: where.isNotEmpty ? where.join(" AND ") : null,
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
+      orderBy: 'gmt_create ASC',
+    );
+
+    return userRows.map((row) => WeightTrend.fromMap(row)).toList();
   }
 }
