@@ -606,4 +606,210 @@ class DBTrainingHelper {
       return batch.commit();
     });
   }
+
+  ///***********************************************/
+  ///  training_log 的相关操作
+  ///
+  /// 插入单个计划基本信息
+  Future<int> insertTrainingLog(TrainedLog log) async =>
+      (await database).insert(TrainingDdl.tableNameOfTrainedLog, log.toMap());
+
+  // 查询指定训练以及其所有动作
+  // 训练支持条件查询，估计训练的数量不会多，就暂时不分页；同事关联的动作就全部带出。
+  Future<List<TrainedLogWithGroupBasic>> searchTrainedLogWithGroupBasic({
+    int? userId,
+    String? startDate,
+    String? endDate,
+    String? gmtCreateSort = "ASC", // 按创建时间升序或者降序排序
+  }) async {
+    final db = await database;
+
+    var where = [];
+    var whereArgs = [];
+
+    if (userId != null) {
+      where.add(" user_id = ? ");
+      whereArgs.add(userId);
+    }
+    if (startDate != null) {
+      where.add(" trained_date >= ? ");
+      whereArgs.add(startDate);
+    }
+    if (endDate != null) {
+      where.add(" trained_date <= ? ");
+      whereArgs.add(endDate);
+    }
+
+    // 如果有传入创建时间排序，不是传的降序一律升序
+    var sort = gmtCreateSort?.toLowerCase() == 'desc' ? 'DESC' : 'ASC';
+
+    final userRows = await db.query(
+      TrainingDdl.tableNameOfTrainedLog,
+      where: where.isNotEmpty ? where.join(" AND ") : null,
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
+      orderBy: 'trained_date $sort',
+    );
+
+    // 查询到了基础日志，遍历查询每个详情数据？？？性能好差
+    List<TrainedLog> logs =
+        userRows.map((row) => TrainedLog.fromMap(row)).toList();
+
+    final list = <TrainedLogWithGroupBasic>[];
+
+    for (final row in logs) {
+      /// 理论上，训练日志中group id和plan id不能也不会同时为空
+      /// 从训练 和 计划查询到指定天数的训练的过程中，默认全部数据都存在且唯一（很丑陋，别这样写）。
+      // 不做空判断，出错在最外面嵌套个try catch
+      if (row.groupId != null) {
+        var tempGroup = TrainingGroup.fromMap((await db.query(
+          TrainingDdl.tableNameOfGroup,
+          where: 'group_id = ?',
+          whereArgs: [row.groupId],
+        ))
+            .first);
+
+        list.add(TrainedLogWithGroupBasic(log: row, group: tempGroup));
+      } else if (row.planId != null) {
+        var tempPlan = TrainingPlan.fromMap((await db.query(
+                TrainingDdl.tableNameOfPlan,
+                where: 'plan_id = ?',
+                whereArgs: [row.planId]))
+            .first);
+
+        // 查到plan之后再通过daynumber查询groupId，再查到group
+        (await db.query(TrainingDdl.tableNameOfPlanHasGroup,
+                where: 'plan_id = ?', whereArgs: [row.planId]))
+            .map((e) => PlanHasGroup.fromMap(e))
+            .forEach((e) async {
+          if (e.dayNumber == row.dayNumber) {
+            var tempGroup = TrainingGroup.fromMap((await db.query(
+              TrainingDdl.tableNameOfGroup,
+              where: 'group_id = ?',
+              whereArgs: [e.groupId],
+            ))
+                .first);
+
+            // 如果有计划但是没有跑到这里来的话，那么数据某个地方就有问题
+            list.add(TrainedLogWithGroupBasic(
+                log: row, group: tempGroup, plan: tempPlan));
+          }
+        });
+      } else {
+        throw Exception("训练编号和计划编号同时为空");
+      }
+    }
+
+    return list;
+  }
+
+  /*
+  // 查询指定训练以及其所有动作
+  // 训练支持条件查询，估计训练的数量不会多，就暂时不分页；同事关联的动作就全部带出。
+  Future<List<TrainedLogWithGroupBasic>> bakSearchTrainedLogWithGroupBasic({
+    int? userId,
+    String? startDate,
+    String? endDate,
+    String? gmtCreateSort = "ASC", // 按创建时间升序或者降序排序
+  }) async {
+    final db = await database;
+
+    var where = [];
+    var whereArgs = [];
+
+    if (userId != null) {
+      where.add(" user_id = ? ");
+      whereArgs.add(userId);
+    }
+    if (startDate != null) {
+      where.add(" trained_date >= ? ");
+      whereArgs.add(startDate);
+    }
+    if (endDate != null) {
+      where.add(" trained_date <= ? ");
+      whereArgs.add(endDate);
+    }
+
+    // 如果有传入创建时间排序，不是传的降序一律升序
+    var sort = gmtCreateSort?.toLowerCase() == 'desc' ? 'DESC' : 'ASC';
+
+    final userRows = await db.query(
+      TrainingDdl.tableNameOfTrainedLog,
+      where: where.isNotEmpty ? where.join(" AND ") : null,
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
+      orderBy: 'trained_date $sort',
+    );
+
+    // 查询到了基础日志，遍历查询每个详情数据？？？性能好差
+    List<TrainedLog> logs =
+        userRows.map((row) => TrainedLog.fromMap(row)).toList();
+
+    final list = <TrainedLogWithGroupBasic>[];
+
+    for (final row in logs) {
+      // 默认是这三个值
+      var tempLog1, tempPlan1, tempGroup1;
+
+      if (row.groupId != null) {
+        final groupRows = await db.query(
+          TrainingDdl.tableNameOfGroup,
+          where: 'group_id = ?',
+          whereArgs: [row.groupId],
+        );
+
+        // ？？？理论上这里只有查到1个group，且不应该差不多(暂不考虑异常情况)
+        if (groupRows.isNotEmpty) {
+          tempGroup1 = TrainingGroup.fromMap(groupRows[0]);
+        }
+      }
+      if (row.planId != null) {
+        final planRows = await db.query(
+          TrainingDdl.tableNameOfPlan,
+          where: 'plan_id = ?',
+          whereArgs: [row.planId],
+        );
+
+        // ？？？理论上这里只有查到1个 plan ，且不应该差不多(暂不考虑异常情况)
+        if (planRows.isNotEmpty) {
+          TrainingPlan tempPlan = TrainingPlan.fromMap(planRows[0]);
+
+          tempPlan1 = tempPlan;
+
+          // 查到plan之后再通过daynumber查询groupId，再查到group
+
+          final phgRows = await db.query(
+            TrainingDdl.tableNameOfPlanHasGroup,
+            where: 'plan_id = ?',
+            whereArgs: [row.planId],
+          );
+
+          if (phgRows.isNotEmpty) {
+            var tempPhgs = phgRows.map((e) => PlanHasGroup.fromMap(e)).toList();
+
+            for (var e in tempPhgs) {
+              if (e.dayNumber == row.dayNumber) {
+                final groupRows = await db.query(
+                  TrainingDdl.tableNameOfGroup,
+                  where: 'group_id = ?',
+                  whereArgs: [e.groupId],
+                );
+
+                if (groupRows.isNotEmpty) {
+                  TrainingGroup group = TrainingGroup.fromMap(groupRows[0]);
+                  tempGroup1 = group;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      var ttt = TrainedLogWithGroupBasic(
+          group: tempGroup1, plan: tempPlan1, log: tempLog1);
+
+      list.add(ttt);
+    }
+
+    return list;
+  }
+  */
 }

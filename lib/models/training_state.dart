@@ -320,6 +320,75 @@ class PlanHasGroup {
   }
 }
 
+// 训练日志表
+class TrainedLog {
+  int? trainedLogId; // 自增的，可以不传
+  int? planId, dayNumber, groupId;
+  String trainedDate, trainedStartTime, trainedEndTime;
+  int userId, trainedDuration, totolPausedTime, totalRestTime;
+
+  TrainedLog({
+    this.trainedLogId,
+    required this.trainedDate,
+    required this.userId,
+    this.planId,
+    this.dayNumber,
+    this.groupId,
+    required this.trainedStartTime,
+    required this.trainedEndTime,
+    required this.trainedDuration,
+    required this.totolPausedTime,
+    required this.totalRestTime,
+  });
+
+  // 转换成一个Map。键必须对应于数据库中的列名。
+  Map<String, dynamic> toMap() {
+    return {
+      'trained_log_id': trainedLogId,
+      'trained_date': trainedDate,
+      'user_id': userId,
+      'plan_id': planId,
+      'day_number': dayNumber,
+      'group_id': groupId,
+      'trained_start_time': trainedStartTime,
+      'trained_end_time': trainedEndTime,
+      'trained_duration': trainedDuration,
+      'totol_paused_time': totolPausedTime,
+      'total_rest_time': totalRestTime,
+    };
+  }
+
+// 用于从数据库行映射到 ServingInfo 对象的 fromMap 方法
+  factory TrainedLog.fromMap(Map<String, dynamic> map) {
+    return TrainedLog(
+      trainedLogId: map['trained_log_id'] as int?,
+      trainedDate: map['trained_date'] as String,
+      userId: map['user_id'] as int,
+      planId: map['plan_id'] as int?,
+      dayNumber: map['day_number'] as int?,
+      groupId: map['group_id'] as int?,
+      trainedStartTime: map['trained_start_time'] as String,
+      trainedEndTime: map['trained_end_time'] as String,
+      trainedDuration: map['trained_duration'] as int,
+      totolPausedTime: map['totol_paused_time'] as int,
+      totalRestTime: map['total_rest_time'] as int,
+    );
+  }
+
+  // 重写 toString 方法
+  @override
+  String toString() {
+    return '''
+    TrainedLog{
+      trainedLogId:$trainedLogId, trainedDate:$trainedDate, userId:$userId, 
+      planId:$planId, dayNumber:$dayNumber, groupId:$groupId, 
+      trainedStartTime:$trainedStartTime, trainedEndTime:$trainedEndTime, 
+      trainedDuration:$trainedDuration, totolPausedTime:$totolPausedTime, totalRestTime:$totalRestTime
+    }
+    ''';
+  }
+}
+
 /// --- 扩展表
 
 // 动作和对应基础活动的扩展表
@@ -384,6 +453,30 @@ class ActionPractice {
     return '''
     PlanWithGroups {
       plan: $plan, groupDetailList: $groupDetailList,
+    ''';
+  }
+}
+
+// 训练日志要带上训练或者计划的基础信息(没有动作的信息)
+class TrainedLogWithGroupBasic {
+  final TrainedLog log;
+  // 如果直接的训练的跟练，对应训练的数据；如果是计划的某一天的训练，同样记录训练信息，是哪一天在log表中
+  final TrainingGroup? group;
+  // 如果是某个计划的某一天的训练，带上计划的信息
+  final TrainingPlan? plan;
+
+  TrainedLogWithGroupBasic({
+    required this.log,
+    // 不查询训练是也可以用这个类，代替日志类？
+    this.group,
+    this.plan,
+  });
+
+  @override
+  String toString() {
+    return '''
+    TrainedLogWithGroupBasic {
+      log: $log, group: $group, plan: $plan
     ''';
   }
 }

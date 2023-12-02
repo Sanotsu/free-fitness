@@ -348,6 +348,51 @@ Future<int> insertOneRandomPlanHasGroup() async {
   return planId;
 }
 
+// 插入一条跟练记录(不那么随机，且需要已有训练的基础数据)
+insertTrainingLogDemo({int? size = 10}) async {
+  print("【【【 插入测试数据 start-->:insertTrainingLogDemo ");
+
+  // 计划中的某一天
+  var tl1 = TrainedLog(
+    trainedDate: getCurrentDateTime(),
+    userId: 1,
+    // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
+    planId: 1,
+    dayNumber: 2,
+    // 起止时间就测试插入时的1个小时
+    trainedStartTime: DateFormat('yyyy-MM-dd HH:mm:ss')
+        .format(DateTime.now().add(const Duration(hours: -1))),
+    trainedEndTime: getCurrentDateTime(),
+    // 单位都是秒
+    trainedDuration: 40 * 60, // 实际训练时间
+    totolPausedTime: 8 * 60, // 暂停的总时间
+    totalRestTime: 12 * 60, // 休息的总时间
+  );
+
+  var logId1 = await _trainingHelper.insertTrainingLog(tl1);
+
+  // 直接的某个训练
+  var tl2 = TrainedLog(
+    trainedDate: getCurrentDateTime(),
+    userId: 1,
+    // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
+    groupId: 1,
+    // 起止时间就测试插入时的1个小时
+    trainedStartTime: DateFormat('yyyy-MM-dd HH:mm:ss')
+        .format(DateTime.now().add(const Duration(hours: -2))),
+    trainedEndTime: DateFormat('yyyy-MM-dd HH:mm:ss')
+        .format(DateTime.now().add(const Duration(hours: -1))),
+    // 单位都是秒
+    trainedDuration: 30 * 60, // 实际训练时间
+    totolPausedTime: 10 * 60, // 暂停的总时间
+    totalRestTime: 20 * 60, // 休息的总时间
+  );
+
+  var logId2 = await _trainingHelper.insertTrainingLog(tl2);
+
+  print("【【【 插入测试数据 end-->:insertTrainingLogDemo logId: $logId1 $logId2");
+}
+
 ///
 /// ---------- 个人信息相关--------------
 ///

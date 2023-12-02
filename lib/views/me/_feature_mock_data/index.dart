@@ -154,6 +154,15 @@ class _FeatureMockDemoState extends State<FeatureMockDemo> {
                 },
                 child: const Text("userId为1的新增10条随机BMI数据"),
               ),
+
+              TextButton(
+                onPressed: () async {
+                  await insertTrainingLogDemo();
+                  if (!mounted) return;
+                  _showSimpleDialog(context, "已新增2条【训练日志】示例");
+                },
+                child: const Text("插入两条训练日志(先新增基础数据)"),
+              ),
             ],
           ),
         ),

@@ -28,7 +28,7 @@ class TrainingDdl {
   // 用户基础表
   static const tableNameOfUser = 'ff_user';
   // 训练日志记录表
-  static const tableNameOfTrainingLog = 'ff_training_log';
+  static const tableNameOfTrainedLog = 'ff_trained_log';
   // 体重趋势记录表
   static const tableNameOfWeightTrend = 'ff_weight_trend';
 
@@ -118,15 +118,18 @@ class TrainingDdl {
     """;
 
   static const String ddlForTrainedLog = """
-    CREATE TABLE $tableNameOfTrainingLog (
-      trained_log_id  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-      user_id INTEGER,
-      plan_id INTEGER,
-      day_number  INTEGER,
-      is_completed  INTEGER,
-      sorted_number INTEGER,
-      trained_date  TEXT,
-      trained_duration  REAL
+    CREATE TABLE $tableNameOfTrainedLog (
+      trained_log_id      INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+      trained_date        TEXT,
+      user_id             INTEGER   NOT NULL,
+      plan_id             INTEGER,
+      day_number          INTEGER,
+      group_id            INTEGER,
+      trained_start_time  TEXT      NOT NULL,
+      trained_end_time    TEXT      NOT NULL,
+      trained_duration    INTEGER   NOT NULL,
+      totol_paused_time   INTEGER   NOT NULL,
+      total_rest_time     INTEGER   NOT NULL
     );
     """;
 
