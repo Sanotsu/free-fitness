@@ -74,8 +74,10 @@ dependencies:
   wakelock_plus: ^1.1.4
   # 数字选择器
   numberpicker: ^2.1.2
-  # 保存图片
+  # 保存图片(Android9及其以下可能保存不了)
   image_gallery_saver: ^2.0.3
+  # 获取设备信息
+  device_info_plus: ^9.1.1
   
 
 dev_dependencies:

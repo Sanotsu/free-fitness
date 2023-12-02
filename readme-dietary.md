@@ -302,3 +302,10 @@ MaterialApp(
 文本输入框换成 Formbuilder 的也一样，**原因不知**。
 
 有可能是类似这个 issue: https://github.com/flutter-form-builder-ecosystem/flutter_form_builder/discussions/1297
+
+9. 【unsolved】2023-12-02 image_gallery_saver 保存图片时报错，3.13 有升级到 3.16.0
+
+表现和 https://stackoverflow.com/questions/69883867/flutter-unhandled-exception-missingpluginexceptionno-implementation-found-f
+差不多。
+
+后来找了很多方法，肯定不是权限问题，初步分析是在 Android9 上无法正常工作了，后续用更高级的 Android 版本的试一下。

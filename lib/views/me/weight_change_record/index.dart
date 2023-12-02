@@ -8,6 +8,7 @@ import 'package:numberpicker/numberpicker.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tools.dart';
 import 'weight_change_line_chart.dart';
+import 'weight_record_manage.dart';
 
 // 取这个名字主要和标的基本类 weightTrend 全然区别开
 class WeightChangeRecord extends StatefulWidget {
@@ -64,29 +65,64 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        // 这里只显示修改体重
-                        _buildModifyWeightOrBmiDialog(onlyWeight: true).then(
-                          (value) async {
-                            // 强制重新加载体重变化图表
-                            setState(() {
-                              isLoading = true;
-                            });
-                            var tempUser =
-                                (await _userHelper.queryUser(userId: 1))!;
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            // 这里只显示修改体重
+                            print("点击管理可以删除一些体重数据");
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => WeightRecordManage(user: user),
+                              ),
+                            ).then(
+                              (value) async {
+                                // 强制重新加载体重变化图表
+                                setState(() {
+                                  isLoading = true;
+                                });
+                                var tempUser =
+                                    (await _userHelper.queryUser(userId: 1))!;
 
-                            setState(() {
-                              user = tempUser;
-                              _currentWeight = user.currentWeight ?? 70;
-                              _currentHeight = user.height ?? 170;
-                              isLoading = false;
-                            });
+                                setState(() {
+                                  user = tempUser;
+                                  _currentWeight = user.currentWeight ?? 70;
+                                  _currentHeight = user.height ?? 170;
+                                  isLoading = false;
+                                });
+                              },
+                            );
                           },
-                        );
-                      },
-                      child: const Text("记录"),
-                    ),
+                          child: const Text("管理"),
+                        ),
+                        SizedBox(width: 10.sp),
+                        ElevatedButton(
+                          onPressed: () {
+                            // 这里只显示修改体重
+                            _buildModifyWeightOrBmiDialog(onlyWeight: true)
+                                .then(
+                              (value) async {
+                                // 强制重新加载体重变化图表
+                                setState(() {
+                                  isLoading = true;
+                                });
+                                var tempUser =
+                                    (await _userHelper.queryUser(userId: 1))!;
+
+                                setState(() {
+                                  user = tempUser;
+                                  _currentWeight = user.currentWeight ?? 70;
+                                  _currentHeight = user.height ?? 170;
+                                  isLoading = false;
+                                });
+                              },
+                            );
+                          },
+                          child: const Text("记录"),
+                        ),
+                      ],
+                    )
                   ],
                 ),
                 if (!isLoading) WeightChangeLineChart(user: user),

@@ -449,10 +449,10 @@ insertBMIDemo({int? size = 10}) async {
   for (var i = 0; i < (size ?? 10); i++) {
     // 模拟体重， [70.0,80.0)的一个随机数，刻意的一位小数
     var tempweight = Random().nextInt(10) + 70 + Random().nextDouble();
-    //  BMI = 体重(公斤) / 身高^2(公分^2)
-    var bmi = double.tryParse(
-            (tempweight / (tempHeight * tempHeight)).toStringAsFixed(2)) ??
-        70.5;
+    //  BMI = 体重(公斤) / 身高^2(米^2)
+    var bmi = double.tryParse((tempweight / (tempHeight * tempHeight / 10000))
+            .toStringAsFixed(2)) ??
+        30.5;
 
     var temp = WeightTrend(
       userId: 1,

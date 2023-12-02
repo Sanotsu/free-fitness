@@ -1,17 +1,19 @@
 // ignore_for_file: avoid_print
 
+import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:intl/intl.dart';
 
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
 import '../../../models/user_state.dart';
 
 class WeightChangeLineChart extends StatefulWidget {
@@ -40,15 +42,23 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
   double minWeight = 0;
   double maxWeight = 0;
 
+  // 折线中每个数据点的宽度，如果用户想要缩放图片的时候可以修改这个值
+  double spotWidth = 60.sp;
+
   bool isLoading = false;
 
+  // 保存折线图图表为图片时需要
   final GlobalKey _chartKey = GlobalKey();
+
+// 是否显示保存的按钮(Android9及其以下是无法保存的，组件已经不支持了)
+  bool isShowSaveButton = true;
 
   @override
   void initState() {
     super.initState();
     setState(() {
       getWeightData();
+      getDeviceInfo();
     });
   }
 
@@ -108,20 +118,6 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
     });
   }
 
-  // 默认的结束日期就是此时此刻；开始日期就是当前时刻 减去 指定天数
-  List<String> getStartEndDateString(int lastDays) {
-    // 获取当前时间的字符串表示
-    String endDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
-    print('当前日期: $endDate');
-
-    // 获取30天前的日期
-    String startDate = DateFormat('yyyy-MM-dd HH:mm:ss')
-        .format(DateTime.now().subtract(Duration(days: lastDays)));
-    print('$lastDays 天前日期: $startDate');
-
-    return [startDate, endDate];
-  }
-
   // 左侧的标签(体重)
   Widget _leftTitles(double value, TitleMeta meta) {
     if (value == meta.max) {
@@ -149,15 +145,57 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
     var tempDate = temp.split(" ")[0].split("-");
     String text = tempDate.sublist(tempDate.length - 2).join("-");
 
+    // 如果图表单个数据点宽度过小，x轴标题只显示日
+    if (spotWidth >= 60) {
+      text =
+          '${tempDate.sublist(tempDate.length - 2).join("-")}\n${temp.split(" ")[1]}';
+    } else if (spotWidth >= 30) {
+      text = tempDate.sublist(tempDate.length - 2).join("-");
+    } else {
+      text = temp.split(" ")[0].split("-")[2];
+    }
+
     return SideTitleWidget(
       axisSide: AxisSide.top,
       fitInside: SideTitleFitInsideData.disable(),
       child: Text(
-        // text,
-        "$text\n${temp.split(" ")[1]}",
+        text,
+        // "$text\n${temp.split(" ")[1]}",
         style: TextStyle(fontSize: 12.sp),
       ),
     );
+  }
+
+  // ？？？找了很多问题，分析可能是Android9及之下，无法保存。
+  // 权限什么的都已经给了的，还是存不了，有时间找个Android10及其之上的设备试一下
+  _saveChartImage() async {
+    RenderRepaintBoundary boundary =
+        _chartKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    ui.Image image = await boundary.toImage(pixelRatio: 2.0);
+
+    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    if (byteData != null) {
+      final result = await ImageGallerySaver.saveImage(
+        byteData.buffer.asUint8List(),
+        name: "图表",
+      );
+      print(result);
+    }
+  }
+
+  // 获取设备信息，判断是否显示保存按钮
+  getDeviceInfo() async {
+    if (Platform.isAndroid) {
+      final deviceInfoPlugin = DeviceInfoPlugin();
+      final deviceInfo = await deviceInfoPlugin.androidInfo;
+      final sdkInt = deviceInfo.version.sdkInt;
+
+      // Android9对应sdk是28,<=28就不显示保存按钮
+      if (sdkInt <= 28) {
+        isShowSaveButton = false;
+      }
+    }
   }
 
   @override
@@ -214,25 +252,6 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             TextButton(
-              onPressed: () async {
-                RenderRepaintBoundary boundary = _chartKey.currentContext!
-                    .findRenderObject() as RenderRepaintBoundary;
-                ui.Image image = await boundary.toImage(pixelRatio: 2.0);
-
-                print("image--------$image");
-
-                ByteData? byteData =
-                    await (image.toByteData(format: ui.ImageByteFormat.png));
-                // ？？？为什么会保存失败呢？
-                if (byteData != null) {
-                  final result = await ImageGallerySaver.saveImage(
-                      byteData.buffer.asUint8List());
-                  print(result);
-                }
-              },
-              child: const Text("保存图片(todo)"),
-            ),
-            TextButton(
               onPressed: () {
                 var temp = getStartEndDateString(3);
                 getWeightData(startDate: temp[0], endDate: temp[1]);
@@ -255,15 +274,60 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
             ),
           ],
         ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            if (isShowSaveButton)
+              TextButton(
+                onPressed: _saveChartImage,
+                child: const Text("保存图表"),
+              ),
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  // 每个点最小宽度20；在50以上，每次缩小10；在25-40每次缩小5；
+                  if (spotWidth >= 50.sp) {
+                    spotWidth -= 10.sp;
+                  } else if (spotWidth >= 25.sp) {
+                    spotWidth -= 5.sp;
+                  }
+                });
+              },
+              icon: Icon(
+                Icons.zoom_out,
+                size: 24.sp,
+                color: spotWidth <= 20.sp ? Colors.grey : Colors.blue,
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                // 每个点最大宽度120
+                setState(() {
+                  if (spotWidth <= 110.sp) {
+                    spotWidth += 10.sp;
+                  }
+                });
+              },
+              icon: Icon(
+                Icons.zoom_in,
+                size: 24.sp,
+                color: spotWidth >= 120.sp ? Colors.grey : Colors.blue,
+              ),
+            ),
+          ],
+        ),
         isLoading
             ? buildLoader(isLoading)
             : SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Container(
-                  // 四周留点边框方便标题显示完整
-                  padding: EdgeInsets.fromLTRB(10.sp, 50, 30, 30),
+                  // 四周留点边框方便标题显示完整(上面右边多留点为了数据点提示工具框显示完整)
+                  padding: EdgeInsets.fromLTRB(10.sp, 50.sp, 30.sp, 10.sp),
                   // 表格的宽度可以根据数量来(这每个sport的宽度可以根据x轴坐标的标题长度来定)
-                  width: allSpots.length * 60.sp,
+                  // width: allSpots.length * 60.sp,
+
+                  // 要考虑上面padding左右边框和适当的图表最小宽度
+                  width: (allSpots.length * spotWidth) + 80.sp,
                   height: 300.sp,
                   child: RepaintBoundary(
                     key: _chartKey,

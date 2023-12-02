@@ -146,3 +146,15 @@ List<DateTime> daysInRange(DateTime first, DateTime last) {
     (index) => DateTime.utc(first.year, first.month, first.day + index),
   );
 }
+
+// 默认的结束日期就是此时此刻；开始日期就是当前时刻 减去 指定天数
+List<String> getStartEndDateString(int lastDays) {
+  // 获取当前时间的字符串表示
+  String endDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+
+  // 获取指定天数前的日期
+  String startDate = DateFormat('yyyy-MM-dd HH:mm:ss')
+      .format(DateTime.now().subtract(Duration(days: lastDays)));
+
+  return [startDate, endDate];
+}

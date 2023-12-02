@@ -269,7 +269,7 @@ class DBUserHelper {
   /// weight_trent 的相关操作
   ///
 
-// 批量插入体重趋势数据(有单条的，也放到list)
+  // 批量插入体重趋势数据(有单条的，也放到list)
   Future<List<Object?>> insertWeightTrendList(
     List<WeightTrend> weightTrendList,
   ) async {
@@ -282,11 +282,29 @@ class DBUserHelper {
     return batch.commit();
   }
 
+  // 批量删除体重趋势数据(有单条的，也放到list)
+  Future<List<Object?>> deleteWeightTrendList(
+    List<WeightTrend> weightTrendList,
+  ) async {
+    var batch = (await database).batch();
+
+    for (var item in weightTrendList) {
+      batch.delete(
+        UserDdl.tableNameWeightTrend,
+        where: "weight_trend_id = ? ",
+        whereArgs: [item.weightTrendId],
+      );
+    }
+
+    return batch.commit();
+  }
+
   // 查询用户体重数据，查不到是空数组
   Future<List<WeightTrend>> queryWeightTrendByUser({
     int? userId,
     String? startDate,
     String? endDate,
+    String? gmtCreateSort = "ASC", // 按创建时间升序或者降序排序
   }) async {
     Database db = await database;
 
@@ -306,11 +324,14 @@ class DBUserHelper {
       whereArgs.add(endDate);
     }
 
+    // 如果有传入创建时间排序，不是传的降序一律升序
+    var sort = gmtCreateSort?.toLowerCase() == 'desc' ? 'DESC' : 'ASC';
+
     final userRows = await db.query(
       UserDdl.tableNameWeightTrend,
       where: where.isNotEmpty ? where.join(" AND ") : null,
       whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
-      orderBy: 'gmt_create ASC',
+      orderBy: 'gmt_create $sort',
     );
 
     return userRows.map((row) => WeightTrend.fromMap(row)).toList();
