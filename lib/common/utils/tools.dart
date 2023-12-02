@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:intl/intl.dart';
 
+import '../global/constants.dart';
+
 // 10位的时间戳转字符串
 String formatTimestampToString(int timestamp) {
   if (timestamp.toString().length == 10) {
@@ -29,7 +31,7 @@ String formatDurationToString2(Duration duration) {
 }
 
 // 格式化秒数为HH:mm:ss样式
-String formatSeconds(double seconds, {String? formatString = "HH:mm:ss"}) {
+String formatSeconds(double seconds, {String? formatString = constTimeFormat}) {
   Duration duration = Duration(seconds: seconds.round());
   DateFormat formatter = DateFormat(formatString);
   return formatter.format(DateTime(0).add(duration));
@@ -39,7 +41,7 @@ String formatSeconds(double seconds, {String? formatString = "HH:mm:ss"}) {
 Duration? convertToDuration(String timeStr, formatString) {
   List<String> parts = timeStr.split(':');
 
-  if (formatString == "HH:mm:ss") {
+  if (formatString == constTimeFormat) {
     return Duration(
       hours: int.parse(parts[0]),
       minutes: int.parse(parts[1]),
@@ -103,21 +105,28 @@ getFileSize(int bytes, int decimals) {
 // 获取当日格式化的日期字符串
 String getCurrentDate() {
   final now = DateTime.now();
-  final formatter = DateFormat('yyyy-MM-dd');
+  final formatter = DateFormat(constDateFormat);
   final formattedDate = formatter.format(now);
   return formattedDate;
 }
 
+// 格式化知道日期时间格式为指定字符串格式
+String formatDateToString(
+  DateTime dateTime, {
+  String? formatter = constDateFormat,
+}) =>
+    DateFormat(formatter).format(dateTime);
+
 // 获取当前格式化的日期时间字符串
 // 注意，这个格式化的规则才是固定的，尤其是时分秒
 String getCurrentDateTime() =>
-    DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+    DateFormat(constDatetimeFormat).format(DateTime.now());
 
 // 获取今天往前指定天数的所有日期字符串
 List<String> getAdjacentDatesInRange(int days) {
   List<String> dateList = [];
   DateTime today = DateTime.now();
-  DateFormat formatter = DateFormat('yyyy-MM-dd');
+  DateFormat formatter = DateFormat(constDateFormat);
 
   for (int i = -days; i <= 0; i++) {
     DateTime date = today.add(Duration(days: i));
@@ -150,10 +159,10 @@ List<DateTime> daysInRange(DateTime first, DateTime last) {
 // 默认的结束日期就是此时此刻；开始日期就是当前时刻 减去 指定天数
 List<String> getStartEndDateString(int lastDays) {
   // 获取当前时间的字符串表示
-  String endDate = DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
+  String endDate = DateFormat(constDatetimeFormat).format(DateTime.now());
 
   // 获取指定天数前的日期
-  String startDate = DateFormat('yyyy-MM-dd HH:mm:ss')
+  String startDate = DateFormat(constDatetimeFormat)
       .format(DateTime.now().subtract(Duration(days: lastDays)));
 
   return [startDate, endDate];

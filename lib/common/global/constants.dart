@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 /// 单变量区域
 /// ********************************************************
 
+const constDatetimeFormat = "yyyy-MM-dd HH:mm:ss";
+const constDateFormat = "yyyy-MM-dd";
+const constTimeFormat = "HH:mm:ss";
+
 // 1 大卡 = 4.184 千焦
 const double oneCalToKjRatio = 4.18400;
 

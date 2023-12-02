@@ -12,6 +12,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
+import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tools.dart';
 import '../../../models/training_state.dart';
 import '../reports/index.dart';
@@ -19,8 +20,10 @@ import '../reports/index.dart';
 class ActionFollowPracticeWithTTS extends StatefulWidget {
   // 跟练需要传入动作组数据
   final List<ActionDetail> actionList;
+  final int? groupId;
 
-  const ActionFollowPracticeWithTTS({Key? key, required this.actionList})
+  const ActionFollowPracticeWithTTS(
+      {Key? key, required this.actionList, this.groupId})
       : super(key: key);
 
   @override
@@ -32,6 +35,8 @@ enum TtsState { playing, stopped, paused, continued }
 
 class _ActionFollowPracticeWithTTSState
     extends State<ActionFollowPracticeWithTTS> {
+  final DBTrainingHelper _trainingHelper = DBTrainingHelper();
+
   // 一般的倒计时控制器
   final _actionController = CountDownController();
   // 倒计时组件控制器
@@ -1083,15 +1088,42 @@ class _ActionFollowPracticeWithTTSState
   }
 
   // TODO 跟练完成时的弹窗示例(实际可能是跳到报告页面，并保持数据到数据库)
-  _showFinishedDialog() {
-    var tempTime = DateTime.now().millisecondsSinceEpoch -
-        startedMoment.millisecondsSinceEpoch;
+  _showFinishedDialog() async {
+    var endTime = DateTime.now();
+    var tempTime =
+        endTime.millisecondsSinceEpoch - startedMoment.millisecondsSinceEpoch;
 
     var totolTime = (tempTime / 1000).toStringAsFixed(0);
     var pausedTime = (totalPausedTimes / 1000).toStringAsFixed(0);
     var workoutTime =
         (tempTime / 1000 - totalPausedTimes / 1000 - totalRestTimes)
             .toStringAsFixed(0);
+
+    // 训练日志
+    var tempLog = TrainedLog(
+      trainedDate: getCurrentDateTime(),
+      userId: 1,
+      // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
+      // planId: 1,
+      // dayNumber: 2,
+      groupId: widget.groupId,
+      // 起止时间就测试插入时的1个小时
+      trainedStartTime: formatDateToString(
+        startedMoment,
+        formatter: constDatetimeFormat,
+      ),
+      trainedEndTime: formatDateToString(
+        endTime,
+        formatter: constDatetimeFormat,
+      ),
+      // 单位都是秒
+      trainedDuration: int.tryParse(workoutTime) ?? 0, // 实际训练时间
+      totolPausedTime: int.tryParse(pausedTime) ?? 0, // 暂停的总时间
+      totalRestTime: int.tryParse(pausedTime) ?? 0, // 休息的总时间
+    );
+
+    // ？？？这里应该有出错的处理
+    await _trainingHelper.insertTrainingLog(tempLog);
 
     // 跟练结束后就可以停止禁止熄屏
     WakelockPlus.disable();

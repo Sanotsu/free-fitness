@@ -246,6 +246,7 @@ class _ActionListState extends State<ActionList> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ActionFollowPracticeWithTTS(
+                          groupId: widget.groupItem.groupId,
                           actionList: actionList,
                         ),
                       ),

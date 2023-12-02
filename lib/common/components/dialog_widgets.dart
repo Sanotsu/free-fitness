@@ -122,26 +122,29 @@ buildExerciseImageCarouselSlider(Exercise exercise) {
       // 只有一张图片时不滚动
       enableInfiniteScroll: imageList.length > 1,
     ),
-    items: imageList.map((imageUrl) {
-      return Builder(
-        builder: (BuildContext context) {
-          return Container(
-            width: MediaQuery.of(context).size.width,
-            margin: const EdgeInsets.symmetric(horizontal: 5.0),
-            decoration: const BoxDecoration(
-              color: Colors.grey,
-            ),
-            child: Image.file(
-              // 预备的时候，肯定显示第一个动作的图片
-              File(imageUrl),
-              errorBuilder: (BuildContext context, Object exception,
-                  StackTrace? stackTrace) {
-                return Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown);
+    // 没有图片显示一张占位图片
+    items: imageList.isEmpty
+        ? [Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown)]
+        : imageList.map((imageUrl) {
+            return Builder(
+              builder: (BuildContext context) {
+                return Container(
+                  width: MediaQuery.of(context).size.width,
+                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.grey,
+                  ),
+                  child: Image.file(
+                    File(imageUrl),
+                    errorBuilder: (BuildContext context, Object exception,
+                        StackTrace? stackTrace) {
+                      return Image.asset(placeholderImageUrl,
+                          fit: BoxFit.scaleDown);
+                    },
+                  ),
+                );
               },
-            ),
-          );
-        },
-      );
-    }).toList(),
+            );
+          }).toList(),
   );
 }
