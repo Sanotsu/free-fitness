@@ -64,6 +64,10 @@ class _TrainingReportsState extends State<TrainingReports> {
     });
   }
 
+  ///
+  /// 表格日历的报告页面需要的函数
+  ///
+
   // 初始化事件，以当前日查询对应的手记数据
   // 因为不能再改变state中用await，所以单独一个函数
   _getEventsForInitDay() async {
@@ -73,9 +77,10 @@ class _TrainingReportsState extends State<TrainingReports> {
       isLoading = true;
     });
 
-    var list = await _trainingHelper.searchTrainedLogWithGroupBasic(userId: 1);
-
-    // log.d("list---------------------$list");
+    var list = await _trainingHelper.searchTrainedLogWithGroupBasic(
+      userId: 1,
+      gmtCreateSort: "DESC",
+    );
 
     setState(() {
       trainedLogList = list;
@@ -159,12 +164,21 @@ class _TrainingReportsState extends State<TrainingReports> {
         appBar: AppBar(
           bottom: const TabBar(
             tabs: [
-              Tab(icon: Icon(Icons.bar_chart)),
-              Tab(icon: Icon(Icons.calendar_month)),
-              Tab(icon: Icon(Icons.history)),
+              Tab(
+                // text: "总计",
+                icon: Icon(Icons.bar_chart),
+              ),
+              Tab(
+                // text: "日历",
+                icon: Icon(Icons.calendar_month),
+              ),
+              Tab(
+                // text: "最近",
+                icon: Icon(Icons.history),
+              ),
             ],
           ),
-          title: const Text('TrainingReports'),
+          title: const Text('运动报告'),
         ),
         body: isLoading
             ? buildLoader(isLoading)
@@ -181,7 +195,157 @@ class _TrainingReportsState extends State<TrainingReports> {
 
   buildReportsView() {
     // 统计的是所有的运动次数和总的运动时间
-    return Container();
+    return FutureBuilder(
+      future: _trainingHelper.searchTrainedLogWithGroupBasic(
+        userId: 1,
+        gmtCreateSort: "DESC",
+      ),
+      builder: (BuildContext context,
+          AsyncSnapshot<List<TrainedLogWithGroupBasic>> snapshot) {
+        if (snapshot.hasData) {
+          List<TrainedLogWithGroupBasic> data = snapshot.data!;
+
+          // TrainedLogWithGroupBasic-->tlwgb
+          // 计算所有训练日志的累加时间
+          int totalRest = data.fold(
+              0, (prevVal, tlwgb) => prevVal + tlwgb.log.totalRestTime);
+          int totolPaused = data.fold(
+              0, (prevVal, tlwgb) => prevVal + tlwgb.log.totolPausedTime);
+          int totalTrained = data.fold(
+              0, (prevVal, tlwgb) => prevVal + tlwgb.log.trainedDuration);
+
+          return Card(
+            elevation: 5,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      children: [
+                        Icon(Icons.flag, size: 24.sp),
+                        const Text("总锻炼次数"),
+                        Text(
+                          "${data.length} 次",
+                          style: TextStyle(
+                            fontSize: 24.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Icon(Icons.alarm, size: 24.sp),
+                        const Text("总锻炼时间"),
+                        Text(
+                          "${(totalTrained / 60).toStringAsFixed(0)} 分钟",
+                          style: TextStyle(
+                            fontSize: 24.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.sp),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      children: [
+                        Icon(Icons.alarm, size: 24.sp),
+                        const Text("总休息时间"),
+                        Text(
+                          "${(totalRest / 60).toStringAsFixed(0)} 分钟",
+                          style: TextStyle(
+                            fontSize: 24.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Icon(Icons.alarm, size: 24.sp),
+                        const Text("总暂停时间"),
+                        Text(
+                          "${(totolPaused / 60).toStringAsFixed(0)} 分钟",
+                          style: TextStyle(
+                            fontSize: 24.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.sp),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const Text("上次运动日期: "),
+                    Text(
+                      data.first.log.trainedDate,
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const Text("上次训练名称: "),
+                    Text(
+                      (data.first.plan != null)
+                          ? "${data.first.plan?.planName} 的第${data.first.log.dayNumber}个训练日"
+                          : data.first.group?.groupName ?? "",
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const Text("上次运动用时: "),
+                    Text(
+                      "${(data.first.log.trainedDuration / 60).toStringAsFixed(1)} 分钟",
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20.sp),
+              ],
+            ),
+          );
+        } else if (snapshot.hasError) {
+          /// 如果请求数据有错，显示错误信息
+          return Text('${snapshot.error}');
+        } else {
+          return SizedBox(
+            width: 50.sp,
+            height: 50.sp,
+            child: const CircularProgressIndicator(),
+          );
+        }
+      },
+    );
   }
 
   buildHistoryView() {
@@ -324,6 +488,170 @@ class _TrainingReportsState extends State<TrainingReports> {
   }
 
   buildRecentView() {
-    return Container();
+    var [start, end] = getStartEndDateString(30);
+
+    return FutureBuilder(
+      future: _trainingHelper.searchTrainedLogWithGroupBasic(
+        userId: 1,
+        startDate: start,
+        endDate: end,
+        gmtCreateSort: "DESC",
+      ),
+      builder: (BuildContext context,
+          AsyncSnapshot<List<TrainedLogWithGroupBasic>> snapshot) {
+        if (snapshot.hasData) {
+          List<TrainedLogWithGroupBasic> data = snapshot.data!;
+
+          // 将最近30天的记录，按天分组并排序展示。
+          Map<String, List<TrainedLogWithGroupBasic>> logGroupedByDate = {};
+          for (var log in data) {
+            // 日志的日期(不含时间)
+            var temp = log.log.trainedDate.split(" ")[0];
+            if (logGroupedByDate.containsKey(temp)) {
+              logGroupedByDate[temp]!.add(log);
+            } else {
+              logGroupedByDate[temp] = [log];
+            }
+          }
+
+          List<Widget> rst = [];
+          logGroupedByDate.forEach((key, value) {
+            rst.add(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(20.sp, 10.sp, 0, 10.sp),
+                    child: Text(
+                      key,
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700]!,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(10.sp, 10.sp, 10, 10.sp),
+                    child: Card(
+                      elevation: 5,
+                      child: _buildRecentLogListView(value),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          });
+
+          return Column(
+            children: [
+              Text(
+                "最近30天",
+                style: TextStyle(fontSize: 20.sp),
+              ),
+              ...rst,
+            ],
+          );
+        } else if (snapshot.hasError) {
+          /// 如果请求数据有错，显示错误信息
+          return Text('${snapshot.error}');
+        } else {
+          return SizedBox(
+            width: 50.sp,
+            height: 50.sp,
+            child: const CircularProgressIndicator(),
+          );
+        }
+      },
+    );
+  }
+
+  _buildRecentLogListView(List<TrainedLogWithGroupBasic> items) {
+    return ListView.builder(
+      // 和外层的滚动只保留一个
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        var log = items[index];
+        var name = "";
+
+        var planName = log.plan?.planName;
+        if (planName != null) {
+          name =
+              "计划 $planName 的第 ${log.log.dayNumber} 天 ${log.group?.groupName}";
+        } else {
+          name = '训练 ${log.group?.groupName ?? "<无名>"}';
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (index != 0) Divider(height: 5.sp, thickness: 3.sp),
+            ListTile(
+              title: Text(
+                name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "锻炼时间: ${log.log.trainedStartTime.split(" ")[1]} ~ ${log.log.trainedEndTime.split(" ")[1]}",
+                  ),
+                  Text(
+                    "锻炼时长: ${formatSeconds(log.log.trainedDuration.toDouble())}",
+                  ),
+                  Text(
+                    "暂停时长: ${formatSeconds(log.log.totolPausedTime.toDouble())}",
+                  ),
+                  Text(
+                    "休息时长: ${formatSeconds(log.log.totalRestTime.toDouble())}",
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+
+        // return Container(
+        //   margin: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 4.sp),
+        //   decoration: BoxDecoration(
+        //     border: Border.all(),
+        //     borderRadius: BorderRadius.circular(12.0),
+        //   ),
+        //   child: Column(
+        //     crossAxisAlignment: CrossAxisAlignment.start,
+        //     children: [
+        //       Text(
+        //         name,
+        //         maxLines: 2,
+        //         overflow: TextOverflow.ellipsis,
+        //         style: TextStyle(
+        //           fontSize: 16.sp,
+        //           fontWeight: FontWeight.bold,
+        //         ),
+        //       ),
+        //       Text("开始时间: ${log.log.trainedStartTime}"),
+        //       Text("结束时间: ${log.log.trainedEndTime}"),
+        //       Text(
+        //         "锻炼时长: ${formatSeconds(log.log.trainedDuration.toDouble())}",
+        //       ),
+        //       Text(
+        //         "暂停时长: ${formatSeconds(log.log.totolPausedTime.toDouble())}",
+        //       ),
+        //       Text(
+        //         "休息时长: ${formatSeconds(log.log.totalRestTime.toDouble())}",
+        //       ),
+        //     ],
+        //   ),
+        // );
+      },
+    );
   }
 }

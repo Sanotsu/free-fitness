@@ -390,7 +390,30 @@ insertTrainingLogDemo({int? size = 10}) async {
 
   var logId2 = await _trainingHelper.insertTrainingLog(tl2);
 
-  print("【【【 插入测试数据 end-->:insertTrainingLogDemo logId: $logId1 $logId2");
+  // 前一天的日志 计划中的某一天
+  var tl3 = TrainedLog(
+    trainedDate: DateFormat('yyyy-MM-dd HH:mm:ss')
+        .format(DateTime.now().add(const Duration(days: -1))),
+    userId: 1,
+    // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
+    planId: 1,
+    dayNumber: 1,
+    // 起止时间就测试插入时的1个小时
+    trainedStartTime: DateFormat('yyyy-MM-dd HH:mm:ss')
+        .format(DateTime.now().add(const Duration(days: -1, hours: -1))),
+    trainedEndTime: DateFormat('yyyy-MM-dd HH:mm:ss')
+        .format(DateTime.now().add(const Duration(days: -1))),
+    // 单位都是秒
+    trainedDuration: 40 * 60, // 实际训练时间
+    totolPausedTime: 8 * 60, // 暂停的总时间
+    totalRestTime: 12 * 60, // 休息的总时间
+  );
+
+  var logId3 = await _trainingHelper.insertTrainingLog(tl3);
+
+  print(
+    "【【【 插入测试数据 end-->:insertTrainingLogDemo logId: $logId1 $logId2 $logId3",
+  );
 }
 
 ///
