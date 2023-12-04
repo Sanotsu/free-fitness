@@ -75,7 +75,7 @@ class _TrainingReportsState extends State<TrainingReports> {
 
     var list = await _trainingHelper.searchTrainedLogWithGroupBasic(userId: 1);
 
-    log.d("list---------------------$list");
+    // log.d("list---------------------$list");
 
     setState(() {
       trainedLogList = list;

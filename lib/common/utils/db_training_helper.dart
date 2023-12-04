@@ -682,6 +682,8 @@ class DBTrainingHelper {
             .map((e) => PlanHasGroup.fromMap(e))
             .forEach((e) async {
           if (e.dayNumber == row.dayNumber) {
+            /// ？？？2023-12-04 还真不一定有，计划跟练之后又有修改，导致某些训练、动作都有变化了，那么这里就一定会报错了。。
+            /// 暂时有跟练的计划不让修改，后续再看如何设计日志表
             var tempGroup = TrainingGroup.fromMap((await db.query(
               TrainingDdl.tableNameOfGroup,
               where: 'group_id = ?',
@@ -812,4 +814,34 @@ class DBTrainingHelper {
     return list;
   }
   */
+
+  /// 查询指定计划中各个训练日上一次训练的时间
+  /// 用于点击知道计划进入训练日列表时，显示每个训练日最近一次训练时间的训练记录
+  Future<Map<int, TrainedLog?>> searchLastTrainingLogByPlanId(
+    TrainingPlan plan,
+  ) async {
+    final db = await database;
+
+    // 对应计划的每个训练日编号作为key，该训练日的最新训练记录作为value。
+    Map<int, TrainedLog?> logMap = {};
+
+    /// 只找最后一次的记录，那就创建时间倒序查询计划编号和对应训练日编号的最新数据
+    for (var i = 0; i < plan.planPeriod; i++) {
+      final logRows = await db.query(
+        TrainingDdl.tableNameOfTrainedLog,
+        where: "plan_id = ? AND day_number = ? ",
+        whereArgs: [plan.planId, i + 1],
+        orderBy: 'trained_date DESC',
+      );
+
+      if (logRows.isEmpty) {
+        logMap[i + 1] = null;
+      } else {
+        // 训练时间倒序排列的，所以选第一个即可
+        logMap[i + 1] = TrainedLog.fromMap(logRows.first);
+      }
+    }
+
+    return logMap;
+  }
 }

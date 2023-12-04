@@ -15,11 +15,18 @@ import 'action_follow_practice.dart';
 import 'simple_exercise_list.dart';
 
 class ActionList extends StatefulWidget {
-//  从已存在的训练进入action list，会带上group信息去查询已存在的action list
-// ？？？但进入simple exercise list之后，跳到action config之后返回跨级别了，需要看其他方式或者参数，比如带参数命名路由
+  // 从已存在的训练进入action list，会带上group信息去查询已存在的action list
+  // 2023-12-04 如果是从计划页面跳转过来，就需要带上计划的编号已经训练日信息
   final TrainingGroup groupItem;
+  final int? planId;
+  final int? dayNumber;
 
-  const ActionList({super.key, required this.groupItem});
+  const ActionList({
+    super.key,
+    required this.groupItem,
+    this.planId,
+    this.dayNumber,
+  });
 
   @override
   State<ActionList> createState() => _ActionListState();
@@ -246,7 +253,14 @@ class _ActionListState extends State<ActionList> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ActionFollowPracticeWithTTS(
-                          groupId: widget.groupItem.groupId,
+                          // 虽然计划编号、训练日 和训练编号都有传，但理论上两者不会同时存在也不会同时为空
+                          planId: widget.planId,
+                          dayNumber: widget.dayNumber,
+                          // 有计划编号，就不传训练编号了
+                          groupId: widget.planId != null
+                              ? null
+                              : widget.groupItem.groupId,
+                          // 动作组数据是必须要传的
                           actionList: actionList,
                         ),
                       ),
@@ -275,7 +289,8 @@ class _ActionListState extends State<ActionList> {
   // 构建可以重新排序的动作列表
   _buildReorderableList() {
     return ReorderableListView.builder(
-      buildDefaultDragHandles: _isEditing, // 如果是修改，才允许长按进行拖拽
+      // 如果是修改，才允许长按进行拖拽
+      buildDefaultDragHandles: _isEditing,
       itemCount: actionList.length,
       itemBuilder: (context, index) {
         // actionDetailItem
@@ -378,7 +393,7 @@ class _ActionListState extends State<ActionList> {
           ),
         );
       },
-      onReorder: _onReorder, // 根据编辑状态设置是否允许拖动
+      onReorder: _onReorder,
     );
   }
 

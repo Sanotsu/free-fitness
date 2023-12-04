@@ -38,6 +38,9 @@ class _GroupListState extends State<GroupList> {
   // 这里不使用TrainingAction 是因为actionDetail有更多信息可以直接显示
   List<GroupWithActions> groupList = [];
 
+  // 当前计划的每个训练日最后一次训练的日志map
+  Map<int, TrainedLog?> logMap = {};
+
   // 是否在加载数据
   bool isLoading = false;
 
@@ -74,10 +77,21 @@ class _GroupListState extends State<GroupList> {
 
     // log.d("tempPWG------$tempPWG");
 
+    var tempLog = await _dbHelper.searchLastTrainingLogByPlanId(
+      widget.planItem,
+    );
+
     // 设置查询结果
     setState(() {
       // ？？？因为没有分页查询，所有这里直接替换已有的数组
       groupList = tempPWG.isNotEmpty ? tempPWG[0].groupDetailList : [];
+
+      logMap = tempLog;
+
+      print(
+          "logMap.values.toList().isEmpty----------${logMap.values.where((value) => value != null).toString()}");
+      print(logMap.toString());
+
       // 重置状态为查询完成
       isLoading = false;
     });
@@ -199,23 +213,27 @@ class _GroupListState extends State<GroupList> {
               }
             },
           ),
-          actions: <Widget>[
-            if (_isEditing)
-              IconButton(
-                icon: const Icon(Icons.cancel_outlined),
-                onPressed: () async {
-                  // 取消时数据恢复原本的内容
-                  await _getGroupListByPlanId();
-                  setState(() {
-                    _isEditing = !_isEditing;
-                  });
-                },
-              ),
-            IconButton(
-              icon: Icon(_isEditing ? Icons.done : Icons.edit),
-              onPressed: _isEditing ? _onSavePressed : _onEditPressed,
-            ),
-          ],
+          // ？？？2023-12-04 因为有跟练日志之后再修改计划的内容可能会导致日志查不到对应的基础表数据
+          // 所以暂时有跟练的计划不让修改内容(理论上对应的action list也不允许再改了)
+          actions: (logMap.values.where((value) => value != null).isNotEmpty)
+              ? null
+              : <Widget>[
+                  if (_isEditing)
+                    IconButton(
+                      icon: const Icon(Icons.cancel_outlined),
+                      onPressed: () async {
+                        // 取消时数据恢复原本的内容
+                        await _getGroupListByPlanId();
+                        setState(() {
+                          _isEditing = !_isEditing;
+                        });
+                      },
+                    ),
+                  IconButton(
+                    icon: Icon(_isEditing ? Icons.done : Icons.edit),
+                    onPressed: _isEditing ? _onSavePressed : _onEditPressed,
+                  ),
+                ],
         ),
         body: isLoading
             ? buildLoader(isLoading)
@@ -223,83 +241,22 @@ class _GroupListState extends State<GroupList> {
                 children: [
                   Expanded(
                     child: ReorderableListView.builder(
-                      buildDefaultDragHandles: _isEditing, // 如果是修改，才允许长按进行拖拽
+                      // 如果是修改，才允许长按进行拖拽
+                      buildDefaultDragHandles: _isEditing,
                       itemCount: groupList.length,
                       itemBuilder: (context, index) {
-                        // actionDetailItem
-                        GroupWithActions gwaItem = groupList[index];
-                        TrainingGroup groupItem = gwaItem.group;
-
                         return Card(
                           key: Key('$index'),
+                          elevation: 3,
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              ListTile(
-                                leading:
-                                    _isEditing ? const Icon(Icons.menu) : null,
-                                // 不存在action name，就是exercise name就好
-                                title: Text(
-                                  "第${index + 1}天 - ${groupItem.groupName}",
-                                  style: TextStyle(fontSize: 20.sp),
-                                ),
-                                subtitle: Text(
-                                  "${groupItem.groupLevel}- 共${gwaItem.actionDetailList.length}个动作",
-                                ),
-
-                                // 【【【 如果点击时是修改状态，不做任何操作（修改group的基本信息在group模块点击省略号的时候去做）；
-                                // 如果不是修改状态，就应该直接跳转到action list去。
-                                // 后续在action list中的修改、开始跟练都一样一样的
-                                onTap: () {
-                                  if (!_isEditing) {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ActionList(
-                                          groupItem: groupItem,
-                                        ),
-                                      ),
-                                    ).then((value) {
-                                      print("action list 返回的数据 $value");
-                                      // ？？？暂时返回这个页面时都重新加载最新的训练列表数据
-
-                                      // 如果进入action list有修改、做了跟练之类的，这里要更新训练日的状态（已练习、未练）
-                                    });
-                                  }
-                                },
-                                // trailing 是有高度上限的56好像是
-                                trailing: _isEditing
-                                    ? SizedBox(
-                                        width: 80.sp,
-                                        height: 100,
-                                        child: Row(
-                                          children: [
-                                            const Expanded(child: Text("图片")),
-                                            Expanded(
-                                                child: IconButton(
-                                              icon: const Icon(Icons.delete),
-                                              onPressed: () => _onDelete(index),
-                                            ))
-                                          ],
-                                        ),
-                                      )
-                                    : SizedBox(
-                                        width: 80.sp,
-                                        height: 100,
-                                        // 跟练状态和上次运动时间？---如果点击时是修改状态，不做任何操作（修改group的基本信息在group模块点击省略号的时候去做
-                                        child: Text(
-                                          "跟练状态和上次运动时间？",
-                                          style: TextStyle(fontSize: 12.sp),
-                                        ),
-                                        // ？？？融合训练记录，展示上次运动时间和跟练过多少次？？？
-                                      ),
-                              ),
+                              _buildGroupItemListTile(groupList, index),
                             ],
                           ),
                         );
                       },
-                      // onReorder: _isEditing ? _onReorder : null, // 根据编辑状态设置是否允许拖动
-                      onReorder: _onReorder, // 根据编辑状态设置是否允许拖动
+                      onReorder: _onReorder,
                     ),
                   ),
                   // 避免修改时新增按钮遮住最后一条列表
@@ -326,13 +283,128 @@ class _GroupListState extends State<GroupList> {
                     });
                   });
                 },
-                backgroundColor: Colors.yellow,
+                backgroundColor: Colors.lightBlue,
                 child: const Icon(Icons.add),
               )
             : null,
         // 悬浮按钮位置
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
+    );
+  }
+
+  // 构建训练条目瓦片
+  _buildGroupItemListTile(List<GroupWithActions> groupList, int index) {
+    // actionDetailItem
+    GroupWithActions gwaItem = groupList[index];
+    TrainingGroup groupItem = gwaItem.group;
+
+    print("_buildGroupItemListTile---inde $index");
+    return ListTile(
+      leading: _isEditing
+          ? SizedBox(
+              width: 30.sp,
+              child: const Row(
+                children: [Expanded(child: Icon(Icons.menu))],
+              ),
+            )
+          : null,
+      // 不存在action name，就是exercise name就好
+      title: Text(
+        "第${index + 1}天 ${groupItem.groupName}",
+        style: TextStyle(fontSize: 20.sp),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        "${groupItem.groupLevel} 共${gwaItem.actionDetailList.length}个动作",
+      ),
+
+      // 【【【 如果点击时是修改状态，不做任何操作（修改group的基本信息在group模块点击省略号的时候去做）；
+      // 如果不是修改状态，就应该直接跳转到action list去。
+      // 后续在action list中的修改、开始跟练都一样一样的
+      onTap: () {
+        if (!_isEditing) {
+          // 如果前一个训练日没有完成(第一个训练日除外)，这个就不让进入跟练页面
+          // ？？？2023-12-04 不能这样设计，这样的话，就无法跳转已有训练日的动作及其配置了(因为无法进入action list页面)
+          // if (index > 0 && logMap[index - 1] == null) {
+          //   showDialog(
+          //     context: context,
+          //     builder: (context) {
+          //       return AlertDialog(
+          //         title: const Text("提醒"),
+          //         content: Text(
+          //           "请先完成前一个训练日的跟练。",
+          //           style: TextStyle(fontSize: 14.sp),
+          //         ),
+          //         actions: [
+          //           TextButton(
+          //             onPressed: () {
+          //               Navigator.pop(context);
+          //             },
+          //             child: const Text('确认'),
+          //           ),
+          //         ],
+          //       );
+          //     },
+          //   );
+          //   return;
+          // }
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ActionList(
+                groupItem: groupItem,
+                planId: widget.planItem.planId,
+                dayNumber: index + 1,
+              ),
+            ),
+          ).then((value) {
+            print("grouplist中：action list 返回的数据 $value");
+            // ？？？暂时返回这个页面时都重新加载最新的训练列表数据
+
+            // 如果进入action list有修改,比如增加减少了action的数量，这里重新查询显示最新的数据
+            _getGroupListByPlanId();
+          });
+        }
+      },
+      // trailing 是有高度上限的56好像是
+      trailing: _isEditing
+          ? SizedBox(
+              width: 40.sp,
+              child: Row(
+                children: [
+                  Expanded(
+                      child: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () => _onDelete(index),
+                  ))
+                ],
+              ),
+            )
+          : SizedBox(
+              width: 65.sp,
+              // 跟练状态和上次运动时间？---如果点击时是修改状态，不做任何操作（修改group的基本信息在group模块点击省略号的时候去做
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                // 注意索引index是从0开始，logmap中的key是从1开始(第一个训练日)
+                children: [
+                  Icon(
+                    (index > 0 && logMap[index + 1] == null)
+                        ? Icons.do_not_disturb_alt_rounded
+                        : Icons.play_arrow,
+                  ),
+                  Text(
+                    // "跟练状态和上次运动时间？",
+                    logMap[index + 1]?.trainedDate ?? '从未跟练',
+                    style: TextStyle(fontSize: 12.sp),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 }

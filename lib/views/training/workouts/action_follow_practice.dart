@@ -18,13 +18,20 @@ import '../../../models/training_state.dart';
 import '../reports/index.dart';
 
 class ActionFollowPracticeWithTTS extends StatefulWidget {
+  /// 跟练的时候，可能是直接的某个训练；也可能是某个计划的某个训练日。理论上不会两者都有
+  final int? planId;
+  final int? dayNumber;
+  final int? groupId;
   // 跟练需要传入动作组数据
   final List<ActionDetail> actionList;
-  final int? groupId;
 
-  const ActionFollowPracticeWithTTS(
-      {Key? key, required this.actionList, this.groupId})
-      : super(key: key);
+  const ActionFollowPracticeWithTTS({
+    Key? key,
+    required this.actionList,
+    this.groupId,
+    this.planId,
+    this.dayNumber,
+  }) : super(key: key);
 
   @override
   State<ActionFollowPracticeWithTTS> createState() =>
@@ -42,8 +49,17 @@ class _ActionFollowPracticeWithTTSState
   // 倒计时组件控制器
   final _restController = CountDownController();
 
+  /// 跟练的时候，可能是直接的某个训练；也可能是某个计划的某个训练日
+  /// 理论上不会两者都有
+  // 当前的训练编号
+  int? groupId;
+  // 当前的计划编号
+  int? planId;
+  // 计划编号中的训练日
+  int? dayNumber;
   // 当前的动作列表
   late List<ActionDetail> actions;
+
   // 设置动作开始索引为-1，这时不会匹配任何动作，只是为了有个准备的10秒倒计时
   int _currentIndex = -1;
 
@@ -125,8 +141,14 @@ class _ActionFollowPracticeWithTTSState
     setState(() {
       // 一定要传动作组数据
       actions = widget.actionList;
+      planId = widget.planId;
+      dayNumber = widget.dayNumber;
+      groupId = widget.groupId;
       // 进入此跟练页面自动开始
       startedMoment = DateTime.now();
+
+      print("[开始]时的各个编号-------------------");
+      print("planId $planId dayNumber $dayNumber groupId $groupId");
     });
 
     initTts();
@@ -829,7 +851,7 @@ class _ActionFollowPracticeWithTTSState
             ),
             // 如果已经是最后一个了，就不让点击了(实际能点击，只是没有任何操作而已)
             TextButton.icon(
-              label: const Text('下一个'),
+              label: const Text('跳过'),
               icon: const Icon(Icons.skip_next),
 
               // 如果已经是最后一个了，直接跳到结束弹窗？？？
@@ -1099,15 +1121,18 @@ class _ActionFollowPracticeWithTTSState
         (tempTime / 1000 - totalPausedTimes / 1000 - totalRestTimes)
             .toStringAsFixed(0);
 
+    print("保存时的各个编号-------------------");
+    print("planId $planId dayNumber $dayNumber groupId $groupId");
+
     // 训练日志
     var tempLog = TrainedLog(
       trainedDate: getCurrentDateTime(),
       userId: 1,
       // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
-      // planId: 1,
-      // dayNumber: 2,
-      groupId: widget.groupId,
-      // 起止时间就测试插入时的1个小时
+      planId: planId,
+      dayNumber: dayNumber,
+      groupId: groupId,
+      // 起止时间都是datetime格式化后的字符串
       trainedStartTime: formatDateToString(
         startedMoment,
         formatter: constDatetimeFormat,
@@ -1128,6 +1153,7 @@ class _ActionFollowPracticeWithTTSState
     // 跟练结束后就可以停止禁止熄屏
     WakelockPlus.disable();
 
+    if (!mounted) return;
     showDialog(
       context: context,
       barrierDismissible: false, // 禁止点击空白处隐藏弹窗
@@ -1147,12 +1173,10 @@ class _ActionFollowPracticeWithTTSState
         actions: [
           TextButton(
             onPressed: () {
-              // 实际的时候应该push and replace一个报告页面,然后这里应该在结束时记录数据，保存到数据库等等
-
               _restartAllExercise();
               Navigator.pop(context);
             },
-            child: const Text('好的，再来一次'),
+            child: const Text('再来一次'),
           ),
           // 测试的
           TextButton(
@@ -1168,7 +1192,7 @@ class _ActionFollowPracticeWithTTSState
                 MaterialPageRoute(builder: (_) => const TrainingReports()),
               );
             },
-            child: const Text('查看报告（测试）'),
+            child: const Text('查看报告'),
           ),
         ],
       ),
