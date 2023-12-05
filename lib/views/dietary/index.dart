@@ -5,7 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../common/components/cus_cards.dart';
 import '../../common/global/constants.dart';
-import '../me/_feature_mock_data/index.dart';
 import 'foods/index.dart';
 import 'records/index.dart';
 import 'reports/index.dart';
@@ -38,7 +37,7 @@ class _DietaryState extends State<Dietary> {
       child: Column(
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.fromLTRB(20.sp, 20.sp, 20.sp, 0),
+            padding: EdgeInsets.symmetric(horizontal: 20.sp),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.min,
@@ -46,30 +45,12 @@ class _DietaryState extends State<Dietary> {
                 Expanded(
                   flex: 1,
                   child: SizedBox(
-                    height: 100.sp,
+                    height: 50.sp,
                     child: buildSmallCoverCard(
                       context,
                       const DietaryReports(),
-                      "报告",
+                      "饮食报告",
                       routeName: "/dietaryReports",
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: SizedBox(
-                    height: 100.sp,
-                    child: TextButton.icon(
-                      label: const Text("占位，后续调整"),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const FeatureMockDemo(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.bug_report_outlined),
                     ),
                   ),
                 ),

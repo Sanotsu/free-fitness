@@ -167,3 +167,39 @@ List<String> getStartEndDateString(int lastDays) {
 
   return [startDate, endDate];
 }
+
+// 获取当月第一天和最后一天
+List<String> getCurrentMonthStartEndDateString() {
+  // 获取当前日期
+  DateTime now = DateTime.now();
+
+  // 获取当前月的第一天
+  DateTime firstDayOfMonth = DateTime(now.year, now.month, 1);
+
+  // 获取下个月的第一天，然后减去一天，即为当前月的最后一天
+  DateTime lastDayOfMonth =
+      DateTime(now.year, now.month + 1, 1).subtract(const Duration(days: 1));
+
+  // 格式化日期为指定日期形式
+  String startDate = DateFormat(constDateFormat).format(firstDayOfMonth);
+  String endDate = DateFormat(constDateFormat).format(lastDayOfMonth);
+
+  return [startDate, endDate];
+}
+
+// 指定某一天的日期，获取当前日期所在月份的第一天和最后一天的日期字符串
+List<String> getMonthStartEndDateString(
+  DateTime date, {
+  String? formatterString = constDateFormat,
+}) {
+  // 获取指定月的第一天和最后一天
+  DateTime firstDayOfMonth = DateTime(date.year, date.month, 1);
+  DateTime lastDayOfMonth = DateTime(date.year, date.month + 1, 0);
+
+  // 格式化为指定样式字符串
+  DateFormat formatter = DateFormat(formatterString);
+  String startDate = formatter.format(firstDayOfMonth);
+  String endDate = formatter.format(lastDayOfMonth);
+
+  return [startDate, endDate];
+}

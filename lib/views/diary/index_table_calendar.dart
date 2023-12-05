@@ -103,9 +103,8 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
         _rangeEnd = null;
         _rangeSelectionMode = RangeSelectionMode.toggledOff;
       });
-
-      _selectedEvents.value = _getDiarysForADay(selectedDay);
     }
+    _selectedEvents.value = _getDiarysForADay(selectedDay);
   }
 
   // 当某个日期被长按

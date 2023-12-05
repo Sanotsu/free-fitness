@@ -9,7 +9,6 @@ import '../../common/global/constants.dart';
 import 'exercise/index.dart';
 import 'plans/index.dart';
 import 'reports/index.dart';
-import 'settings/index.dart';
 import 'workouts/index.dart';
 
 class Training extends StatefulWidget {
@@ -59,7 +58,7 @@ class _TrainingState extends State<Training> {
       child: Column(
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.fromLTRB(20.sp, 20.sp, 20.sp, 0),
+            padding: EdgeInsets.symmetric(horizontal: 20.sp),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               mainAxisSize: MainAxisSize.min,
@@ -67,22 +66,11 @@ class _TrainingState extends State<Training> {
                 Expanded(
                   flex: 1,
                   child: SizedBox(
-                    height: 100.sp,
+                    height: 50.sp,
                     child: buildSmallCoverCard(
                       context,
                       const TrainingReports(),
-                      "报告",
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: SizedBox(
-                    height: 100.sp,
-                    child: buildSmallCoverCard(
-                      context,
-                      const TrainingSettings(),
-                      "设置",
+                      "运动报告",
                     ),
                   ),
                 ),

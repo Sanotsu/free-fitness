@@ -11,7 +11,9 @@ import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../models/dietary_state.dart';
 
-class FoodDetail extends StatefulWidget {
+/// 2023-12-04 这个是饮食条目选择食物的时候展示的食物列表，点击之后显示的食物详情；
+/// 和单独的“食物成分”模块不一样，显示的内容更少些，主要是选择餐次、单份营养素种类和添加食物摄入数量而已
+class SimpleFoodDetail extends StatefulWidget {
   // 这个是食物搜索页面点击食物进来详情页时传入的数据
   final FoodAndServingInfo foodItem;
 
@@ -25,7 +27,7 @@ class FoodDetail extends StatefulWidget {
   final CusMeals? mealtime;
   final String? logDate;
 
-  const FoodDetail({
+  const SimpleFoodDetail({
     super.key,
     required this.foodItem,
     this.dfiwfs,
@@ -34,10 +36,10 @@ class FoodDetail extends StatefulWidget {
   });
 
   @override
-  State<FoodDetail> createState() => _FoodDetailState();
+  State<SimpleFoodDetail> createState() => _SimpleFoodDetailState();
 }
 
-class _FoodDetailState extends State<FoodDetail> {
+class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
 
   final _formKey = GlobalKey<FormBuilderState>();
@@ -246,7 +248,23 @@ class _FoodDetailState extends State<FoodDetail> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text('Food Details - ${widget.foodItem.food.brand}'),
+        title: RichText(
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: '食物信息概述\n',
+                style: TextStyle(fontSize: 18.sp),
+              ),
+              TextSpan(
+                text:
+                    "${widget.foodItem.food.product}(${widget.foodItem.food.brand})",
+                style: TextStyle(fontSize: 12.sp),
+              ),
+            ],
+          ),
+        ),
       ),
       body: ListView(
         children: [
@@ -257,6 +275,7 @@ class _FoodDetailState extends State<FoodDetail> {
               key: _formKey,
               child: Column(
                 children: [
+                  // 用封装的那个，验证器有问题
                   FormBuilderTextField(
                     name: 'serving_value',
                     initialValue: "$inputServingValue",

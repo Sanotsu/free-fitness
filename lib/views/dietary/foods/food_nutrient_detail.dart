@@ -7,8 +7,12 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 
 import '../../../../common/global/constants.dart';
 import '../../../../models/dietary_state.dart';
+import '../../../common/utils/tools.dart';
 
 // ？？？看能不能和日志中的food detail 拆一些复用部件来
+/// 2023-12-04 和饮食记录模块的食物详情不太一样:
+/// 本页面要修改食物基本信息、新增删除修改单份营养素信息，不关联餐次；
+/// 后者显示的内容更少些，主要是选择餐次、单份营养素种类和添加食物摄入数量而已
 class FoodNutrientDetail extends StatefulWidget {
   // 这个是食物搜索页面点击食物进来详情页时传入的数据
   final FoodAndServingInfo foodItem;
@@ -72,6 +76,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     });
   }
 
+/**
+ * 新结构，上面是食物基本信息，下面是详情表格，右上角修改按钮，修改基本信息，可删除表格数据，点击表格进入单份营养素修改？？？
+ */
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,6 +95,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
       ),
       body: ListView(
         children: [
+          /// ？？？食物基本信息，带图
           Padding(
             padding: EdgeInsets.all(20.sp),
             child: Center(
@@ -117,8 +126,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
                         borderRadius: BorderRadius.circular(5.0),
                       ),
                     ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: TextInputType.name,
                     validator: FormBuilderValidators.compose([
                       FormBuilderValidators.numeric(errorText: '数量只能为数字'),
                     ]),
@@ -179,240 +187,237 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
             ),
           ),
 
-          ...genMainNutrientArea(),
-          // 详细营养素区域
-          Padding(
-            padding: EdgeInsets.only(left: 20.sp, right: 20.sp, top: 20.sp),
-            child: Text(
-              "全部营养信息",
-              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-            ),
-          ),
-          // listview中嵌入listview可能会出问题，使用这个scollview也不能放到expanded里面
-          // 实测是根据外部listview滚动，而不是内部单独再滚动
-          Padding(
-            padding: EdgeInsets.only(left: 20.sp, right: 20.sp),
-            child: _genAllNutrientsCard(),
-          ),
+          ///
+          /// 展示所有单份的数据，不用实时根据摄入数量修改值
+          ///
+          /// ？？？这个table可以用高级点的，
+          ///
+          _buildSimpleFoodTable(fsInfo),
         ],
       ),
     );
   }
 
-  genMainNutrientArea() {
-    // 主要营养素表格
-    return [
-      Padding(
-        padding: EdgeInsets.only(left: 20.sp, right: 20.sp, top: 20.sp),
-        child: Text(
-          "主要营养信息",
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-        ),
-      ),
-      Padding(
-        padding: EdgeInsets.only(left: 20.sp, right: 20.sp),
-        child: DecoratedBox(
-          decoration: const BoxDecoration(
-            color: Colors.grey, // 设置背景色
-            // 其他背景样式，例如渐变等
-          ),
-          child: Table(
-            border: TableBorder.all(),
-            columnWidths: const <int, TableColumnWidth>{
-              1: FlexColumnWidth(),
-              2: FlexColumnWidth(),
-            },
-            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-            children: <TableRow>[
-              TableRow(
-                children: <Widget>[
-                  _genEssentialNutrientsTableCell(
-                    "卡路里",
-                    "${(inputServingValue * nutrientsInfo.energy / oneCalToKjRatio).toStringAsFixed(2)} 大卡",
-                  ),
-                  _genEssentialNutrientsTableCell(
-                    "碳水化合物",
-                    formatNutrientValue(
-                        inputServingValue * nutrientsInfo.totalCarbohydrate),
-                  ),
-                ],
-              ),
-              TableRow(
-                // decoration: const BoxDecoration(color: Colors.white),
-                children: <Widget>[
-                  _genEssentialNutrientsTableCell(
-                    "脂肪",
-                    formatNutrientValue(
-                        inputServingValue * nutrientsInfo.totalFat),
-                  ),
-                  _genEssentialNutrientsTableCell(
-                    "蛋白质",
-                    formatNutrientValue(
-                        inputServingValue * nutrientsInfo.protein),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    ];
-  }
+  /// 表格展示？？？
+  ///
+  _buildSimpleFoodTable(FoodAndServingInfo fsi) {
+    var food = fsi.food;
+    var servingList = fsi.servingInfoList;
+    var foodName = "${food.product} (${food.brand})";
 
-  _genEssentialNutrientsTableCell(String title, String value) {
-    return TableCell(
-      verticalAlignment: TableCellVerticalAlignment.middle,
-      child: Padding(
-        padding: EdgeInsets.all(10.sp),
-        child: Center(
-          child: RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: '$title\n', // 没有这个换行符两个会放到一行来
-                  style: TextStyle(
-                    color: Theme.of(context).canvasColor,
+    return Card(
+      elevation: 5,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          SizedBox(
+            width: 1.sw,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5.0), // 设置所有圆角的大小
+                // 设置展开前的背景色
+                color: const Color.fromARGB(255, 195, 198, 201),
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(10.sp),
+                child: RichText(
+                  textAlign: TextAlign.start,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '食物名称: ',
+                        style: TextStyle(fontSize: 14.sp, color: Colors.black),
+                      ),
+                      TextSpan(
+                        text: foodName,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                TextSpan(
-                  text: value,
-                  style: TextStyle(
-                    color: Theme.of(context).canvasColor,
-                  ),
+              ),
+            ),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              // dataRowHeight: 10.sp,
+              dataRowMinHeight: 60.sp, // 设置行高范围
+              dataRowMaxHeight: 100.sp,
+              headingRowHeight: 25, // 设置表头行高
+              horizontalMargin: 10, // 设置水平边距
+              columnSpacing: 20.sp, // 设置列间距
+              columns: [
+                DataColumn(
+                  label: Text('单份', style: TextStyle(fontSize: 14.sp)),
+                ),
+                DataColumn(
+                  label: Text('能量(大卡)', style: TextStyle(fontSize: 14.sp)),
+                  numeric: true,
+                ),
+                DataColumn(
+                  label: Text('蛋白质(克)', style: TextStyle(fontSize: 14.sp)),
+                  numeric: true,
+                ),
+                DataColumn(
+                  label: Text('脂肪(克)', style: TextStyle(fontSize: 14.sp)),
+                  numeric: true,
+                ),
+                DataColumn(
+                  label: Text('碳水(克)', style: TextStyle(fontSize: 14.sp)),
+                  numeric: true,
+                ),
+                DataColumn(
+                  label: Text('微量元素(毫克)', style: TextStyle(fontSize: 14.sp)),
+                  numeric: true,
                 ),
               ],
+              rows: List<DataRow>.generate(servingList.length, (index) {
+                var serving = servingList[index];
+
+                return DataRow(
+                  cells: [
+                    _buildDataCell(serving.servingUnit),
+                    _buildDataCell(
+                        formatDoubleToString(serving.energy / oneCalToKjRatio)),
+                    _buildDataCell(formatDoubleToString(serving.protein)),
+                    _buildFatDataCell(
+                      formatDoubleToString(serving.totalFat),
+                      serving.transFat?.toStringAsFixed(2) ?? "",
+                      serving.saturatedFat?.toStringAsFixed(2) ?? "",
+                      serving.monounsaturatedFat?.toStringAsFixed(2) ?? "",
+                      serving.polyunsaturatedFat?.toStringAsFixed(2) ?? "",
+                    ),
+                    _buildChoDataCell(
+                      formatDoubleToString(serving.totalCarbohydrate),
+                      serving.sugar?.toStringAsFixed(2) ?? "",
+                      serving.dietaryFiber?.toStringAsFixed(2) ?? "",
+                    ),
+                    _buildMicroDataCell(
+                      formatDoubleToString(serving.sodium),
+                      serving.cholesterol?.toStringAsFixed(2) ?? "",
+                      serving.potassium?.toStringAsFixed(2) ?? "",
+                    ),
+                  ],
+                );
+              }),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  _genAllNutrientsCard() {
-    var nutrientValues = {
-      // '食用量': '$inputServingValue X ${inputServingUnit}',
-      // '卡路里': inputServingValue * nutrientsInfo.energy,
-      '蛋白质': inputServingValue * nutrientsInfo.protein,
-      '脂肪': inputServingValue * nutrientsInfo.totalFat,
-      '碳水化合物': inputServingValue * nutrientsInfo.totalCarbohydrate,
-      '钠': inputServingValue * nutrientsInfo.sodium,
-      '胆固醇': nutrientsInfo.cholesterol != null
-          ? inputServingValue * nutrientsInfo.cholesterol!
-          : 0.0,
-      '钾': nutrientsInfo.potassium != null
-          ? inputServingValue * nutrientsInfo.potassium!
-          : 0.0,
-    };
-
-    var subtitles = {
-      // '卡路里': [
-      //   {'': nutrientsInfo.energy / 1000},
-      // ],
-      '脂肪': [
-        {'反式脂肪': nutrientsInfo.transFat},
-        {'多不饱和脂肪': nutrientsInfo.polyunsaturatedFat},
-        {'单不饱和脂肪': nutrientsInfo.monounsaturatedFat},
-        {'饱和脂肪': nutrientsInfo.saturatedFat},
-      ],
-      '碳水化合物': [
-        {'糖': nutrientsInfo.sugar},
-        {'纤维': nutrientsInfo.dietaryFiber},
-      ],
-    };
-
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // 食用量和能量(卡路里)这两个比较特殊，单独处理
-          _buildCard(
-            "食用量",
-            '$inputServingValue X $inputServingUnit',
-          ),
-          _buildCard(
-            "卡路里",
-            '${(inputServingValue * nutrientsInfo.energy).toStringAsFixed(2)} 千焦',
-            [
-              Row(
-                children: [
-                  const Expanded(child: Text("")),
-                  // 子行的单位都是克，不用传其他参数
-                  Text(
-                    "${(inputServingValue * nutrientsInfo.energy / oneCalToKjRatio).toStringAsFixed(2)} 大卡",
-                  ),
-                ],
-              )
-            ],
-          ),
-          // 除了食用量和能力行之外，其他处理都一样
-          ...nutrientValues.entries.map((entry) {
-            var title = entry.key;
-            var value = entry.value;
-
-            List<Widget>? subtitleRows;
-
-            // print("value----------------------$title - $value");
-
-            if (subtitles.containsKey(title)) {
-              subtitleRows = subtitles[title]!
-                  .where((subtitle) => subtitle.values.first != null)
-                  .map((subtitle) => buildSubtitleRow(
-                      subtitle.keys.first, subtitle.values.first))
-                  .toList();
-            }
-
-            return _buildCard(
-                title,
-                formatNutrientValue(
-                  value,
-                  isCalories: title == '卡路里',
-                  isMilligram: ["钠", "胆固醇", "钾"].contains(title),
-                ),
-                subtitleRows);
-          }).toList()
         ],
       ),
     );
   }
 
-  // 能量栏位也单独处理的话这里不用格式化千焦和大卡了
-  String formatNutrientValue(
-    double value, {
-    bool isCalories = false, // 是否是卡路里（默认显示克，大卡和毫克要指定）
-    bool isMilligram = false, // 是否是毫克
-  }) {
-    final formattedValue = value.toStringAsFixed(2);
-    return isCalories
-        ? '$formattedValue 千焦'
-        : isMilligram
-            ? '$formattedValue 毫克'
-            : '$formattedValue 克';
-  }
-
-  //  构建卡片
-  Widget _buildCard(String title, String value, [List<Widget>? subtitleRows]) {
-    return Card(
-      child: ListTile(
-        title: Row(
-          children: [
-            Expanded(child: Text(title)),
-            Text(value),
-          ],
-        ),
-        subtitle: (subtitleRows != null && subtitleRows.isNotEmpty)
-            ? Column(children: subtitleRows)
-            : null,
+  _buildDataCell(String text) {
+    return DataCell(
+      Text(
+        text,
+        style: TextStyle(fontSize: 14.sp),
       ),
     );
   }
 
-  // 构建卡片中ListTile的子标题部件
-  Widget buildSubtitleRow(String title, double? value) {
+  _buildFatDataCell(
+    String totalFat,
+    String transFat,
+    String saturatedFat,
+    String muFat,
+    String puFat,
+  ) {
+    return DataCell(
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("总脂肪 ", style: TextStyle(fontSize: 14.sp)),
+              Text(totalFat, style: TextStyle(fontSize: 14.sp)),
+            ],
+          ),
+          _buildDetailRowCellText("反式脂肪 ", transFat),
+          _buildDetailRowCellText("饱和脂肪 ", transFat),
+          _buildDetailRowCellText("单不饱和脂肪 ", transFat),
+          _buildDetailRowCellText("多不饱和脂肪 ", transFat),
+        ],
+      ),
+    );
+  }
+
+  _buildChoDataCell(String totalCho, String sugar, String dietaryFiber) {
+    return DataCell(
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("总碳水 ", style: TextStyle(fontSize: 14.sp)),
+              Text(totalCho, style: TextStyle(fontSize: 14.sp)),
+            ],
+          ),
+          _buildDetailRowCellText("糖 ", sugar),
+          _buildDetailRowCellText("膳食纤维 ", dietaryFiber),
+        ],
+      ),
+    );
+  }
+
+  _buildMicroDataCell(
+    String sodium,
+    String potassium,
+    String cholesterol,
+  ) {
+    return DataCell(
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("钠 ", style: TextStyle(fontSize: 14.sp)),
+              Text(sodium, style: TextStyle(fontSize: 14.sp)),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("钾 ", style: TextStyle(fontSize: 14.sp)),
+              Text(potassium, style: TextStyle(fontSize: 14.sp)),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("胆固醇 ", style: TextStyle(fontSize: 14.sp)),
+              Text(cholesterol, style: TextStyle(fontSize: 14.sp)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  _buildDetailRowCellText(String label, String value) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Expanded(child: Text(title)),
-        // 子行的单位都是克，不用传其他参数
-        Text(formatNutrientValue(inputServingValue * value!)),
+        Text(
+          label,
+          style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]!),
+        ),
+        Text(
+          value,
+          style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]!),
+        ),
       ],
     );
   }

@@ -9,6 +9,7 @@ import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
 import 'food_json_import.dart';
+import 'food_modify.dart';
 import 'food_nutrient_detail.dart';
 
 /// 2023-11-21 食物单独一个大模块，可以逐步考虑和之前新增饮食记录的部件进行复用，或者整体复用
@@ -201,9 +202,27 @@ class _DietaryFoodsState extends State<DietaryFoods> {
                   //   }
                   // });
                 },
-                child: Text(
-                  "找不到?",
-                  style: TextStyle(fontSize: 14.sp, color: Colors.white),
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const FoodModify()),
+                    ).then((value) {
+                      // 不管是否新增成功，这里都重新加载；因为没有清空查询条件，所以新增的食物关键字不包含查询条件中，不会显示
+                      if (value != null) {
+                        setState(() {
+                          foodItems.clear();
+                          currentPage = 1;
+                        });
+                        _loadFoodData();
+                      }
+                    });
+                  },
+                  child: Text(
+                    "找不到?",
+                    style: TextStyle(fontSize: 14.sp, color: Colors.white),
+                  ),
                 ),
               )
             ],
@@ -398,24 +417,6 @@ class _DietaryFoodsState extends State<DietaryFoods> {
       Text(
         text,
         style: TextStyle(fontSize: 14.sp),
-      ),
-    );
-  }
-}
-
-class FoodDetailsPage extends StatelessWidget {
-  final String foodItem;
-
-  const FoodDetailsPage(this.foodItem, {Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Food Details - $foodItem'),
-      ),
-      body: Center(
-        child: Text('Details of $foodItem'),
       ),
     );
   }

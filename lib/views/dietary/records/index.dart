@@ -11,8 +11,9 @@ import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
-import 'foods/food_detail.dart';
-import 'foods/food_list.dart';
+import 'report_calendar_summary.dart';
+import 'simple_food_detail.dart';
+import 'simple_food_list.dart';
 
 class DietaryRecords extends StatefulWidget {
   const DietaryRecords({super.key});
@@ -65,7 +66,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   }
 
   // 有指定日期查询指定日期的饮食记录条目，没有就当前日期
-  _queryDailyFoodItemList() async {
+  _queryDailyFoodItemList({String? mealEnLabel}) async {
     if (isLoading) return;
 
     setState(() {
@@ -99,6 +100,15 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
     setState(() {
       dfiwfsList = temp;
+
+      print('mealEnLabelmealEnLabelmealEnLabel--$mealEnLabel');
+      // ？？？没有效果，这个得重新设计
+      if (mealEnLabel != null) {
+        isExpandedList[mealEnLabel] = true;
+
+        print('isExpandedList[meal.enLabel]-${isExpandedList[mealEnLabel]}');
+      }
+
       isLoading = false;
     });
   }
@@ -122,27 +132,50 @@ class _DietaryRecordsState extends State<DietaryRecords> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.calendar_month),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ReportCalendarSummary(),
+                ),
+              ).then((value) {
+                // 2023-12-04 之前是在食物详情中有设置一个新增成功的返回参数，确认新增成功后重新加载当前日期的条目数据。
+                // 现在就只要是返回这个页面，都重新加载，也避免了跨级子组件数据返回的设计
+
+                print("TableCalendarComplex---$value");
+                // // ？？？为什么不回触发？？？
+                // if (value != null) {
+                //   print(2222222222222222);
+
+                //   _queryDailyFoodItemList(mealEnLabel: value as String);
+                // }
+              });
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FoodList(
+                  builder: (context) => SimpleFoodList(
                     mealtime: CusMeals.breakfast,
                     // 注意，这里应该是一个日期选择器插件选中的值，格式化为固定字符串，子组件就不再处理
                     logDate: selectedDateStr,
                   ),
                 ),
               ).then((value) {
-                // 确认新增成功后重新加载当前日期的条目数据
-                final arguments =
-                    ModalRoute.of(context)!.settings.arguments as Map;
-                final bool result = arguments['isItemAdded'];
-                if (result) {
-                  _queryDailyFoodItemList();
-                }
+                // 2023-12-04 之前是在食物详情中有设置一个新增成功的返回参数，确认新增成功后重新加载当前日期的条目数据。
+                // 现在就只要是返回这个页面，都重新加载，也避免了跨级子组件数据返回的设计
 
-                (ModalRoute.of(context)!.settings.arguments as Map).clear();
+                print("1111111111111111111---$value");
+                // ？？？为什么不回触发？？？
+                if (value != null) {
+                  print(2222222222222222);
+
+                  _queryDailyFoodItemList(mealEnLabel: value as String);
+                }
               });
             },
           ),
@@ -628,24 +661,16 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                       context,
                       MaterialPageRoute(
                         // 主页面点击餐次的添加是新增，没有旧数据，需要餐次和日期信息
-                        builder: (context) => FoodList(
+                        builder: (context) => SimpleFoodList(
                           mealtime: mealtime.value,
                           // 注意，这里应该是一个日期选择器插件选中的值，格式化为固定字符串，子组件就不再处理
                           logDate: selectedDateStr,
                         ),
                       ),
                     ).then((value) {
-                      // 确认新增成功后重新加载当前日期的条目数据
-                      final arguments =
-                          ModalRoute.of(context)!.settings.arguments as Map;
-                      final bool result = arguments['isItemAdded'];
-
-                      if (result) {
-                        _queryDailyFoodItemList();
-                      }
-                      // 使用参数后应清除Map
-                      (ModalRoute.of(context)!.settings.arguments as Map)
-                          .clear();
+                      // 2023-12-04 之前是在食物详情中有设置一个新增成功的返回参数，确认新增成功后重新加载当前日期的条目数据。
+                      // 现在就只要是返回这个页面，都重新加载，也避免了跨级子组件数据返回的设计
+                      _queryDailyFoodItemList();
                     });
                   },
                   icon: const Icon(Icons.add, color: Colors.blue),
@@ -668,6 +693,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                 color: Color.fromARGB(255, 195, 198, 201),
               ),
               child: ExpansionTile(
+                initiallyExpanded: isExpandedList[mealtime.enLabel]!,
                 // 如果是概要，展开的标题只显示餐次的食物数量；是详情，则展示该餐次各项食物的主要营养素之和
                 title: dataDisplayMode == "summary"
                     ? Text('${dfiwfsMealItems.length} 项')
@@ -764,14 +790,13 @@ class _DietaryRecordsState extends State<DietaryRecords> {
             context,
             MaterialPageRoute(
               // 主页面点击item详情是修改或删除，只需要传入食物信息和item详情就好
-              builder: (context) => FoodDetail(foodItem: data, dfiwfs: logItem),
+              builder: (context) =>
+                  SimpleFoodDetail(foodItem: data, dfiwfs: logItem),
             ),
           ).then((value) {
-            // 确认修改或删除成功后重新加载当前日期的条目数据
-            final bool result = value['isItemModified'];
-            if (result) {
-              _queryDailyFoodItemList();
-            }
+            // 2023-12-04 之前是在食物详情中有设置一个修改或删除成功的返回参数，确认修改或删除成功后重新加载当前日期的条目数据。
+            // 现在就只要是返回这个页面，都重新加载，也避免了跨级子组件数据返回的设计
+            _queryDailyFoodItemList();
           });
         },
         // 滑动可删除，

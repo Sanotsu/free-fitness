@@ -374,6 +374,7 @@ class DBDietaryHelper {
   // 返回值动态类型，有查详情则是 List<DailyFoodItemWithFoodServing>，
   // 不查详情则是 List<DailyFoodItem>
   Future<List<dynamic>> queryDailyFoodItemListWithDetail({
+    int? userId, // TODO 用户编号应该是必须要指定的，调用处要改
     int? dailyFoodItemId,
     String? startDate,
     String? endDate,
@@ -384,6 +385,11 @@ class DBDietaryHelper {
 
     final where = <String>[];
     final whereArgs = <dynamic>[];
+
+    if (userId != null) {
+      where.add('contributor = ?');
+      whereArgs.add(userId);
+    }
 
     if (dailyFoodItemId != null) {
       where.add('daily_food_item_id = ?');

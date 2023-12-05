@@ -9,9 +9,10 @@ import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../../../../common/global/constants.dart';
-import '../../../../common/utils/db_dietary_helper.dart';
-import '../../../../models/dietary_state.dart';
+import '../../../common/global/constants.dart';
+import '../../../common/utils/db_dietary_helper.dart';
+import '../../../common/utils/tool_widgets.dart';
+import '../../../models/dietary_state.dart';
 import 'food_serving_info_modify_form.dart';
 
 // 目前这个是食物新增时使用，新增时会同时至少新增一条单份食物营养素信息。
@@ -377,20 +378,23 @@ class _FoodModifyState extends State<FoodModify> {
                 child: Column(
                   children: [
                     // 食物的品牌和产品名称(没有对应数据库，没法更人性化的筛选，都是用户输入)
-                    FormBuilderTextField(
-                      name: 'brand',
-                      decoration: const InputDecoration(labelText: '*食物品牌'),
+
+                    cusFormBuilerTextField(
+                      "brand",
+                      labelText: '*食物品牌',
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(errorText: '品牌不可为空'),
                       ]),
                     ),
-                    FormBuilderTextField(
-                      name: 'product',
-                      decoration: const InputDecoration(labelText: '*产品名称'),
+
+                    cusFormBuilerTextField(
+                      "product",
+                      labelText: '*产品名称',
                       validator: FormBuilderValidators.compose([
                         FormBuilderValidators.required(errorText: '名称不可为空'),
                       ]),
                     ),
+
                     FormBuilderRadioGroup(
                       decoration: const InputDecoration(labelText: '营养成分'),
                       name: 'serving_info_type',
@@ -706,14 +710,16 @@ class _FoodModifyState extends State<FoodModify> {
                       maxLines: 4,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    FormBuilderTextField(
-                      name: 'tags',
-                      decoration: const InputDecoration(labelText: '标签'),
+
+                    cusFormBuilerTextField(
+                      "tags",
+                      labelText: '标签',
                     ),
-                    FormBuilderTextField(
-                      name: 'category',
-                      decoration: const InputDecoration(labelText: '分类'),
+                    cusFormBuilerTextField(
+                      "category",
+                      labelText: '分类',
                     ),
+
                     const SizedBox(height: 10),
                     // 上传活动示例图片（静态图或者gif）
                     FormBuilderFilePicker(

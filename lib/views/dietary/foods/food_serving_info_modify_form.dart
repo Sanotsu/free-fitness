@@ -6,8 +6,9 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
-import '../../../../common/global/constants.dart';
-import '../../../../models/dietary_state.dart';
+import '../../../common/global/constants.dart';
+import '../../../common/utils/tool_widgets.dart';
+import '../../../models/dietary_state.dart';
 
 class FoodServingInfoModifyForm extends StatefulWidget {
   // 一定会传单份食物营养素的分类(度量的metric 或者自定义的custom)
@@ -106,10 +107,9 @@ class _FoodServingInfoModifyFormState extends State<FoodServingInfoModifyForm> {
                             ),
                           ),
                           Flexible(
-                            child: FormBuilderTextField(
-                              name: 'serving_unit',
-                              decoration:
-                                  const InputDecoration(labelText: '*单位'),
+                            child: cusFormBuilerTextField(
+                              "serving_unit",
+                              labelText: '*单位',
                               validator: FormBuilderValidators.compose([
                                 FormBuilderValidators.required(
                                     errorText: '单位不可为空'),

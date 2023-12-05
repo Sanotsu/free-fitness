@@ -148,9 +148,7 @@ void showConfigDialog(
                       ),
                     ],
                     // 打开数字键盘
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
+                    keyboardType: TextInputType.name,
                   ),
                 ),
               ],

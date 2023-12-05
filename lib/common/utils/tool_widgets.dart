@@ -88,6 +88,7 @@ Widget cusFormBuilerTextField(
   bool? isOutline = false, // 输入框是否有线条
   bool isReadOnly = false, // 输入框是否有线条
   TextInputType? keyboardType,
+  void Function(String?)? onChanged,
 }) {
   return Padding(
     padding: EdgeInsets.symmetric(horizontal: 10.sp),
@@ -97,7 +98,8 @@ Widget cusFormBuilerTextField(
       maxLines: maxLines,
       readOnly: isReadOnly,
       style: TextStyle(fontSize: valueFontSize),
-      keyboardType: keyboardType,
+      // 2023-12-04 没有传默认使用name，原本默认的.text会弹安全键盘，可能无法输入中文
+      keyboardType: keyboardType ?? TextInputType.name,
       decoration: _buildInputDecoration(
         isOutline,
         isReadOnly,
@@ -126,6 +128,7 @@ Widget cusFormBuilerTextField(
       //             EdgeInsets.symmetric(horizontal: 5.sp, vertical: 5),
       //       ),
       validator: validator,
+      onChanged: onChanged,
     ),
   );
 }

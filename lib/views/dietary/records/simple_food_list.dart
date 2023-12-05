@@ -2,18 +2,22 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:free_fitness/common/utils/tools.dart';
 import 'package:free_fitness/models/dietary_state.dart';
 
 import '../../../../common/global/constants.dart' as constants;
 import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../common/utils/tool_widgets.dart';
-import 'food_modify.dart';
-import 'food_detail.dart';
 
-class FoodList extends StatefulWidget {
+import '../foods/food_modify.dart';
+import 'simple_food_detail.dart';
+
+/// 2023-12-04 这个是饮食条目选择食物的时候展示的食物列表；
+/// 和单独的“食物成分”模块不一样，显示的内容更少些，但关联的内容多些，比如日期、餐次等等
+class SimpleFoodList extends StatefulWidget {
   // 2023-10-26
-  // 目前能进入食物列表的入口的，只有在饮食主界面点击顶部搜索按钮、知道餐次添加食物信息的时候。
+  // 目前能进入简单食物列表的入口的，只有在饮食主界面点击顶部搜索按钮、知道餐次添加食物信息的时候。
   // 如果是顶部搜索，默认为早餐；其他指定餐次点击添加时也会自动带上对应餐次。
   final CusMeals mealtime;
 
@@ -23,17 +27,17 @@ class FoodList extends StatefulWidget {
   // 有传日记新增食物摄入时可以用日记里的或者这个值；没有日记完全新增时，只有用这个数据。
   final String logDate;
 
-  const FoodList({
+  const SimpleFoodList({
     Key? key,
     required this.mealtime,
     required this.logDate,
   }) : super(key: key);
 
   @override
-  State<FoodList> createState() => _FoodListState();
+  State<SimpleFoodList> createState() => _SimpleFoodListState();
 }
 
-class _FoodListState extends State<FoodList> {
+class _SimpleFoodListState extends State<SimpleFoodList> {
   List<FoodAndServingInfo> foodItems = [];
   int currentPage = 1; // 数据库查询的时候会从0开始offset
   int pageSize = 10;
@@ -76,14 +80,8 @@ class _FoodListState extends State<FoodList> {
     super.dispose();
   }
 
+  // 加载食物数据，每次10条
   Future<void> _loadData() async {
-    print("进入了_loadData");
-
-    print(widget.mealtime);
-    // _dietaryHelper.deleteDb();
-
-    // return;
-
     if (isLoading) return;
 
     setState(() {
@@ -91,7 +89,11 @@ class _FoodListState extends State<FoodList> {
     });
 
     CusDataResult temp =
-        await _queryFood(page: currentPage, size: pageSize, query: query);
+        await _dietaryHelper.searchFoodWithServingInfoWithPagination(
+      query,
+      currentPage,
+      pageSize,
+    );
 
     List<FoodAndServingInfo> newData = temp.data as List<FoodAndServingInfo>;
 
@@ -102,6 +104,7 @@ class _FoodListState extends State<FoodList> {
     });
   }
 
+  // 滚动到底部加载更多数据
   void _scrollListener() {
     if (isLoading) return;
 
@@ -115,24 +118,14 @@ class _FoodListState extends State<FoodList> {
   }
 
   void _handleSearch() {
-    print("点击了_handleSearch");
+    // 取消键盘输入框聚焦
+    FocusScope.of(context).unfocus();
     setState(() {
       foodItems.clear();
       currentPage = 1;
       query = searchController.text;
     });
     _loadData();
-  }
-
-  Future<CusDataResult> _queryFood(
-      {required int page, required int size, String query = ''}) async {
-    print("进入了_queryFood");
-
-    var data = await _dietaryHelper.searchFoodWithServingInfoWithPagination(
-        query, page, size);
-    print("进入了_queryFood,查询结果$data");
-
-    return data;
   }
 
   @override
@@ -153,20 +146,22 @@ class _FoodListState extends State<FoodList> {
                   currentMealtime = newValue.value;
                 });
               },
-              items: mealtimeList
-                  .map<DropdownMenuItem<CusLabel>>((CusLabel value) {
-                return DropdownMenuItem<CusLabel>(
-                  value: value,
-                  child: Text(value.enLabel),
-
-                  ///？？？
-                );
-              }).toList(),
+              items: mealtimeList.map<DropdownMenuItem<CusLabel>>(
+                (CusLabel value) {
+                  return DropdownMenuItem<CusLabel>(
+                    value: value,
+                    child: Text(
+                      value.cnLabel,
+                      style: TextStyle(fontSize: 15.sp),
+                    ),
+                  );
+                },
+              ).toList(),
               underline: Container(), // 将下划线设置为空的Container
               icon: null, // 将图标设置为null
             ),
           ),
-          subtitle: Text(currentDate),
+          subtitle: Text(currentDate, style: TextStyle(fontSize: 14.sp)),
         ),
         actions: [
           Row(
@@ -179,22 +174,13 @@ class _FoodListState extends State<FoodList> {
                     context,
                     MaterialPageRoute(builder: (context) => const FoodModify()),
                   ).then((value) {
-                    print('value in food list :$value');
-
-                    // 这里如果有返回值，应该能取到新增食物的寄过flag，bool类型
-                    if (value != null && value["isFoodAdded"] != null) {
-                      // 新增成功重新加载食物列表
-                      if (value["isFoodAdded"]) {
-                        setState(() {
-                          foodItems.clear();
-                          currentPage = 1;
-                        });
-                        _loadData();
-                      } else {
-                        print(
-                          'value["isFoodAdded"]的结果不是true:${value["isFoodAdded"]}',
-                        );
-                      }
+                    // 不管是否新增成功，这里都重新加载；因为没有清空查询条件，所以新增的食物关键字不包含查询条件中，不会显示
+                    if (value != null) {
+                      setState(() {
+                        foodItems.clear();
+                        currentPage = 1;
+                      });
+                      _loadData();
                     }
                   });
                 },
@@ -206,7 +192,7 @@ class _FoodListState extends State<FoodList> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(8.sp),
             child: Row(
               children: [
                 Expanded(
@@ -240,57 +226,63 @@ class _FoodListState extends State<FoodList> {
                           constants.oneCalToKjRatio)
                       .toStringAsFixed(2);
 
-                  return ListTile(
-                    // 食物名称
-                    title: Text(foodName),
-                    // 单份食物营养素
-                    subtitle: Text("$foodUnit - $foodEnergy 大卡"),
-                    trailing: IconButton(
-                      onPressed: () async {
-                        print("==========在这里直接添加份量值到日记对应餐次======");
-                        print("==========当前食物：${foodItems[index]}");
-                        print("==========当前餐次：$currentMealtime");
-                        print("==========当日当餐已有食物摄入记录时，对应日、餐次添加meal food item");
-                        print("==========此时需要日记id、meal id才行（从父组件传入）======");
-                        print("==========如果该日、该餐没有的数据，则是全新曾======");
+                  return Card(
+                    elevation: 2,
+                    child: ListTile(
+                      // 食物名称
+                      title: Text(
+                        foodName,
+                        // style: TextStyle(fontSize: 14.sp),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      // 单份食物营养素
+                      subtitle: Text("$foodUnit - $foodEnergy 大卡"),
+                      // 点击这个添加就是默认添加单份营养素的食物，那就直接返回日志页面。
+                      trailing: IconButton(
+                        onPressed: () async {
+                          var tempStr = mealtimeList
+                              .firstWhere((e) => e.value == currentMealtime);
+                          // 如果没有当前日，则完全新增
+                          var dailyFoodItem = DailyFoodItem(
+                            date: currentDate,
+                            mealCategory: tempStr.enLabel,
+                            foodId: foodItems[index].food.foodId!,
+                            servingInfoId: fistServingInfo.servingInfoId!,
+                            foodIntakeSize:
+                                fistServingInfo.servingSize.toDouble(),
+                            contributor: "<登入者编号>",
+                            gmtCreate: getCurrentDateTime(),
+                          );
 
-                        // ？？？这里暂时先只新增1条数据，传入log、meal、mealItem和餐次标识字符串，具体判断逻辑全部放到db helper中区
+                          // ？？？这里应该有插入是否成功的判断
+                          var rst = await _dietaryHelper
+                              .insertDailyFoodItemList([dailyFoodItem]);
 
-                        var tempStr = mealtimeList
-                            .firstWhere((e) => e.value == currentMealtime);
-                        // 如果没有当前日，则完全新增
-                        var dailyFoodItem = DailyFoodItem(
-                          date: currentDate,
-                          mealCategory: tempStr.enLabel,
-                          foodId: foodItems[index].food.foodId!,
-                          servingInfoId: fistServingInfo.servingInfoId!,
-                          foodIntakeSize:
-                              fistServingInfo.servingSize.toDouble(),
-                          contributor: "david",
-                          gmtCreate: DateTime.now().toString(),
-                        );
-
-                        var insertRst = await _dietaryHelper
-                            .insertDailyFoodItemList([dailyFoodItem]);
-
-                        print("food list 里面的新增 insertRst：$insertRst");
-                      },
-                      icon: const Icon(Icons.add_box_outlined),
-                    ),
-                    onTap: () {
-                      print("food lsit 点击了food item ，跳转到food detail ---> ");
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FoodDetail(
-                            foodItem: foodItems[index],
-                            mealtime: currentMealtime,
-                            logDate: currentDate,
+                          print("tempStr.enLabel----${tempStr.enLabel}");
+                          if (!mounted) return;
+                          if (rst.isNotEmpty) {
+                            // 返回餐次，让主页面展开新增的那个折叠栏
+                            Navigator.of(context).pop(tempStr.enLabel);
+                          } else {
+                            Navigator.of(context).pop(tempStr.enLabel);
+                          }
+                        },
+                        icon: const Icon(Icons.add, color: Colors.blue),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SimpleFoodDetail(
+                              foodItem: foodItems[index],
+                              mealtime: currentMealtime,
+                              logDate: currentDate,
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   );
                 }
               },
@@ -298,24 +290,6 @@ class _FoodListState extends State<FoodList> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class FoodDetailsPage extends StatelessWidget {
-  final String foodItem;
-
-  const FoodDetailsPage(this.foodItem, {Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Food Details - $foodItem'),
-      ),
-      body: Center(
-        child: Text('Details of $foodItem'),
       ),
     );
   }

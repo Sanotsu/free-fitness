@@ -39,7 +39,8 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
       generateRandomString(1, 8)
     ].join(","),
     category: generateRandomString(5, 10),
-    contributor: "随机数据测试插入",
+    // 2023-12-05 这里是userId，每个用户只能查询到自己的。后续改为int
+    contributor: Random().nextInt(4).toString(),
     gmtCreate: DateFormat.yMMMd().format(DateTime.now()),
   );
 
@@ -186,7 +187,9 @@ insertDailyLogDataDemo(
       foodId: usedFoodId,
       servingInfoId: usedServingId,
       foodIntakeSize: Random().nextDouble() * 100,
-      contributor: "随机数据测试插入",
+      // contributor: "随机数据测试插入",
+      // 2023-12-05 这里是userId，每个用户只能查询到自己的。后续改为int
+      contributor: Random().nextInt(4).toString(),
       gmtCreate: DateTime.now().toString(),
     );
     list.add(temp);

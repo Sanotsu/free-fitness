@@ -208,8 +208,13 @@ tobed: 目标卡路里折线图是实际摄入的条状图放到一起？
   - 完成 [yuhonas/free-exercise-db](https://github.com/yuhonas/free-exercise-db)格式的 json 文件导入的功能，并修改了图片显示组件。
 
 - 2023-11-30
+
   - 完善动作和食物营养素 json 文件导入页面的细节，修复 json 文件解析未正确解析的问题。
   - 将所有锻炼动作展示本地图片使用轮播组件以便展示多张图;设置在跟练页面时屏幕保持常亮。
+
+- 2023-12-05
+  - 重构了饮食记录中设计食物选择部分的组件结构，完成食物成分模块的食物详情基本页面和新增食物的相关表单页面。
+  - 完成饮食日志首页跳转的日历统计概述报告页面。
 
 ### 问题记录
 
@@ -285,7 +290,13 @@ MaterialApp(
 
 6. 【unsolved】2023-11-22 不知道什么原因，使用 formbuilder 构建文本输入框，一定是安全键盘，无法切换。即便手动设置`keyboardType: TextInputType.text,`也不行。原因不明
 
-但是使用自带的 TextField 就不会有这个问题
+但是使用自带的 TextField 就不会有这个问题。
+
+2023-12-04,无法解决，MIUI 什么的可以关闭安全键盘，这样打开后还是英文输入法，但可以切成中文；如果没关安全键盘，则一定弹出小米安全键盘，无法输入中文。
+
+但 FormBuilderTextField 的 keyboardType 改为"`TextInputType.number`"它就是正常键盘的数字键而已，就不会弹安全键盘，原因不明。
+
+**改为`keyboardType: TextInputType.name`可以启用正常键盘。**
 
 7. Chip 部件的默认高度
 
