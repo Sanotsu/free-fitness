@@ -114,6 +114,34 @@ class ServingInfo {
     };
   }
 
+  // 2023-12-06 在修改单份营养素时，对已有的ServingInfo作为表单的初始化值时，可能会报错
+  // 这里全部转为string的话，应该还行
+  Map<String, dynamic> toStringMap() {
+    return {
+      "serving_info_id": servingInfoId,
+      "food_id": foodId,
+      "serving_size": servingSize,
+      "serving_unit": servingUnit,
+      "energy": energy.toStringAsFixed(2),
+      "protein": protein.toStringAsFixed(2),
+      "total_fat": totalFat.toStringAsFixed(2),
+      "saturated_fat": saturatedFat?.toStringAsFixed(2),
+      "trans_fat": transFat?.toStringAsFixed(2),
+      "polyunsaturated_fat": polyunsaturatedFat?.toStringAsFixed(2),
+      "monounsaturated_fat": monounsaturatedFat?.toStringAsFixed(2),
+      "cholesterol": cholesterol?.toStringAsFixed(2),
+      "total_carbohydrate": totalCarbohydrate.toStringAsFixed(2),
+      "sugar": sugar?.toStringAsFixed(2),
+      "dietary_fiber": dietaryFiber?.toStringAsFixed(2),
+      "sodium": sodium.toStringAsFixed(2),
+      "potassium": potassium?.toStringAsFixed(2),
+      "contributor": contributor,
+      "gmt_create": gmtCreate,
+      "update_user": updateUser,
+      "gmt_modified": gmtModified,
+    };
+  }
+
   factory ServingInfo.fromMap(Map<String, dynamic> map) {
     return ServingInfo(
       servingInfoId: map['serving_info_id'] as int?,

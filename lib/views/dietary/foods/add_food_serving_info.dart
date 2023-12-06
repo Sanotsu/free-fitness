@@ -5,7 +5,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/global/constants.dart';
-import 'food_serving_modify_from_column.dart';
+import 'common_utils_for_food_modify.dart';
 
 class FoodServingInfoModify extends StatefulWidget {
   // 一定会传单份食物营养素的分类(度量的metric 或者自定义的custom)
@@ -21,8 +21,7 @@ class FoodServingInfoModify extends StatefulWidget {
   });
 
   @override
-  State<FoodServingInfoModify> createState() =>
-      _FoodServingInfoModifyState();
+  State<FoodServingInfoModify> createState() => _FoodServingInfoModifyState();
 }
 
 class _FoodServingInfoModifyState extends State<FoodServingInfoModify> {
@@ -69,7 +68,8 @@ class _FoodServingInfoModifyState extends State<FoodServingInfoModify> {
               onPressed: () {
                 if (_servingInfoformKey.currentState!.saveAndValidate()) {
                   var temp = _servingInfoformKey.currentState?.value;
-                  Navigator.pop(context, {"servingInfo": temp});
+                  // 直接返回表单的值就好
+                  Navigator.pop(context, temp);
                 }
               },
               child: const Text("添加"),

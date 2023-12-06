@@ -9,8 +9,8 @@ import '../../../common/components/dialog_widgets.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
-import 'detail_food_modify.dart';
-import 'detail_serving_info_modify.dart';
+import 'detail_modify_food.dart';
+import 'detail_modify_serving_info.dart';
 
 // ？？？看能不能和日志中的food detail 拆一些复用部件来
 /// 2023-12-04 和饮食记录模块的食物详情不太一样:
@@ -92,7 +92,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => DetailFoodModify(food: fsInfo.food),
+                  builder: (context) => DetailModifyFood(food: fsInfo.food),
                 ),
               ).then((value) {
                 // 不管是否修改成功，这里都重新加载
@@ -129,11 +129,11 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 // 2023-12-05 暂时不提供修改，以新增+删除代替修改
-                // if (servingSelectedList.where((e) => e == true).length == 1)
-                //   TextButton(
-                //     onPressed: clickServingInfoModify,
-                //     child: const Text("修改"),
-                //   ),
+                if (servingSelectedList.where((e) => e == true).length == 1)
+                  TextButton(
+                    onPressed: clickServingInfoModify,
+                    child: const Text("修改"),
+                  ),
                 if (servingSelectedList.where((e) => e == true).isNotEmpty)
                   TextButton(
                     onPressed: clickServingInfoDelete,
@@ -173,8 +173,13 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DetailServingInfoModify(
-          servingType: servingTypeList.first, // 这个值真没地方取啊
+        builder: (context) => DetailModifyServingInfo(
+          /// 这个值真没地方取啊
+          /// 2023-12-06 简单判断是否是标准度量
+          servingType: (servingInfo.servingUnit.toLowerCase() == "100ml" ||
+                  servingInfo.servingUnit.toLowerCase() == "100g")
+              ? servingTypeList.first
+              : servingTypeList.last,
           food: fsInfo.food,
           currentServingInfo: servingInfo,
         ),
@@ -294,7 +299,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => DetailServingInfoModify(
+            builder: (context) => DetailModifyServingInfo(
               food: fsInfo.food,
               servingType: dropdownValue,
             ),

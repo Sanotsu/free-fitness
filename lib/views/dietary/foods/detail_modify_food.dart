@@ -4,27 +4,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
-import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:free_fitness/common/utils/tools.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../common/utils/db_dietary_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
 import '../../../models/dietary_state.dart';
+import 'common_utils_for_food_modify.dart';
 
 // 新增的时候用旧的food_modify和food_serving_info_modify_form。
 // 而在食物成分的详情页面进行修改时，是食物基本信息和指定单份营养素分开修改，所以有_base关键字
-class DetailFoodModify extends StatefulWidget {
+class DetailModifyFood extends StatefulWidget {
   // 专门在食物详情中修改食物基本信息
   final Food food;
 
-  const DetailFoodModify({super.key, required this.food});
+  const DetailModifyFood({super.key, required this.food});
 
   @override
-  State<DetailFoodModify> createState() => _DetailFoodModifyState();
+  State<DetailModifyFood> createState() => _DetailModifyFoodState();
 }
 
-class _DetailFoodModifyState extends State<DetailFoodModify> {
+class _DetailModifyFoodState extends State<DetailModifyFood> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
 
 //  食物添加的表单key
@@ -53,7 +52,7 @@ class _DetailFoodModifyState extends State<DetailFoodModify> {
     });
   }
 
-  _addFoodAndServingList() async {
+  _updateFoodInfo() async {
     if (_foodFormKey.currentState!.saveAndValidate()) {
       var temp = _foodFormKey.currentState?.value;
       var food = Food(
@@ -128,58 +127,13 @@ class _DetailFoodModifyState extends State<DetailFoodModify> {
           padding: EdgeInsets.all(10.sp),
           child: SingleChildScrollView(
             child: FormBuilder(
-                key: _foodFormKey,
-                child: Column(
-                  children: [
-                    // 食物的品牌和产品名称(没有对应数据库，没法更人性化的筛选，都是用户输入)
-                    cusFormBuilerTextField(
-                      "brand",
-                      labelText: '*食物品牌',
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(errorText: '品牌不可为空'),
-                      ]),
-                    ),
-                    cusFormBuilerTextField(
-                      "product",
-                      labelText: '*产品名称',
-                      validator: FormBuilderValidators.compose([
-                        FormBuilderValidators.required(errorText: '名称不可为空'),
-                      ]),
-                    ),
-                    cusFormBuilerTextField("tags", labelText: '标签'),
-                    cusFormBuilerTextField("category", labelText: '分类'),
-
-                    const SizedBox(height: 10),
-                    // 上传活动示例图片（静态图或者gif）
-                    FormBuilderFilePicker(
-                      name: 'images',
-                      decoration: const InputDecoration(labelText: '演示图片'),
-                      initialValue: initImages,
-                      maxFiles: null,
-                      allowMultiple: true,
-                      previewImages: true,
-                      onChanged: (val) => debugPrint(val.toString()),
-                      typeSelectors: const [
-                        TypeSelector(
-                          type: FileType.image,
-                          selector: Row(
-                            children: <Widget>[
-                              Icon(Icons.file_upload),
-                              Text('图片上传'),
-                            ],
-                          ),
-                        )
-                      ],
-                      customTypeViewerBuilder: (children) => Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: children,
-                      ),
-                      onFileLoading: (val) {
-                        debugPrint(val.toString());
-                      },
-                    ),
-                  ],
-                )),
+              key: _foodFormKey,
+              child: Column(
+                children: [
+                  ...buildFoodModifyFormColumns(initImages: initImages),
+                ],
+              ),
+            ),
           ),
         ),
         Padding(
@@ -201,7 +155,7 @@ class _DetailFoodModifyState extends State<DetailFoodModify> {
               Expanded(
                 flex: 4,
                 child: ElevatedButton(
-                  onPressed: _addFoodAndServingList,
+                  onPressed: _updateFoodInfo,
                   child: const Text("确定"),
                 ),
               ),

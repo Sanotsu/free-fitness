@@ -9,7 +9,7 @@ import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
 import 'food_json_import.dart';
-import 'food_modify.dart';
+import 'add_food_with_serving.dart';
 import 'food_nutrient_detail.dart';
 
 /// 2023-11-21 食物单独一个大模块，可以逐步考虑和之前新增饮食记录的部件进行复用，或者整体复用
@@ -176,55 +176,26 @@ class _DietaryFoodsState extends State<DietaryFoods> {
           Row(
             children: [
               TextButton(
-                // icon: const Icon(Icons.add),
                 onPressed: () {
-                  print("单个新增-----------");
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => const FoodModify()),
-                  // ).then((value) {
-                  //   print('value in food list :$value');
-
-                  //   // 这里如果有返回值，应该能取到新增食物的寄过flag，bool类型
-                  //   if (value != null && value["isFoodAdded"] != null) {
-                  //     // 新增成功重新加载食物列表
-                  //     if (value["isFoodAdded"]) {
-                  //       setState(() {
-                  //         foodItems.clear();
-                  //         currentPage = 1;
-                  //       });
-                  //       _loadFoodData();
-                  //     } else {
-                  //       print(
-                  //         'value["isFoodAdded"]的结果不是true:${value["isFoodAdded"]}',
-                  //       );
-                  //     }
-                  //   }
-                  // });
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AddfoodWithServing()),
+                  ).then((value) {
+                    // 不管是否新增成功，这里都重新加载；因为没有清空查询条件，所以新增的食物关键字不包含查询条件中，不会显示
+                    if (value != null) {
+                      setState(() {
+                        foodItems.clear();
+                        currentPage = 1;
+                      });
+                      _loadFoodData();
+                    }
+                  });
                 },
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const FoodModify()),
-                    ).then((value) {
-                      // 不管是否新增成功，这里都重新加载；因为没有清空查询条件，所以新增的食物关键字不包含查询条件中，不会显示
-                      if (value != null) {
-                        setState(() {
-                          foodItems.clear();
-                          currentPage = 1;
-                        });
-                        _loadFoodData();
-                      }
-                    });
-                  },
-                  child: Text(
-                    "找不到?",
-                    style: TextStyle(fontSize: 14.sp, color: Colors.white),
-                  ),
+                child: Text(
+                  "找不到?",
+                  style: TextStyle(fontSize: 14.sp, color: Colors.white),
                 ),
-              )
+              ),
             ],
           ),
         ],

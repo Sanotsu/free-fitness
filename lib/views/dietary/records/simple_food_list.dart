@@ -10,7 +10,7 @@ import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../common/utils/tool_widgets.dart';
 
-import '../foods/food_modify.dart';
+import '../foods/add_food_with_serving.dart';
 import 'simple_food_detail.dart';
 
 /// 2023-12-04 这个是饮食条目选择食物的时候展示的食物列表；
@@ -172,7 +172,7 @@ class _SimpleFoodListState extends State<SimpleFoodList> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const FoodModify()),
+                    MaterialPageRoute(builder: (context) => const AddfoodWithServing()),
                   ).then((value) {
                     // 不管是否新增成功，这里都重新加载；因为没有清空查询条件，所以新增的食物关键字不包含查询条件中，不会显示
                     if (value != null) {
