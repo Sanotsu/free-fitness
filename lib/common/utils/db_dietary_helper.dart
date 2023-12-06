@@ -113,6 +113,14 @@ class DBDietaryHelper {
   /// food and serving_info 的相关操作
   ///
 
+  // 修改单条基础 food
+  Future<int> updateFood(Food food) async => (await database).update(
+        DietaryDdl.tableNameOfFood,
+        food.toMap(),
+        where: 'food_id = ?',
+        whereArgs: [food.foodId],
+      );
+
   ///
   // 插入单条食物(返回食物编号和营养素编号列表，0和空可能就没插入成功)
   // 如果食物为空，servinginfo不为空，说明是给以存在的食物添加单份营养素
@@ -247,6 +255,21 @@ class DBDietaryHelper {
       print('Error deleting food with serving info: $e');
       rethrow;
     }
+  }
+
+  // 删除营养素数据列表
+  Future<List<Object?>> deleteServingInfoList(List<int> ids) async {
+    var batch = (await database).batch();
+
+    for (var id in ids) {
+      batch.delete(
+        DietaryDdl.tableNameOfServingInfo,
+        where: "serving_info_id = ? ",
+        whereArgs: [id],
+      );
+    }
+
+    return batch.commit();
   }
 
   // 关键字查询食物及其不同单份食物营养素

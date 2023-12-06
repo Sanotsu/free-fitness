@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../global/constants.dart';
@@ -202,4 +203,22 @@ List<String> getMonthStartEndDateString(
   String endDate = formatter.format(lastDayOfMonth);
 
   return [startDate, endDate];
+}
+
+// formbuilder的图片地址拼接的字符串，要转回平台文件列表
+List<PlatformFile> convertStringToPlatformFiles(String imagesString) {
+  List<String> imageUrls = imagesString.split(','); // 拆分字符串
+
+  List<PlatformFile> platformFiles = []; // 存储 PlatformFile 对象的列表
+
+  for (var imageUrl in imageUrls) {
+    PlatformFile file = PlatformFile(
+      name: imageUrl,
+      path: imageUrl,
+      size: 32, // 假设图片地址即为文件路径
+    );
+    platformFiles.add(file);
+  }
+
+  return platformFiles;
 }
