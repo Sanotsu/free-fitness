@@ -13,7 +13,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/dietary_state.dart';
-import 'food_serving_info_modify_form.dart';
+import 'food_serving_info_modify.dart';
 
 // 目前这个是食物新增时使用，新增时会同时至少新增一条单份食物营养素信息。
 // 而食物某一单份营养素信息的修改可以在食物详情找到修改入口，但食物基本信息的修改入口还不明确
@@ -419,7 +419,7 @@ class _FoodModifyState extends State<FoodModify> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            FoodServingInfoModifyForm(
+                                            FoodServingInfoModify(
                                           servingType: servingType,
                                           currentServingInfo:
                                               tempServingFormData,
@@ -483,7 +483,7 @@ class _FoodModifyState extends State<FoodModify> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => FoodServingInfoModifyForm(
+                            builder: (context) => FoodServingInfoModify(
                               servingType: servingType,
                             ),
                           ),

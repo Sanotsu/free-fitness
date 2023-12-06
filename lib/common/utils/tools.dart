@@ -147,6 +147,16 @@ String formatDoubleToString(double number, {length = 6}) {
       : numberString;
 }
 
+// 小数转化为2位小数的字符串
+//  如果转换为两位小数的字符串长度超过6(即999.99)，则四舍五入为整数
+String cusDoubleToString(double? number, {length = 6}) {
+  if (number == null) return "";
+  String numberString = number.toStringAsFixed(2);
+  return numberString.length > length
+      ? number.toStringAsFixed(0)
+      : numberString;
+}
+
 /// Returns a list of [DateTime] objects from [first] to [last], inclusive.
 /// 返回从[第一个]到[最后一个]（包括首尾两个）的[DateTime]对象列表。
 List<DateTime> daysInRange(DateTime first, DateTime last) {
@@ -221,4 +231,11 @@ List<PlatformFile> convertStringToPlatformFiles(String imagesString) {
   }
 
   return platformFiles;
+}
+
+// 把驼峰命名法的栏位转为全小写下划线连接  snake_case 方式表示
+String getPropName(String camelCaseName) {
+  final pattern = RegExp(r'[A-Z]');
+  return camelCaseName.splitMapJoin(pattern,
+      onMatch: (m) => '_${m.group(0)?.toLowerCase()}');
 }

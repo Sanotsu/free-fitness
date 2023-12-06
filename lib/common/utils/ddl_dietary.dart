@@ -23,6 +23,7 @@ class DietaryDdl {
     );
     """;
 
+  // 2023-12-06 新增唯一检查，同一个食物、同一个单位、同一个数量的联合值是唯一的
   static const String ddlForServingInfo = """
     CREATE TABLE IF NOT EXISTS $tableNameOfServingInfo (
       serving_info_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -45,7 +46,8 @@ class DietaryDdl {
       contributor TEXT,
       gmt_create TEXT,
       update_user TEXT,
-      gmt_modified TEXT
+      gmt_modified TEXT,
+      UNIQUE(food_id,serving_size,serving_unit)
     );
     """;
 

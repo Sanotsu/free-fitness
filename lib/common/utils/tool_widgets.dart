@@ -308,3 +308,37 @@ buildTinyButtonTag(
     ),
   );
 }
+
+// 带有横线滚动条的datatable
+buildDataTableWithHorizontalScrollbar({
+  required ScrollController scrollController,
+  required List<DataColumn> columns,
+  required List<DataRow> rows,
+}) {
+  return Scrollbar(
+    thickness: 5,
+    // 设置交互模式后，滚动条和手势滚动方向才一致
+    interactive: true,
+    radius: Radius.circular(5.sp),
+    // 不设置这个，滚动条默认不显示，在滚动时才显示
+    thumbVisibility: true,
+    // trackVisibility: true,
+    // 滚动条默认在右边，要改在左边就配合Transform进行修改(此例没必要)
+    // 刻意预留一点空间给滚动条
+    controller: scrollController,
+    child: SingleChildScrollView(
+      controller: scrollController,
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        // dataRowHeight: 10.sp,
+        dataRowMinHeight: 60.sp, // 设置行高范围
+        dataRowMaxHeight: 100.sp,
+        headingRowHeight: 25, // 设置表头行高
+        horizontalMargin: 10, // 设置水平边距
+        columnSpacing: 20.sp, // 设置列间距
+        columns: columns,
+        rows: rows,
+      ),
+    ),
+  );
+}

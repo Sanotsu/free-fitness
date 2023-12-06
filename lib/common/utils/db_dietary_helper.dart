@@ -180,11 +180,29 @@ class DBDietaryHelper {
           // 3 食物为空，营养素不为空
           // 多个单个营养素的批量插入，(营养素的foodId不传食物时一定要有)
           for (var e in servingInfoList) {
-            var sId = await txn.insert(
-              DietaryDdl.tableNameOfServingInfo,
-              e.toMap(),
-            );
-            servingIds.add(sId);
+            try {
+              var sId = await txn.insert(
+                DietaryDdl.tableNameOfServingInfo,
+                e.toMap(),
+              );
+              servingIds.add(sId);
+            } on DatabaseException catch (err) {
+              // 唯一值重复
+              if (err.isUniqueConstraintError()) {
+                // 抛出自定义异常并携带错误信息
+                throw Exception(
+                  '该食物已存在同样的单份营养素:\n ${e.servingSize} - ${e.servingUnit}',
+                );
+              } else if (err.isDuplicateColumnError()) {
+                // 抛出自定义异常并携带错误信息
+                throw Exception(
+                  '该食物已存在同样的单份营养素:\n ${e.servingInfoId}-${e.servingSize} - ${e.servingUnit}',
+                );
+              } else {
+                // 其他错误(抛出异常来触发回滚的方式是 sqflite 中常用的做法)
+                rethrow;
+              }
+            }
           }
           foodId = servingInfoList.first.foodId;
         } else {

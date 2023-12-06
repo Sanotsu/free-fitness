@@ -14,17 +14,17 @@ import '../../../models/dietary_state.dart';
 
 // 新增的时候用旧的food_modify和food_serving_info_modify_form。
 // 而在食物成分的详情页面进行修改时，是食物基本信息和指定单份营养素分开修改，所以有_base关键字
-class FoodBaseModify extends StatefulWidget {
+class DetailFoodModify extends StatefulWidget {
   // 专门在食物详情中修改食物基本信息
   final Food food;
 
-  const FoodBaseModify({super.key, required this.food});
+  const DetailFoodModify({super.key, required this.food});
 
   @override
-  State<FoodBaseModify> createState() => _FoodBaseModifyState();
+  State<DetailFoodModify> createState() => _DetailFoodModifyState();
 }
 
-class _FoodBaseModifyState extends State<FoodBaseModify> {
+class _DetailFoodModifyState extends State<DetailFoodModify> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
 
 //  食物添加的表单key

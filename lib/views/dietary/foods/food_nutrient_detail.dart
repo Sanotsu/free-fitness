@@ -7,9 +7,10 @@ import '../../../../common/global/constants.dart';
 import '../../../../models/dietary_state.dart';
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/utils/db_dietary_helper.dart';
+import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
-import 'food_base_modify.dart';
-import 'food_serving_info_base_modify.dart';
+import 'detail_food_modify.dart';
+import 'detail_serving_info_modify.dart';
 
 // ？？？看能不能和日志中的food detail 拆一些复用部件来
 /// 2023-12-04 和饮食记录模块的食物详情不太一样:
@@ -49,7 +50,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     setState(() {
       fsInfo = widget.foodItem;
 
-      // 更新需要构建的表格的长度和每条数据的可选中状态
+      // 更新需要构建的表格的长度和每条数据的可选中状态(初始状态是都未选中)
       servingItemsNum = fsInfo.servingInfoList.length;
       servingSelectedList =
           List<bool>.generate(servingItemsNum, (int index) => false);
@@ -91,7 +92,8 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => FoodBaseModify(food: fsInfo.food)),
+                  builder: (context) => DetailFoodModify(food: fsInfo.food),
+                ),
               ).then((value) {
                 // 不管是否修改成功，这里都重新加载
                 // 还是稍微判断一下吧
@@ -106,17 +108,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
       ),
       body: ListView(
         children: [
-          ///
           /// 展示食物基本信息表格
-          ///
-          ...buildTableData(fsInfo),
+          ...buildFoodTable(fsInfo),
 
-          ///
           /// 展示所有单份的数据，不用实时根据摄入数量修改值
-          ///
-          /// ？？？这个table可以用高级点的，
-          ///
-
           Text(
             "食物单份营养素信息",
             style: TextStyle(
@@ -124,11 +119,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
               fontWeight: FontWeight.bold,
               color: Colors.green,
             ),
-            textAlign: TextAlign.center,
+            textAlign: TextAlign.left,
           ),
 
-          // 当有单份营养素被选中后，显示删除或修改(仅单个被选中时)按钮
-
+          /// 当有单份营养素被选中后，显示删除或修改(仅单个被选中时)按钮；默认即可新增
           SizedBox(
             height: 50.sp,
             child: Row(
@@ -153,7 +147,12 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
             ),
           ),
 
-          _buildSimpleFoodTable(fsInfo),
+          SizedBox(height: 20.sp),
+          Card(
+            elevation: 5,
+            child: buildFoodServingDataTable(fsInfo),
+          ),
+          SizedBox(height: 20.sp),
         ],
       ),
     );
@@ -174,7 +173,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FoodServingInfoBaseModify(
+        builder: (context) => DetailServingInfoModify(
           servingType: servingTypeList.first, // 这个值真没地方取啊
           food: fsInfo.food,
           currentServingInfo: servingInfo,
@@ -236,9 +235,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
                   for (var index in trueIndices) {
                     selecteds.add(fsInfo.servingInfoList[index].servingInfoId!);
                   }
-
-                  print("selecteds----$selecteds");
-
+                  // ？？？删除对应的单份营养素列表，应该要检测执行结果
                   await _dietaryHelper.deleteServingInfoList(selecteds);
 
                   if (!mounted) return;
@@ -274,15 +271,6 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
               );
             }).toList(),
           ),
-
-          // cusFormBuilerDropdown(
-          //   "serving_info_type",
-          //   servingTypeList,
-          //   labelText: '*营养成分',
-          //   initialValue: servingTypeList.first.cnLabel,
-          //   validator: FormBuilderValidators.compose(
-          //       [FormBuilderValidators.required(errorText: '营养成分')]),
-          // ),
           actions: [
             TextButton(
               onPressed: () {
@@ -301,12 +289,12 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
         );
       },
     ).then((value) {
+      // 因为默认有选中新增单份营养素的类型，所以返回true确认新增时，一定有该type
       if (value != null && value) {
-        print("dropdownValue---$dropdownValue");
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => FoodServingInfoBaseModify(
+            builder: (context) => DetailServingInfoModify(
               food: fsInfo.food,
               servingType: dropdownValue,
             ),
@@ -322,7 +310,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   }
 
   /// 表格显示食物基本信息
-  buildTableData(FoodAndServingInfo info) {
+  buildFoodTable(FoodAndServingInfo info) {
     var food = info.food;
     var imageList = food.photos?.split(",") ?? [];
 
@@ -359,7 +347,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     ];
   }
 
-  // 构建表格行数据
+  // 构建食物基本信息表格的行数据
   _buildTableRow(String label, String value) {
     return TableRow(
       children: [
@@ -382,237 +370,91 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     );
   }
 
-  /// 表格展示单份营养素信息？？？
-  ///
-  _buildSimpleFoodTable(FoodAndServingInfo fsi) {
-    // var food = fsi.food;
-    // var foodName = "${food.product} (${food.brand})";
+  /// 表格展示单份营养素信息
+  buildFoodServingDataTable(FoodAndServingInfo fsi) {
     var servingList = fsi.servingInfoList;
 
-    return Card(
-      elevation: 5,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // SizedBox(
-          //   width: 1.sw,
-          //   child: Container(
-          //     decoration: BoxDecoration(
-          //       borderRadius: BorderRadius.circular(5.0), // 设置所有圆角的大小
-          //       // 设置展开前的背景色
-          //       color: const Color.fromARGB(255, 195, 198, 201),
-          //     ),
-          //     child: Padding(
-          //       padding: EdgeInsets.all(10.sp),
-          //       child: RichText(
-          //         textAlign: TextAlign.start,
-          //         maxLines: 2,
-          //         overflow: TextOverflow.ellipsis,
-          //         text: TextSpan(
-          //           children: [
-          //             TextSpan(
-          //               text: '食物名称: ',
-          //               style: TextStyle(fontSize: 14.sp, color: Colors.black),
-          //             ),
-          //             TextSpan(
-          //               text: foodName,
-          //               style: TextStyle(
-          //                 fontSize: 16.sp,
-          //                 color: Colors.black,
-          //                 fontWeight: FontWeight.bold,
-          //               ),
-          //             ),
-          //           ],
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // ),
+    return buildDataTableWithHorizontalScrollbar(
+      scrollController: _scrollController,
+      columns: [
+        _buildDataColumn("单份"),
+        _buildDataColumn("能量(大卡)"),
+        _buildDataColumn("蛋白质(克)"),
+        _buildDataColumn("脂肪(克)"),
+        _buildDataColumn("碳水(克)"),
+        _buildDataColumn("微量元素(毫克)"),
+      ],
+      rows: List<DataRow>.generate(servingList.length, (index) {
+        var serving = servingList[index];
 
-          Scrollbar(
-            thickness: 5,
-            // 设置交互模式后，滚动条和手势滚动方向才一致
-            interactive: true,
-            radius: Radius.circular(5.sp),
-            // 不设置这个，滚动条默认不显示，在滚动时才显示
-            thumbVisibility: true,
-            // trackVisibility: true,
-            // 滚动条默认在右边，要改在左边就配合Transform进行修改(此例没必要)
-            // 刻意预留一点空间给滚动条
-            controller: _scrollController,
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              scrollDirection: Axis.horizontal,
-              child: GestureDetector(
-                onTap: () {
-                  FocusScope.of(context).unfocus();
-                },
-                child: DataTable(
-                  // dataRowHeight: 10.sp,
-                  dataRowMinHeight: 60.sp, // 设置行高范围
-                  dataRowMaxHeight: 100.sp,
-                  headingRowHeight: 25, // 设置表头行高
-                  horizontalMargin: 10, // 设置水平边距
-                  columnSpacing: 20.sp, // 设置列间距
-                  columns: [
-                    _buildDataColumn("单份"),
-                    _buildDataColumn("能量(大卡)"),
-                    _buildDataColumn("蛋白质(克)"),
-                    _buildDataColumn("脂肪(克)"),
-                    _buildDataColumn("碳水(克)"),
-                    _buildDataColumn("微量元素(毫克)"),
-                  ],
-                  rows: List<DataRow>.generate(servingList.length, (index) {
-                    var serving = servingList[index];
-
-                    return DataRow(
-                      // 奇数行添加灰色背景色
-                      color: MaterialStateProperty.resolveWith<Color?>(
-                          (Set<MaterialState> states) {
-                        // All rows will have the same selected color.
-                        if (states.contains(MaterialState.selected)) {
-                          return Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withOpacity(0.08);
-                        }
-                        // Even rows will have a grey color.
-                        if (index.isEven) {
-                          return Colors.grey.withOpacity(0.3);
-                        }
-                        return null; // Use default value for other states and odd rows.
-                      }),
-                      // 是否被选中
-                      selected: servingSelectedList[index],
-                      // 选中变化的回调
-                      onSelectChanged: (bool? value) {
-                        setState(() {
-                          servingSelectedList[index] = value!;
-                        });
-                      },
-                      cells: [
-                        _buildDataCell(serving.servingUnit),
-                        _buildDataCell(formatDoubleToString(
-                            serving.energy / oneCalToKjRatio)),
-                        _buildDataCell(formatDoubleToString(serving.protein)),
-                        _buildFatDataCell(
-                          formatDoubleToString(serving.totalFat),
-                          serving.transFat?.toStringAsFixed(2) ?? "",
-                          serving.saturatedFat?.toStringAsFixed(2) ?? "",
-                          serving.monounsaturatedFat?.toStringAsFixed(2) ?? "",
-                          serving.polyunsaturatedFat?.toStringAsFixed(2) ?? "",
-                        ),
-                        _buildChoDataCell(
-                          formatDoubleToString(serving.totalCarbohydrate),
-                          serving.sugar?.toStringAsFixed(2) ?? "",
-                          serving.dietaryFiber?.toStringAsFixed(2) ?? "",
-                        ),
-                        _buildMicroDataCell(
-                          formatDoubleToString(serving.sodium),
-                          serving.cholesterol?.toStringAsFixed(2) ?? "",
-                          serving.potassium?.toStringAsFixed(2) ?? "",
-                        ),
-                      ],
-                    );
-                  }),
-                ),
-              ),
+        return DataRow(
+          // 偶数行(算上标题行)添加灰色背景色，和选中时的背景色
+          color: MaterialStateProperty.resolveWith<Color?>(
+              (Set<MaterialState> states) {
+            // 所有行被选中后都使用统一的背景
+            if (states.contains(MaterialState.selected)) {
+              return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+            }
+            // 偶数行使用灰色背景
+            if (index.isEven) {
+              return Colors.grey.withOpacity(0.3);
+            }
+            // 对其他状态和奇数行使用默认值。
+            return null;
+          }),
+          // 是否被选中
+          selected: servingSelectedList[index],
+          // 选中变化的回调
+          onSelectChanged: (bool? value) {
+            setState(() {
+              servingSelectedList[index] = value!;
+            });
+          },
+          cells: [
+            _buildDataCell(serving.servingUnit),
+            _buildDataCell(cusDoubleToString(serving.energy / oneCalToKjRatio)),
+            _buildDataCell(cusDoubleToString(serving.protein)),
+            _buildFatDataCell(
+              cusDoubleToString(serving.totalFat),
+              cusDoubleToString(serving.transFat),
+              cusDoubleToString(serving.saturatedFat),
+              cusDoubleToString(serving.monounsaturatedFat),
+              cusDoubleToString(serving.polyunsaturatedFat),
             ),
-          ),
-          SizedBox(height: 20.sp),
-          // SingleChildScrollView(
-          //   scrollDirection: Axis.horizontal,
-          //   child: DataTable(
-          //     // dataRowHeight: 10.sp,
-          //     dataRowMinHeight: 60.sp, // 设置行高范围
-          //     dataRowMaxHeight: 100.sp,
-          //     headingRowHeight: 25, // 设置表头行高
-          //     horizontalMargin: 10, // 设置水平边距
-          //     columnSpacing: 20.sp, // 设置列间距
-          //     columns: [
-          //       DataColumn(
-          //         label: Text('单份', style: TextStyle(fontSize: 14.sp)),
-          //       ),
-          //       DataColumn(
-          //         label: Text('能量(大卡)', style: TextStyle(fontSize: 14.sp)),
-          //         numeric: true,
-          //       ),
-          //       DataColumn(
-          //         label: Text('蛋白质(克)', style: TextStyle(fontSize: 14.sp)),
-          //         numeric: true,
-          //       ),
-          //       DataColumn(
-          //         label: Text('脂肪(克)', style: TextStyle(fontSize: 14.sp)),
-          //         numeric: true,
-          //       ),
-          //       DataColumn(
-          //         label: Text('碳水(克)', style: TextStyle(fontSize: 14.sp)),
-          //         numeric: true,
-          //       ),
-          //       DataColumn(
-          //         label: Text('微量元素(毫克)', style: TextStyle(fontSize: 14.sp)),
-          //         numeric: true,
-          //       ),
-          //     ],
-          //     rows: List<DataRow>.generate(servingList.length, (index) {
-          //       var serving = servingList[index];
-
-          //       return DataRow(
-          //         cells: [
-          //           _buildDataCell(serving.servingUnit),
-          //           _buildDataCell(
-          //               formatDoubleToString(serving.energy / oneCalToKjRatio)),
-          //           _buildDataCell(formatDoubleToString(serving.protein)),
-          //           _buildFatDataCell(
-          //             formatDoubleToString(serving.totalFat),
-          //             serving.transFat?.toStringAsFixed(2) ?? "",
-          //             serving.saturatedFat?.toStringAsFixed(2) ?? "",
-          //             serving.monounsaturatedFat?.toStringAsFixed(2) ?? "",
-          //             serving.polyunsaturatedFat?.toStringAsFixed(2) ?? "",
-          //           ),
-          //           _buildChoDataCell(
-          //             formatDoubleToString(serving.totalCarbohydrate),
-          //             serving.sugar?.toStringAsFixed(2) ?? "",
-          //             serving.dietaryFiber?.toStringAsFixed(2) ?? "",
-          //           ),
-          //           _buildMicroDataCell(
-          //             formatDoubleToString(serving.sodium),
-          //             serving.cholesterol?.toStringAsFixed(2) ?? "",
-          //             serving.potassium?.toStringAsFixed(2) ?? "",
-          //           ),
-          //         ],
-          //       );
-          //     }),
-          //   ),
-          // ),
-        ],
-      ),
+            _buildChoDataCell(
+              cusDoubleToString(serving.totalCarbohydrate),
+              cusDoubleToString(serving.sugar),
+              cusDoubleToString(serving.dietaryFiber),
+            ),
+            _buildMicroDataCell(
+              cusDoubleToString(serving.sodium),
+              cusDoubleToString(serving.cholesterol),
+              cusDoubleToString(serving.potassium),
+            ),
+          ],
+        );
+      }),
     );
   }
 
-  /// 表格的标题和单元格样式
+  // 表格的标题和单元格样式
   _buildDataColumn(String text) {
     return DataColumn(
       label: Text(
         text,
-        style: TextStyle(
-          fontSize: 14.sp,
-          fontWeight: FontWeight.bold,
-        ),
+        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
       ),
     );
   }
 
+  // 构建单个值的单元格
   _buildDataCell(String text) {
     return DataCell(
-      Text(
-        text,
-        style: TextStyle(fontSize: 14.sp),
-      ),
+      Text(text, style: TextStyle(fontSize: 14.sp)),
     );
   }
 
+  // 脂肪、碳水、蛋白质单元格有多个不同的值，要单独构建
   _buildFatDataCell(
     String totalFat,
     String transFat,
@@ -695,6 +537,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     );
   }
 
+  // 单元格中有多个值，每个值都还有label和value
   _buildDetailRowCellText(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
