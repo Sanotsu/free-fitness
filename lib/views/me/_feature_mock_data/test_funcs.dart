@@ -446,6 +446,7 @@ insertOneUser() async {
     proteinGoal: 85.5,
     fatGoal: 45.5,
     choGoal: 65.6,
+    actionRestTime: 30,
   );
   await _userHelper.insertUserList([newItem]);
   print("【【【 插入测试数据 end-->:insertOneUser ");

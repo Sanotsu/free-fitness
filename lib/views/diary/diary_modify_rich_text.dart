@@ -112,8 +112,16 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
       initTitle = item.title;
       _titleTextController.text = initTitle;
       initMood = item.mood ?? "";
-      initCategorys = item.category?.split(",").toList() ?? [];
-      initTags = item.tags?.split(",").toList() ?? [];
+      // 先排除原本的数据就是一个空字符串，因此空字符串用逗号分割后是还有一个空字符串的字符串列表
+      // initCategorys = item.category?.split(",").toList() ?? [];
+      initCategorys =
+          (item.category != null && item.category!.trim().isNotEmpty)
+              ? item.category!.trim().split(",")
+              : [];
+      // initTags = item.tags?.split(",").toList() ?? [];
+      initTags = (item.tags != null && item.tags!.trim().isNotEmpty)
+          ? item.tags!.trim().split(",")
+          : [];
       initDiaryId = item.diaryId;
 
       lastSavedTime = item.gmtModified ?? item.gmtCreate;

@@ -45,7 +45,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
 
   // 肌肉这个有多项，所以从预设选项中显示对应标签略有不同
   _genMuscleOptionLabel(String? muscleStr) {
-    if (muscleStr == null) {
+    if (muscleStr == null || muscleStr.trim().isEmpty) {
       return "";
     }
     List<String> selectedValues = muscleStr.split(',');

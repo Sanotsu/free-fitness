@@ -317,7 +317,12 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   /// 表格显示食物基本信息
   buildFoodTable(FoodAndServingInfo info) {
     var food = info.food;
-    var imageList = food.photos?.split(",") ?? [];
+    // var imageList = food.photos?.split(",") ?? [];
+    List<String> imageList = [];
+    // 先要排除image是个空字符串在分割
+    if (food.photos != null && food.photos!.trim().isNotEmpty) {
+      imageList = food.photos!.split(",");
+    }
 
     return [
       Text(

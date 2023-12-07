@@ -218,9 +218,14 @@ tobed: 目标卡路里折线图是实际摄入的条状图放到一起？
   - 完成饮食日志首页跳转的日历统计概述报告页面。
 
 - 2023-12-06
+
   - 基本完成食物成分模块中食物详情页面，以及食物基本信息的修改及其单份营养素的新增与删除功能。
   - 基本完成食物成分模块中单份营养素页面的重构。
   - 基本完成新增食物带单份营养素的功能页面的重构。
+
+- 2023-12-07
+  - 基本完成在饮食日记中，可以对每餐进行图片上传。
+  - fix:所有字符串 split 的地方都先排除字符串本身就是空。
 
 ### 问题记录
 
@@ -312,7 +317,7 @@ MaterialApp(
 
 参看：https://stackoverflow.com/questions/51440984/how-to-adjust-the-size-of-a-chip-in-flutter.
 
-8. 【unsolved】2023-11-25 一个很严重的 bug：在手记修改页面，标题或者标签的文本输入框中是编辑状态，打开了键盘，点击收起键盘之后，又会立马聚焦到输入框，然后弹出键盘，重复收起又弹窗很多次键盘后，才会不自动聚焦到输入框。
+8. 2023-11-25 一个很严重的 bug：在手记修改页面，标题或者标签的文本输入框中是编辑状态，打开了键盘，点击收起键盘之后，又会立马聚焦到输入框，然后弹出键盘，重复收起又弹窗很多次键盘后，才会不自动聚焦到输入框。
 
 同样，只要点击了这两个输入框进行文本修改，再点击 rich text 修改正文也无法聚焦，要重复点击多次，鼠标跳过去了，但完成 rich text 编辑收起键盘，还是会聚焦到标题或者标签的文本输入框去，然后弹出键盘。再点击收起又弹出多次，才失去焦点。
 
@@ -320,9 +325,59 @@ MaterialApp(
 
 有可能是类似这个 issue: https://github.com/flutter-form-builder-ecosystem/flutter_form_builder/discussions/1297
 
+【实际解决】：是因为 textField 和 quillEditor 聚焦冲突的问题，手动控制点击 quillEditor 让 textField 失去焦点就可以了；反之亦然。
+
 9. 【unsolved】2023-12-02 image_gallery_saver 保存图片时报错，3.13 有升级到 3.16.0
 
 表现和 https://stackoverflow.com/questions/69883867/flutter-unhandled-exception-missingpluginexceptionno-implementation-found-f
 差不多。
 
 后来找了很多方法，肯定不是权限问题，初步分析是在 Android9 上无法正常工作了，后续用更高级的 Android 版本的试一下。
+
+【实际测试】：的确是 Android9 及旧的版本不支持，一加一刷 lineageOS 的 Android11 实测可以。
+
+所以检测到设备 sdk 版本小于 30,就不显示按钮。
+
+还有问题：预览时白色，下载的图片是黑色，所以手机中看到是白底黑色下载之后黑字的标题就没有了。
+
+10. 【unsolved】 2023-12-06 所有的 formbuilder 的 reset 都没有效果？
+
+执行力`_formKey.currentState!.reset();` 页面选中或者输入的值还在；
+
+但`print("已经执行了简单查询的重置了_formKey.currentState!${_formKey.currentState!.value}");` 却是空对象。
+
+11. 对字符串 split() 的理解和认知不对。
+
+str.split()的描述是:如果模式与该字符串完全不匹配，则结果总是一个仅包含原始字符串的列表。
+
+```dart
+var a = "";
+var b = a.split(",");
+print(b);           // []
+print(b.isEmpty);   // false
+print(b.length);    // 1
+// 因为此时的 b 虽然是`[]`，但是具有一个空字符串的列表，而不是空列表。
+```
+
+同理:
+
+```dart
+var a = ",";
+var b = a.split(",");
+print(b);         // [, ]
+print(b.isEmpty); // false
+print(b.length);  // 2
+// 此时的 b 是`[, ]`，是具有两个空字符串数据的列表。
+```
+
+但是:
+
+```dart
+var a = "";
+var b = a.split("");
+print(b.isEmpty); // true
+print(b.length);  // 0
+print(b);         // []
+```
+
+**所以后续在使用字符串拆分的时候，先判断是否为空字符串，连字符至少是个空格或者逗号。**

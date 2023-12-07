@@ -57,6 +57,7 @@ class DBDietaryHelper {
       txn.execute(DietaryDdl.ddlForFood);
       txn.execute(DietaryDdl.ddlForServingInfo);
       txn.execute(DietaryDdl.ddlForDailyFoodItem);
+      txn.execute(DietaryDdl.ddlForMealPhoto);
     });
   }
 
@@ -458,7 +459,7 @@ class DBDietaryHelper {
       whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
     );
 
-// 如果需要查询详情，则继续查以下内容
+    // 如果需要查询详情，则继续查以下内容
     if (withDetail) {
       // 如果有查询到日记条目，查询对应的食物和营养素详情
       final List<DailyFoodItem> list =
@@ -494,5 +495,62 @@ class DBDietaryHelper {
       // 不查询详情就直接返回饮食日记条目列表
       return dfiRows.map((row) => DailyFoodItem.fromMap(row)).toList();
     }
+  }
+
+  ///***********************************************/
+  /// meal_photo 的相关操作
+  ///
+  // 插入单条餐次照片
+  Future<int> insertMealPhotoList(MealPhoto mp) async =>
+      (await database).insert(DietaryDdl.tableNameOfMealPhoto, mp.toMap());
+
+  // 修改单条餐次照片
+  Future<int> updateMealPhoto(MealPhoto mp) async =>
+      (await database).update(DietaryDdl.tableNameOfMealPhoto, mp.toMap(),
+          where: "meal_photo_id = ? ", whereArgs: [mp.mealPhotoId]);
+
+  // 删除单条餐次照片
+  Future<int> deleteMealPhotoById(int mealPhotoId) async =>
+      (await database).delete(DietaryDdl.tableNameOfMealPhoto,
+          where: "meal_photo_id = ? ", whereArgs: [mealPhotoId]);
+
+  // 查询餐次照片
+  // 常用的就是指定日期(只有一天起止一样)和指定餐次(也只能查属于自己的照片)
+  Future<List<MealPhoto>> queryMealPhotoList(
+    int userId, {
+    String? startDate,
+    String? endDate,
+    String? mealCategory,
+  }) async {
+    Database db = await database;
+
+    final where = <String>[];
+    final whereArgs = <dynamic>[];
+
+    where.add('user_id = ?');
+    whereArgs.add(userId);
+
+    if (mealCategory != null) {
+      where.add('meal_category = ?');
+      whereArgs.add(mealCategory);
+    }
+
+    if (startDate != null) {
+      where.add('date >= ?');
+      whereArgs.add(startDate);
+    }
+
+    if (endDate != null) {
+      where.add('date <= ?');
+      whereArgs.add(endDate);
+    }
+
+    final mpRows = await db.query(
+      DietaryDdl.tableNameOfMealPhoto,
+      where: where.join(' AND '),
+      whereArgs: whereArgs,
+    );
+
+    return mpRows.map((row) => MealPhoto.fromMap(row)).toList();
   }
 }

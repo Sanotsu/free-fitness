@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_print
 
+import 'dart:developer';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,6 +14,7 @@ import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
 import 'report_calendar_summary.dart';
+import 'save_meal_photo.dart';
 import 'simple_food_detail.dart';
 import 'simple_food_list.dart';
 
@@ -58,6 +61,15 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     mealNameMap[CusMeals.other]!.enLabel: false,
   };
 
+  // 一日四餐对应拥有的餐次照片路径
+  // key是餐次英文，value是MealPhoto实例
+  Map<String, MealPhoto?> mealPhotoNums = {
+    mealNameMap[CusMeals.breakfast]!.enLabel: null,
+    mealNameMap[CusMeals.lunch]!.enLabel: null,
+    mealNameMap[CusMeals.dinner]!.enLabel: null,
+    mealNameMap[CusMeals.other]!.enLabel: null,
+  };
+
   @override
   void initState() {
     super.initState();
@@ -98,6 +110,9 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
     // log("---------测试查询的当前日记item $temp");
 
+    // 查询餐次照片数量
+    _queryMealPhotoNums();
+
     setState(() {
       dfiwfsList = temp;
 
@@ -110,6 +125,47 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       }
 
       isLoading = false;
+    });
+  }
+
+  // 有指定日期查询指定日期的饮食记录条目，没有就当前日期
+  _queryMealPhotoNums({String? mealEnLabel}) async {
+    // 理论上是默认查询当日的，有选择其他日期则查询指定日期
+
+    List<MealPhoto> temp = await _dietaryHelper.queryMealPhotoList(
+      1, // ？？？userId是必传的
+      startDate: selectedDateStr,
+      endDate: selectedDateStr,
+      mealCategory: mealEnLabel,
+    );
+
+    log("---------_queryMealPhotoNums测试查询的当前日记item $temp");
+
+    setState(() {
+      // 正常来讲，每天每个餐次最多只有一条数据，只要有数据，照片就是修改或删除了
+      var bfMp = temp.where(
+          (e) => e.mealCategory == mealNameMap[CusMeals.breakfast]!.enLabel);
+      if (bfMp.isNotEmpty) {
+        mealPhotoNums[mealNameMap[CusMeals.breakfast]!.enLabel] = bfMp.first;
+      }
+
+      var lunchMp = temp
+          .where((e) => e.mealCategory == mealNameMap[CusMeals.lunch]!.enLabel);
+      if (lunchMp.isNotEmpty) {
+        mealPhotoNums[mealNameMap[CusMeals.lunch]!.enLabel] = lunchMp.first;
+      }
+
+      var dinnerMp = temp.where(
+          (e) => e.mealCategory == mealNameMap[CusMeals.dinner]!.enLabel);
+      if (dinnerMp.isNotEmpty) {
+        mealPhotoNums[mealNameMap[CusMeals.dinner]!.enLabel] = dinnerMp.first;
+      }
+
+      var otherMp = temp
+          .where((e) => e.mealCategory == mealNameMap[CusMeals.other]!.enLabel);
+      if (otherMp.isNotEmpty) {
+        mealPhotoNums[mealNameMap[CusMeals.other]!.enLabel] = otherMp.first;
+      }
     });
   }
 
@@ -434,12 +490,12 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
     var tempCalories = tempEnergy / oneCalToKjRatio;
 
-    print("当日的累加值……");
-    print("tempEnergy $tempEnergy");
-    print("tempProtein $tempProtein");
-    print("tempFat $tempFat");
-    print("tempCHO $tempCHO");
-    print("tempCalories $tempCalories");
+    // print("当日的累加值……");
+    // print("tempEnergy $tempEnergy");
+    // print("tempProtein $tempProtein");
+    // print("tempFat $tempFat");
+    // print("tempCHO $tempCHO");
+    // print("tempCalories $tempCalories");
 
     setState(() {
       // 当日主要营养素表格数据
@@ -693,41 +749,72 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                 color: Color.fromARGB(255, 195, 198, 201),
               ),
               child: ExpansionTile(
-                initiallyExpanded: isExpandedList[mealtime.enLabel]!,
-                // 如果是概要，展开的标题只显示餐次的食物数量；是详情，则展示该餐次各项食物的主要营养素之和
-                title: dataDisplayMode == "summary"
-                    ? Text('${dfiwfsMealItems.length} 项')
-                    : Table(
-                        children: [
-                          _buildMainMutrientsValueTableRow(
-                            tempCHO,
-                            tempProtein,
-                            tempFat,
-                            tempCalories,
-                          ),
-                        ],
-                      ),
-                backgroundColor: const Color.fromARGB(255, 235, 227, 227),
-                trailing: SizedBox(
-                  width: 0.15.sw, // 将屏幕宽度的四分之一作为trailing的宽度
-                  child: Icon(
-                    isExpandedList[mealtime.enLabel]!
-                        ? Icons.arrow_drop_up
-                        : Icons.arrow_drop_down,
+                  initiallyExpanded: isExpandedList[mealtime.enLabel]!,
+                  // 如果是概要，展开的标题只显示餐次的食物数量；是详情，则展示该餐次各项食物的主要营养素之和
+                  title: dataDisplayMode == "summary"
+                      ? Text('${dfiwfsMealItems.length} 项')
+                      : Table(
+                          children: [
+                            _buildMainMutrientsValueTableRow(
+                              tempCHO,
+                              tempProtein,
+                              tempFat,
+                              tempCalories,
+                            ),
+                          ],
+                        ),
+                  backgroundColor: const Color.fromARGB(255, 235, 227, 227),
+                  trailing: SizedBox(
+                    width: 0.15.sw, // 将屏幕宽度的四分之一作为trailing的宽度
+                    child: Icon(
+                      isExpandedList[mealtime.enLabel]!
+                          ? Icons.arrow_drop_up
+                          : Icons.arrow_drop_down,
+                    ),
                   ),
-                ),
-                onExpansionChanged: (isExpanded) {
-                  setState(() {
-                    isExpandedList[mealtime.enLabel] = isExpanded; // 更新展开状态列表
-                  });
-                },
-                // 展开显示食物详情
-                children: _buildListTile(mealtime, dfiwfsMealItems),
-              ),
+                  onExpansionChanged: (isExpanded) {
+                    setState(() {
+                      isExpandedList[mealtime.enLabel] = isExpanded; // 更新展开状态列表
+                    });
+                  },
+                  // 展开显示食物详情
+                  children: [
+                    ..._buildListTile(mealtime, dfiwfsMealItems),
+                    TextButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SaveMealPhotos(
+                              mealtime: mealtime,
+                              mealItems: dfiwfsMealItems,
+                              mealPhoto: mealPhotoNums[mealtime.enLabel],
+                            ),
+                          ),
+                        ).then((value) {
+                          // 进入过添加照片页面的返回都要重新查询
+                          setState(() {
+                            _queryMealPhotoNums();
+                          });
+                        });
+                      },
+                      icon: const Icon(Icons.photo),
+                      label: Text('照片 ${_getPhotoCount(mealtime)}'),
+                    ),
+                  ]),
             ),
         ],
       ),
     );
+  }
+
+  // 获取指定餐次的照片数量
+  _getPhotoCount(CusLabel mealtime) {
+    return ((mealPhotoNums[mealtime.enLabel]?.photos != null &&
+                mealPhotoNums[mealtime.enLabel]!.photos.trim().isNotEmpty)
+            ? mealPhotoNums[mealtime.enLabel]!.photos.trim().split(",")
+            : [])
+        .length;
   }
 
   // 餐次展开的文本样式基本都一样的

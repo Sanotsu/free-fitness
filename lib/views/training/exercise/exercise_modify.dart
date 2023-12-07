@@ -11,6 +11,7 @@ import 'package:sqflite/sqflite.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
 import '../../../models/training_state.dart';
 
 /// 基础活动变更表单（希望新增、修改可通用）
@@ -58,7 +59,7 @@ class _ExerciseModifyState extends State<ExerciseModify> {
         updateTarget = widget.item;
         // 有图片地址，显示图片
         if (updateTarget?.images != null && updateTarget?.images != "") {
-          exerciseImages = convertToPlatformFiles(updateTarget!.images!);
+          exerciseImages = convertStringToPlatformFiles(updateTarget!.images!);
         }
         // 有主要肌肉，显示主要肌肉
         if (updateTarget?.primaryMuscles != null &&
@@ -74,24 +75,6 @@ class _ExerciseModifyState extends State<ExerciseModify> {
         }
       }
     });
-  }
-
-  // 图片地址拼接的字符串，要转回平台文件列表
-  List<PlatformFile> convertToPlatformFiles(String imagesString) {
-    List<String> imageUrls = imagesString.split(','); // 拆分字符串
-
-    List<PlatformFile> platformFiles = []; // 存储 PlatformFile 对象的列表
-
-    for (var imageUrl in imageUrls) {
-      PlatformFile file = PlatformFile(
-        name: imageUrl,
-        path: imageUrl,
-        size: 32, // 假设图片地址即为文件路径
-      );
-      platformFiles.add(file);
-    }
-
-    return platformFiles;
   }
 
   // 根据数据库拼接的字符串值转回对应选项

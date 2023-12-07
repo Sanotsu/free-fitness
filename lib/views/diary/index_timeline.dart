@@ -281,16 +281,27 @@ class _IndexTimelineState extends State<IndexTimeline> {
                       // 排布方向
                       alignment: WrapAlignment.spaceAround,
                       children: [
-                        ...(diaryItem.category?.split(",") ?? []).map((tag) {
+                        // 先排除原本就是空字符串之后再分割
+                        // ...(diaryItem.category?.split(",") ?? [])
+                        ...((diaryItem.category != null &&
+                                    diaryItem.category!.trim().isNotEmpty)
+                                ? diaryItem.category!.trim().split(",")
+                                : [])
+                            .map((cate) {
                           return buildTinyButtonTag(
-                            tag,
+                            cate,
                             bgColor: const Color.fromARGB(255, 125, 185, 172),
                             labelTextSize: 8.sp,
                           );
                         }).toList(),
-                        ...(diaryItem.tags?.split(",") ?? []).map((cate) {
+                        // ...(diaryItem.tags?.split(",") ?? [])
+                        ...((diaryItem.tags != null &&
+                                    diaryItem.tags!.trim().isNotEmpty)
+                                ? diaryItem.tags!.trim().split(",")
+                                : [])
+                            .map((tag) {
                           return buildTinyButtonTag(
-                            cate,
+                            tag,
                             bgColor: const Color.fromARGB(255, 139, 139, 132),
                             labelTextSize: 8.sp,
                           );

@@ -8,6 +8,8 @@ class DietaryDdl {
   static const tableNameOfServingInfo = 'ff_serving_info';
   // 日记条目表（一天多餐多条目，空间换时间的设计）
   static const tableNameOfDailyFoodItem = 'ff_daily_food_item';
+  // 餐次的食物照片表
+  static const tableNameOfMealPhoto = 'ff_meal_photo';
 
   static const String ddlForFood = """
     CREATE TABLE IF NOT EXISTS $tableNameOfFood (
@@ -63,6 +65,17 @@ class DietaryDdl {
       gmt_create TEXT,
       update_user TEXT,
       gmt_modified TEXT
+    );
+    """;
+
+  static const String ddlForMealPhoto = """
+    CREATE TABLE IF NOT EXISTS $tableNameOfMealPhoto (
+      meal_photo_id   INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT,
+      date            TEXT      NOT NULL,
+      meal_category   TEXT      NOT NULL,
+      photos          TEXT      NOT NULL,
+      user_id         INTEGER   NOT NULL,
+      gmt_create      TEXT      NOT NULL
     );
     """;
 }

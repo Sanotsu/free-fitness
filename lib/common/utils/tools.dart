@@ -218,6 +218,10 @@ List<String> getMonthStartEndDateString(
 // formbuilder的图片地址拼接的字符串，要转回平台文件列表
 List<PlatformFile> convertStringToPlatformFiles(String imagesString) {
   List<String> imageUrls = imagesString.split(','); // 拆分字符串
+  // 如果本身就是空字符串，直接返回空平台文件数组
+  if (imagesString.trim().isEmpty || imageUrls.isEmpty) {
+    return [];
+  }
 
   List<PlatformFile> platformFiles = []; // 存储 PlatformFile 对象的列表
 

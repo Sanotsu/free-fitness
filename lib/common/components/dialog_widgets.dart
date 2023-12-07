@@ -111,7 +111,11 @@ Image buildExerciseImage(Exercise exercise) {
 
 // 锻炼的图片轮播图(后续如果食物的图片或者其他图片有类似功能，可能再抽一次)
 buildExerciseImageCarouselSlider(Exercise exercise) {
-  var imageList = exercise.images?.split(",") ?? [];
+  List<String> imageList = [];
+  // 先要排除image是个空字符串
+  if (exercise.images != null && exercise.images!.trim().isNotEmpty) {
+    imageList = exercise.images!.split(",");
+  }
 
   return CarouselSlider(
     options: CarouselOptions(
@@ -150,7 +154,10 @@ buildExerciseImageCarouselSlider(Exercise exercise) {
 }
 
 // 图片轮播
-buildImageCarouselSlider(List<String> imageList) {
+buildImageCarouselSlider(
+  List<String> imageList, {
+  bool isNoImage = false, // 是否不显示图片，默认就算无图片也显示占位图片
+}) {
   return CarouselSlider(
     options: CarouselOptions(
       autoPlay: true, // 自动播放
@@ -160,29 +167,31 @@ buildImageCarouselSlider(List<String> imageList) {
       // 只有一张图片时不滚动
       enableInfiniteScroll: imageList.length > 1,
     ),
-    // 没有图片显示一张占位图片
-    items: imageList.isEmpty
-        ? [Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown)]
-        : imageList.map((imageUrl) {
-            return Builder(
-              builder: (BuildContext context) {
-                return Container(
-                  width: MediaQuery.of(context).size.width,
-                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.grey,
-                  ),
-                  child: Image.file(
-                    File(imageUrl),
-                    errorBuilder: (BuildContext context, Object exception,
-                        StackTrace? stackTrace) {
-                      return Image.asset(placeholderImageUrl,
-                          fit: BoxFit.scaleDown);
-                    },
-                  ),
+    // 除非指定不显示图片，否则没有图片也显示一张占位图片
+    items: isNoImage
+        ? null
+        : imageList.isEmpty
+            ? [Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown)]
+            : imageList.map((imageUrl) {
+                return Builder(
+                  builder: (BuildContext context) {
+                    return Container(
+                      width: MediaQuery.of(context).size.width,
+                      margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                      decoration: const BoxDecoration(
+                        color: Colors.grey,
+                      ),
+                      child: Image.file(
+                        File(imageUrl),
+                        errorBuilder: (BuildContext context, Object exception,
+                            StackTrace? stackTrace) {
+                          return Image.asset(placeholderImageUrl,
+                              fit: BoxFit.scaleDown);
+                        },
+                      ),
+                    );
+                  },
                 );
-              },
-            );
-          }).toList(),
+              }).toList(),
   );
 }

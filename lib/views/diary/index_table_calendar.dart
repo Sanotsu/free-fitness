@@ -274,8 +274,17 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
       itemBuilder: (context, index) {
         var diary = diarys[index];
 
-        var initTags = diary.tags?.split(",") ?? [];
-        var initCategorys = diary.category?.split(",") ?? [];
+        // 先排除原本就是空字符串
+        // var initTags = diary.tags?.split(",") ?? [];
+        var initTags = (diary.tags != null && diary.tags!.trim().isNotEmpty)
+            ? diary.tags!.trim().split(",")
+            : [];
+        // var initCategorys = diary.category?.split(",") ?? [];
+        var initCategorys =
+            (diary.category != null && diary.category!.trim().isNotEmpty)
+                ? diary.category!.trim().split(",")
+                : [];
+
         var initMood = diary.mood ?? "";
 
         var chipLength = initTags.length + initCategorys.length + 1;

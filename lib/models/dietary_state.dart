@@ -246,6 +246,54 @@ class DailyFoodItem {
   }
 }
 
+/// 餐次对应的照片表
+class MealPhoto {
+  int? mealPhotoId; // 自增的，可以不传
+  String date, mealCategory, photos, gmtCreate;
+  int userId;
+
+  MealPhoto({
+    this.mealPhotoId,
+    required this.date,
+    required this.mealCategory,
+    required this.photos, // 一次一餐可以传多个图片；如果照片为空，相当于删除整条记录
+    required this.gmtCreate,
+    required this.userId,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      "meal_photo_id": mealPhotoId,
+      "date": date,
+      "meal_category": mealCategory,
+      "photos": photos,
+      "user_id": userId,
+      "gmt_create": gmtCreate,
+    };
+  }
+
+// 用于从数据库行映射到 MealPhoto 对象的 fromMap 方法
+  factory MealPhoto.fromMap(Map<String, dynamic> map) {
+    return MealPhoto(
+      mealPhotoId: map['meal_photo_id'] as int?,
+      date: map['date'] as String,
+      mealCategory: map['meal_category'] as String,
+      photos: map['photos'] as String,
+      userId: map['user_id'] as int,
+      gmtCreate: map['gmt_create'] as String,
+    );
+  }
+
+  @override
+  String toString() {
+    return '''
+    MealPhoto{
+      mealPhotoId: $mealPhotoId, date: $date, mealCategory: $mealCategory, 
+      photos: $photos, userId: $userId, gmt_create: $gmtCreate }
+    ''';
+  }
+}
+
 /// 扩展表
 
 // 食物营养素详情 (食物带上对应的所有单份营养素列表)
