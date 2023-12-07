@@ -11,6 +11,8 @@ import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../models/dietary_state.dart';
+import 'export/_demos/pages/invoices.dart';
+import 'export/report_pdf_viewer.dart';
 import 'week_intake_bar.dart';
 
 class DietaryReports extends StatefulWidget {
@@ -220,6 +222,32 @@ class _DietaryReportsState extends State<DietaryReports> {
             ],
           ),
           actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ReportPdfViewer(
+                      startDate: '2023-01-01',
+                      endDate: '2023-12-31',
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.print),
+            ),
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => InvoicePage(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.print),
+            ),
+
             // 下拉按钮，切换报告的时间范围
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,

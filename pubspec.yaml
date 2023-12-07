@@ -78,6 +78,10 @@ dependencies:
   image_gallery_saver: ^2.0.3
   # 获取设备信息
   device_info_plus: ^9.1.1
+  # 创建和预览pdf
+  pdf: ^3.10.7
+  # 允许 Flutter 应用程序生成文档并将其打印到 android 或 ios 兼容打印机
+  printing: ^5.11.1
   
 
 dev_dependencies:
