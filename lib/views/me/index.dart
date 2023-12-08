@@ -3,14 +3,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/user_state.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../../../common/utils/tool_widgets.dart';
+import '../../common/global/constants.dart';
 import '../../common/utils/db_user_helper.dart';
 import '_feature_mock_data/index.dart';
-import '_feature_mock_data/test_funcs.dart';
 import 'intake_goals/intake_target.dart';
 import 'training_setting/index.dart';
-import 'user_info/base_info.dart';
+import 'user_info/modify_user/index.dart';
 import 'weight_change_record/index.dart';
 
 class UserAndSettings extends StatefulWidget {
@@ -23,30 +24,38 @@ class UserAndSettings extends StatefulWidget {
 class _UserAndSettingsState extends State<UserAndSettings> {
   final DBUserHelper _userHelper = DBUserHelper();
 
+  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
+  final box = GetStorage();
+  // 这里有修改，暂时不用get
+  int currentUserId = 1;
+
 // ？？？登录用户信息，怎么在app中记录用户信息？缓存一个用户id每次都查？记住状态实时更新？……
   late User userInfo;
 
   bool isLoading = false;
 
+// 切换用户时，选择的用户
+  User? selectedGender;
+
   @override
   void initState() {
     super.initState();
+
+    setState(() {
+      currentUserId = box.read(LocalStorageKey.userId) ?? 1;
+    });
+
     _queryLoginedUserInfo();
   }
 
-  // ？？？这里要传入用户信息供查询
   _queryLoginedUserInfo() async {
     if (isLoading) return;
     setState(() {
       isLoading = true;
     });
 
-    // ？？？这个是测试的实例，实际的时候不是这样的------
-    // 如果没有userid为1的用户，新增一个测试的，那就一定存在了
-    if ((await _userHelper.queryUser(userId: 1)) == null) {
-      await insertOneUser();
-    }
-    var tempUser = (await _userHelper.queryUser(userId: 1))!;
+    // 查询登录用户的信息一定会有的
+    var tempUser = (await _userHelper.queryUser(userId: currentUserId))!;
 
     print("_queryLoginedUserInfo---tempUser: $tempUser");
 
@@ -56,11 +65,83 @@ class _UserAndSettingsState extends State<UserAndSettings> {
     });
   }
 
+  _switchUser() async {
+    var userList = await _userHelper.queryUserList();
+
+    print("userList---$userList");
+
+    if (!mounted) return;
+    if (userList != null && userList.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('提示'),
+            content: const Text("无额外的用户信息"),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  if (!mounted) return;
+                  Navigator.pop(context, true);
+                },
+                child: const Text('确认'),
+              ),
+            ],
+          );
+        },
+      );
+    } else if (userList != null && userList.isNotEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('切换用户'),
+            content: DropdownButtonFormField<User>(
+              value: userList.firstWhere((e) => e.userId == currentUserId),
+              items: userList.map((User gender) {
+                return DropdownMenuItem<User>(
+                  value: gender,
+                  child: Text(gender.userName),
+                );
+              }).toList(),
+              onChanged: (User? value) async {
+                setState(() {
+                  selectedGender = value;
+                });
+              },
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  if (!mounted) return;
+                  Navigator.pop(context, true);
+                },
+                child: const Text('确认'),
+              ),
+            ],
+          );
+        },
+      ).then((value) async {
+        // 如果有返回值且为true，
+        if (value != null && value) {
+          // 修改缓存的用户编号
+          await box.write(LocalStorageKey.userId, selectedGender!.userId!);
+
+          // 重新缓存当前用户编号和查询用户信息
+          setState(() {
+            currentUserId = box.read(LocalStorageKey.userId) ?? 1;
+            _queryLoginedUserInfo();
+          });
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('UserAndSettings'),
+        title: const Text('用户与设置'),
         actions: [
           IconButton(
             onPressed: () {
@@ -73,11 +154,23 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             },
             icon: const Icon(Icons.bug_report),
           ),
-          const Icon(Icons.menu),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.sp),
-            child: const Icon(Icons.settings),
-          )
+          // 切换用户(切换后缓存的用户编号也得修改)
+          IconButton(
+            onPressed: _switchUser,
+            icon: const Icon(Icons.toggle_on),
+          ),
+          // 新增用户(默认就一个用户，保存多个用户的数据就需要可以新增其他用户)
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ModifyUserPage(),
+                ),
+              );
+            },
+            icon: const Icon(Icons.add),
+          ),
         ],
       ),
       body: isLoading
@@ -192,7 +285,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    MyProfilePage(userInfo: userInfo),
+                                    ModifyUserPage(user: userInfo),
                               ),
                             ).then((value) {
                               // 确认新增成功后重新加载当前日期的条目数据

@@ -149,6 +149,27 @@ class DBUserHelper {
     return userlist.isNotEmpty ? userlist[0] : null;
   }
 
+  // 查询用户列表
+  Future<List<User>?> queryUserList({String? userName}) async {
+    Database db = await database;
+
+    var where = [];
+    var whereArgs = [];
+
+    if (userName != null) {
+      where.add(" user_name like ? ");
+      whereArgs.add("%$userName%");
+    }
+
+    final userRows = await db.query(
+      UserDdl.tableNameOfUser,
+      where: where.isNotEmpty ? where.join(" AND ") : null,
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
+    );
+
+    return userRows.map((row) => User.fromMap(row)).toList();
+  }
+
   // 批量插入用户(有单条的，也放到list)
   Future<List<Object?>> insertUserList(
     List<User> userList,

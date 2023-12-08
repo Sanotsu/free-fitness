@@ -53,6 +53,29 @@ class User {
     };
   }
 
+  // 给表单初始化值得时候，需要转类型
+  Map<String, dynamic> toStringMap() {
+    return {
+      "user_id": userId,
+      "user_name": userName,
+      "user_code": userCode,
+      "gender": gender,
+      "password": password,
+      "description": description,
+      "date_of_birth": DateTime.tryParse(dateOfBirth ?? "1970-01-01"),
+      "height": height?.toString(),
+      "height_unit": heightUnit?.toString(),
+      "current_weight": currentWeight?.toString(),
+      "target_weight": targetWeight?.toString(),
+      "weight_unit": weightUnit?.toString(),
+      "rda_goal": rdaGoal?.toString(),
+      "protein_goal": proteinGoal?.toString(),
+      "fat_goal": fatGoal?.toString(),
+      "cho_goal": choGoal?.toString(),
+      "action_rest_time": actionRestTime?.toString(),
+    };
+  }
+
 // 用于从数据库行映射到 ServingInfo 对象的 fromMap 方法
   factory User.fromMap(Map<String, dynamic> map) {
     return User(

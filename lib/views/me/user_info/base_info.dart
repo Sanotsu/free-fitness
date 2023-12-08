@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:free_fitness/models/user_state.dart';
 import 'package:intl/intl.dart';
 
+import '../../../common/global/constants.dart';
 import '../../../common/utils/db_user_helper.dart';
 
 class MyProfilePage extends StatefulWidget {
@@ -21,7 +22,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final List<String> genders = ['男', '女', '雷霆战机', '其他'];
   String selectedGender = "";
 
   final TextEditingController heightController = TextEditingController();

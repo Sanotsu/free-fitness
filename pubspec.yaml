@@ -82,6 +82,9 @@ dependencies:
   pdf: ^3.10.7
   # 允许 Flutter 应用程序生成文档并将其打印到 android 或 ios 兼容打印机
   printing: ^5.11.1
+  # 简单的键值对存储，可以用来存用户基本信息:支持存储的类型 String, int, double, Map and List
+  # 不使用shared_preferences 是因为它不能保证一定存储到硬盘
+  get_storage: ^2.1.1
   
 
 dev_dependencies:

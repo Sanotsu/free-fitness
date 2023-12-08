@@ -24,19 +24,19 @@ const String workoutCalendarImageUrl =
 /// (安卓的话指定位置.../DCIM/free-fitness/exercise-images/)下才能读到图片文件
 const cusExImgPre = "/storage/emulated/0/DCIM/free-fitness/exercise-images/";
 
-// 常量声明的示例,上面那种单个变量或者这种class
+// 声明单独storage缓存的用户基本信息的key字段(全局使用当前登录的用户信息，切换用户时会修改)
 class LocalStorageKey {
-  // add a private constructor to prevent this class being instantiated
-  // e.g. invoke `LocalStorageKey()` accidentally
+  // 添加一个私有构造函数以防止此类被实例化
+// 例如意外调用“LocalStorageKey()”
   LocalStorageKey._();
 
-  // the properties are static so that we can use them without a class instance
-  // e.g. can be retrieved by `LocalStorageKey.saveUserId`.
-  static const String saveUserId = 'save_user_id';
+  // 属性是静态的，因此我们可以在没有类实例的情况下使用它们
   static const String userId = 'user_id';
-  static const String language = 'language';
-  static const String themeMode = 'theme_mode';
-  static const String enablePushNotification = 'enable_push_notification';
+  static const String userName = 'user_name';
+  static const String userCode = 'user_code';
+  static const String password = 'password';
+  static const String gender = 'password';
+  static const String description = 'password';
 }
 
 /// ********************************************************
@@ -260,6 +260,8 @@ Map<CusNutType, Color> cusNutrientColors = {
 /// ********************************************************
 /// 列表区
 /// ********************************************************
+
+final List<String> genders = ['男', '女', '雷霆战机', '其他'];
 
 /// 基础活动的一些分类选项
 /// 来源： https://lite.datasette.io/?json=https://github.com/yuhonas/free-exercise-db/blob/main/dist/exercises.json#/data/exercises?_facet=force

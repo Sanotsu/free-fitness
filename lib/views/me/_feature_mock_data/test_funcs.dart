@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:free_fitness/models/user_state.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../common/utils/db_dietary_helper.dart';
@@ -21,6 +22,10 @@ final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
 final DBTrainingHelper _trainingHelper = DBTrainingHelper();
 final DBDiaryHelper _diaryHelper = DBDiaryHelper();
 final DBUserHelper _userHelper = DBUserHelper();
+
+// 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
+final box = GetStorage();
+int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
 
 ///
 /// ---------- 饮食模块相关--------------
@@ -358,7 +363,7 @@ insertTrainingLogDemo({int? size = 10}) async {
   // 计划中的某一天
   var tl1 = TrainedLog(
     trainedDate: getCurrentDateTime(),
-    userId: 1,
+    userId: currentUserId,
     // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
     planId: 1,
     dayNumber: 2,
@@ -377,7 +382,7 @@ insertTrainingLogDemo({int? size = 10}) async {
   // 直接的某个训练
   var tl2 = TrainedLog(
     trainedDate: getCurrentDateTime(),
-    userId: 1,
+    userId: currentUserId,
     // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
     groupId: 1,
     // 起止时间就测试插入时的1个小时
@@ -397,7 +402,7 @@ insertTrainingLogDemo({int? size = 10}) async {
   var tl3 = TrainedLog(
     trainedDate: DateFormat('yyyy-MM-dd HH:mm:ss')
         .format(DateTime.now().add(const Duration(days: -1))),
-    userId: 1,
+    userId: currentUserId,
     // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
     planId: 1,
     dayNumber: 1,
@@ -432,7 +437,7 @@ insertOneUser() async {
   await _userHelper.deleteUser(1);
 
   var newItem = User(
-    userId: 1,
+    userId: currentUserId,
     userName: "张三",
     userCode: "测试code",
     gender: "雷霆战机",
@@ -496,7 +501,7 @@ insertOneQuillDemo() async {
     tags: tempTags.join(","),
     category: tempCates.join(","),
     mood: diaryMoodList[Random().nextInt(diaryMoodList.length)].cnLabel,
-    userId: 1, // ？？？实际用户的编号
+    userId: currentUserId, // 实际用户的编号
     gmtCreate: getCurrentDateTime(),
   );
 
@@ -527,7 +532,7 @@ insertBMIDemo({int? size = 10}) async {
         30.5;
 
     var temp = WeightTrend(
-      userId: 1,
+      userId: currentUserId,
       weight: tempweight,
       weightUnit: 'kg',
       height: tempHeight,

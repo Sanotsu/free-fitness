@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -29,6 +30,9 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
   // 初始化或查询时加载饮食日记数据，没加载完就都是加载中
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
   final DBUserHelper _userHelper = DBUserHelper();
+  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
+  final box = GetStorage();
+  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
 
   // 被选中的日期所拥有的饮食条目数据
   final ValueNotifier<List<DailyFoodItemWithFoodServing>> _selectedItems =
@@ -68,7 +72,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
     });
 
     // 查询用户目标值
-    var tempUser = await _userHelper.queryUser(userId: 1);
+    var tempUser = await _userHelper.queryUser(userId: currentUserId);
     // 当前月的起止日期
     var [startDate, endDate] = getMonthStartEndDateString(datetime);
 

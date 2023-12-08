@@ -2,10 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
@@ -27,6 +29,10 @@ class TrainingReports extends StatefulWidget {
 class _TrainingReportsState extends State<TrainingReports> {
   // 过长的字符串无法打印显示完，默认的developer库的log有时候没效果
   var log = Logger();
+
+  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
+  final box = GetStorage();
+  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
 
   // 数据是否加载中
   bool isLoading = false;
@@ -78,7 +84,7 @@ class _TrainingReportsState extends State<TrainingReports> {
     });
 
     var list = await _trainingHelper.searchTrainedLogWithGroupBasic(
-      userId: 1,
+      userId: currentUserId,
       gmtCreateSort: "DESC",
     );
 
@@ -197,7 +203,7 @@ class _TrainingReportsState extends State<TrainingReports> {
     // 统计的是所有的运动次数和总的运动时间
     return FutureBuilder(
       future: _trainingHelper.searchTrainedLogWithGroupBasic(
-        userId: 1,
+        userId: currentUserId,
         gmtCreateSort: "DESC",
       ),
       builder: (BuildContext context,
@@ -492,7 +498,7 @@ class _TrainingReportsState extends State<TrainingReports> {
 
     return FutureBuilder(
       future: _trainingHelper.searchTrainedLogWithGroupBasic(
-        userId: 1,
+        userId: currentUserId,
         startDate: start,
         endDate: end,
         gmtCreateSort: "DESC",

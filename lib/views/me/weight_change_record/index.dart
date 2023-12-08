@@ -3,8 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/user_state.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:numberpicker/numberpicker.dart';
 
+import '../../../common/global/constants.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tools.dart';
 import 'weight_change_line_chart.dart';
@@ -22,6 +24,9 @@ class WeightChangeRecord extends StatefulWidget {
 
 class _WeightChangeRecordState extends State<WeightChangeRecord> {
   final DBUserHelper _userHelper = DBUserHelper();
+  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
+  final box = GetStorage();
+  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
 
   double _currentWeight = 0;
   double _currentHeight = 0;
@@ -74,7 +79,8 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => WeightRecordManage(user: user),
+                                builder: (context) =>
+                                    WeightRecordManage(user: user),
                               ),
                             ).then(
                               (value) async {
@@ -82,8 +88,9 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                                 setState(() {
                                   isLoading = true;
                                 });
-                                var tempUser =
-                                    (await _userHelper.queryUser(userId: 1))!;
+                                var tempUser = (await _userHelper.queryUser(
+                                  userId: currentUserId,
+                                ))!;
 
                                 setState(() {
                                   user = tempUser;
@@ -107,8 +114,9 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                                 setState(() {
                                   isLoading = true;
                                 });
-                                var tempUser =
-                                    (await _userHelper.queryUser(userId: 1))!;
+                                var tempUser = (await _userHelper.queryUser(
+                                  userId: currentUserId,
+                                ))!;
 
                                 setState(() {
                                   user = tempUser;
@@ -154,8 +162,9 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                               setState(() {
                                 isLoading = true;
                               });
-                              var tempUser =
-                                  (await _userHelper.queryUser(userId: 1))!;
+                              var tempUser = (await _userHelper.queryUser(
+                                userId: currentUserId,
+                              ))!;
 
                               setState(() {
                                 user = tempUser;
@@ -364,7 +373,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
 
                       // 新增体重趋势信息
                       var temp = WeightTrend(
-                        userId: 1,
+                        userId: currentUserId,
                         weight: _currentWeight,
                         weightUnit: 'kg',
                         height: _currentHeight,

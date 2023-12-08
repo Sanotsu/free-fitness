@@ -3,15 +3,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:free_fitness/layout/init_guide_page.dart';
+import 'package:get_storage/get_storage.dart';
 
+import '../common/global/constants.dart';
 import '../views/dietary/foods/index.dart';
 import '../views/dietary/records/index.dart';
 import '../views/dietary/reports/index.dart';
 
 import 'home.dart';
 
-class FreeFitnessApp extends StatelessWidget {
+class FreeFitnessApp extends StatefulWidget {
   const FreeFitnessApp({Key? key}) : super(key: key);
+
+  @override
+  State<FreeFitnessApp> createState() => _FreeFitnessAppState();
+}
+
+class _FreeFitnessAppState extends State<FreeFitnessApp> {
+  final box = GetStorage();
+
+// 获取缓存中的用户编号
+  int? get getUserId => box.read(LocalStorageKey.userId);
 
   // 应用程序的根部件
   @override
@@ -20,6 +33,8 @@ class FreeFitnessApp extends StatelessWidget {
     // （不能设为const，否则返回会无法修改参数值，
     //  这也是抽在这里的原因，下面RouteSettings 直接赋值{}会提示使用const，然后就报错）
     var routeSettingsArgs = {};
+
+    print("getUserId---$getUserId");
 
     return ScreenUtilInit(
       designSize: const Size(360, 640), // 1080p / 3 ,单位dp
@@ -79,7 +94,11 @@ class FreeFitnessApp extends StatelessWidget {
               return MaterialPageRoute(builder: (_) => const DietaryFoods());
             } else if (settings.name == "/") {
               // 可带上自定义参数
-              return MaterialPageRoute(builder: (_) => const HomePage());
+              return MaterialPageRoute(
+                builder: (_) =>
+                    // 如果没有在缓存获取到用户信息，就要用户输入；否则就直接进入首页
+                    getUserId != null ? const HomePage() : const InitGuidePage(),
+              );
             } else {
               return null;
             }
