@@ -471,3 +471,22 @@ List<CusLabel> diaryCategoryList = [
   CusLabel(enLabel: "Script", cnLabel: "剧本", value: "script"),
   CusLabel(enLabel: "Emotion", cnLabel: "情感", value: "emotion"),
 ];
+
+// 导出是可下拉选择的值
+List<CusLabel> exportDateList = [
+  CusLabel(
+    enLabel: "last 7 days",
+    cnLabel: "最近7天",
+    value: "seven",
+  ),
+  CusLabel(
+    enLabel: "last 30 days",
+    cnLabel: "最近30天",
+    value: "thirty",
+  ),
+  CusLabel(
+    enLabel: "all",
+    cnLabel: "全部",
+    value: "all",
+  ),
+];

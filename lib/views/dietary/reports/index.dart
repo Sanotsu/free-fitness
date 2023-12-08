@@ -10,8 +10,8 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
 import '../../../models/dietary_state.dart';
-import 'export/_demos/pages/invoices.dart';
 import 'export/report_pdf_viewer.dart';
 import 'week_intake_bar.dart';
 
@@ -43,6 +43,9 @@ class _DietaryReportsState extends State<DietaryReports> {
 
   // 下拉切换的日期范围(默认今天)
   CusLabel dropdownValue = dietaryReportDisplayModeList.first;
+
+  // 导出数据时默认选中为最近7天
+  CusLabel exportValue = exportDateList.first;
 
   @override
   void initState() {
@@ -222,32 +225,6 @@ class _DietaryReportsState extends State<DietaryReports> {
             ],
           ),
           actions: [
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ReportPdfViewer(
-                      startDate: '2023-01-01',
-                      endDate: '2023-12-31',
-                    ),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.print),
-            ),
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => InvoicePage(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.print),
-            ),
-
             // 下拉按钮，切换报告的时间范围
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -283,15 +260,80 @@ class _DietaryReportsState extends State<DietaryReports> {
                   isExpanded: false,
                   underline: Container(), // 将下划线设置为空的Container
                 ),
-                Padding(
-                  padding: EdgeInsets.only(right: 10.sp),
-                  child: IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.flag_circle),
-                  ),
-                ),
               ],
-            )
+            ),
+            IconButton(
+              onPressed: () async {
+                var dateSelected = await showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('选择日期范围'),
+                      content: DropdownMenu<CusLabel>(
+                        initialSelection: exportDateList.first,
+                        onSelected: (CusLabel? value) {
+                          setState(() {
+                            exportValue = value!;
+                          });
+                        },
+                        dropdownMenuEntries: exportDateList
+                            .map<DropdownMenuEntry<CusLabel>>((CusLabel value) {
+                          return DropdownMenuEntry<CusLabel>(
+                            value: value,
+                            label: value.cnLabel,
+                          );
+                        }).toList(),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, false);
+                          },
+                          child: const Text('取消'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, true);
+                          },
+                          child: const Text('确认'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+                // 弹窗选择导出范围不为空，且不为false，则默认是选择的日期范围
+                if (dateSelected != null && dateSelected) {
+                  String tempStart, tempEnd;
+                  if (exportValue.value == "seven") {
+                    [tempStart, tempEnd] = getStartEndDateString(7);
+                  } else if (exportValue.value == "thirty") {
+                    [tempStart, tempEnd] = getStartEndDateString(30);
+                  } else {
+                    // 导出全部就近20年吧
+                    [tempStart, tempEnd] = getStartEndDateString(365 * 20);
+                  }
+
+                  if (!mounted) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ReportPdfViewer(
+                        startDate: tempStart,
+                        endDate: tempEnd,
+                      ),
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.print),
+            ),
+            // Padding(
+            //   padding: EdgeInsets.only(right: 10.sp),
+            //   child: IconButton(
+            //     onPressed: () {},
+            //     icon: const Icon(Icons.flag_circle),
+            //   ),
+            // ),
           ],
         ),
         body: isLoading

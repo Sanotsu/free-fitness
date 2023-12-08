@@ -1,9 +1,11 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
 import '../../../../common/utils/db_dietary_helper.dart';
+import '../../../../common/utils/tool_widgets.dart';
 import '../../../../models/dietary_state.dart';
 import 'report_pdf_export.dart';
 
@@ -44,8 +46,6 @@ class _ReportPdfViewerState extends State<ReportPdfViewer> {
 
   /// 有指定日期查询指定日期的饮食记录条目，没有就当前日期
   _queryDailyFoodItemList() async {
-    print("开始运行查询当日饮食日记条目---------");
-
     if (isLoading) return;
 
     setState(() {
@@ -59,7 +59,7 @@ class _ReportPdfViewerState extends State<ReportPdfViewer> {
       withDetail: true,
     ) as List<DailyFoodItemWithFoodServing>);
 
-    // log("---------测试查询的当前日记item $temp");
+    print("导出pdf查询到的饮食数据数量${temp.length}");
 
     setState(() {
       dfiwfsList = temp;
@@ -74,9 +74,17 @@ class _ReportPdfViewerState extends State<ReportPdfViewer> {
       appBar: AppBar(
         title: const Text('饮食记录导出'),
       ),
-      body: PdfPreview(
-        build: (context) => makeReportPdf(dfiwfsList),
-      ),
+      body: isLoading
+          ? buildLoader(isLoading)
+          : PdfPreview(
+              initialPageFormat: PdfPageFormat.a4,
+              build: (context) => makeReportPdf(
+                dfiwfsList,
+                // 在pdf页首会显示查询数据的日期
+                widget.startDate.split(" ")[0],
+                widget.endDate.split(" ")[0],
+              ),
+            ),
     );
   }
 }
