@@ -2,12 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/models/user_state.dart';
-import 'package:get_storage/get_storage.dart';
 
 import '../../../common/utils/tool_widgets.dart';
 import '../../common/global/constants.dart';
 import '../../common/utils/db_user_helper.dart';
+import '../../models/user_state.dart';
 import '_feature_mock_data/index.dart';
 import 'intake_goals/intake_target.dart';
 import 'training_setting/index.dart';
@@ -24,8 +23,6 @@ class UserAndSettings extends StatefulWidget {
 class _UserAndSettingsState extends State<UserAndSettings> {
   final DBUserHelper _userHelper = DBUserHelper();
 
-  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
-  final box = GetStorage();
   // 这里有修改，暂时不用get
   int currentUserId = 1;
 
@@ -35,14 +32,14 @@ class _UserAndSettingsState extends State<UserAndSettings> {
   bool isLoading = false;
 
 // 切换用户时，选择的用户
-  User? selectedGender;
+  User? selectedUser;
 
   @override
   void initState() {
     super.initState();
 
     setState(() {
-      currentUserId = box.read(LocalStorageKey.userId) ?? 1;
+      currentUserId = CacheUser.userId;
     });
 
     _queryLoginedUserInfo();
@@ -98,15 +95,15 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             title: const Text('切换用户'),
             content: DropdownButtonFormField<User>(
               value: userList.firstWhere((e) => e.userId == currentUserId),
-              items: userList.map((User gender) {
+              items: userList.map((User user) {
                 return DropdownMenuItem<User>(
-                  value: gender,
-                  child: Text(gender.userName),
+                  value: user,
+                  child: Text(user.userName),
                 );
               }).toList(),
               onChanged: (User? value) async {
                 setState(() {
-                  selectedGender = value;
+                  selectedUser = value;
                 });
               },
             ),
@@ -125,11 +122,13 @@ class _UserAndSettingsState extends State<UserAndSettings> {
         // 如果有返回值且为true，
         if (value != null && value) {
           // 修改缓存的用户编号
-          await box.write(LocalStorageKey.userId, selectedGender!.userId!);
+          CacheUser.updateUserId(selectedUser!.userId!);
+          CacheUser.updateUserName(selectedUser!.userName);
+          CacheUser.updateUserCode(selectedUser!.userCode ?? "");
 
           // 重新缓存当前用户编号和查询用户信息
           setState(() {
-            currentUserId = box.read(LocalStorageKey.userId) ?? 1;
+            currentUserId = CacheUser.userId;
             _queryLoginedUserInfo();
           });
         }

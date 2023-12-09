@@ -5,7 +5,6 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -27,11 +26,6 @@ class ExerciseModify extends StatefulWidget {
 
 class _ExerciseModifyState extends State<ExerciseModify> {
   final DBTrainingHelper _dbHelper = DBTrainingHelper();
-
-  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
-  final box = GetStorage();
-  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
-  String get currentUseName => box.read(LocalStorageKey.userName) ?? "";
 
   // 这个表单用到了3个库，flutter_form_builder、form_builder_file_picker、multi_select_flutter
   // multi_select_flutter不和前者通用，所以其下拉选择框单独使用key来获取值和验证状态等
@@ -148,7 +142,7 @@ class _ExerciseModifyState extends State<ExerciseModify> {
 
         ///
         isCustom: true,
-        contributor: currentUseName,
+        contributor: CacheUser.userName,
         // 时间都存时间戳，显示的时候再格式化
         gmtCreate: getCurrentDateTime(),
       );

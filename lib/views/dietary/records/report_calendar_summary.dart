@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -28,10 +27,6 @@ class ReportCalendarSummary extends StatefulWidget {
 class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
   // 初始化或查询时加载饮食日记数据，没加载完就都是加载中
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
-
-  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
-  final box = GetStorage();
-  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
 
   // 被选中的日期所拥有的饮食条目数据
   final ValueNotifier<List<DailyFoodItemWithFoodServing>> _selectedItems =
@@ -76,7 +71,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
     // 理论上是默认查询当日的，有选择其他日期则查询指定日期
     List<DailyFoodItemWithFoodServing> temp =
         (await _dietaryHelper.queryDailyFoodItemListWithDetail(
-      userId: currentUserId,
+      userId: CacheUser.userId,
       startDate: startDate,
       endDate: endDate,
       withDetail: true,

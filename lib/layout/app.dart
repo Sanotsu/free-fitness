@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:free_fitness/layout/init_guide_page.dart';
-import 'package:get_storage/get_storage.dart';
 
 import '../common/global/constants.dart';
 import '../views/dietary/foods/index.dart';
@@ -21,9 +20,7 @@ class FreeFitnessApp extends StatefulWidget {
 }
 
 class _FreeFitnessAppState extends State<FreeFitnessApp> {
-  final box = GetStorage();
-
-// 获取缓存中的用户编号
+  // 获取缓存中的用户编号
   int? get getUserId => box.read(LocalStorageKey.userId);
 
   // 应用程序的根部件
@@ -97,7 +94,9 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
               return MaterialPageRoute(
                 builder: (_) =>
                     // 如果没有在缓存获取到用户信息，就要用户输入；否则就直接进入首页
-                    getUserId != null ? const HomePage() : const InitGuidePage(),
+                    getUserId != null
+                        ? const HomePage()
+                        : const InitGuidePage(),
               );
             } else {
               return null;

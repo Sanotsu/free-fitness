@@ -9,7 +9,6 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/diary_state.dart';
-import 'package:get_storage/get_storage.dart';
 
 import '../../common/global/constants.dart';
 import '../../common/utils/db_diary_helper.dart';
@@ -39,9 +38,6 @@ class DiaryModifyRichText extends StatefulWidget {
 
 class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
   final DBDiaryHelper _dbHelper = DBDiaryHelper();
-  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
-  final box = GetStorage();
-  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
 
   // 使用formbuilder管理的心情和分类多选表单组件在重置数据时需要表单key
   final _formKey = GlobalKey<FormBuilderState>();
@@ -181,7 +177,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
       tags: initTags.join(","),
       category: initCategorys.join(","),
       mood: initMood,
-      userId: currentUserId,
+      userId: CacheUser.userId,
     );
 
     // ？？？这里应该有错误检查

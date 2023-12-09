@@ -5,7 +5,6 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:free_fitness/common/utils/tools.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../common/global/constants.dart';
@@ -27,10 +26,6 @@ class DetailModifyFood extends StatefulWidget {
 
 class _DetailModifyFoodState extends State<DetailModifyFood> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
-// 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
-  final box = GetStorage();
-  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
-  String get currentUseName => box.read(LocalStorageKey.userName) ?? "";
 
 //  食物添加的表单key
   final _foodFormKey = GlobalKey<FormBuilderState>();
@@ -74,7 +69,7 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
                 .toList()
                 .join(",")
             : null,
-        contributor: currentUseName,
+        contributor: CacheUser.userName,
         gmtCreate: getCurrentDateTime(),
       );
 

@@ -103,8 +103,6 @@ class _FeatureMockDemoState extends State<FeatureMockDemo> {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      // 新增饮食模块需要有个人信息，避免没有点击上面那个按钮
-                      await insertOneUser();
                       // 7种食物(对应7*3种单份营养素)、70条饮食日记条目、随机插入最近7天中
                       // (一日四餐，每餐1个条目，7天都是7*4=28条数据)
                       await insertDailyLogDataDemo(7, 30, 7);
@@ -137,11 +135,11 @@ class _FeatureMockDemoState extends State<FeatureMockDemo> {
                   ),
                   ElevatedButton(
                     onPressed: () async {
-                      await insertOneUser();
+                      await insertExtraUsers();
                       if (!mounted) return;
-                      _showSimpleDialog(context, "已新增唯一用户");
+                      _showSimpleDialog(context, "已新增额外用户");
                     },
-                    child: const Text("新增唯一用户"),
+                    child: const Text("新增额外两个用户"),
                   ),
                 ],
               ),

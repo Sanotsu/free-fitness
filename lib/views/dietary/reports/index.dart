@@ -4,7 +4,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/user_state.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common/global/constants.dart';
@@ -30,9 +29,6 @@ class DietaryReports extends StatefulWidget {
 class _DietaryReportsState extends State<DietaryReports> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
   final DBUserHelper _userHelper = DBUserHelper();
-  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
-  final box = GetStorage();
-  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
 
   /// 根据条件查询的日记条目数据(所有数据的来源，格式化成VO可以在指定函数中去做)
   List<DailyFoodItemWithFoodServing> dfiwfsList = [];
@@ -115,14 +111,14 @@ class _DietaryReportsState extends State<DietaryReports> {
 
     // 理论上是默认查询当日的，有选择其他日期则查询指定日期？？？还要是登录者这个用户编号的
     var temp = (await _dietaryHelper.queryDailyFoodItemListWithDetail(
-      userId: currentUserId,
+      userId: CacheUser.userId,
       startDate: queryDateRange["startDate"],
       endDate: queryDateRange["endDate"],
       withDetail: true,
     ) as List<DailyFoodItemWithFoodServing>);
 
     // 查询用户目标值
-    var tempUser = await _userHelper.queryUser(userId: currentUserId);
+    var tempUser = await _userHelper.queryUser(userId: CacheUser.userId);
 
     print("queryDateRange--$queryDateRange ${temp.length}");
 

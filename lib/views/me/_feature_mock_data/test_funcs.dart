@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:free_fitness/models/user_state.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../common/utils/db_dietary_helper.dart';
@@ -23,11 +22,6 @@ final DBTrainingHelper _trainingHelper = DBTrainingHelper();
 final DBDiaryHelper _diaryHelper = DBDiaryHelper();
 final DBUserHelper _userHelper = DBUserHelper();
 
-// 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
-final box = GetStorage();
-int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
-String get currentUseName => box.read(LocalStorageKey.userName) ?? "";
-
 ///
 /// ---------- 饮食模块相关--------------
 ///
@@ -45,7 +39,8 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
       generateRandomString(1, 8)
     ].join(","),
     category: generateRandomString(5, 10),
-    contributor: currentUseName,
+    description: generateRandomString(50, 100),
+    contributor: CacheUser.userName,
     gmtCreate: getCurrentDateTime(),
   );
 
@@ -85,7 +80,7 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
     sodium: sodium,
     potassium: potassium,
     cholesterol: cholesterol,
-    contributor: currentUseName,
+    contributor: CacheUser.userName,
     gmtCreate: getCurrentDateTime(),
   );
   // 输入标准单份营养素
@@ -107,7 +102,7 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
     sodium: sodium / 100,
     potassium: potassium / 100,
     cholesterol: cholesterol / 100,
-    contributor: currentUseName,
+    contributor: CacheUser.userName,
     gmtCreate: getCurrentDateTime(),
   );
 
@@ -129,7 +124,7 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
     sodium: Random().nextDouble() * 5000,
     potassium: Random().nextDouble() * 5000,
     cholesterol: Random().nextDouble() * 5000,
-    contributor: currentUseName,
+    contributor: CacheUser.userName,
     gmtCreate: getCurrentDateTime(),
   );
 
@@ -198,9 +193,7 @@ insertDailyLogDataDemo(
       foodId: usedFoodId,
       servingInfoId: usedServingId,
       foodIntakeSize: Random().nextDouble() * 100,
-      // contributor: "随机数据测试插入",
-      // 2023-12-05 这里是userId，每个用户只能查询到自己的。后续改为int
-      userId: currentUserId,
+      userId: Random().nextInt(3) + 1,
       gmtCreate: getCurrentDateTime(),
     );
     list.add(temp);
@@ -239,12 +232,11 @@ Future<int> insertOneRandomExercise({String? countingMode}) async {
     equipment:
         equipmentOptions[Random().nextInt(equipmentOptions.length)].value,
     countingMode: temp,
-    // standardDuration: "1",
     instructions: generateRandomString(300, 500),
     primaryMuscles:
         musclesOptions[Random().nextInt(musclesOptions.length)].value,
     gmtCreate: getCurrentDateTime(),
-    standardDuration: 1,
+    standardDuration: Random().nextInt(3) + 1,
   );
 
   var rst = await _trainingHelper.insertExercise(exercise);
@@ -369,7 +361,7 @@ insertTrainingLogDemo({int? size = 10}) async {
   // 计划中的某一天
   var tl1 = TrainedLog(
     trainedDate: getCurrentDateTime(),
-    userId: currentUserId,
+    userId: Random().nextInt(3) + 1,
     // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
     planId: 1,
     dayNumber: 2,
@@ -388,7 +380,7 @@ insertTrainingLogDemo({int? size = 10}) async {
   // 直接的某个训练
   var tl2 = TrainedLog(
     trainedDate: getCurrentDateTime(),
-    userId: currentUserId,
+    userId: Random().nextInt(3) + 1,
     // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
     groupId: 1,
     // 起止时间就测试插入时的1个小时
@@ -408,7 +400,7 @@ insertTrainingLogDemo({int? size = 10}) async {
   var tl3 = TrainedLog(
     trainedDate: DateFormat(constDatetimeFormat)
         .format(DateTime.now().add(const Duration(days: -1))),
-    userId: currentUserId,
+    userId: Random().nextInt(3) + 1,
     // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
     planId: 1,
     dayNumber: 1,
@@ -434,33 +426,58 @@ insertTrainingLogDemo({int? size = 10}) async {
 /// ---------- 个人信息相关--------------
 ///
 
-// 插入一条用户信息
-// 因为没有缓存用户信息，逻辑中有测试数据userId=1,所以插入也只插入这一条
-insertOneUser() async {
-  print("【【【 插入测试数据 start-->:insertOneUser ");
+insertExtraUsers() async {
+  print("【【【 插入测试数据 start-->:insertExtraUsers ");
 
-  // 测试，插入先删除
-  await _userHelper.deleteUser(1);
+  // 2023-12-09 成功进入app就有一条默认的用户了，这里测试是为了查询多个用户各自独立的强关联数据
+  // 插入2个额外用户用于插入其他随机日志时能够随机查询到指定用户的数据
 
-  var newItem = User(
-    userId: currentUserId,
+  var newItem1 = User(
+    userId: 2,
     userName: "张三",
-    userCode: "测试code",
-    gender: "雷霆战机",
+    userCode: "zhangsan",
+    gender: "男",
     description: "测试描述",
     password: "123",
     dateOfBirth: "1994-07",
     height: 173,
     currentWeight: 68,
     targetWeight: 65.2,
-    rdaGoal: 1200,
+    rdaGoal: 1500,
     proteinGoal: 85.5,
     fatGoal: 45.5,
     choGoal: 65.6,
     actionRestTime: 30,
   );
-  await _userHelper.insertUserList([newItem]);
-  print("【【【 插入测试数据 end-->:insertOneUser ");
+
+  var newItem2 = User(
+    userId: 3,
+    userName: "李四",
+    userCode: "lisi",
+    gender: "女",
+    description: "nothing is unknown",
+    password: "123456",
+    dateOfBirth: "1994-07",
+    height: 160,
+    currentWeight: 60,
+    targetWeight: 55,
+    rdaGoal: 1300,
+    proteinGoal: 100,
+    fatGoal: 50,
+    choGoal: 100,
+    actionRestTime: 30,
+  );
+
+  var rst1 = await _userHelper.queryUser(userId: 2);
+  var rst2 = await _userHelper.queryUser(userId: 3);
+
+  if (rst1 == null) {
+    await _userHelper.insertUserList([newItem1]);
+  } else if (rst2 == null) {
+    await _userHelper.insertUserList([newItem2]);
+  }
+
+  print("【【【 插入测试数据 end-->:insertExtraUsers ");
 }
 
 // 插入一个固定内容随机题目的手记
@@ -507,7 +524,7 @@ insertOneQuillDemo() async {
     tags: tempTags.join(","),
     category: tempCates.join(","),
     mood: diaryMoodList[Random().nextInt(diaryMoodList.length)].cnLabel,
-    userId: currentUserId,
+    userId: Random().nextInt(3) + 1,
     gmtCreate: getCurrentDateTime(),
   );
 
@@ -538,7 +555,7 @@ insertBMIDemo({int? size = 10}) async {
         30.5;
 
     var temp = WeightTrend(
-      userId: currentUserId,
+      userId: Random().nextInt(3) + 1,
       weight: tempweight,
       weightUnit: 'kg',
       height: tempHeight,

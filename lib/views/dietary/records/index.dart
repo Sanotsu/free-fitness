@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/common/global/constants.dart';
 import 'package:free_fitness/models/dietary_state.dart';
-import 'package:get_storage/get_storage.dart';
+
 import 'package:intl/intl.dart';
 
 import '../../../common/utils/db_dietary_helper.dart';
@@ -29,10 +29,6 @@ class DietaryRecords extends StatefulWidget {
 class _DietaryRecordsState extends State<DietaryRecords> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
   final DBUserHelper _userHelper = DBUserHelper();
-
-  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
-  final box = GetStorage();
-  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
 
   /// 根据条件查询的日记条目数据
   List<DailyFoodItemWithFoodServing> dfiwfsList = [];
@@ -79,9 +75,9 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   void initState() {
     super.initState();
 
-    _queryDailyFoodItemList();
+    print("进入饮食日志，当前缓存的用户${CacheUser.userId} ${CacheUser.userName}");
 
-    print("currentUserId-----$currentUserId");
+    _queryDailyFoodItemList();
   }
 
   // 有指定日期查询指定日期的饮食记录条目，没有就当前日期
@@ -94,7 +90,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
     // 查询用户目标值
     // TODO 这里还应该根据今天是星期几显示对应的RDA值
-    var tempUser = await _userHelper.queryUser(userId: currentUserId);
+    var tempUser = await _userHelper.queryUser(userId: CacheUser.userId);
 
     print("开始运行查询当日饮食日记条目---------");
     if (tempUser != null) {
@@ -110,7 +106,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     // 理论上是默认查询当日的，有选择其他日期则查询指定日期
     List<DailyFoodItemWithFoodServing> temp =
         (await _dietaryHelper.queryDailyFoodItemListWithDetail(
-      userId: currentUserId,
+      userId: CacheUser.userId,
       startDate: selectedDateStr,
       endDate: selectedDateStr,
       withDetail: true,

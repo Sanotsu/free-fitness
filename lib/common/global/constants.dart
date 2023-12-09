@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 
 /// ********************************************************
 /// 单变量区域
@@ -37,6 +38,47 @@ class LocalStorageKey {
   static const String password = 'password';
   static const String gender = 'password';
   static const String description = 'password';
+}
+
+// 缓存中存放的用户信息，方便统一查询(这个box导出也都在用，就像单例)
+// final box = GetStorage();
+
+// class CacheUser {
+//   CacheUser._();
+
+//   // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
+//   static int userId = box.read(LocalStorageKey.userId) ?? 1;
+//   static String userName = box.read(LocalStorageKey.userName) ?? "";
+// }
+
+final box = GetStorage();
+
+class CacheUser {
+  CacheUser._();
+
+  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
+  static int userId = _readUserId();
+  static String userName = _readUserName();
+  static String userCode = _readUserCode();
+
+  static int _readUserId() => box.read(LocalStorageKey.userId) ?? 1;
+  static String _readUserName() => box.read(LocalStorageKey.userName) ?? "";
+  static String _readUserCode() => box.read(LocalStorageKey.userCode) ?? "";
+
+  static void updateUserId(int newUserId) async {
+    userId = newUserId;
+    await box.write(LocalStorageKey.userId, newUserId);
+  }
+
+  static void updateUserName(String newUserName) async {
+    userName = newUserName;
+    await box.write(LocalStorageKey.userName, newUserName);
+  }
+
+  static void updateUserCode(String newUserCode) async {
+    userCode = newUserCode;
+    await box.write(LocalStorageKey.userName, newUserCode);
+  }
 }
 
 /// ********************************************************

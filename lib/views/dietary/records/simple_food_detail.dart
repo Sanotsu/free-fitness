@@ -6,12 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:free_fitness/common/utils/tools.dart';
-import 'package:get_storage/get_storage.dart';
 
 import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../models/dietary_state.dart';
+import '../../../common/utils/tools.dart';
 
 /// 2023-12-04 这个是饮食条目选择食物的时候展示的食物列表，点击之后显示的食物详情；
 /// 和单独的“食物成分”模块不一样，显示的内容更少些，主要是选择餐次、单份营养素种类和添加食物摄入数量而已
@@ -43,9 +42,6 @@ class SimpleFoodDetail extends StatefulWidget {
 
 class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
-  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
-  final box = GetStorage();
-  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
 
   final _formKey = GlobalKey<FormBuilderState>();
 
@@ -204,7 +200,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
       foodId: widget.foodItem.food.foodId!,
       servingInfoId: nutrientsInfo.servingInfoId!,
       foodIntakeSize: inputServingValue,
-      userId: currentUserId,
+      userId: CacheUser.userId,
       gmtCreate: getCurrentDateTime(),
     );
 

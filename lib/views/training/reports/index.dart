@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -29,10 +28,6 @@ class TrainingReports extends StatefulWidget {
 class _TrainingReportsState extends State<TrainingReports> {
   // 过长的字符串无法打印显示完，默认的developer库的log有时候没效果
   var log = Logger();
-
-  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
-  final box = GetStorage();
-  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
 
   // 数据是否加载中
   bool isLoading = false;
@@ -84,7 +79,7 @@ class _TrainingReportsState extends State<TrainingReports> {
     });
 
     var list = await _trainingHelper.searchTrainedLogWithGroupBasic(
-      userId: currentUserId,
+      userId: CacheUser.userId,
       gmtCreateSort: "DESC",
     );
 
@@ -203,7 +198,7 @@ class _TrainingReportsState extends State<TrainingReports> {
     // 统计的是所有的运动次数和总的运动时间
     return FutureBuilder(
       future: _trainingHelper.searchTrainedLogWithGroupBasic(
-        userId: currentUserId,
+        userId: CacheUser.userId,
         gmtCreateSort: "DESC",
       ),
       builder: (BuildContext context,
@@ -308,12 +303,15 @@ class _TrainingReportsState extends State<TrainingReports> {
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Text("上次训练名称: "),
                     Text(
                       (data.first.plan != null)
                           ? "${data.first.plan?.planName} 的第${data.first.log.dayNumber}个训练日"
                           : data.first.group?.groupName ?? "",
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w300,
@@ -498,7 +496,7 @@ class _TrainingReportsState extends State<TrainingReports> {
 
     return FutureBuilder(
       future: _trainingHelper.searchTrainedLogWithGroupBasic(
-        userId: currentUserId,
+        userId: CacheUser.userId,
         startDate: start,
         endDate: end,
         gmtCreateSort: "DESC",

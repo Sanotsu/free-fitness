@@ -3,13 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
-import 'package:free_fitness/common/utils/tools.dart';
-import 'package:get_storage/get_storage.dart';
 
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
 import '../../../models/dietary_state.dart';
 
 class SaveMealPhotos extends StatefulWidget {
@@ -32,9 +31,6 @@ class SaveMealPhotos extends StatefulWidget {
 
 class _SaveMealPhotosState extends State<SaveMealPhotos> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
-  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
-  final box = GetStorage();
-  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
 
   final _formKey = GlobalKey<FormBuilderState>();
 
@@ -113,7 +109,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                     mealCategory: widget.mealtime.enLabel,
                     photos: photos,
                     gmtCreate: getCurrentDateTime(),
-                    userId: currentUserId, // 应该要全局缓存当前登录用户id
+                    userId: CacheUser.userId,
                   );
 
                   try {

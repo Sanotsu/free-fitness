@@ -1,13 +1,12 @@
 // ignore_for_file: avoid_print
 
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/common/utils/tools.dart';
 import 'package:free_fitness/models/dietary_state.dart';
-import 'package:get_storage/get_storage.dart';
-import 'dart:io';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
@@ -23,10 +22,6 @@ class FoodJsonImport extends StatefulWidget {
 
 class _FoodJsonImportState extends State<FoodJsonImport> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
-  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
-  final box = GetStorage();
-  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
-  String get currentUseName => box.read(LocalStorageKey.userName) ?? "";
 
   // 是否在解析json中或导入数据库中
   bool isLoading = false;
@@ -185,7 +180,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
         category: e.category?.join(","),
         // ？？？2023-11-30 这里假设传入的图片是完整的，就不像动作那样再指定文件夹前缀了
         photos: e.photos?.join(","),
-        contributor: currentUseName,
+        contributor: CacheUser.userName,
         gmtCreate: getCurrentDateTime(),
       );
 
@@ -206,7 +201,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
         cholesterol: double.tryParse(e.cholesterol ?? "0") ?? 0,
         dietaryFiber: double.tryParse(e.dietaryFiber ?? "0") ?? 0,
         // 其他可选值暂时不对应
-        contributor: currentUseName,
+        contributor: CacheUser.userName,
         gmtCreate: getCurrentDateTime(),
       );
 

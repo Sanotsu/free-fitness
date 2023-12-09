@@ -429,7 +429,7 @@ class DBDietaryHelper {
     final whereArgs = <dynamic>[];
 
     if (userId != null) {
-      where.add('contributor = ?');
+      where.add('user_id = ?');
       whereArgs.add(userId);
     }
 

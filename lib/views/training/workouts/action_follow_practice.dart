@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../common/components/dialog_widgets.dart';
@@ -44,9 +43,6 @@ enum TtsState { playing, stopped, paused, continued }
 class _ActionFollowPracticeWithTTSState
     extends State<ActionFollowPracticeWithTTS> {
   final DBTrainingHelper _trainingHelper = DBTrainingHelper();
-  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
-  final box = GetStorage();
-  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
 
   // 一般的倒计时控制器
   final _actionController = CountDownController();
@@ -1131,7 +1127,7 @@ class _ActionFollowPracticeWithTTSState
     // 训练日志
     var tempLog = TrainedLog(
       trainedDate: getCurrentDateTime(),
-      userId: currentUserId,
+      userId: CacheUser.userId,
       // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
       planId: planId,
       dayNumber: dayNumber,

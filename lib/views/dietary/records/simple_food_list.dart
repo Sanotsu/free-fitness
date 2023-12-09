@@ -2,15 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/common/utils/tools.dart';
-import 'package:free_fitness/models/dietary_state.dart';
-import 'package:get_storage/get_storage.dart';
 
 import '../../../../common/global/constants.dart' as constants;
 import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../common/utils/tool_widgets.dart';
 
+import '../../../common/utils/tools.dart';
+import '../../../models/dietary_state.dart';
 import '../foods/add_food_with_serving.dart';
 import 'simple_food_detail.dart';
 
@@ -39,10 +38,6 @@ class SimpleFoodList extends StatefulWidget {
 }
 
 class _SimpleFoodListState extends State<SimpleFoodList> {
-  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
-  final box = GetStorage();
-  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
-
   List<FoodAndServingInfo> foodItems = [];
   int currentPage = 1; // 数据库查询的时候会从0开始offset
   int pageSize = 10;
@@ -257,7 +252,7 @@ class _SimpleFoodListState extends State<SimpleFoodList> {
                             servingInfoId: fistServingInfo.servingInfoId!,
                             foodIntakeSize:
                                 fistServingInfo.servingSize.toDouble(),
-                            userId: currentUserId,
+                            userId: CacheUser.userId,
                             gmtCreate: getCurrentDateTime(),
                           );
 

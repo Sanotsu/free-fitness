@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get_storage/get_storage.dart';
 
 import '../common/global/constants.dart';
 import '../common/utils/db_user_helper.dart';
@@ -30,7 +29,7 @@ class InitGuidePage extends StatefulWidget {
 
 class _InitGuidePageState extends State<InitGuidePage> {
   final DBUserHelper _userHelper = DBUserHelper();
-  final box = GetStorage();
+
   // 用户输入的称呼
   final TextEditingController _usernameController = TextEditingController();
   // 用户选择的性别
