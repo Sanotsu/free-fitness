@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/common/utils/tools.dart';
 import 'package:free_fitness/models/dietary_state.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../../../../common/global/constants.dart' as constants;
 import '../../../../common/global/constants.dart';
@@ -38,6 +39,10 @@ class SimpleFoodList extends StatefulWidget {
 }
 
 class _SimpleFoodListState extends State<SimpleFoodList> {
+  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
+  final box = GetStorage();
+  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
+
   List<FoodAndServingInfo> foodItems = [];
   int currentPage = 1; // 数据库查询的时候会从0开始offset
   int pageSize = 10;
@@ -172,7 +177,8 @@ class _SimpleFoodListState extends State<SimpleFoodList> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const AddfoodWithServing()),
+                    MaterialPageRoute(
+                        builder: (context) => const AddfoodWithServing()),
                   ).then((value) {
                     // 不管是否新增成功，这里都重新加载；因为没有清空查询条件，所以新增的食物关键字不包含查询条件中，不会显示
                     if (value != null) {
@@ -251,7 +257,7 @@ class _SimpleFoodListState extends State<SimpleFoodList> {
                             servingInfoId: fistServingInfo.servingInfoId!,
                             foodIntakeSize:
                                 fistServingInfo.servingSize.toDouble(),
-                            contributor: "<登入者编号>",
+                            userId: currentUserId,
                             gmtCreate: getCurrentDateTime(),
                           );
 

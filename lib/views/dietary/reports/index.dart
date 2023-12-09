@@ -70,26 +70,26 @@ class _DietaryReportsState extends State<DietaryReports> {
     switch (lowerFlag) {
       case "today":
         var temp = DateTime.now();
-        startTemp = endTemp = DateFormat('yyyy-MM-dd').format(temp);
+        startTemp = endTemp = DateFormat(constDateFormat).format(temp);
         break;
       case "yesterday":
         var temp = DateTime.now().subtract(const Duration(days: 1));
-        startTemp = endTemp = DateFormat('yyyy-MM-dd').format(temp);
+        startTemp = endTemp = DateFormat(constDateFormat).format(temp);
         break;
       case "this_week":
         DateTime now = DateTime.now();
         DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
         DateTime endOfWeek = now.add(Duration(days: 7 - now.weekday));
-        startTemp = DateFormat('yyyy-MM-dd').format(startOfWeek);
-        endTemp = DateFormat('yyyy-MM-dd').format(endOfWeek);
+        startTemp = DateFormat(constDateFormat).format(startOfWeek);
+        endTemp = DateFormat(constDateFormat).format(endOfWeek);
         break;
       case "last_week":
         DateTime now = DateTime.now();
         DateTime startOfLastWeek =
             now.subtract(Duration(days: now.weekday + 6));
         DateTime endOfLastWeek = now.subtract(Duration(days: now.weekday));
-        startTemp = DateFormat('yyyy-MM-dd').format(startOfLastWeek);
-        endTemp = DateFormat('yyyy-MM-dd').format(endOfLastWeek);
+        startTemp = DateFormat(constDateFormat).format(startOfLastWeek);
+        endTemp = DateFormat(constDateFormat).format(endOfLastWeek);
         break;
     }
 
@@ -109,12 +109,13 @@ class _DietaryReportsState extends State<DietaryReports> {
 
     // 如果没有给定查询范围，就查询今天
     queryDateRange ??= {
-      "startDate": DateFormat('yyyy-MM-dd').format(DateTime.now()),
-      "endDate": DateFormat('yyyy-MM-dd').format(DateTime.now()),
+      "startDate": DateFormat(constDateFormat).format(DateTime.now()),
+      "endDate": DateFormat(constDateFormat).format(DateTime.now()),
     };
 
     // 理论上是默认查询当日的，有选择其他日期则查询指定日期？？？还要是登录者这个用户编号的
     var temp = (await _dietaryHelper.queryDailyFoodItemListWithDetail(
+      userId: currentUserId,
       startDate: queryDateRange["startDate"],
       endDate: queryDateRange["endDate"],
       withDetail: true,

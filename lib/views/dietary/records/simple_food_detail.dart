@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:free_fitness/common/utils/tools.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
@@ -41,6 +43,9 @@ class SimpleFoodDetail extends StatefulWidget {
 
 class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
+  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
+  final box = GetStorage();
+  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
 
   final _formKey = GlobalKey<FormBuilderState>();
 
@@ -154,6 +159,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
     updatedMfi.foodIntakeSize = inputServingValue;
     updatedMfi.servingInfoId = nutrientsInfo.servingInfoId!;
     updatedMfi.mealCategory = inputMealtimeValue.enLabel;
+    updatedMfi.gmtModified = getCurrentDateTime();
 
     log("修改后的详情条目：$updatedMfi");
 
@@ -198,10 +204,8 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
       foodId: widget.foodItem.food.foodId!,
       servingInfoId: nutrientsInfo.servingInfoId!,
       foodIntakeSize: inputServingValue,
-      contributor: "马六",
-      gmtCreate: DateTime.now().toString(),
-      updateUser: null,
-      gmtModified: null,
+      userId: currentUserId,
+      gmtCreate: getCurrentDateTime(),
     );
 
     log("新增的详情条目：$temp");

@@ -1,9 +1,11 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
+import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../common/utils/tool_widgets.dart';
 import '../../../../models/dietary_state.dart';
@@ -31,6 +33,9 @@ class ReportPdfViewer extends StatefulWidget {
 
 class _ReportPdfViewerState extends State<ReportPdfViewer> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
+  // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
+  final box = GetStorage();
+  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
 
   /// 根据条件查询的日记条目数据(所有数据的来源，格式化成VO可以在指定函数中去做)
   List<DailyFoodItemWithFoodServing> dfiwfsList = [];
@@ -54,6 +59,7 @@ class _ReportPdfViewerState extends State<ReportPdfViewer> {
 
     // 理论上是默认查询当日的，有选择其他日期则查询指定日期？？？还要是登录者这个用户编号的
     var temp = (await _dietaryHelper.queryDailyFoodItemListWithDetail(
+      userId: currentUserId,
       startDate: widget.startDate,
       endDate: widget.endDate,
       withDetail: true,

@@ -185,7 +185,7 @@ class _ActionFollowPracticeWithTTSState
     } else {
       // 如果是计次，次数*单个标准动作耗时
       var temp1 = curAd.action.frequency ?? 1;
-      var temp2 = int.tryParse(curAd.exercise.standardDuration ?? "1") ?? 1;
+      var temp2 = curAd.exercise.standardDuration;
       times = temp1 * temp2;
     }
 
@@ -210,7 +210,7 @@ class _ActionFollowPracticeWithTTSState
     } else {
       // 如果是计次，次数*单个标准动作耗时
       var temp1 = curAd.action.frequency ?? 1;
-      var temp2 = int.tryParse(curAd.exercise.standardDuration ?? "1") ?? 1;
+      var temp2 = curAd.exercise.standardDuration;
       countString = "$temp1 x $temp2秒";
     }
 
@@ -1113,7 +1113,7 @@ class _ActionFollowPracticeWithTTSState
     ];
   }
 
-  // TODO 跟练完成时的弹窗示例(实际可能是跳到报告页面，并保持数据到数据库)
+  // 跟练完成时的弹窗(有再来一次和跳到报告页面，并保存数据到数据库)
   _showFinishedDialog() async {
     var endTime = DateTime.now();
     var tempTime =

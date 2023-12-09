@@ -174,15 +174,15 @@ class _IndexTimelineState extends State<IndexTimeline> {
         if (index == diaryList.length) {
           return buildLoader(isLoading);
         } else {
-          // 示意图可以有多个，就去第一张号了
+          // 示意图可以有多个，就去第一张好了
           var diaryItem = diaryList[index];
 
           // 创建时间(不使用最后修改时间是避免时间线显示出现时间不连续的尴尬)
-          // var createDate = DateFormat('yyyy-MM-dd').format(
+          // var createDate = DateFormat(constDateFormat).format(
           //   DateTime.parse(diaryItem.gmtCreate ?? '1970-01-01 00:00:00'),
           // );
 
-          var createTime = DateFormat('HH:mm:ss').format(
+          var createTime = DateFormat(constTimeFormat).format(
             DateTime.parse(diaryItem.gmtCreate ?? '1970-01-01 00:00:00'),
           );
           return TimelineTile(

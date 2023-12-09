@@ -5,8 +5,10 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:free_fitness/common/utils/tools.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../models/dietary_state.dart';
 import 'common_utils_for_food_modify.dart';
@@ -25,6 +27,10 @@ class DetailModifyFood extends StatefulWidget {
 
 class _DetailModifyFoodState extends State<DetailModifyFood> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
+// 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
+  final box = GetStorage();
+  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
+  String get currentUseName => box.read(LocalStorageKey.userName) ?? "";
 
 //  食物添加的表单key
   final _foodFormKey = GlobalKey<FormBuilderState>();
@@ -59,6 +65,7 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
         foodId: widget.food.foodId,
         brand: temp?["brand"],
         product: temp?["product"],
+        description: temp?["description"],
         tags: temp?["tags"],
         category: temp?["category"],
         photos: temp?["images"] != null
@@ -66,8 +73,8 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
                 .map((e) => e.path)
                 .toList()
                 .join(",")
-            : "",
-        contributor: '1', // 全局存放的用不编号？？？后续要改为int类型
+            : null,
+        contributor: currentUseName,
         gmtCreate: getCurrentDateTime(),
       );
 

@@ -194,7 +194,7 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
   List<BarChartGroupData> _showingGroups() => List.generate(7, (i) {
         // 查询map中存在的日期key是一周的周几，如果该weekday有数据，则构建条状图，否则就空的。
         for (String key in widget.fntMap.keys) {
-          int weekdayNumber = DateFormat('yyyy-MM-dd').parse(key).weekday;
+          int weekdayNumber = DateFormat(constDateFormat).parse(key).weekday;
 
           // 星期的数字从1-7,而索引是从0-6,所以比较时后者要加一
           if (weekdayNumber == i + 1) {

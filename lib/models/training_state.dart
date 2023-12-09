@@ -3,36 +3,36 @@
 /// --- 基础表
 class Exercise {
   int? exerciseId; // 自增的，可以不传
-  String exerciseCode, exerciseName, category, countingMode, gmtCreate;
+  String exerciseCode, exerciseName, category, countingMode;
   String? force, level, mechanic, equipment, instructions, ttsNotes;
-  String? primaryMuscles, secondaryMuscles, images, standardDuration;
-  // standardDuration 应该是整数或者小数的，但这里用的字符串，虽然都是下拉选择的可以转，但看着不太好
-  // int? standardDuration;
-  String? gmtModified, isCustom, contributor;
+  String? primaryMuscles, secondaryMuscles, images;
+  int standardDuration;
+  bool? isCustom;
+  String? contributor, gmtCreate, gmtModified;
 
   Exercise({
     this.exerciseId,
     required this.exerciseCode,
     required this.exerciseName,
-    required this.category,
-    required this.countingMode,
-    required this.gmtCreate,
     this.force,
     this.level,
     this.mechanic,
     this.equipment,
-    this.standardDuration,
+    required this.countingMode,
+    required this.standardDuration,
     this.instructions,
     this.ttsNotes,
+    required this.category,
     this.primaryMuscles,
     this.secondaryMuscles,
     this.images,
     this.isCustom,
     this.contributor,
+    this.gmtCreate,
     this.gmtModified,
   });
 
-  // 将一个 TxtState 转换成一个Map。键必须对应于数据库中的列名。
+  // 将一个 Exercise 转换成一个Map。键必须对应于数据库中的列名。
   Map<String, dynamic> toMap() {
     return {
       'exercise_id': exerciseId,
@@ -57,30 +57,30 @@ class Exercise {
     };
   }
 
-// 用于从数据库行映射到 ServingInfo 对象的 fromMap 方法
+// 用于从数据库行映射到 Exercise 对象的 fromMap 方法
   factory Exercise.fromMap(Map<String, dynamic> map) {
     return Exercise(
-      exerciseId: map['exercise_id'],
-      exerciseCode: map['exercise_code'],
-      exerciseName: map['exercise_name'],
-      force: map['force'],
-      level: map['level'],
-      mechanic: map['mechanic'],
-      equipment: map['equipment'],
-      countingMode: map['counting_mode'],
+      exerciseId: map['exercise_id'] as int?,
+      exerciseCode: map['exercise_code'] as String,
+      exerciseName: map['exercise_name'] as String,
+      force: map['force'] as String?,
+      level: map['level'] as String?,
+      mechanic: map['mechanic'] as String?,
+      equipment: map['equipment'] as String?,
+      countingMode: map['counting_mode'] as String,
       // ？？？明明sql语句设置了默认值，但是不传还是null
-      standardDuration: map['standard_duration'] ?? "1",
-      instructions: map['instructions'],
-      ttsNotes: map['tts_notes'],
-      category: map['category'],
-      primaryMuscles: map['primary_muscles'],
-      secondaryMuscles: map['secondary_muscles'],
-      images: map['images'],
+      standardDuration: map['standard_duration'] as int? ?? 1,
+      instructions: map['instructions'] as String?,
+      ttsNotes: map['tts_notes'] as String?,
+      category: map['category'] as String,
+      primaryMuscles: map['primary_muscles'] as String?,
+      secondaryMuscles: map['secondary_muscles'] as String?,
+      images: map['images'] as String?,
       // ？？？明明sql语句设置了默认值，但是不传还是null
-      isCustom: map['is_custom'] ?? 'true',
-      contributor: map['contributor'],
-      gmtCreate: map['gmt_create'],
-      gmtModified: map['gmt_modified'],
+      isCustom: map['is_custom'] as bool?,
+      contributor: map['contributor'] as String?,
+      gmtCreate: map['gmt_create'] as String?,
+      gmtModified: map['gmt_modified'] as String?,
     );
   }
 
@@ -96,19 +96,6 @@ class Exercise {
     is_custom: $isCustom, contributor: $contributor, gmt_create: $gmtCreate, gmt_modified: $gmtModified }
     ''';
   }
-}
-
-// 基础活动一些栏位的默认选项都具有label和value
-class ExerciseDefaultOption {
-  final String label;
-  final String? name;
-  final String value;
-
-  ExerciseDefaultOption({
-    required this.label,
-    this.name,
-    required this.value,
-  });
 }
 
 // 动作表的 model（Action、Group、Plan可能都和flutter的预设部件重名了，都加上Training前缀）
@@ -163,7 +150,7 @@ class TrainingAction {
 class TrainingGroup {
   int? groupId; // 自增的，可以不传
   String groupName, groupCategory, groupLevel;
-  int? restInterval, consumption, timeSpent;
+  int? consumption, timeSpent;
   String? description, contributor, gmtCreate, gmtModified;
 
   TrainingGroup({
@@ -171,12 +158,11 @@ class TrainingGroup {
     required this.groupName,
     required this.groupCategory,
     required this.groupLevel,
-    this.restInterval,
     this.consumption,
     this.timeSpent,
     this.description,
     this.contributor,
-    required this.gmtCreate,
+    this.gmtCreate,
     this.gmtModified,
   });
 
@@ -186,7 +172,6 @@ class TrainingGroup {
       'group_name': groupName,
       'group_category': groupCategory,
       'group_level': groupLevel,
-      'rest_interval': restInterval,
       'consumption': consumption,
       'time_spent': timeSpent,
       'description': description,
@@ -202,7 +187,6 @@ class TrainingGroup {
       groupName: map['group_name'] as String,
       groupCategory: map['group_category'] as String,
       groupLevel: map['group_level'] as String,
-      restInterval: map['rest_interval'] as int?,
       consumption: map['consumption'] as int?,
       timeSpent: map['time_spent'] as int?,
       description: map['description'] as String?,
@@ -217,7 +201,7 @@ class TrainingGroup {
     return '''
     TrainingGroup {
     group_id: $groupId, group_name: $groupName, group_category: $groupCategory, 
-    group_level: $groupLevel, rest_interval: $restInterval, consumption: $consumption, time_spent: $timeSpent, 
+    group_level: $groupLevel, consumption: $consumption, time_spent: $timeSpent, 
     description: $description, contributor: $contributor, gmt_create: $gmtCreate, gmt_modified: $gmtModified }
     ''';
   }
@@ -226,15 +210,15 @@ class TrainingGroup {
 class TrainingPlan {
   int? planId; // 自增的，可以不传
   int planPeriod;
-  String planCode, planName, planCategory;
-  String? planLevel, description, contributor, gmtCreate, gmtModified;
+  String planCode, planName, planCategory, planLevel;
+  String? description, contributor, gmtCreate, gmtModified;
 
   TrainingPlan({
     this.planId,
     required this.planCode,
     required this.planName,
     required this.planCategory,
-    this.planLevel,
+    required this.planLevel,
     required this.planPeriod,
     this.description,
     this.contributor,

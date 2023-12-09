@@ -62,9 +62,7 @@ class DBTrainingHelper {
       txn.execute(TrainingDdl.ddlForGroup);
       txn.execute(TrainingDdl.ddlForPlan);
       txn.execute(TrainingDdl.ddlForPlanHasGroup);
-      txn.execute(TrainingDdl.ddlForUser);
       txn.execute(TrainingDdl.ddlForTrainedLog);
-      txn.execute(TrainingDdl.ddlForWeightTrend);
     });
   }
 

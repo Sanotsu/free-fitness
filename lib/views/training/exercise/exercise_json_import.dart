@@ -2,15 +2,17 @@
 
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
-import 'dart:io';
+import 'package:get_storage/get_storage.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
 import '../../../models/custom_exercise.dart';
 import '../../../models/training_state.dart';
 
@@ -23,6 +25,10 @@ class ExerciseJsonImport extends StatefulWidget {
 
 class _ExerciseJsonImportState extends State<ExerciseJsonImport> {
   final DBTrainingHelper _trainingHelper = DBTrainingHelper();
+// 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
+  final box = GetStorage();
+  int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
+  String get currentUseName => box.read(LocalStorageKey.userName) ?? "";
 
   // 是否在解析json中或导入数据库中
   bool isLoading = false;
@@ -241,7 +247,7 @@ Ab_Roller.json:
         level: e.level,
         mechanic: e.mechanic,
         equipment: e.equipment,
-        standardDuration: e.standardDuration ?? "1",
+        standardDuration: int.tryParse(e.standardDuration ?? "1") ?? 1,
         instructions: e.instructions?.join(","),
         ttsNotes: e.ttsNotes,
         primaryMuscles: e.primaryMuscles?.join(","),
@@ -251,9 +257,9 @@ Ab_Roller.json:
         images:
             e.images?.map((e) => cusExerciseImagePerfix + e).toList().join(","),
         // 导入json都为true则可以读取相册中对应位置的图片
-        isCustom: e.isCustom ?? "true",
-        contributor: "用户导入",
-        gmtCreate: DateFormat.yMMMd().format(DateTime.now()),
+        isCustom: bool.tryParse(e.isCustom ?? 'true') ?? true,
+        contributor: currentUseName,
+        gmtCreate: getCurrentDateTime(),
       );
 
       try {

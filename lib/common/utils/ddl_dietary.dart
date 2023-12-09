@@ -13,14 +13,15 @@ class DietaryDdl {
 
   static const String ddlForFood = """
     CREATE TABLE IF NOT EXISTS $tableNameOfFood (
-      food_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-      brand TEXT NOT NULL,
-      product TEXT NOT NULL,
-      photos TEXT,
-      tags TEXT,
-      category TEXT,
+      food_id     INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT,
+      brand       TEXT      NOT NULL,
+      product     TEXT      NOT NULL,
+      description TEXT,
+      photos      TEXT,
+      tags        TEXT,
+      category    TEXT,
       contributor TEXT,
-      gmt_create TEXT,
+      gmt_create  TEXT,
       UNIQUE(brand,product)
     );
     """;
@@ -28,53 +29,52 @@ class DietaryDdl {
   // 2023-12-06 新增唯一检查，同一个食物、同一个单位、同一个数量的联合值是唯一的
   static const String ddlForServingInfo = """
     CREATE TABLE IF NOT EXISTS $tableNameOfServingInfo (
-      serving_info_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-      food_id INTEGER NOT NULL,
-      serving_size INTEGER NOT NULL,
-      serving_unit TEXT NOT NULL,
-      energy REAL NOT NULL,
-      protein REAL NOT NULL,
-      total_fat REAL NOT NULL,
-      saturated_fat REAL,
-      trans_fat REAL,
-      polyunsaturated_fat REAL,
-      monounsaturated_fat REAL,
-      cholesterol REAL,
-      total_carbohydrate REAL NOT NULL,
-      sugar REAL,
-      dietary_fiber REAL,
-      sodium REAL NOT NULL,
-      potassium REAL,
-      contributor TEXT,
-      gmt_create TEXT,
-      update_user TEXT,
-      gmt_modified TEXT,
+      serving_info_id       INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT,
+      food_id               INTEGER   NOT NULL,
+      serving_size          INTEGER   NOT NULL,
+      serving_unit          TEXT      NOT NULL,
+      energy                REAL      NOT NULL,
+      protein               REAL      NOT NULL,
+      total_fat             REAL      NOT NULL,
+      saturated_fat         REAL,
+      trans_fat             REAL,
+      polyunsaturated_fat   REAL,
+      monounsaturated_fat   REAL,
+      cholesterol           REAL,
+      total_carbohydrate    REAL NOT NULL,
+      sugar                 REAL,
+      dietary_fiber         REAL,
+      sodium                REAL NOT NULL,
+      potassium             REAL,
+      contributor           TEXT,
+      gmt_create            TEXT,
+      update_user           TEXT,
+      gmt_modified          TEXT,
       UNIQUE(food_id,serving_size,serving_unit)
     );
     """;
 
   static const String ddlForDailyFoodItem = """
     CREATE TABLE IF NOT EXISTS $tableNameOfDailyFoodItem (
-      daily_food_item_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-      date TEXT NOT NULL,
-      meal_category TEXT NOT NULL,
-      food_id INTEGER NOT NULL,
-      food_intake_size REAL NOT NULL,
-      serving_info_id INTEGER NOT NULL,
-      contributor TEXT,
-      gmt_create TEXT,
-      update_user TEXT,
-      gmt_modified TEXT
+      daily_food_item_id  INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT,
+      user_id             INTEGER   NOT NULL,
+      date                TEXT      NOT NULL,
+      meal_category       TEXT      NOT NULL,
+      food_id             INTEGER   NOT NULL,
+      food_intake_size    REAL      NOT NULL,
+      serving_info_id     INTEGER   NOT NULL,
+      gmt_create          TEXT,
+      gmt_modified        TEXT
     );
     """;
 
   static const String ddlForMealPhoto = """
     CREATE TABLE IF NOT EXISTS $tableNameOfMealPhoto (
       meal_photo_id   INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT,
+      user_id         INTEGER   NOT NULL,
       date            TEXT      NOT NULL,
       meal_category   TEXT      NOT NULL,
       photos          TEXT      NOT NULL,
-      user_id         INTEGER   NOT NULL,
       gmt_create      TEXT      NOT NULL
     );
     """;

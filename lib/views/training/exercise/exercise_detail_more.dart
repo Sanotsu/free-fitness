@@ -127,7 +127,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
                 "次要肌肉", _genMuscleOptionLabel(_item.secondaryMuscles)),
             _buildTableRow(
               "用户上传",
-              (_item.isCustom != null && _item.isCustom == 'true') ? '是' : '否',
+              (_item.isCustom != null && _item.isCustom == true) ? '是' : '否',
             ),
             _buildTableRow("技术要点", _item.instructions ?? ""),
             _buildTableRow("语言提示", _item.ttsNotes ?? ""),
@@ -174,7 +174,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
       _buildListTile("次要肌肉", _genMuscleOptionLabel(_item.secondaryMuscles)),
       _buildListTile(
         "用户上传",
-        (_item.isCustom != null && _item.isCustom == 'true') ? '是' : '否',
+        (_item.isCustom != null && _item.isCustom == true) ? '是' : '否',
       ),
       _buildListTile("技术要点", _item.instructions ?? ""),
       _buildListTile("语言提示", _item.ttsNotes ?? ""),
@@ -254,8 +254,8 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
           cusFormBuilerTextField(
             "standard_duration",
             labelText: '标准动作耗时',
-            initialValue:
-                _getCnLabel(_item.standardDuration, standardDurationOptions),
+            initialValue: _getCnLabel(
+                _item.standardDuration.toString(), standardDurationOptions),
             isReadOnly: true,
           ),
 

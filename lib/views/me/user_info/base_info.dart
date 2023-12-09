@@ -154,7 +154,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
       if (selectedDate != null) {
         setState(() {
           // 在这里更新用户的出生年月
-          user.dateOfBirth = DateFormat('yyyy-MM-dd').format(selectedDate);
+          user.dateOfBirth = DateFormat(constDateFormat).format(selectedDate);
         });
 
         await _userHelper.updateUser(user);

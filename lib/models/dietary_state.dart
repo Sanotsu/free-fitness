@@ -4,12 +4,13 @@
 class Food {
   int? foodId; // 自增的，可以不传
   String brand, product;
-  String? photos, tags, category, contributor, gmtCreate;
+  String? description, photos, tags, category, contributor, gmtCreate;
 
   Food({
     this.foodId,
     required this.brand,
     required this.product,
+    this.description,
     this.photos,
     this.tags,
     this.category,
@@ -22,6 +23,7 @@ class Food {
       'food_id': foodId,
       'brand': brand,
       'product': product,
+      'description': description,
       'photos': photos,
       'tags': tags,
       'category': category,
@@ -37,6 +39,7 @@ class Food {
       brand: map['brand'] as String,
       product: map['product'] as String,
       photos: map['photos'] as String?,
+      description: map['description'] as String?,
       tags: map['tags'] as String?,
       category: map['category'] as String?,
       contributor: map['contributor'] as String?,
@@ -48,7 +51,7 @@ class Food {
   String toString() {
     return '''
     Food{
-    food_id: $foodId, brand: $brand, product: $product, photos: $photos, tags: $tags, 
+    food_id: $foodId, brand: $brand, product: $product,description:$description, photos: $photos, tags: $tags, 
     category: $category, contributor: $contributor, gmt_create: $gmtCreate }
     ''';
   }
@@ -186,34 +189,32 @@ class ServingInfo {
 class DailyFoodItem {
   int? dailyFoodItemId; // 自增的，可以不传(如果设为必要的栏位再给默认值，新增时会被默认值替换数据库设置的自增导致无法插入)
   String date, mealCategory;
-  int foodId, servingInfoId;
+  int userId, foodId, servingInfoId;
   double foodIntakeSize;
-  String? contributor, gmtCreate, updateUser, gmtModified;
+  String? gmtCreate, gmtModified;
 
   DailyFoodItem({
     this.dailyFoodItemId,
+    required this.userId,
     required this.date,
     required this.mealCategory,
+    required this.foodIntakeSize,
     required this.foodId,
     required this.servingInfoId,
-    required this.foodIntakeSize,
-    this.contributor,
     this.gmtCreate,
-    this.updateUser,
     this.gmtModified,
   });
 
   Map<String, dynamic> toMap() {
     return {
       "daily_food_item_id": dailyFoodItemId,
+      "user_id": userId,
       "date": date,
       "meal_category": mealCategory,
-      "food_id": foodId,
       "food_intake_size": foodIntakeSize,
+      "food_id": foodId,
       "serving_info_id": servingInfoId,
-      "contributor": contributor,
       "gmt_create": gmtCreate,
-      "update_user": updateUser,
       "gmt_modified": gmtModified,
     };
   }
@@ -222,14 +223,13 @@ class DailyFoodItem {
   factory DailyFoodItem.fromMap(Map<String, dynamic> map) {
     return DailyFoodItem(
       dailyFoodItemId: map['daily_food_item_id'] as int?,
+      userId: map['user_id'] as int,
       date: map['date'] as String,
       mealCategory: map['meal_category'] as String,
-      foodId: map['food_id'] as int,
       foodIntakeSize: map['food_intake_size'] as double,
+      foodId: map['food_id'] as int,
       servingInfoId: map['serving_info_id'] as int,
-      contributor: map['contributor'] as String?,
       gmtCreate: map['gmt_create'] as String?,
-      updateUser: map['update_user'] as String?,
       gmtModified: map['gmt_modified'] as String?,
     );
   }
@@ -240,7 +240,7 @@ class DailyFoodItem {
     DailyFoodItem {  
       "daily_food_item_id": $dailyFoodItemId,"date": $date,"meal_category": $mealCategory,
       "food_id": $foodId,"food_intake_size": $foodIntakeSize, serving_info_id:$servingInfoId,
-      "contributor": $contributor,"gmt_create": $gmtCreate,"gmt_modified": $gmtModified
+      "user_id": $userId,"gmt_create": $gmtCreate,"gmt_modified": $gmtModified
     }
     ''';
   }
@@ -254,20 +254,20 @@ class MealPhoto {
 
   MealPhoto({
     this.mealPhotoId,
+    required this.userId,
     required this.date,
     required this.mealCategory,
     required this.photos, // 一次一餐可以传多个图片；如果照片为空，相当于删除整条记录
     required this.gmtCreate,
-    required this.userId,
   });
 
   Map<String, dynamic> toMap() {
     return {
       "meal_photo_id": mealPhotoId,
+      "user_id": userId,
       "date": date,
       "meal_category": mealCategory,
       "photos": photos,
-      "user_id": userId,
       "gmt_create": gmtCreate,
     };
   }
@@ -276,10 +276,10 @@ class MealPhoto {
   factory MealPhoto.fromMap(Map<String, dynamic> map) {
     return MealPhoto(
       mealPhotoId: map['meal_photo_id'] as int?,
+      userId: map['user_id'] as int,
       date: map['date'] as String,
       mealCategory: map['meal_category'] as String,
       photos: map['photos'] as String,
-      userId: map['user_id'] as int,
       gmtCreate: map['gmt_create'] as String,
     );
   }
@@ -288,8 +288,9 @@ class MealPhoto {
   String toString() {
     return '''
     MealPhoto{
-      mealPhotoId: $mealPhotoId, date: $date, mealCategory: $mealCategory, 
-      photos: $photos, userId: $userId, gmt_create: $gmtCreate }
+      mealPhotoId: $mealPhotoId,userId: $userId, date: $date, mealCategory: $mealCategory, 
+      photos: $photos,  gmt_create: $gmtCreate 
+    }
     ''';
   }
 }
@@ -333,60 +334,6 @@ class DailyFoodItemWithFoodServing {
       "dailyFoodItem": $dailyFoodItem,
       "food": $food,
       "servingInfo": $servingInfo,
-    }
-    ''';
-  }
-}
-
-// 在饮食日记报告分析时，需要每种营养素的值或者累加值信息，这些属性仅用于显示需要
-class FoodNutrientVO {
-  double energy, calorie, protein, totalFat, totalCarbohydrate, sodium;
-  double? saturatedFat, transFat, polyunsaturatedFat, monounsaturatedFat;
-  double? sugar, dietaryFiber, cholesterol, potassium;
-  double? breakfastColories, lunchColories, dinnerColories, otherColories;
-
-  FoodNutrientVO({
-    required this.energy,
-    required this.calorie,
-    required this.protein,
-    required this.totalFat,
-    this.saturatedFat,
-    this.transFat,
-    this.polyunsaturatedFat,
-    this.monounsaturatedFat,
-    required this.totalCarbohydrate,
-    this.sugar,
-    this.dietaryFiber,
-    required this.sodium,
-    this.cholesterol,
-    this.potassium,
-    this.breakfastColories,
-    this.lunchColories,
-    this.dinnerColories,
-    this.otherColories,
-  });
-
-// 初始化方法，返回所有属性为0的实例
-  static FoodNutrientVO initWithZero() {
-    return FoodNutrientVO(
-      energy: 0,
-      calorie: 0,
-      protein: 0,
-      totalFat: 0,
-      totalCarbohydrate: 0,
-      sodium: 0,
-    );
-  }
-
-// 因为是VO，暂时可能不需要tomap或者frommap
-  @override
-  String toString() {
-    return '''
-    FoodNutrientVO{
-      "energy": $energy, "calorie": $calorie, "protein": $protein,  "sodium": $sodium, "totalFat": $totalFat,
-      "saturatedFat": $saturatedFat, "transFat": $transFat, "polyunsaturatedFat": $polyunsaturatedFat, 
-      "monounsaturatedFat": $monounsaturatedFat, "totalCarbohydrate": $totalCarbohydrate, 
-      "sugar": $sugar, "dietaryFiber": $dietaryFiber,"cholesterol": $cholesterol, "potassium": $potassium, 
     }
     ''';
   }

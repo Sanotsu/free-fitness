@@ -26,6 +26,7 @@ final DBUserHelper _userHelper = DBUserHelper();
 // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
 final box = GetStorage();
 int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
+String get currentUseName => box.read(LocalStorageKey.userName) ?? "";
 
 ///
 /// ---------- 饮食模块相关--------------
@@ -44,9 +45,8 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
       generateRandomString(1, 8)
     ].join(","),
     category: generateRandomString(5, 10),
-    // 2023-12-05 这里是userId，每个用户只能查询到自己的。后续改为int
-    contributor: Random().nextInt(4).toString(),
-    gmtCreate: DateFormat.yMMMd().format(DateTime.now()),
+    contributor: currentUseName,
+    gmtCreate: getCurrentDateTime(),
   );
 
   // ？？？注意，业务中好像有有订好是100g,100ml的逻辑
@@ -85,6 +85,8 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
     sodium: sodium,
     potassium: potassium,
     cholesterol: cholesterol,
+    contributor: currentUseName,
+    gmtCreate: getCurrentDateTime(),
   );
   // 输入标准单份营养素
   var dserving1 = ServingInfo(
@@ -105,6 +107,8 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
     sodium: sodium / 100,
     potassium: potassium / 100,
     cholesterol: cholesterol / 100,
+    contributor: currentUseName,
+    gmtCreate: getCurrentDateTime(),
   );
 
   // 自定义单份
@@ -125,6 +129,8 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
     sodium: Random().nextDouble() * 5000,
     potassium: Random().nextDouble() * 5000,
     cholesterol: Random().nextDouble() * 5000,
+    contributor: currentUseName,
+    gmtCreate: getCurrentDateTime(),
   );
 
   var rst = await _dietaryHelper.insertFoodWithServingInfoList(
@@ -194,8 +200,8 @@ insertDailyLogDataDemo(
       foodIntakeSize: Random().nextDouble() * 100,
       // contributor: "随机数据测试插入",
       // 2023-12-05 这里是userId，每个用户只能查询到自己的。后续改为int
-      contributor: Random().nextInt(4).toString(),
-      gmtCreate: DateTime.now().toString(),
+      userId: currentUserId,
+      gmtCreate: getCurrentDateTime(),
     );
     list.add(temp);
   }
@@ -237,7 +243,8 @@ Future<int> insertOneRandomExercise({String? countingMode}) async {
     instructions: generateRandomString(300, 500),
     primaryMuscles:
         musclesOptions[Random().nextInt(musclesOptions.length)].value,
-    gmtCreate: DateFormat.yMMMd().format(DateTime.now()),
+    gmtCreate: getCurrentDateTime(),
+    standardDuration: 1,
   );
 
   var rst = await _trainingHelper.insertExercise(exercise);
@@ -256,11 +263,10 @@ Future<int> _insertOneRandomGroup() async {
         groupCategoryOptions[Random().nextInt(groupCategoryOptions.length)]
             .value,
     groupLevel: levelOptions[Random().nextInt(levelOptions.length)].value,
-    restInterval: Random().nextInt(50),
     consumption: Random().nextInt(1000),
     timeSpent: Random().nextInt(100),
     description: generateRandomString(50, 500),
-    gmtCreate: DateFormat.yMMMd().format(DateTime.now()),
+    gmtCreate: getCurrentDateTime(),
   );
 
   var rst = await _trainingHelper.insertTrainingGroup(group);
@@ -285,7 +291,7 @@ Future<List<int>> _insertOneRandomPlan() async {
     planLevel: levelOptions[Random().nextInt(levelOptions.length)].value,
     planPeriod: planPeriod,
     description: generateRandomString(50, 500),
-    gmtCreate: DateFormat.yMMMd().format(DateTime.now()),
+    gmtCreate: getCurrentDateTime(),
   );
 
   var planId = await _trainingHelper.insertTrainingPlan(plan);
@@ -368,7 +374,7 @@ insertTrainingLogDemo({int? size = 10}) async {
     planId: 1,
     dayNumber: 2,
     // 起止时间就测试插入时的1个小时
-    trainedStartTime: DateFormat('yyyy-MM-dd HH:mm:ss')
+    trainedStartTime: DateFormat(constDatetimeFormat)
         .format(DateTime.now().add(const Duration(hours: -1))),
     trainedEndTime: getCurrentDateTime(),
     // 单位都是秒
@@ -386,9 +392,9 @@ insertTrainingLogDemo({int? size = 10}) async {
     // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
     groupId: 1,
     // 起止时间就测试插入时的1个小时
-    trainedStartTime: DateFormat('yyyy-MM-dd HH:mm:ss')
+    trainedStartTime: DateFormat(constDatetimeFormat)
         .format(DateTime.now().add(const Duration(hours: -2))),
-    trainedEndTime: DateFormat('yyyy-MM-dd HH:mm:ss')
+    trainedEndTime: DateFormat(constDatetimeFormat)
         .format(DateTime.now().add(const Duration(hours: -1))),
     // 单位都是秒
     trainedDuration: 30 * 60, // 实际训练时间
@@ -400,16 +406,16 @@ insertTrainingLogDemo({int? size = 10}) async {
 
   // 前一天的日志 计划中的某一天
   var tl3 = TrainedLog(
-    trainedDate: DateFormat('yyyy-MM-dd HH:mm:ss')
+    trainedDate: DateFormat(constDatetimeFormat)
         .format(DateTime.now().add(const Duration(days: -1))),
     userId: currentUserId,
     // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
     planId: 1,
     dayNumber: 1,
     // 起止时间就测试插入时的1个小时
-    trainedStartTime: DateFormat('yyyy-MM-dd HH:mm:ss')
+    trainedStartTime: DateFormat(constDatetimeFormat)
         .format(DateTime.now().add(const Duration(days: -1, hours: -1))),
-    trainedEndTime: DateFormat('yyyy-MM-dd HH:mm:ss')
+    trainedEndTime: DateFormat(constDatetimeFormat)
         .format(DateTime.now().add(const Duration(days: -1))),
     // 单位都是秒
     trainedDuration: 40 * 60, // 实际训练时间
@@ -501,7 +507,7 @@ insertOneQuillDemo() async {
     tags: tempTags.join(","),
     category: tempCates.join(","),
     mood: diaryMoodList[Random().nextInt(diaryMoodList.length)].cnLabel,
-    userId: currentUserId, // 实际用户的编号
+    userId: currentUserId,
     gmtCreate: getCurrentDateTime(),
   );
 

@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import '../../common/global/constants.dart';
 import '../../common/utils/db_diary_helper.dart';
 import '../../common/utils/tool_widgets.dart';
 import '../../common/utils/tools.dart';
@@ -86,7 +87,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
   // 获取指定某一天的手记列表
   List<Diary> _getDiarysForADay(day) {
     return diaryList
-        .where((e) => e.date == DateFormat('yyyy-MM-dd').format(day))
+        .where((e) => e.date == DateFormat(constDateFormat).format(day))
         .toList();
   }
 

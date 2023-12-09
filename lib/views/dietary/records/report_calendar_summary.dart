@@ -8,7 +8,6 @@ import 'package:table_calendar/table_calendar.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
-import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
 import '../../../models/dietary_state.dart';
@@ -29,7 +28,7 @@ class ReportCalendarSummary extends StatefulWidget {
 class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
   // 初始化或查询时加载饮食日记数据，没加载完就都是加载中
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
-  final DBUserHelper _userHelper = DBUserHelper();
+
   // 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
   final box = GetStorage();
   int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
@@ -71,15 +70,13 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
       isLoading = true;
     });
 
-    // 查询用户目标值
-    var tempUser = await _userHelper.queryUser(userId: currentUserId);
     // 当前月的起止日期
     var [startDate, endDate] = getMonthStartEndDateString(datetime);
 
     // 理论上是默认查询当日的，有选择其他日期则查询指定日期
     List<DailyFoodItemWithFoodServing> temp =
         (await _dietaryHelper.queryDailyFoodItemListWithDetail(
-      userId: tempUser?.userId ?? 1,
+      userId: currentUserId,
       startDate: startDate,
       endDate: endDate,
       withDetail: true,
@@ -100,8 +97,8 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
   // 获取指定某一天的饮食条目列表
   List<DailyFoodItemWithFoodServing> _getDialyItemsForADay(day) {
     return dfiwfsList
-        .where(
-            (e) => e.dailyFoodItem.date == DateFormat('yyyy-MM-dd').format(day))
+        .where((e) =>
+            e.dailyFoodItem.date == DateFormat(constDateFormat).format(day))
         .toList();
   }
 

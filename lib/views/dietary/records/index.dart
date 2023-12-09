@@ -45,7 +45,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   // 日期选择器中选择的日期，用于构建初始值，有选择后保留选择的
   DateTime selectedDate = DateTime.now();
   // 用户选择日期格式化后的字符串，传入子组件或者查询日志条目的参数
-  String selectedDateStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  String selectedDateStr = DateFormat(constDateFormat).format(DateTime.now());
   // 在标题处显示当前展示的日期信息（日期选择器之后有一点自定义处理）
   String showedDateStr = "今天";
 
@@ -1065,7 +1065,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
       setState(() {
         selectedDate = picked;
-        selectedDateStr = DateFormat('yyyy-MM-dd').format(picked);
+        selectedDateStr = DateFormat(constDateFormat).format(picked);
         showedDateStr = formatDate;
         _queryDailyFoodItemList();
       });

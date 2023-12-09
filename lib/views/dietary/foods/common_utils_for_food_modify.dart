@@ -5,11 +5,17 @@ import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
 import '../../../models/dietary_state.dart';
+
+// 获取缓存中的用户编号(理论上进入app主页之后，就一定有一个默认的用户编号了)
+final box = GetStorage();
+int get currentUserId => box.read(LocalStorageKey.userId) ?? 1;
+String get currentUseName => box.read(LocalStorageKey.userName) ?? "";
 
 ///
 /// 食物的新增和修改为了逻辑方便使用两个页面，但其中很多内容是重复的，所以集中放在这里。
@@ -172,6 +178,7 @@ buildFoodModifyFormColumns({List<PlatformFile>? initImages}) {
         FormBuilderValidators.required(errorText: '名称不可为空'),
       ]),
     ),
+    cusFormBuilerTextField("description", maxLines: 4, labelText: '简述'),
     cusFormBuilerTextField("tags", labelText: '标签'),
     cusFormBuilerTextField("category", labelText: '分类'),
 
@@ -263,8 +270,8 @@ List<ServingInfo> parseServingInfo(
       sodium: props['sodium'] ?? 0.0,
       cholesterol: props['cholesterol'],
       potassium: props['potassium'],
-      contributor: "<预设登录用户>",
-      gmtCreate: DateTime.now().toString(),
+      contributor: currentUseName,
+      gmtCreate: getCurrentDateTime(),
     );
   }
 

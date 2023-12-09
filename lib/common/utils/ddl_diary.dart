@@ -8,17 +8,17 @@ class DiaryDdl {
 
   static const String ddlForDiary = """
     CREATE TABLE IF NOT EXISTS $tableNameOfDiary (
-      diary_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-      date TEXT NOT NULL,
-      title TEXT NOT NULL,
-      content TEXT NOT NULL,
-      tags TEXT,
-      category TEXT,
-      mood TEXT,
-      photos TEXT,
-      userId INTEGER,
-      gmt_create TEXT,
-      gmt_modified TEXT
+      diary_id      INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT,
+      date          TEXT      NOT NULL,
+      title         TEXT      NOT NULL,
+      content       TEXT      NOT NULL,
+      tags          TEXT,
+      category      TEXT,
+      mood          TEXT,
+      photos        TEXT,
+      userId        INTEGER,
+      gmt_create    TEXT,
+      gmt_modified  TEXT
     );
     """;
 }

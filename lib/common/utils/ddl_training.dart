@@ -12,7 +12,6 @@ class TrainingDdl {
   // db名称
   static String databaseName = "embedded_workout.db";
 
-  /// db name、table names
   // 创建的表名加上项目前缀，避免出现关键字问题
   // 基础活动基础表
   static const tableNameOfExercise = 'ff_exercise';
@@ -20,100 +19,85 @@ class TrainingDdl {
   static const tableNameOfAction = 'ff_action';
   // 动作组表
   static const tableNameOfGroup = 'ff_group';
-
   // 训练计划基础表
   static const tableNameOfPlan = 'ff_plan';
   // 训练计划-动作组关系表
   static const tableNameOfPlanHasGroup = 'ff_plan_has_group';
-  // 用户基础表
-  static const tableNameOfUser = 'ff_user';
+
   // 训练日志记录表
   static const tableNameOfTrainedLog = 'ff_trained_log';
-  // 体重趋势记录表
-  static const tableNameOfWeightTrend = 'ff_weight_trend';
 
   static const String ddlForExercise = """
     CREATE TABLE $tableNameOfExercise (
-      exercise_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-      exercise_code TEXT UNIQUE NOT NULL,
-      exercise_name TEXT UNIQUE NOT NULL,
-      force TEXT,
-      level TEXT,
-      mechanic TEXT,
-      equipment TEXT,
-      counting_mode TEXT NOT NULL,
-      standard_duration TEXT DEFAULT '1',
-      instructions TEXT,
-      tts_notes TEXT,
-      category TEXT NOT NULL,
-      primary_muscles TEXT,
-      secondary_muscles TEXT,
-      images TEXT,
-      is_custom INTEGER DEFAULT 0,
-      contributor TEXT,
-      gmt_create TEXT NOT NULL,
-      gmt_modified TEXT 
+      exercise_id         INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+      exercise_code       TEXT      UNIQUE NOT NULL,
+      exercise_name       TEXT      UNIQUE NOT NULL,
+      force               TEXT,
+      level               TEXT,
+      mechanic            TEXT,
+      equipment           TEXT,
+      counting_mode       TEXT      NOT NULL,
+      standard_duration   INTEGER   NOT NULL  DEFAULT 1,
+      instructions        TEXT,
+      tts_notes           TEXT,
+      category            TEXT      NOT NULL,
+      primary_muscles     TEXT,
+      secondary_muscles   TEXT,
+      images              TEXT,
+      is_custom           INTEGER   DEFAULT 0,
+      contributor         TEXT,
+      gmt_create          TEXT,
+      gmt_modified        TEXT 
     );
     """;
 
   static const String ddlForAction = """
     CREATE TABLE $tableNameOfAction (
-      action_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-      group_id INTEGER  NOT NULL,
-      exercise_id INTEGER NOT NULL,
-      frequency INTEGER,
-      duration  INTEGER,
-      equipment_weight REAL
+      action_id         INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+      group_id          INTEGER   NOT NULL,
+      exercise_id       INTEGER   NOT NULL,
+      frequency         INTEGER,
+      duration          INTEGER,
+      equipment_weight  REAL
     );
     """;
 
   static const String ddlForGroup = """
     CREATE TABLE $tableNameOfGroup (
-      group_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-      group_name TEXT UNIQUE NOT NULL,
-      group_category TEXT NOT NULL,
-      group_level TEXT NOT NULL,
-      rest_interval INTEGER,
-      consumption INTEGER,
-      time_spent INTEGER,
-      description TEXT,
-      contributor TEXT,
-      gmt_create TEXT,
-      gmt_modified TEXT
+      group_id        INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+      group_name      TEXT      UNIQUE NOT NULL,
+      group_category  TEXT      NOT NULL,
+      group_level     TEXT      NOT NULL,
+      consumption     INTEGER,
+      time_spent      INTEGER,
+      description     TEXT,
+      contributor     TEXT,
+      gmt_create      TEXT,
+      gmt_modified    TEXT
     );
     """;
 
   static const String ddlForPlan = """
     CREATE TABLE $tableNameOfPlan (
-      plan_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-      plan_code TEXT UNIQUE NOT NULL,
-      plan_name TEXT UNIQUE NOT NULL,
-      plan_category TEXT,
-      plan_level  TEXT,
-      plan_period  INTEGER,
-      description TEXT,
-      contributor TEXT,
-      gmt_create  TEXT,
-      gmt_modified  TEXT
+      plan_id         INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+      plan_code       TEXT      UNIQUE NOT NULL,
+      plan_name       TEXT      UNIQUE NOT NULL,
+      plan_category   TEXT      NOT NULL,
+      plan_level      TEXT      NOT NULL,
+      plan_period     INTEGER   NOT NULL,
+      description     TEXT,
+      contributor     TEXT,
+      gmt_create      TEXT,
+      gmt_modified    TEXT
     );
     """;
 
   static const String ddlForPlanHasGroup = """
     CREATE TABLE $tableNameOfPlanHasGroup  (
-      plan_has_group_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-      plan_id INTEGER,
-      group_id INTEGER,
-      day_number INTEGER
-    );
-    """;
-
-  static const String ddlForUser = """
-    CREATE TABLE $tableNameOfUser (
-      user_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-      user_code TEXT,
-      user_name TEXT,
-      height  REAL,
-      height_unit  TEXT
+      plan_has_group_id   INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+      plan_id             INTEGER   NOT NULL,
+      group_id            INTEGER   NOT NULL,
+      day_number          INTEGER   NOT NULL
     );
     """;
 
@@ -130,19 +114,6 @@ class TrainingDdl {
       trained_duration    INTEGER   NOT NULL,
       totol_paused_time   INTEGER   NOT NULL,
       total_rest_time     INTEGER   NOT NULL
-    );
-    """;
-
-  static const String ddlForWeightTrend = """
-    CREATE TABLE $tableNameOfWeightTrend (
-      weight_trend_id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-      user_id INTEGER,
-      measured_date TEXT,
-      weight  REAL,
-      weight_unit TEXT,
-      height  REAL,
-      height_unit  TEXT,
-      bmi_value REAL
     );
     """;
 }

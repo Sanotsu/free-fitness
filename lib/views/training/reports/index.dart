@@ -105,7 +105,7 @@ class _TrainingReportsState extends State<TrainingReports> {
     return trainedLogList
         .where((e) =>
             e.log.trainedDate.split(" ")[0] ==
-            DateFormat('yyyy-MM-dd').format(day))
+            DateFormat(constDateFormat).format(day))
         .toList();
   }
 
