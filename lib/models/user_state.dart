@@ -7,7 +7,7 @@ class User {
   int? userId; // 自增的，可以不传
   String userName;
   String? userCode, gender, description, password, dateOfBirth;
-  String? heightUnit, weightUnit;
+  String? heightUnit, weightUnit, avatar;
   int? rdaGoal, actionRestTime;
   double? height, currentWeight, targetWeight, proteinGoal, fatGoal, choGoal;
 
@@ -16,6 +16,7 @@ class User {
     required this.userName,
     this.userCode,
     this.gender,
+    this.avatar,
     this.password,
     this.description,
     this.dateOfBirth,
@@ -37,6 +38,7 @@ class User {
       "user_name": userName,
       "user_code": userCode,
       "gender": gender,
+      "avatar": avatar,
       "password": password,
       "description": description,
       "date_of_birth": dateOfBirth,
@@ -60,6 +62,7 @@ class User {
       "user_name": userName,
       "user_code": userCode,
       "gender": gender,
+      "avatar": avatar,
       "password": password,
       "description": description,
       "date_of_birth": DateTime.tryParse(dateOfBirth ?? "1970-01-01"),
@@ -83,6 +86,7 @@ class User {
       userName: map['user_name'] as String,
       userCode: map['user_code'] as String?,
       gender: map['gender'] as String?,
+      avatar: map['avatar'] as String?,
       password: map['password'] as String?,
       description: map['description'] as String?,
       dateOfBirth: map['date_of_birth'] as String?,
@@ -103,7 +107,7 @@ class User {
   String toString() {
     return '''
     User{
-      userId: $userId, userName: $userName, userCode: $userCode, gender: $gender,password: $password,
+      userId: $userId, userName: $userName, userCode: $userCode, gender: $gender,avatar:$avatar,password: $password,
       description:$description, dateOfBirth: $dateOfBirth, height: $height,  heightUnit: $heightUnit, 
       currentWeight: $currentWeight, targetWeight: $targetWeight, targetWeight: $targetWeight, 
       rdaGoal: $rdaGoal, proteinGoal: $proteinGoal, fatGoal: $fatGoal,choGoal: $choGoal,

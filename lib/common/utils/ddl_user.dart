@@ -17,6 +17,7 @@ class UserDdl {
       user_name         TEXT      NOT NULL,
       user_code         TEXT,
       gender            TEXT,
+      avatar            TEXT,
       password          TEXT,
       description       TEXT,
       date_of_birth     TEXT,

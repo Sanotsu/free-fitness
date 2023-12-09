@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:free_fitness/common/global/constants.dart';
 
 import '../../../common/utils/db_diary_helper.dart';
 import '../../../common/utils/db_dietary_helper.dart';
@@ -86,6 +87,7 @@ class _FeatureMockDemoState extends State<FeatureMockDemo> {
                   ElevatedButton(
                     onPressed: () {
                       _userHelper.deleteDB();
+                      CacheUser.clearUserId();
                       _showSimpleDialog(context, "已删除 user db");
                     },
                     child: const Text("delete user db"),

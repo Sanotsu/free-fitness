@@ -521,6 +521,11 @@ class DBDietaryHelper {
     String? startDate,
     String? endDate,
     String? mealCategory,
+    // 默认查所有，相册模块时可能一次性查询10条，上滑加载更多
+    int? page,
+    int? pageSize,
+    // 还可以指定日期排序
+    String? dateSort,
   }) async {
     Database db = await database;
 
@@ -545,10 +550,19 @@ class DBDietaryHelper {
       whereArgs.add(endDate);
     }
 
+    var sort = dateSort?.toLowerCase();
+    if (dateSort != null) {
+      // 如果有传入创建时间排序，不是传的降序一律升序
+      sort = dateSort.toLowerCase() == 'desc' ? 'DESC' : 'ASC';
+    }
+
     final mpRows = await db.query(
       DietaryDdl.tableNameOfMealPhoto,
       where: where.join(' AND '),
       whereArgs: whereArgs,
+      limit: pageSize,
+      offset: (page != null && pageSize != null) ? (page - 1) * pageSize : null,
+      orderBy: sort != null ? 'date $sort' : null,
     );
 
     return mpRows.map((row) => MealPhoto.fromMap(row)).toList();

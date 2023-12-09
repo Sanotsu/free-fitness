@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/dietary_state.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
@@ -118,6 +119,29 @@ class _DietaryFoodsState extends State<DietaryFoods> {
     return data;
   }
 
+  // 进入json文件导入前，先获取权限
+  Future<void> clickFoodImport() async {
+    final status = await Permission.storage.request();
+
+    // 用户授权了访问内部存储权限，可以跳转到导入
+    if (!mounted) return;
+    if (status.isGranted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const FoodJsonImport()),
+      ).then((value) {
+        // 从导入页面返回，总是刷新当前页面数据
+        setState(() {
+          foodItems.clear();
+          currentPage = 1;
+        });
+        _loadFoodData();
+      });
+    } else {
+      showSnackMessage(context, "用户已禁止访问内部存储,无法进行json文件导入。");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -157,20 +181,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
           // 导入
           IconButton(
             icon: const Icon(Icons.import_export),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const FoodJsonImport()),
-              ).then((value) {
-                // 从导入页面返回，总是刷新当前页面数据
-                // ？？？直接返回就不用？还是根据返回值来刷新？
-                setState(() {
-                  foodItems.clear();
-                  currentPage = 1;
-                });
-                _loadFoodData();
-              });
-            },
+            onPressed: clickFoodImport,
           ),
           // 新增
           Row(
@@ -179,7 +190,8 @@ class _DietaryFoodsState extends State<DietaryFoods> {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const AddfoodWithServing()),
+                    MaterialPageRoute(
+                        builder: (context) => const AddfoodWithServing()),
                   ).then((value) {
                     // 不管是否新增成功，这里都重新加载；因为没有清空查询条件，所以新增的食物关键字不包含查询条件中，不会显示
                     if (value != null) {

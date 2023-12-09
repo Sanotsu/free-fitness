@@ -70,6 +70,10 @@ class CacheUser {
     await box.write(LocalStorageKey.userId, newUserId);
   }
 
+  static void clearUserId() async {
+    await box.write(LocalStorageKey.userId, null);
+  }
+
   static void updateUserName(String newUserName) async {
     userName = newUserName;
     await box.write(LocalStorageKey.userName, newUserName);

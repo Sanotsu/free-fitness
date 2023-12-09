@@ -85,6 +85,8 @@ dependencies:
   # 简单的键值对存储，可以用来存用户基本信息:支持存储的类型 String, int, double, Map and List
   # 不使用shared_preferences 是因为它不能保证一定存储到硬盘
   get_storage: ^2.1.1
+  # 从相册选择图片或者拍照片
+  image_picker: ^1.0.4
   
 
 dev_dependencies:
