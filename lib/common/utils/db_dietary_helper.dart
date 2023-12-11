@@ -81,7 +81,7 @@ class DBDietaryHelper {
   }
 
   // 删除sqlite的db文件（初始化数据库操作中那个path的值）
-  void deleteDB() async {
+  Future<void> deleteDB() async {
     print("开始删除內嵌的 sqlite Dietary db文件，db文件地址：$dietaryDbFilePath");
 
     // 先删除，再重置，避免仍然存在其他线程在访问数据库，从而导致删除失败
@@ -267,6 +267,15 @@ class DBDietaryHelper {
     };
   }
 
+  // 数据库备份全量导入时每个文件夹单独导出，需要用到
+  Future<List<Object?>> insertFoodList(List<Food> foods) async {
+    var batch = (await database).batch();
+    for (var item in foods) {
+      batch.insert(DietaryDdl.tableNameOfFood, item.toMap());
+    }
+    return batch.commit();
+  }
+
   Future<void> updateFoodWithServingInfo(
       Food food, ServingInfo servingInfo) async {
     final db = await database;
@@ -316,6 +325,17 @@ class DBDietaryHelper {
       print('Error deleting food with serving info: $e');
       rethrow;
     }
+  }
+
+  // 数据库备份全量导入时每个文件夹单独导出，需要用到
+  Future<List<Object?>> insertServingInfoList(
+    List<ServingInfo> siList,
+  ) async {
+    var batch = (await database).batch();
+    for (var item in siList) {
+      batch.insert(DietaryDdl.tableNameOfServingInfo, item.toMap());
+    }
+    return batch.commit();
   }
 
   // 删除营养素数据列表
@@ -543,8 +563,20 @@ class DBDietaryHelper {
   /// meal_photo 的相关操作
   ///
   // 插入单条餐次照片
-  Future<int> insertMealPhotoList(MealPhoto mp) async =>
+  Future<int> insertMealPhoto(MealPhoto mp) async =>
       (await database).insert(DietaryDdl.tableNameOfMealPhoto, mp.toMap());
+
+  Future<List<Object?>> insertMealPhotoList(
+    List<MealPhoto> mpList,
+  ) async {
+    var batch = (await database).batch();
+
+    for (var item in mpList) {
+      batch.insert(DietaryDdl.tableNameOfMealPhoto, item.toMap());
+    }
+
+    return batch.commit();
+  }
 
   // 修改单条餐次照片
   Future<int> updateMealPhoto(MealPhoto mp) async =>

@@ -80,7 +80,7 @@ class DBUserHelper {
   }
 
   // 删除sqlite的db文件（初始化数据库操作中那个path的值）
-  void deleteDB() async {
+  Future<void> deleteDB() async {
     print("开始删除內嵌的 sqlite User db文件，db文件地址：$userDbFilePath");
 
     // 先删除，再重置，避免仍然存在其他线程在访问数据库，从而导致删除失败
@@ -239,6 +239,18 @@ class DBUserHelper {
         where: "user_id = ?",
         whereArgs: [userId],
       );
+
+  Future<List<Object?>> insertIntakeDailyGoalList(
+    List<IntakeDailyGoal> goals,
+  ) async {
+    var batch = (await database).batch();
+
+    for (var item in goals) {
+      batch.insert(UserDdl.tableNameOfIntakeDailyGoal, item.toMap());
+    }
+
+    return batch.commit();
+  }
 
   // 查询用户带上每周具体摄入目标
   // ？？？现在就是显示登录用户信息，用户密码登录成功之后记住信息？(缓存还不太懂，这里就账号密码id查询)

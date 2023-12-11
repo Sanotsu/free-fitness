@@ -127,7 +127,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                       }
                     } else {
                       // 没有传数据，则是新增，没有选择任何图片也算新增，反正下一次还为空就一定删除了
-                      await _dietaryHelper.insertMealPhotoList(tempMp);
+                      await _dietaryHelper.insertMealPhoto(tempMp);
                     }
 
                     if (!mounted) return;

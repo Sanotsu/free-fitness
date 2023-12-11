@@ -20,6 +20,7 @@ import '../../common/utils/db_training_helper.dart';
 import '../../common/utils/db_user_helper.dart';
 import '../../models/user_state.dart';
 import '_feature_mock_data/index.dart';
+import 'backup_and_restore/index.dart';
 import 'intake_goals/intake_target.dart';
 import 'training_setting/index.dart';
 import 'user_gallery/meal_photo_gallery.dart';
@@ -193,12 +194,17 @@ class _UserAndSettingsState extends State<UserAndSettings> {
 
       // 存放所有json文件的文件夹
       String? filePath = p.join(appDocDir.path, "db_export/");
+
+      // 创建或检索压缩包临时存放的文件夹
+      var tempZipDir =
+          await Directory(p.join(appDocDir.path, "temp_zip")).create();
+
       // 获取临时文件夹目录
       Directory tempDirectory = Directory(filePath);
 
       // 创建压缩文件
       final encoder = ZipFileEncoder();
-      encoder.create(p.join(filePath, tempZipName));
+      encoder.create(p.join(tempZipDir.path, tempZipName));
 
       // 遍历临时文件夹中的所有文件和子文件夹，并将它们添加到压缩文件中
       await for (FileSystemEntity entity
@@ -214,7 +220,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
       encoder.close();
 
       // 移动临时文件到用户选择的位置
-      File sourceFile = File(p.join(filePath, tempZipName));
+      File sourceFile = File(p.join(tempZipDir.path, tempZipName));
       File destinationFile = File(p.join(selectedDirectory, tempZipName));
 
       if (destinationFile.existsSync()) {
@@ -228,6 +234,11 @@ class _UserAndSettingsState extends State<UserAndSettings> {
 
       // 导出完之后，清空文件夹中文件
       await deleteFilesInDirectory(filePath);
+      // 删除临时zip文件
+      if (sourceFile.existsSync()) {
+        // 如果目标文件已经存在，则先删除
+        sourceFile.deleteSync();
+      }
 
       setState(() {
         isLoading = false;
@@ -573,13 +584,29 @@ class _UserAndSettingsState extends State<UserAndSettings> {
         ),
         Expanded(
           child: NewCusSettingCard(
-            leadingIcon: Icons.privacy_tip_sharp,
-            title: '常见问题(tbd)',
+            leadingIcon: Icons.backup,
+            title: '备份恢复',
             onTap: () {
               // 处理相应的点击事件
+              print("(点击进入备份恢复页面)……");
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BackupAndRestore(),
+                ),
+              );
             },
           ),
         ),
+        // Expanded(
+        //   child: NewCusSettingCard(
+        //     leadingIcon: Icons.privacy_tip_sharp,
+        //     title: '常见问题(tbd)',
+        //     onTap: () {
+        //       // 处理相应的点击事件
+        //     },
+        //   ),
+        // ),
       ],
     );
   }

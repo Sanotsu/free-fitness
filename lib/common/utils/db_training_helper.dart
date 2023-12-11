@@ -86,7 +86,7 @@ class DBTrainingHelper {
   }
 
   // 删除sqlite的db文件（初始化数据库操作中那个path的值）
-  void deleteDB() async {
+  Future<void> deleteDB() async {
     print("开始删除內嵌的sqlite db文件，db文件地址：$dbFilePath");
 
     // 先删除，再重置，避免仍然存在其他线程在访问数据库，从而导致删除失败
@@ -192,6 +192,16 @@ class DBTrainingHelper {
         rethrow;
       }
     }
+  }
+
+  Future<List<Object?>> insertExerciseList(List<Exercise> exercises) async {
+    var batch = (await database).batch();
+
+    for (var item in exercises) {
+      batch.insert(TrainingDdl.tableNameOfExercise, item.toMap());
+    }
+
+    return batch.commit();
   }
 
   // 修改单条数据
@@ -348,6 +358,16 @@ class DBTrainingHelper {
   Future<int> insertTrainingGroup(TrainingGroup group) async =>
       (await database).insert(TrainingDdl.tableNameOfGroup, group.toMap());
 
+  Future<List<Object?>> insertTrainingGroupList(
+    List<TrainingGroup> tgList,
+  ) async {
+    var batch = (await database).batch();
+    for (var item in tgList) {
+      batch.insert(TrainingDdl.tableNameOfGroup, item.toMap());
+    }
+    return batch.commit();
+  }
+
 // 修改指定训练基本信息（指定id修改）
   Future<int> updateTrainingGroup(int groupId, TrainingGroup group) async =>
       (await database).update(
@@ -490,6 +510,16 @@ class DBTrainingHelper {
   /// 插入单个计划基本信息
   Future<int> insertTrainingPlan(TrainingPlan plan) async =>
       (await database).insert(TrainingDdl.tableNameOfPlan, plan.toMap());
+
+  Future<List<Object?>> insertTrainingPlanList(
+    List<TrainingPlan> tpList,
+  ) async {
+    var batch = (await database).batch();
+    for (var item in tpList) {
+      batch.insert(TrainingDdl.tableNameOfPlan, item.toMap());
+    }
+    return batch.commit();
+  }
 
   // 插入动作组(插入plan has group 表，单条也当数组插入）
   Future<List<Object?>> insertPlanHasGroupList(
@@ -653,6 +683,18 @@ class DBTrainingHelper {
   /// 插入单个计划基本信息
   Future<int> insertTrainingLog(TrainedLog log) async =>
       (await database).insert(TrainingDdl.tableNameOfTrainedLog, log.toMap());
+
+  Future<List<Object?>> insertTrainingLogList(
+    List<TrainedLog> tlList,
+  ) async {
+    var batch = (await database).batch();
+
+    for (var item in tlList) {
+      batch.insert(TrainingDdl.tableNameOfTrainedLog, item.toMap());
+    }
+
+    return batch.commit();
+  }
 
   // 查询指定训练以及其所有动作
   // 训练支持条件查询，估计训练的数量不会多，就暂时不分页；同事关联的动作就全部带出。

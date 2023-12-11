@@ -78,7 +78,7 @@ class DBDiaryHelper {
   }
 
   // 删除sqlite的db文件（初始化数据库操作中那个path的值）
-  void deleteDB() async {
+  Future<void> deleteDB() async {
     print("开始删除內嵌的 sqlite Diary db文件，db文件地址：$diaryDbFilePath");
 
     // 先删除，再重置，避免仍然存在其他线程在访问数据库，从而导致删除失败
@@ -157,6 +157,14 @@ class DBDiaryHelper {
   // 插入单条数据(返回 diary_id)
   Future<int> insertDiary(Diary diary) async =>
       (await database).insert(DiaryDdl.tableNameOfDiary, diary.toMap());
+
+  Future<List<Object?>> insertDiaryList(List<Diary> diarys) async {
+    var batch = (await database).batch();
+    for (var item in diarys) {
+      batch.insert(DiaryDdl.tableNameOfDiary, item.toMap());
+    }
+    return batch.commit();
+  }
 
   // 修改单条数据
   Future<int> updateDiary(Diary diary) async =>
