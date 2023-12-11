@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
@@ -242,4 +243,16 @@ String getPropName(String camelCaseName) {
   final pattern = RegExp(r'[A-Z]');
   return camelCaseName.splitMapJoin(pattern,
       onMatch: (m) => '_${m.group(0)?.toLowerCase()}');
+}
+
+// 删除指定文件夹下所有文件
+Future<void> deleteFilesInDirectory(String directoryPath) async {
+  final directory = Directory(directoryPath);
+  if (await directory.exists()) {
+    await for (var file in directory.list()) {
+      if (file is File) {
+        await file.delete();
+      }
+    }
+  }
 }

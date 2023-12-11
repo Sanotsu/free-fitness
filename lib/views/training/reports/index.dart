@@ -11,6 +11,7 @@ import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
 import '../../../models/training_state.dart';
+import 'export/report_pdf_viewer.dart';
 
 /// 默认的日历显示范围，当前月的前后3个月
 /// ？？？实际手记的日历显示范围的话，就第一个手记的月份，到当前月份即可
@@ -53,6 +54,9 @@ class _TrainingReportsState extends State<TrainingReports> {
 
   // 初始化或查询时加载数据，没加载完就都是加载中
   late List<TrainedLogWithGroupBasic> trainedLogList;
+
+  // 导出数据时默认选中为最近7天
+  CusLabel exportDateValue = exportDateList.first;
 
   @override
   void initState() {
@@ -180,6 +184,73 @@ class _TrainingReportsState extends State<TrainingReports> {
             ],
           ),
           title: const Text('运动报告'),
+          actions: [
+            IconButton(
+              onPressed: () async {
+                var dateSelected = await showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('选择日期范围'),
+                      content: DropdownMenu<CusLabel>(
+                        initialSelection: exportDateList.first,
+                        onSelected: (CusLabel? value) {
+                          setState(() {
+                            exportDateValue = value!;
+                          });
+                        },
+                        dropdownMenuEntries: exportDateList
+                            .map<DropdownMenuEntry<CusLabel>>((CusLabel value) {
+                          return DropdownMenuEntry<CusLabel>(
+                            value: value,
+                            label: value.cnLabel,
+                          );
+                        }).toList(),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, false);
+                          },
+                          child: const Text('取消'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, true);
+                          },
+                          child: const Text('确认'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+                // 弹窗选择导出范围不为空，且不为false，则默认是选择的日期范围
+                if (dateSelected != null && dateSelected) {
+                  String tempStart, tempEnd;
+                  if (exportDateValue.value == "seven") {
+                    [tempStart, tempEnd] = getStartEndDateString(7);
+                  } else if (exportDateValue.value == "thirty") {
+                    [tempStart, tempEnd] = getStartEndDateString(30);
+                  } else {
+                    // 导出全部就近20年吧
+                    [tempStart, tempEnd] = getStartEndDateString(365 * 20);
+                  }
+
+                  if (!mounted) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TrainedReportPdfViewer(
+                        startDate: tempStart,
+                        endDate: tempEnd,
+                      ),
+                    ),
+                  );
+                }
+              },
+              icon: const Icon(Icons.print),
+            ),
+          ],
         ),
         body: isLoading
             ? buildLoader(isLoading)

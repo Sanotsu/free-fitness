@@ -87,7 +87,10 @@ dependencies:
   get_storage: ^2.1.1
   # 从相册选择图片或者拍照片
   image_picker: ^1.0.4
-  
+  # 一个全面的、跨平台的 Dart 路径操作库(2023-12-11安装1.9.0会报错)。
+  path: ^1.8.3
+  # 压缩文件
+  archive: ^3.4.9
 
 dev_dependencies:
   flutter_test:

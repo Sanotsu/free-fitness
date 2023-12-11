@@ -2,12 +2,21 @@
 
 import 'dart:io';
 
+import 'package:archive/archive_io.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:free_fitness/common/utils/tools.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../common/utils/tool_widgets.dart';
 import '../../common/global/constants.dart';
+import '../../common/utils/db_diary_helper.dart';
+import '../../common/utils/db_dietary_helper.dart';
+import '../../common/utils/db_training_helper.dart';
 import '../../common/utils/db_user_helper.dart';
 import '../../models/user_state.dart';
 import '_feature_mock_data/index.dart';
@@ -25,10 +34,13 @@ class UserAndSettings extends StatefulWidget {
 }
 
 class _UserAndSettingsState extends State<UserAndSettings> {
+  final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
+  final DBTrainingHelper _trainingHelper = DBTrainingHelper();
+  final DBDiaryHelper _diaryHelper = DBDiaryHelper();
   final DBUserHelper _userHelper = DBUserHelper();
 
   // 用户头像路径
-  String _avatarPath = "assets/profile_icons/Avatar.jpg";
+  String _avatarPath = "";
 
   // 这里有修改，暂时不用get
   int currentUserId = 1;
@@ -147,6 +159,88 @@ class _UserAndSettingsState extends State<UserAndSettings> {
     }
   }
 
+  // 导出db中所有的数据
+  _exportalldata() async {
+    final status = await Permission.storage.request();
+    // 用户没有授权，简单提示一下
+    if (!mounted) return;
+    if (!status.isGranted) {
+      showSnackMessage(context, "用户已禁止访问内部存储,无法进行备份。");
+      return;
+    }
+
+    // 用户选择指定文件夹
+    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
+    // 如果有选中文件夹，执行导出数据库的json文件，并添加到压缩档。
+    if (selectedDirectory != null) {
+      if (isLoading) return;
+
+      setState(() {
+        isLoading = true;
+      });
+
+      String tempZipName =
+          "free-fitness-full-bak-${DateTime.now().millisecondsSinceEpoch}.zip";
+
+      // 等到所有文件导出，都默认放在同一个文件夹下，所以就不用返回路径了
+      await _userHelper.exportDatabase();
+      await _dietaryHelper.exportDatabase();
+      await _trainingHelper.exportDatabase();
+      await _diaryHelper.exportDatabase();
+
+      // 获取应用文档目录路径
+      Directory appDocDir = await getApplicationDocumentsDirectory();
+
+      // 存放所有json文件的文件夹
+      String? filePath = p.join(appDocDir.path, "db_export/");
+      // 获取临时文件夹目录
+      Directory tempDirectory = Directory(filePath);
+
+      // 创建压缩文件
+      final encoder = ZipFileEncoder();
+      encoder.create(p.join(filePath, tempZipName));
+
+      // 遍历临时文件夹中的所有文件和子文件夹，并将它们添加到压缩文件中
+      await for (FileSystemEntity entity
+          in tempDirectory.list(recursive: true)) {
+        if (entity is File) {
+          encoder.addFile(entity);
+        } else if (entity is Directory) {
+          encoder.addDirectory(entity);
+        }
+      }
+
+      // 完成并关闭压缩文件
+      encoder.close();
+
+      // 移动临时文件到用户选择的位置
+      File sourceFile = File(p.join(filePath, tempZipName));
+      File destinationFile = File(p.join(selectedDirectory, tempZipName));
+
+      if (destinationFile.existsSync()) {
+        // 如果目标文件已经存在，则先删除
+        destinationFile.deleteSync();
+      }
+
+      // 把文件从缓存的位置放到用户选择的位置
+      sourceFile.copySync(p.join(selectedDirectory, tempZipName));
+      print('文件已成功复制到：${p.join(selectedDirectory, tempZipName)}');
+
+      // 导出完之后，清空文件夹中文件
+      await deleteFilesInDirectory(filePath);
+
+      setState(() {
+        isLoading = false;
+      });
+
+      if (!mounted) return;
+      showSnackMessage(context, "已经保存到 $selectedDirectory");
+    } else {
+      print('保存操作已取消');
+      return;
+    }
+  }
+
   // 修改头像
   // 选择图片来源
   Future<void> _pickImage(ImageSource source) async {
@@ -179,6 +273,41 @@ class _UserAndSettingsState extends State<UserAndSettings> {
               );
             },
             icon: const Icon(Icons.bug_report),
+          ),
+          // 导出所有数据
+          IconButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('全量备份'),
+                    content: const Text("确认导出所有数据?"),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          if (!mounted) return;
+                          Navigator.pop(context, false);
+                        },
+                        child: const Text('取消'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          if (!mounted) return;
+                          Navigator.pop(context, true);
+                        },
+                        child: const Text('确认'),
+                      ),
+                    ],
+                  );
+                },
+              ).then((value) {
+                print("value----------$value");
+
+                if (value != null && value) _exportalldata();
+              });
+            },
+            icon: const Icon(Icons.print),
           ),
           // 切换用户(切换后缓存的用户编号也得修改)
           IconButton(
@@ -229,10 +358,19 @@ class _UserAndSettingsState extends State<UserAndSettings> {
       Stack(
         alignment: Alignment.center,
         children: [
-          CircleAvatar(
-            maxRadius: 60.sp,
-            backgroundImage: FileImage(File(_avatarPath)),
-          ),
+          // 没有修改头像，就用默认的
+          if (_avatarPath.isEmpty)
+            CircleAvatar(
+              maxRadius: 60.sp,
+              backgroundImage: const AssetImage(
+                'assets/profile_icons/Avatar.jpg',
+              ),
+            ),
+          if (_avatarPath.isNotEmpty)
+            CircleAvatar(
+              maxRadius: 60.sp,
+              backgroundImage: FileImage(File(_avatarPath)),
+            ),
           Positioned(
             top: 40.sp,
             right: 0.5.sw - 75.sp,

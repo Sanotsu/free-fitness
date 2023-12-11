@@ -1,8 +1,10 @@
 // ignore_for_file: avoid_print
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -101,6 +103,47 @@ class DBDiaryHelper {
 
     print("Diary DB中拥有的表名:------------");
     print(tableNames);
+  }
+
+  // 导出所有数据
+  Future<void> exportDatabase() async {
+    // 获取应用文档目录路径
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    // 创建或检索 db_export 文件夹
+    var tempDir = await Directory(p.join(appDocDir.path, "db_export")).create();
+
+    // 打开数据库
+    Database db = await database;
+
+    // 获取所有表名
+    List<Map<String, dynamic>> tables =
+        await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'");
+
+    // 遍历所有表
+    for (Map<String, dynamic> table in tables) {
+      String tableName = table['name'];
+
+      // 不是自建的表，不导出
+      if (!tableName.startsWith("ff_")) {
+        continue;
+      }
+
+      String tempFilePath = p.join(tempDir.path, '$tableName.json');
+
+      // 查询表中所有数据
+      List<Map<String, dynamic>> result = await db.query(tableName);
+
+      // 将结果转换为JSON字符串
+      String jsonStr = jsonEncode(result);
+
+      // 创建临时导出文件
+      File tempFile = File(tempFilePath);
+
+      // 将JSON字符串写入临时文件
+      await tempFile.writeAsString(jsonStr);
+
+      // print('表 $tableName 已成功导出到：$tempFilePath');
+    }
   }
 
   ///
