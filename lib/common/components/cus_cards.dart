@@ -11,8 +11,9 @@ buildSmallCoverCard(
 }) {
   return Card(
     clipBehavior: Clip.hardEdge,
+    elevation: 5,
     child: InkWell(
-      splashColor: Colors.blue.withAlpha(30),
+      splashColor: Colors.lightBlue.withAlpha(30),
       onTap: () {
         if (routeName != null) {
           // 这里需要使用pushName 带上指定的路由名称，后续跨层级popUntil的时候才能指定路由名称进行传参
@@ -26,7 +27,7 @@ buildSmallCoverCard(
         }
       },
       child: Container(
-        color: Colors.lightBlue[100],
+        color: Colors.lightBlue[50],
         child: Center(
           child: Text(
             title,
@@ -50,43 +51,40 @@ buildCoverCard(
 }) {
   return Card(
     clipBehavior: Clip.hardEdge,
-    child: Container(
-      color: Colors.lightBlue[100],
-      child: Center(
-        child: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: EdgeInsets.all(5.sp),
-                child: Image.asset(imageUrl, fit: BoxFit.scaleDown),
-              ),
+    elevation: 5,
+    child: Center(
+      child: Row(
+        children: [
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: EdgeInsets.all(5.sp),
+              child: Image.asset(imageUrl, fit: BoxFit.scaleDown),
             ),
-            Expanded(
-              flex: 3,
-              child: ListTile(
-                title: Text(
-                  title,
-                  style:
-                      TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(subtitle),
-                onTap: () {
-                  if (routeName != null) {
-                    // 这里需要使用pushName 带上指定的路由名称，后续跨层级popUntil的时候才能指定路由名称进行传参
-                    Navigator.pushNamed(context, routeName);
-                  } else {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext ctx) => widget,
-                      ),
-                    );
-                  }
-                },
+          ),
+          Expanded(
+            flex: 3,
+            child: ListTile(
+              title: Text(
+                title,
+                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
               ),
+              subtitle: Text(subtitle),
+              onTap: () {
+                if (routeName != null) {
+                  // 这里需要使用pushName 带上指定的路由名称，后续跨层级popUntil的时候才能指定路由名称进行传参
+                  Navigator.pushNamed(context, routeName);
+                } else {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (BuildContext ctx) => widget,
+                    ),
+                  );
+                }
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     ),
   );

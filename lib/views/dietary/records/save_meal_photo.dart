@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 
 import '../../../common/components/dialog_widgets.dart';
@@ -70,7 +71,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
     // 最上面图片走马灯，下面餐次item信息，action是保存和取消/返回按钮
     return Scaffold(
       appBar: AppBar(
-        title: const Text('新增餐次照片'),
+        title: const Text('餐次照片'),
         actions: [
           if (!isEditing)
             TextButton(
@@ -80,7 +81,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                 });
               },
               child: const Text(
-                "修改",
+                "更新",
                 style: TextStyle(color: Colors.white),
               ),
             ),
@@ -164,8 +165,6 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
       ),
       body: Column(
         children: [
-          Text("${(imagesUrls.length)}"),
-
           if (imagesUrls.isNotEmpty && !isEditing)
             buildImageCarouselSlider(imagesUrls),
           const SizedBox(height: 10),
@@ -206,7 +205,10 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                 ],
               ),
             ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10.sp),
+
+          Text(widget.mealtime.cnLabel, style: TextStyle(fontSize: 22.sp)),
+
           // 预览已有的图片
           ListView.builder(
               itemCount: items.length,

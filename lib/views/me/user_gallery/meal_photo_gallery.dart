@@ -78,34 +78,20 @@ class _MealPhotoGalleryState extends State<MealPhotoGallery> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('饮食相册'),
-        actions: [
-          TextButton.icon(
-            onPressed: null,
-            icon: const Icon(
-              Icons.save,
-              color: Colors.white,
-            ),
-            label: Text(
-              "保存",
-              style: TextStyle(
-                fontSize: 20.sp,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
       ),
-      body: ListView.builder(
-        itemCount: photoItems.length + 1,
-        itemBuilder: (context, index) {
-          if (index == photoItems.length) {
-            return buildLoader(isLoading);
-          } else {
-            return _buildMealPhotoCard(photoItems[index]);
-          }
-        },
-        controller: scrollController,
-      ),
+      body: (photoItems.isNotEmpty)
+          ? ListView.builder(
+              itemCount: photoItems.length + 1,
+              itemBuilder: (context, index) {
+                if (index == photoItems.length) {
+                  return buildLoader(isLoading);
+                } else {
+                  return _buildMealPhotoCard(photoItems[index]);
+                }
+              },
+              controller: scrollController,
+            )
+          : const Center(child: Text("暂未上传任何餐次食物照片")),
     );
   }
 

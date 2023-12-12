@@ -281,6 +281,9 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
 
     return Card(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             "当月摄入统计",

@@ -399,37 +399,42 @@ class _UserAndSettingsState extends State<UserAndSettings> {
                       : Colors.black,
             ),
           ),
+          Positioned(
+            top: 0.sp,
+            right: 0.sp,
+            child: TextButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('指定选项'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _pickImage(ImageSource.camera);
+                          },
+                          child: const Text('拍照'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _pickImage(ImageSource.gallery);
+                          },
+                          child: const Text('相册'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              child: Text('切换头像', style: TextStyle(fontSize: 12.sp)),
+            ),
+          ),
         ],
       ),
-      TextButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('指定选项'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _pickImage(ImageSource.camera);
-                    },
-                    child: const Text('拍照'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _pickImage(ImageSource.gallery);
-                    },
-                    child: const Text('相册'),
-                  ),
-                ],
-              );
-            },
-          );
-        },
-        child: const Text('切换头像'),
-      ),
+
       SizedBox(height: 10.sp),
       // username
       Row(

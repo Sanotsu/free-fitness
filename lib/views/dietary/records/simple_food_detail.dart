@@ -266,214 +266,213 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           ),
         ),
       ),
-      body: ListView(
+      body: Padding(
+        padding: EdgeInsets.all(10.sp),
+        child: ListView(
+          children: [
+            // 修改数量和单位
+            buildInputFormArea(),
+            SizedBox(height: 10.sp),
+            // 饮食日记主界面点击知道item进来有“移除”和“修改”，点指定餐次新增进来则显示“新增”
+            buildButtonsRowArea(),
+            SizedBox(height: 10.sp),
+            // 主要营养素表格
+            buildNutrientTableArea(),
+            // 详细营养素区域
+            buildAllNutrientTableArea(),
+            // buildAllNutrientCardArea(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 传入的食物摄入量、单份单位、餐次信息表单区域
+  buildInputFormArea() {
+    return FormBuilder(
+      key: _formKey,
+      child: Column(
         children: [
-          // 修改数量和单位
-          Padding(
-            padding: EdgeInsets.only(left: 20.sp, right: 20.sp),
-            child: FormBuilder(
-              key: _formKey,
-              child: Column(
-                children: [
-                  // 用封装的那个，验证器有问题
-                  FormBuilderTextField(
-                    name: 'serving_value',
-                    initialValue: "$inputServingValue",
-                    decoration: const InputDecoration(labelText: '数量'),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.numeric(errorText: '数量只能为数字'),
-                    ]),
-                    onChanged: (value) {
-                      if (_formKey.currentState?.validate() != true) {
-                        return;
-                      }
-                      setState(() {
-                        inputServingValue = (value != "" && value != null)
-                            ? double.parse(value)
-                            : 1.0;
-                        _recalculateNutrients();
-                      });
-                    },
+          // 用封装的那个，验证器有问题
+          FormBuilderTextField(
+            name: 'serving_value',
+            initialValue: inputServingValue.toString(),
+            decoration: const InputDecoration(labelText: '数量'),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            validator: FormBuilderValidators.compose([
+              FormBuilderValidators.numeric(errorText: '数量只能为数字'),
+            ]),
+            onChanged: (value) {
+              if (_formKey.currentState?.validate() != true) {
+                return;
+              }
+              setState(() {
+                inputServingValue =
+                    (value != "" && value != null) ? double.parse(value) : 1.0;
+                _recalculateNutrients();
+              });
+            },
+          ),
+          SizedBox(height: 5.sp),
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: FormBuilderDropdown<dynamic>(
+                  name: 'serving_unit',
+                  decoration: const InputDecoration(
+                    labelText: '单位',
                   ),
-                  SizedBox(height: 5.sp),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 3,
-                        child: FormBuilderDropdown<dynamic>(
-                          name: 'serving_unit',
-                          decoration: const InputDecoration(
-                            labelText: '单位',
-                          ),
-                          initialValue: servingUnitOptions[0],
-                          items: servingUnitOptions
-                              .map((unit) => DropdownMenuItem(
-                                    alignment: AlignmentDirectional.center,
-                                    value: unit,
-                                    child: Text(unit),
-                                  ))
-                              .toList(),
-                          onChanged: (val) {
-                            setState(() {
-                              _formKey.currentState?.fields['serving_unit']
-                                  ?.save();
-                              print("unit onchanged value now is $val");
-
-                              inputServingUnit = val;
-                              _recalculateNutrients();
-                            });
-                          },
-                          valueTransformer: (val) => val?.toString(),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: TextButton(
-                          onPressed: () {},
-                          // 2023-10-21 应该也是跳转到新增food的表单，但是可能是修改或新增已有的营养素子栏位，食物信息不变化
-                          // 这里的sql方法好像还没有
-                          child: const Text("添加新单位?"),
-                        ),
-                      )
-                    ],
-                  ),
-                  FormBuilderDropdown<CusLabel>(
-                    name: 'new_mealtime',
-                    decoration: const InputDecoration(
-                      labelText: '餐次',
-                    ),
-                    initialValue: inputMealtimeValue,
-                    items: mealtimeList
-                        .map((unit) => DropdownMenuItem(
-                              alignment: AlignmentDirectional.center,
-                              value: unit,
-                              child: Text(unit.cnLabel),
-                            ))
-                        .toList(),
-                    onChanged: (val) {
-                      setState(() {
-                        _formKey.currentState?.fields['new_mealtime']?.save();
-                        print(
-                          "new_mealtime onchanged value now is $val, mealtime is ${val?.value}",
-                        );
-
-                        inputMealtimeValue = val!;
-                      });
-                    },
-                    valueTransformer: (val) => val?.toString(),
-                  ),
-                ],
+                  initialValue: servingUnitOptions[0],
+                  items: servingUnitOptions
+                      .map((unit) => DropdownMenuItem(
+                            alignment: AlignmentDirectional.center,
+                            value: unit,
+                            child: Text(unit),
+                          ))
+                      .toList(),
+                  onChanged: (val) {
+                    setState(() {
+                      // 保存选择的单位
+                      _formKey.currentState?.fields['serving_unit']?.save();
+                      // 重新计算切换单位后的营养素数值
+                      inputServingUnit = val;
+                      _recalculateNutrients();
+                    });
+                  },
+                  valueTransformer: (val) => val?.toString(),
+                ),
               ),
-            ),
+              Expanded(
+                flex: 2,
+                child: TextButton(
+                  onPressed: () {},
+                  // 2023-10-21 应该也是跳转到新增food的表单，但是可能是修改或新增已有的营养素子栏位，食物信息不变化
+                  // 这里的sql方法好像还没有
+                  child: const Text("添加新单位?"),
+                ),
+              )
+            ],
           ),
-          // 饮食日记主界面点击知道item进来有“移除”和“修改”，点指定餐次新增进来则显示“新增”
-          Padding(
-            padding: EdgeInsets.only(left: 20.sp, right: 20.sp, top: 20.sp),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                if (widget.dfiwfs != null)
-                  Expanded(
-                    flex: 4,
-                    child: ElevatedButton(
-                      onPressed: _removeDailyFoodItem,
-                      child: const Text("移除"),
-                    ),
-                  ),
-                // 两个按钮之间的占位空白
-                if (widget.dfiwfs != null)
-                  const Expanded(flex: 1, child: SizedBox()),
-                if (widget.dfiwfs != null)
-                  Expanded(
-                    flex: 4,
-                    child: ElevatedButton(
-                      onPressed: _updateDailyFoodItem,
-                      child: const Text("修改"),
-                    ),
-                  ),
-                if (widget.dfiwfs == null)
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _addDailyFoodItem,
-                      child: const Text("添加"),
-                    ),
-                  ),
-              ],
+          // 切换餐次
+          FormBuilderDropdown<CusLabel>(
+            name: 'new_mealtime',
+            decoration: const InputDecoration(
+              labelText: '餐次',
             ),
-          ),
-          // 主要营养素表格
-          Padding(
-            padding: EdgeInsets.only(left: 20.sp, right: 20.sp, top: 20.sp),
-            child: Text(
-              "主要营养信息",
-              style: TextStyle(fontSize: 30.sp, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: 20.sp, right: 20.sp),
-            child: DecoratedBox(
-              decoration: const BoxDecoration(
-                color: Colors.grey, // 设置背景色
-                // 其他背景样式，例如渐变等
-              ),
-              child: Table(
-                border: TableBorder.all(),
-                columnWidths: const <int, TableColumnWidth>{
-                  1: FlexColumnWidth(),
-                  2: FlexColumnWidth(),
-                },
-                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-                children: <TableRow>[
-                  TableRow(
-                    children: <Widget>[
-                      _genEssentialNutrientsTableCell(
-                        "卡路里",
-                        "${(inputServingValue * nutrientsInfo.energy / oneCalToKjRatio).toStringAsFixed(2)} 大卡",
-                      ),
-                      _genEssentialNutrientsTableCell(
-                        "碳水化合物",
-                        formatNutrientValue(inputServingValue *
-                            nutrientsInfo.totalCarbohydrate),
-                      ),
-                    ],
-                  ),
-                  TableRow(
-                    // decoration: const BoxDecoration(color: Colors.white),
-                    children: <Widget>[
-                      _genEssentialNutrientsTableCell(
-                        "脂肪",
-                        formatNutrientValue(
-                            inputServingValue * nutrientsInfo.totalFat),
-                      ),
-                      _genEssentialNutrientsTableCell(
-                        "蛋白质",
-                        formatNutrientValue(
-                            inputServingValue * nutrientsInfo.protein),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // 详细营养素区域
-          Padding(
-            padding: EdgeInsets.only(left: 20.sp, right: 20.sp, top: 20.sp),
-            child: Text(
-              "全部营养信息",
-              style: TextStyle(fontSize: 30.sp, fontWeight: FontWeight.bold),
-            ),
-          ),
-          // listview中嵌入listview可能会出问题，使用这个scollview也不能放到expanded里面
-          // 实测是根据外部listview滚动，而不是内部单独再滚动
-          Padding(
-            padding: EdgeInsets.only(left: 20.sp, right: 20.sp),
-            child: _genAllNutrientsCard(),
+            initialValue: inputMealtimeValue,
+            items: mealtimeList
+                .map((unit) => DropdownMenuItem(
+                      alignment: AlignmentDirectional.center,
+                      value: unit,
+                      child: Text(unit.cnLabel),
+                    ))
+                .toList(),
+            onChanged: (val) {
+              setState(() {
+                _formKey.currentState?.fields['new_mealtime']?.save();
+                inputMealtimeValue = val!;
+              });
+            },
+            valueTransformer: (val) => val?.toString(),
           ),
         ],
       ),
+    );
+  }
+
+  /// 构建移除、修改、新增的功能按钮区域
+  buildButtonsRowArea() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        // 有传条目信息，则是修改和删除
+        if (widget.dfiwfs != null)
+          Expanded(
+            flex: 4,
+            child: ElevatedButton(
+              onPressed: _removeDailyFoodItem,
+              child: const Text("移除"),
+            ),
+          ),
+        // 两个按钮之间的占位空白
+        if (widget.dfiwfs != null) const Expanded(flex: 1, child: SizedBox()),
+        if (widget.dfiwfs != null)
+          Expanded(
+            flex: 4,
+            child: ElevatedButton(
+              onPressed: _updateDailyFoodItem,
+              child: const Text("修改"),
+            ),
+          ),
+
+        // 没有传条目信息，则是新增
+        if (widget.dfiwfs == null)
+          Expanded(
+            child: ElevatedButton(
+              onPressed: _addDailyFoodItem,
+              child: const Text("添加"),
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// 构建主要营养素表格区域
+  buildNutrientTableArea() {
+    return Column(
+      children: [
+        Text(
+          "主要营养信息",
+          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+        ),
+        DecoratedBox(
+          decoration: const BoxDecoration(
+            color: Colors.grey, // 设置背景色
+            // 其他背景样式，例如渐变等
+          ),
+          child: Table(
+            border: TableBorder.all(),
+            columnWidths: const <int, TableColumnWidth>{
+              1: FlexColumnWidth(),
+              2: FlexColumnWidth(),
+            },
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+            children: <TableRow>[
+              TableRow(
+                children: <Widget>[
+                  _genEssentialNutrientsTableCell(
+                    "卡路里",
+                    "${(inputServingValue * nutrientsInfo.energy / oneCalToKjRatio).toStringAsFixed(2)} 大卡",
+                  ),
+                  _genEssentialNutrientsTableCell(
+                    "碳水化合物",
+                    formatNutrientValue(
+                      inputServingValue * nutrientsInfo.totalCarbohydrate,
+                    ),
+                  ),
+                ],
+              ),
+              TableRow(
+                children: <Widget>[
+                  _genEssentialNutrientsTableCell(
+                    "脂肪",
+                    formatNutrientValue(
+                      inputServingValue * nutrientsInfo.totalFat,
+                    ),
+                  ),
+                  _genEssentialNutrientsTableCell(
+                    "蛋白质",
+                    formatNutrientValue(
+                      inputServingValue * nutrientsInfo.protein,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -504,6 +503,155 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           ),
         ),
       ),
+    );
+  }
+
+  /// 全部营养素表格展示
+  /// 这个表格比卡片样式更简洁
+  buildAllNutrientTableArea() {
+    return Column(
+      children: [
+        Text(
+          "全部营养信息",
+          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+        ),
+        Table(
+          border: TableBorder.all(), // 设置表格边框
+          // 设置每列的宽度占比
+          columnWidths: const {
+            0: FlexColumnWidth(2),
+            1: FlexColumnWidth(3),
+          },
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          children: [
+            _buildTableRow(
+              "食用量",
+              '${cusDoubleToString(inputServingValue)} X $inputServingUnit',
+            ),
+            _buildTableRow(
+              "卡路里",
+              '${cusDoubleToString(inputServingValue * nutrientsInfo.energy / oneCalToKjRatio)} 大卡',
+            ),
+            _buildTableRow(
+              "能量",
+              '${cusDoubleToString(inputServingValue * nutrientsInfo.energy)} 千焦',
+              labelAligh: TextAlign.right,
+              fontColor: Colors.grey,
+            ),
+            _buildTableRow(
+              "蛋白质",
+              '${cusDoubleToString(inputServingValue * nutrientsInfo.protein)} 克',
+            ),
+            _buildTableRow(
+              "脂肪",
+              '${cusDoubleToString(inputServingValue * nutrientsInfo.totalFat)} 克',
+            ),
+            if (nutrientsInfo.transFat != null)
+              _buildTableRow(
+                "反式脂肪",
+                '${cusDoubleToString(inputServingValue * nutrientsInfo.transFat!)} 克',
+                labelAligh: TextAlign.right,
+                fontColor: Colors.grey,
+              ),
+            if (nutrientsInfo.saturatedFat != null)
+              _buildTableRow(
+                "饱和脂肪",
+                '${cusDoubleToString(inputServingValue * nutrientsInfo.saturatedFat!)} 克',
+                labelAligh: TextAlign.right,
+                fontColor: Colors.grey,
+              ),
+            if (nutrientsInfo.polyunsaturatedFat != null)
+              _buildTableRow(
+                "多不饱和脂肪",
+                '${cusDoubleToString(inputServingValue * nutrientsInfo.polyunsaturatedFat!)} 克',
+                labelAligh: TextAlign.right,
+                fontColor: Colors.grey,
+              ),
+            if (nutrientsInfo.monounsaturatedFat != null)
+              _buildTableRow(
+                "单不饱和脂肪",
+                '${cusDoubleToString(inputServingValue * nutrientsInfo.monounsaturatedFat!)} 克',
+                labelAligh: TextAlign.right,
+                fontColor: Colors.grey,
+              ),
+            _buildTableRow(
+              "碳水化合物",
+              '${cusDoubleToString(inputServingValue * nutrientsInfo.totalCarbohydrate)} 克',
+            ),
+            if (nutrientsInfo.sugar != null)
+              _buildTableRow(
+                "糖",
+                '${cusDoubleToString(inputServingValue * nutrientsInfo.sugar!)} 克',
+                labelAligh: TextAlign.right,
+                fontColor: Colors.grey,
+              ),
+            if (nutrientsInfo.dietaryFiber != null)
+              _buildTableRow(
+                "纤维",
+                '${cusDoubleToString(inputServingValue * nutrientsInfo.dietaryFiber!)} 克',
+                labelAligh: TextAlign.right,
+                fontColor: Colors.grey,
+              ),
+            _buildTableRow(
+              "钠",
+              '${cusDoubleToString(inputServingValue * nutrientsInfo.sodium)} 毫克',
+            ),
+            if (nutrientsInfo.cholesterol != null)
+              _buildTableRow(
+                "胆固醇",
+                '${cusDoubleToString(inputServingValue * nutrientsInfo.cholesterol!)} 毫克',
+              ),
+            if (nutrientsInfo.potassium != null)
+              _buildTableRow(
+                "钾",
+                '${cusDoubleToString(inputServingValue * nutrientsInfo.potassium!)} 毫克',
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  // 构建表格行数据
+  _buildTableRow(
+    String label,
+    String value, {
+    TextAlign? labelAligh = TextAlign.left,
+    Color? fontColor,
+  }) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10.sp),
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 16.sp, color: fontColor),
+            textAlign: labelAligh,
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10.sp),
+          child: Text(
+            value,
+            style: TextStyle(fontSize: 14.0.sp, color: fontColor),
+            textAlign: TextAlign.right,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 构建全部营养素信息卡片区域
+  /// 这个更复杂点
+  buildAllNutrientCardArea() {
+    return Column(
+      children: [
+        Text(
+          "全部营养信息",
+          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+        ),
+        _genAllNutrientsCard(),
+      ],
     );
   }
 
@@ -545,7 +693,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           // 食用量和能量(卡路里)这两个比较特殊，单独处理
           _buildCard(
             "食用量",
-            '$inputServingValue X $inputServingUnit',
+            '${inputServingValue.toStringAsFixed(2)} X $inputServingUnit',
           ),
           _buildCard(
             "卡路里",

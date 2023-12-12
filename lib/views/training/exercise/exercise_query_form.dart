@@ -90,6 +90,13 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
                   // todo 如果有高级查询条件被选择，但是被折叠了，点击重置是不会清除的。
                   setState(() {
                     _formKey.currentState!.reset();
+                    // 2023-12-12 不知道为什么，reset对下拉选中的没有效，所以手动清除
+                    _formKey.currentState?.fields['primary_muscles']
+                        ?.didChange(null);
+                    _formKey.currentState?.fields['level']?.didChange(null);
+                    _formKey.currentState?.fields['mechanic']?.didChange(null);
+                    _formKey.currentState?.fields['category']?.didChange(null);
+                    _formKey.currentState?.fields['equipment']?.didChange(null);
                   });
                 },
                 child: Text('重置', style: TextStyle(fontSize: 12.sp)),

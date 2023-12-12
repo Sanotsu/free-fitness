@@ -91,6 +91,8 @@ dependencies:
   path: ^1.8.3
   # 压缩文件
   archive: ^3.4.9
+  # 一个颜色主题插件
+  flex_color_scheme: ^7.3.1
 
 dev_dependencies:
   flutter_test:

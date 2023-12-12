@@ -190,107 +190,118 @@ class _SimpleFoodListState extends State<SimpleFoodList> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(8.sp),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: searchController,
-                    decoration: const InputDecoration(
-                      hintText: '请输入产品或品牌关键字',
-                    ),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: _handleSearch,
-                  child: const Text('搜索'),
-                ),
+      body: Padding(
+        padding: EdgeInsets.all(8.sp),
+        child: Column(
+          children: [
+            /// 搜索区域
+            buildSearchRowArea(),
+
+            /// 食物列表区域
+            Expanded(
+              child: ListView.builder(
+                itemCount: foodItems.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == foodItems.length) {
+                    return buildLoader(isLoading);
+                  } else {
+                    return buildFoodItemCard(foodItems[index]);
+                  }
+                },
+                controller: scrollController,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 查询条件输入行
+  buildSearchRowArea() {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: searchController,
+            decoration: const InputDecoration(
+              hintText: '请输入产品或品牌关键字',
+            ),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: _handleSearch,
+          child: const Text('搜索'),
+        ),
+      ],
+    );
+  }
+
+  /// 食物列表区域
+  buildFoodItemCard(FoodAndServingInfo item) {
+    var food = item.food;
+    var foodName = "${food.product} (${food.brand})";
+
+    var fistServingInfo = item.servingInfoList[0];
+    var foodUnit = fistServingInfo.servingUnit;
+    var foodEnergy = (fistServingInfo.energy / constants.oneCalToKjRatio);
+
+    return Card(
+      elevation: 2,
+      child: ListTile(
+        // 食物名称
+        title: Text(
+          foodName,
+          // style: TextStyle(fontSize: 14.sp),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        // 单份食物营养素
+        subtitle: Text("$foodUnit - ${cusDoubleToString(foodEnergy)} 大卡"),
+        // 点击这个添加就是默认添加单份营养素的食物，那就直接返回日志页面。
+        trailing: IconButton(
+          onPressed: () async {
+            var tempStr =
+                mealtimeList.firstWhere((e) => e.value == currentMealtime);
+
+            // ？？？这里应该有插入是否成功的判断
+            var rst = await _dietaryHelper.insertDailyFoodItemList(
+              [
+                DailyFoodItem(
+                  date: currentDate,
+                  mealCategory: tempStr.enLabel,
+                  foodId: food.foodId!,
+                  servingInfoId: fistServingInfo.servingInfoId!,
+                  foodIntakeSize: fistServingInfo.servingSize.toDouble(),
+                  userId: CacheUser.userId,
+                  gmtCreate: getCurrentDateTime(),
+                )
               ],
+            );
+
+            print("tempStr.enLabel----${tempStr.enLabel}");
+            if (!mounted) return;
+            if (rst.isNotEmpty) {
+              // 返回餐次，让主页面展开新增的那个折叠栏
+              Navigator.of(context).pop(tempStr.enLabel);
+            } else {
+              Navigator.of(context).pop(tempStr.enLabel);
+            }
+          },
+          icon: const Icon(Icons.add, color: Colors.blue),
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SimpleFoodDetail(
+                foodItem: item,
+                mealtime: currentMealtime,
+                logDate: currentDate,
+              ),
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: foodItems.length + 1,
-              itemBuilder: (context, index) {
-                if (index == foodItems.length) {
-                  return buildLoader(isLoading);
-                } else {
-                  var food = foodItems[index].food;
-                  var foodName = "${food.product}\n(${food.brand})";
-
-                  var fistServingInfo = foodItems[index].servingInfoList[0];
-                  var foodUnit = fistServingInfo.servingUnit;
-                  var foodEnergy = (foodItems[index].servingInfoList[0].energy /
-                          constants.oneCalToKjRatio)
-                      .toStringAsFixed(2);
-
-                  return Card(
-                    elevation: 2,
-                    child: ListTile(
-                      // 食物名称
-                      title: Text(
-                        foodName,
-                        // style: TextStyle(fontSize: 14.sp),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      // 单份食物营养素
-                      subtitle: Text("$foodUnit - $foodEnergy 大卡"),
-                      // 点击这个添加就是默认添加单份营养素的食物，那就直接返回日志页面。
-                      trailing: IconButton(
-                        onPressed: () async {
-                          var tempStr = mealtimeList
-                              .firstWhere((e) => e.value == currentMealtime);
-                          // 如果没有当前日，则完全新增
-                          var dailyFoodItem = DailyFoodItem(
-                            date: currentDate,
-                            mealCategory: tempStr.enLabel,
-                            foodId: foodItems[index].food.foodId!,
-                            servingInfoId: fistServingInfo.servingInfoId!,
-                            foodIntakeSize:
-                                fistServingInfo.servingSize.toDouble(),
-                            userId: CacheUser.userId,
-                            gmtCreate: getCurrentDateTime(),
-                          );
-
-                          // ？？？这里应该有插入是否成功的判断
-                          var rst = await _dietaryHelper
-                              .insertDailyFoodItemList([dailyFoodItem]);
-
-                          print("tempStr.enLabel----${tempStr.enLabel}");
-                          if (!mounted) return;
-                          if (rst.isNotEmpty) {
-                            // 返回餐次，让主页面展开新增的那个折叠栏
-                            Navigator.of(context).pop(tempStr.enLabel);
-                          } else {
-                            Navigator.of(context).pop(tempStr.enLabel);
-                          }
-                        },
-                        icon: const Icon(Icons.add, color: Colors.blue),
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SimpleFoodDetail(
-                              foodItem: foodItems[index],
-                              mealtime: currentMealtime,
-                              logDate: currentDate,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                }
-              },
-              controller: scrollController,
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

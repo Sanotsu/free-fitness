@@ -75,19 +75,8 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     CusDataResult temp = await _searchExercise();
     List<Exercise> newData = temp.data as List<Exercise>;
 
-    // 模拟加载耗时一秒，以明显看到加载圈（实际用删除）
-    // await Future.delayed(const Duration(milliseconds: 200));
-
     // 如果没有更多数据，则在底部显示
     if (newData.isEmpty) {
-      // 显示 "没有更多" 的信息
-      // if (!mounted) return;
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   const SnackBar(
-      //     content: Center(child: Text("没有更多")),
-      //     duration: Duration(seconds: 2),
-      //   ),
-      // );
       // 如果没有更多数据就回弹一下
       scrollController.animateTo(
         scrollController.position.pixels - 100, // 回弹的距离
@@ -107,16 +96,11 @@ class _TrainingExerciseState extends State<TrainingExercise> {
   // 如果是有用户的查询条件，则使用查询条件进行查询（查询条件表单返回的值）；如果没有，则默认查询所有
   _searchExercise() async {
     if (queryConditon == null) {
-      print("queryConditon is null");
-
-      // 总数量放在这里不优雅，但会更新，还行
       return await _dbHelper.queryExercise(
         pageSize: pageSize,
         page: currentPage,
       );
     } else {
-      print("queryConditon i不是s null $queryConditon");
-
       // 从 queryMap 中获取对应的值
       int? exerciseId = queryConditon?['exercise_id'];
       String? exerciseCode = queryConditon?['exercise_code'];
@@ -207,14 +191,15 @@ class _TrainingExerciseState extends State<TrainingExercise> {
         actions: [
           /// 导入json文件
           IconButton(
+            icon: const Icon(Icons.import_export),
             onPressed: clickExerciseImport,
             style: ButtonStyle(
               foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
             ),
-            icon: const Icon(Icons.import_export),
           ),
+          // 新增单个动作
           IconButton(
-            icon: Icon(Icons.add, size: 30.sp),
+            icon: const Icon(Icons.add),
             style: ButtonStyle(
               foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
             ),
@@ -222,14 +207,12 @@ class _TrainingExerciseState extends State<TrainingExercise> {
               if (!mounted) return;
               final result = await Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (BuildContext ctx) {
-                    return const ExerciseModify();
-                  },
+                  builder: (BuildContext ctx) => const ExerciseModify(),
                 ),
               );
 
-              // 如果新增基础活动成功，会有指定返回值。这里拿到之后，加载最新的活动列表
-              // ？？？2023-11-05 这里的新增和下面的展开详情的修改之后返回列表页面，都可以考虑直接重新加载页面，不管子组件返回值
+              // 2023-11-05 这里的新增和下面的展开详情的修改之后返回列表页面，
+              // 都可以考虑直接重新加载页面，不管子组件返回值
               if (result != null) {
                 setState(() {
                   exerciseItems.clear();
@@ -357,21 +340,21 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           });
         },
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox(
               width: 0.4.sw,
               height: 0.3.sh,
               child: buildExerciseImageCarouselSlider(exerciseItem),
             ),
-
-            // SizedBox(width: 0.1.sw),
             Expanded(
+              flex: 3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: EdgeInsets.all(10.sp),
+                    padding: EdgeInsets.fromLTRB(10.sp, 0, 0, 5.sp),
                     child: Text(
                       "${index + 1} ${exerciseItem.exerciseName}",
                       overflow: TextOverflow.ellipsis,
@@ -402,7 +385,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     var label = options
         .firstWhere(
           (element) => element.value == item,
-          orElse: () => CusLabel(cnLabel: '无数据', enLabel: 'No Data', value: ''),
+          orElse: () => CusLabel(cnLabel: '[无]', enLabel: 'No Data', value: ''),
         )
         .cnLabel;
 

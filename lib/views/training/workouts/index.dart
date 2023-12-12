@@ -95,7 +95,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
         title: RichText(
           text: TextSpan(
             children: [
-              TextSpan(text: '训练组    ', style: TextStyle(fontSize: 20.sp)),
+              TextSpan(text: '训练组\n', style: TextStyle(fontSize: 20.sp)),
               TextSpan(
                 text: "共 ${groupList.length} 个",
                 style: TextStyle(fontSize: 12.sp),
@@ -163,6 +163,11 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                       onPressed: () {
                         setState(() {
                           _queryFormKey.currentState?.reset();
+                          // 2023-12-12 不知道为什么，reset对下拉选中的没有效，所以手动清除
+                          _queryFormKey.currentState?.fields['group_category']
+                              ?.didChange(null);
+                          _queryFormKey.currentState?.fields['group_level']
+                              ?.didChange(null);
                           conditionMap = {};
                           getGroupList();
                         });
@@ -265,12 +270,26 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            subtitle: Text(
-              "${groupItem.group.groupCategory}-${groupItem.group.groupLevel}-${groupItem.actionDetailList.length}",
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
-              ),
+            // subtitle: Text(
+            //   "${groupItem.group.groupCategory}-${groupItem.group.groupLevel}-${groupItem.actionDetailList.length}",
+            //   style: TextStyle(
+            //     fontSize: 16.sp,
+            //     fontWeight: FontWeight.w500,
+            //   ),
+            // ),
+
+            subtitle: Row(
+              children: [
+                _propertyText(
+                  groupItem.group.groupCategory,
+                  options: groupCategoryOptions,
+                ),
+                _propertyText(
+                  groupItem.group.groupLevel,
+                  options: levelOptions,
+                ),
+                _propertyText("共${groupItem.actionDetailList.length}个动作"),
+              ],
             ),
             // 2023-11-23 如果是计划新增训练跳转来的,则不允许修改已有的训练或者新增训练，还是严格各自模块去完成各自的内容。
             // 如果说需要计划新增训练时可以再新增训练或者修改指定训练，则不做下面这个限制
@@ -430,6 +449,29 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
           ],
         );
       },
+    );
+  }
+
+  _propertyText(String item, {List<CusLabel>? options}) {
+    // 有传对应列表，才根据数据库存的是英文，这里找到对应的中文显示；否则直接显示
+    var label = options
+            ?.firstWhere(
+              (element) => element.value == item,
+              orElse: () =>
+                  CusLabel(cnLabel: '[无]', enLabel: 'No Data', value: ''),
+            )
+            .cnLabel ??
+        item;
+
+    return Padding(
+      padding: EdgeInsets.only(right: 10.sp),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 }

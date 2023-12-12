@@ -77,7 +77,7 @@ class Exercise {
       secondaryMuscles: map['secondary_muscles'] as String?,
       images: map['images'] as String?,
       // ？？？明明sql语句设置了默认值，但是不传还是null
-      isCustom: map['is_custom'] as bool?,
+      isCustom: bool.tryParse(map['is_custom'].toString()) ?? false,
       contributor: map['contributor'] as String?,
       gmtCreate: map['gmt_create'] as String?,
       gmtModified: map['gmt_modified'] as String?,

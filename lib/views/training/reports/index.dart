@@ -360,12 +360,12 @@ class _TrainingReportsState extends State<TrainingReports> {
                 SizedBox(height: 20.sp),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Text("上次运动日期: "),
                     Text(
                       data.first.log.trainedDate,
-                      style: TextStyle(
-                        fontSize: 20.sp,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w300,
                         color: Colors.green,
                       ),
@@ -383,8 +383,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                           : data.first.group?.groupName ?? "",
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 20.sp,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w300,
                         color: Colors.green,
                       ),
@@ -393,12 +392,12 @@ class _TrainingReportsState extends State<TrainingReports> {
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Text("上次运动用时: "),
                     Text(
                       "${(data.first.log.trainedDuration / 60).toStringAsFixed(1)} 分钟",
-                      style: TextStyle(
-                        fontSize: 20.sp,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w300,
                         color: Colors.green,
                       ),

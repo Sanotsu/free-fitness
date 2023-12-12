@@ -183,7 +183,7 @@ class _ActionListState extends State<ActionList> {
             text: TextSpan(
               children: [
                 TextSpan(
-                    text: '${widget.groupItem.groupName} ',
+                    text: '${widget.groupItem.groupName}\n',
                     style: TextStyle(fontSize: 20.sp)),
                 TextSpan(
                   text: " 共 ${actionList.length} 个动作",

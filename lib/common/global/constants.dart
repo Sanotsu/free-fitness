@@ -16,10 +16,10 @@ const double oneCalToKjRatio = 4.18400;
 const String placeholderImageUrl = 'assets/images/no_image.png';
 const String dietaryLogCoverImageUrl = 'assets/covers/dietary-log-cover.jpg';
 const String dietaryNutritionImageUrl = 'assets/covers/dietary-nutrition.jpg';
-const String workoutManImageUrl = 'assets/covers/workout-man.png';
-const String workoutWomanImageUrl = 'assets/covers/workout-woman.png';
-const String workoutCalendarImageUrl =
-    'assets/covers/workout-calendar-dark.png';
+const String dietaryMealImageUrl = 'assets/covers/dietary-meal-food.jpg';
+const String workoutManImageUrl = 'assets/covers/workout-man.jpg';
+const String workoutWomanImageUrl = 'assets/covers/workout-woman.jpg';
+const String workoutCalendarImageUrl = 'assets/covers/workout-calendar.jpg';
 
 /// 导入的图片默认的地址前缀
 /// (安卓的话指定位置.../DCIM/free-fitness/exercise-images/)下才能读到图片文件
@@ -262,6 +262,23 @@ Map<CusMeals, CusLabel> mealNameMap = {
   ),
 };
 
+// 2023-12-12
+// 有特别多的地方是为了取得mealNameMap的enLabel来做判断，取值都比较麻烦
+// 现在简单用这个静态类来做(以前不太会，现在可能慢慢替代那些map)
+class MealLabels {
+  // 添加一个私有构造函数以防止此类被实例化
+  MealLabels._();
+  // 属性是静态的，因此我们可以在没有类实例的情况下使用它们
+  static const String enBreakfast = 'breakfast';
+  static const String enLunch = 'lunch';
+  static const String enDinner = 'dinner';
+  static const String enOther = 'other';
+  static const String cnBreakfast = '早餐';
+  static const String cnLunch = '午餐';
+  static const String cnDinner = '晚餐';
+  static const String cnOther = "小食";
+}
+
 Map<int, CusLabel> weekdayStringMap = {
   1: CusLabel(enLabel: "Mon", cnLabel: "周一", value: "monday"),
   2: CusLabel(enLabel: "Tue", cnLabel: "周二", value: "tuesday"),
@@ -320,6 +337,7 @@ List<CusLabel> forceOptions = [
   CusLabel(enLabel: '', cnLabel: "拉", value: 'pull'),
   CusLabel(enLabel: '', cnLabel: "推", value: 'push'),
   CusLabel(enLabel: '', cnLabel: "静", value: 'static'),
+  CusLabel(enLabel: '', cnLabel: "其他", value: 'other'),
 ];
 
 List<CusLabel> levelOptions = [
@@ -343,6 +361,7 @@ List<CusLabel> categoryOptions = [
   CusLabel(enLabel: '', cnLabel: "大力士", value: 'strongman'),
   CusLabel(enLabel: '', cnLabel: "有氧", value: 'cardio'),
   CusLabel(enLabel: '', cnLabel: "无氧", value: 'anaerobic'),
+  CusLabel(enLabel: '', cnLabel: "其他", value: 'other'),
 ];
 
 // 训练组的分类示例(？？？可以考虑也用上面那一个？)
@@ -350,6 +369,7 @@ List<CusLabel> groupCategoryOptions = [
   CusLabel(enLabel: 'chest training', cnLabel: "练胸", value: 'chest_training'),
   CusLabel(enLabel: 'arm training', cnLabel: "练臂", value: 'arm_training'),
   CusLabel(enLabel: 'slimming', cnLabel: "减肥", value: 'slimming'),
+  CusLabel(enLabel: '', cnLabel: "其他", value: 'other'),
 ];
 
 List<CusLabel> equipmentOptions = [
@@ -398,6 +418,7 @@ final List<CusLabel> musclesOptions = [
   CusLabel(enLabel: '', cnLabel: "内收肌", value: 'adductors'),
   CusLabel(enLabel: '', cnLabel: "展肌", value: 'abductors'),
   CusLabel(enLabel: '', cnLabel: "脖子", value: 'neck'),
+  CusLabel(enLabel: '', cnLabel: "其他", value: 'other'),
 ];
 
 List<String> cnLabelList = mealNameMap.values.map((cl) => cl.cnLabel).toList();
@@ -501,6 +522,7 @@ List<CusLabel> diaryMoodList = [
   CusLabel(enLabel: "Disgust", cnLabel: "厌恶", value: "disgust"),
   CusLabel(enLabel: "Surprise", cnLabel: "惊奇", value: "surprise"),
   CusLabel(enLabel: "Envy", cnLabel: "羡慕", value: "envy"),
+  CusLabel(enLabel: 'Unknown', cnLabel: "其他", value: 'other'),
 ];
 
 // 手记中的分类标签选择项
@@ -518,6 +540,7 @@ List<CusLabel> diaryCategoryList = [
   CusLabel(enLabel: "Notes", cnLabel: "备忘", value: "notes"),
   CusLabel(enLabel: "Script", cnLabel: "剧本", value: "script"),
   CusLabel(enLabel: "Emotion", cnLabel: "情感", value: "emotion"),
+  CusLabel(enLabel: 'Unknown', cnLabel: "其他", value: 'other'),
 ];
 
 // 导出是可下拉选择的值

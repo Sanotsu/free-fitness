@@ -96,10 +96,10 @@ class _HomePageState extends State<HomePage> {
           currentIndex: _selectedIndex,
           // 底部导航栏的颜色
           // backgroundColor: dartThemeMaterialColor3,
-          backgroundColor: Theme.of(context).primaryColor,
-          // 被选中的item的图标颜色和文本颜色
-          selectedIconTheme: const IconThemeData(color: Colors.white),
-          selectedItemColor: Colors.white,
+          // backgroundColor: Theme.of(context).primaryColor,
+          // // 被选中的item的图标颜色和文本颜色
+          // selectedIconTheme: const IconThemeData(color: Colors.white),
+          // selectedItemColor: Colors.white,
           onTap: _onItemTapped,
         ),
       ),

@@ -148,6 +148,12 @@ class _TrainingPlansState extends State<TrainingPlans> {
                       onPressed: () {
                         setState(() {
                           _queryFormKey.currentState?.reset();
+                          // 2023-12-12 不知道为什么，reset对下拉选中的没有效，所以手动清除
+                          _queryFormKey.currentState?.fields['plan_category']
+                              ?.didChange(null);
+                          _queryFormKey.currentState?.fields['plan_level']
+                              ?.didChange(null);
+
                           conditionMap = {};
                           getPlanList();
                         });

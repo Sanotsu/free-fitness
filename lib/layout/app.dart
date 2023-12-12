@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -54,8 +55,21 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
             primarySwatch: Colors.blue,
             // ？？？2023-11-22：升级到flutter 3.16 之后默认为true，现在还没有兼容修改部件，后续再启用
             useMaterial3: false,
+            appBarTheme: AppBarTheme(
+              color: Colors.blue,
+              iconTheme: const IconThemeData(color: Colors.white),
+              titleTextStyle: TextStyle(fontSize: 20.sp),
+            ),
           ),
+          // theme: lightTheme,
+          // theme: darkTheme,
 
+          // theme: FlexThemeData.light(
+          //   scheme: FlexScheme.aquaBlue,
+          // ),
+          darkTheme: FlexThemeData.dark(scheme: FlexScheme.mandyRed),
+          // 根据系统设置使用深色或浅色主题
+          themeMode: ThemeMode.light,
           initialRoute: '/',
 
           /// routes 和 onGenerateRoute 这两个属性执行相同的操作，都为了命名路由使用，首先检查 routes

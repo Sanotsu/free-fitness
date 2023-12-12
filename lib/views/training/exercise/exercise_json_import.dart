@@ -243,7 +243,8 @@ Ab_Roller.json:
         mechanic: e.mechanic,
         equipment: e.equipment,
         standardDuration: int.tryParse(e.standardDuration ?? "1") ?? 1,
-        instructions: e.instructions?.join(","),
+        // json描述是字符串数组，直接用换行符拼接
+        instructions: e.instructions?.join("\n\n"),
         ttsNotes: e.ttsNotes,
         primaryMuscles: e.primaryMuscles?.join(","),
         secondaryMuscles: e.secondaryMuscles?.join(","),
@@ -252,7 +253,7 @@ Ab_Roller.json:
         images:
             e.images?.map((e) => cusExerciseImagePerfix + e).toList().join(","),
         // 导入json都为true则可以读取相册中对应位置的图片
-        isCustom: bool.tryParse(e.isCustom ?? 'true') ?? true,
+        isCustom: true,
         contributor: CacheUser.userName,
         gmtCreate: getCurrentDateTime(),
       );
@@ -274,14 +275,12 @@ Ab_Roller.json:
     }
     // 保存完了，情况数据，并弹窗提示。
     setState(() {
-      setState(() {
-        jsons = [];
-        cusExercises = [];
-        // 更新需要构建的表格的长度和每条数据的可选中状态
-        exerciseItemsNum = 0;
-        exerciseSelectedList = [false];
-        isLoading = false;
-      });
+      jsons = [];
+      cusExercises = [];
+      // 更新需要构建的表格的长度和每条数据的可选中状态
+      exerciseItemsNum = 0;
+      exerciseSelectedList = [false];
+      isLoading = false;
     });
 
     if (!mounted) return;
@@ -314,13 +313,12 @@ Ab_Roller.json:
             onPressed: cusExercises.isNotEmpty ? _saveToDb : null,
             icon: Icon(
               Icons.save,
-              color: cusExercises.isNotEmpty ? Colors.white : Colors.black87,
+              color: cusExercises.isNotEmpty ? Colors.white : Colors.grey,
             ),
             label: Text(
               "保存",
               style: TextStyle(
-                fontSize: 20.sp,
-                color: cusExercises.isNotEmpty ? Colors.white : Colors.black87,
+                color: cusExercises.isNotEmpty ? Colors.white : Colors.grey,
               ),
             ),
           ),
@@ -388,7 +386,11 @@ Ab_Roller.json:
                       exerciseSelectedList = [false];
                     });
                   },
-                  icon: Icon(Icons.clear, size: 25.sp, color: Colors.blue),
+                  icon: Icon(
+                    Icons.clear,
+                    size: 25.sp,
+                    color: cusExercises.isNotEmpty ? Colors.blue : Colors.grey,
+                  ),
                 ),
               ),
             ],

@@ -1,11 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-
     <application
         android:label="Free Fitness"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- 原来是安卓10开始，要想访问外部存储的所有文件,还需要requestLegacyExternalStorage权限 
+         Android9或更低则单独 WRITE_EXTERNAL_STORAGE 即可
+         -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -13,6 +14,7 @@
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
+            android:requestLegacyExternalStorage="true"
             android:windowSoftInputMode="adjustResize">
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
