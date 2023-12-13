@@ -7,6 +7,7 @@ import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../models/dietary_state.dart';
 import '../../../common/utils/tools.dart';
+import '../foods/detail_modify_serving_info.dart';
 
 /// 2023-12-04 这个是饮食条目选择食物的时候展示的食物列表，点击之后显示的食物详情；
 /// 和单独的“食物成分”模块不一样，显示的内容更少些，主要是选择餐次、单份营养素种类和添加食物摄入数量而已
@@ -39,6 +40,9 @@ class SimpleFoodDetail extends StatefulWidget {
 class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
 
+  // 2023-12-13 传入的食物详细数据(因为有新增单位，可能需要修改食物详情信息)
+  late FoodAndServingInfo fsInfo;
+
   final _formKey = GlobalKey<FormBuilderState>();
 
   // 食物营养素单位选项
@@ -59,6 +63,11 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   void initState() {
     super.initState();
 
+    setState(() {
+      // 因为有新增单位，可能需要修改食物详情信息，所以使用单独的变量
+      fsInfo = widget.foodItem;
+    });
+
     // ---这里显示的摄入量和单位（营养素的食物单份数据）根据来源不同，取值也不同
     // 新增的时候，一个食物有多种单份营养素，默认取第一个
     // 修改的时候，fdlr中有对应的serving info  和摄入量的值
@@ -69,41 +78,43 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   // 可能存在1种食物多个营养素单份单位，默认取第一个用于显示
   // --- 这个是food list选择指定food之后的显示值处理
   _getDefaulFoodServingInfo() {
-    var temp = widget.foodItem.servingInfoList;
-    // 默认给传入的食物的第一个营养素信息，daily log 主页面传入时会修改为指定的
-    nutrientsInfo = temp[0];
+    setState(() {
+      // 默认给传入的食物的第一个营养素信息，daily log 主页面传入时会修改为指定的
+      nutrientsInfo = fsInfo.servingInfoList[0];
 
-    // 1 如果有饮食日记条目详情，则是log index 跳转的修改或删除
-    if (widget.dfiwfs != null) {
-      // 有传入的数据就用传入的
-      nutrientsInfo = widget.dfiwfs!.servingInfo;
-      inputServingValue = widget.dfiwfs!.dailyFoodItem.foodIntakeSize;
-      inputServingUnit = nutrientsInfo.servingUnit;
-      // 构建初始的目标餐次(移除或修改时不会单独传日期和餐次的)
-      inputMealtimeValue = mealtimeList.firstWhere(
-          (e) => e.enLabel == widget.dfiwfs!.dailyFoodItem.mealCategory);
-    } else {
-      // 2 如果没有饮食日记条目详情，则是food list跳转的新增
-      // 构建初始化值
-      // 没有传入的数据就用列表第一个
-      inputServingValue = (nutrientsInfo.servingSize).toDouble();
-      inputServingUnit = nutrientsInfo.servingUnit;
-      // 构建初始的目标餐次
-      inputMealtimeValue =
-          mealtimeList.firstWhere((e) => e.value == widget.mealtime);
-    }
+      // 1 如果有饮食日记条目详情，则是log index 跳转的修改或删除
+      if (widget.dfiwfs != null) {
+        // 有传入的数据就用传入的
+        nutrientsInfo = widget.dfiwfs!.servingInfo;
+        inputServingValue = widget.dfiwfs!.dailyFoodItem.foodIntakeSize;
+        inputServingUnit = nutrientsInfo.servingUnit;
+        // 构建初始的目标餐次(移除或修改时不会单独传日期和餐次的)
+        inputMealtimeValue = mealtimeList.firstWhere(
+            (e) => e.enLabel == widget.dfiwfs!.dailyFoodItem.mealCategory);
+      } else {
+        // 2 如果没有饮食日记条目详情，则是food list跳转的新增
+        // 构建初始化值
+        // 没有传入的数据就用列表第一个
+        inputServingValue = (nutrientsInfo.servingSize).toDouble();
+        inputServingUnit = nutrientsInfo.servingUnit;
+        // 构建初始的目标餐次
+        inputMealtimeValue =
+            mealtimeList.firstWhere((e) => e.value == widget.mealtime);
+      }
 
-    // 构建可选单位列表(不管是新增还是修改，对应食物的单份营养素列表都一样)
-    for (var info in temp) {
-      servingUnitOptions.add(info.servingUnit);
-    }
+      // 构建可选单位列表(不管是新增还是修改，对应食物的单份营养素列表都一样)
+      servingUnitOptions.clear();
+      for (var info in fsInfo.servingInfoList) {
+        servingUnitOptions.add(info.servingUnit);
+      }
+    });
   }
 
   // 修改了摄入量数值和单位，都要重新计算用于显示的营养素信息(这里是重新获取修改后的营养素单位)
   _recalculateNutrients() {
     //  ？？？注意，如果这里没有匹配的，肯定是哪里出问题了
     // 从用户输入的单份食物单位，找到对应的营养素信息
-    var metricServing = widget.foodItem.servingInfoList
+    var metricServing = fsInfo.servingInfoList
         .where((e) => e.servingUnit == inputServingUnit)
         .first;
 
@@ -149,7 +160,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
       // 主键数据库自增
       date: widget.logDate!,
       mealCategory: inputMealtimeValue.enLabel,
-      foodId: widget.foodItem.food.foodId!,
+      foodId: fsInfo.food.foodId!,
       servingInfoId: nutrientsInfo.servingInfoId!,
       foodIntakeSize: inputServingValue,
       userId: CacheUser.userId,
@@ -175,6 +186,36 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
       // 这个会返回到最初的页面(及打开app的第一级)
       // Navigator.of(context).popUntil((route) => route.isFirst);
     }
+  }
+
+  // 点击添加新单位，默认就一定是客制化的单位
+  addNewCusServingInfo() {
+    // 因为默认有选中新增单份营养素的类型，所以返回true确认新增时，一定有该type
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailModifyServingInfo(
+          food: fsInfo.food,
+          // 默认是客制化的单位
+          servingType: servingTypeList.last,
+        ),
+      ),
+    ).then((value) async {
+      // 返回单份营养素新增成功的话重新查询当前食物详情数据
+      if (value != null && value == true) {
+        var newItem = await _dietaryHelper.searchFoodWithServingInfoByFoodId(
+          fsInfo.food.foodId!,
+        );
+
+        if (newItem != null) {
+          setState(() {
+            // 更新当前食物的单份营养素列表
+            fsInfo = newItem;
+            _getDefaulFoodServingInfo();
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -214,7 +255,6 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
             buildNutrientTableArea(),
             // 详细营养素区域
             buildAllNutrientTableArea(),
-            buildAllNutrientCardArea(),
           ],
         ),
       ),
@@ -247,7 +287,6 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
               });
             },
           ),
-          SizedBox(height: 5.sp),
           Row(
             children: [
               Expanded(
@@ -280,9 +319,8 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
               Expanded(
                 flex: 2,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: addNewCusServingInfo,
                   // 2023-10-21 应该也是跳转到新增food的表单，但是可能是修改或新增已有的营养素子栏位，食物信息不变化
-                  // 这里的sql方法好像还没有
                   child: const Text("添加新单位?"),
                 ),
               )
@@ -361,10 +399,8 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
         ),
         DecoratedBox(
-          decoration: const BoxDecoration(
-            color: Colors.grey, // 设置背景色
-            // 其他背景样式，例如渐变等
-          ),
+          // 设置背景色
+          decoration: BoxDecoration(color: Colors.grey[300]),
           child: Table(
             border: TableBorder.all(),
             columnWidths: const <int, TableColumnWidth>{
@@ -377,13 +413,11 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
                 children: <Widget>[
                   _genEssentialNutrientsTableCell(
                     "卡路里",
-                    "${(inputServingValue * nutrientsInfo.energy / oneCalToKjRatio).toStringAsFixed(2)} 大卡",
+                    '${cusDoubleToString(inputServingValue * nutrientsInfo.energy / oneCalToKjRatio)} 大卡',
                   ),
                   _genEssentialNutrientsTableCell(
                     "碳水化合物",
-                    formatNutrientValue(
-                      inputServingValue * nutrientsInfo.totalCarbohydrate,
-                    ),
+                    '${cusDoubleToString(inputServingValue * nutrientsInfo.totalCarbohydrate)} 克',
                   ),
                 ],
               ),
@@ -391,15 +425,11 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
                 children: <Widget>[
                   _genEssentialNutrientsTableCell(
                     "脂肪",
-                    formatNutrientValue(
-                      inputServingValue * nutrientsInfo.totalFat,
-                    ),
+                    '${cusDoubleToString(inputServingValue * nutrientsInfo.totalFat)} 克',
                   ),
                   _genEssentialNutrientsTableCell(
                     "蛋白质",
-                    formatNutrientValue(
-                      inputServingValue * nutrientsInfo.protein,
-                    ),
+                    '${cusDoubleToString(inputServingValue * nutrientsInfo.protein)} 克',
                   ),
                 ],
               ),
@@ -414,7 +444,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
     return TableCell(
       verticalAlignment: TableCellVerticalAlignment.middle,
       child: Padding(
-        padding: EdgeInsets.all(10.sp),
+        padding: EdgeInsets.all(5.sp),
         child: Center(
           child: RichText(
             textAlign: TextAlign.center,
@@ -422,15 +452,14 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
               children: [
                 TextSpan(
                   text: '$title\n', // 没有这个换行符两个会放到一行来
-                  style: TextStyle(
-                    color: Theme.of(context).canvasColor,
-                  ),
+                  style: const TextStyle(color: Colors.black),
                 ),
                 TextSpan(
                   text: value,
                   style: TextStyle(
-                    color: Theme.of(context).canvasColor,
-                  ),
+                      color: Colors.black,
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -571,146 +600,6 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
             textAlign: TextAlign.right,
           ),
         ),
-      ],
-    );
-  }
-
-  /// 构建全部营养素信息卡片区域
-  /// 这个更复杂点
-  buildAllNutrientCardArea() {
-    return Column(
-      children: [
-        Text(
-          "全部营养信息",
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-        ),
-        _genAllNutrientsCard(),
-      ],
-    );
-  }
-
-  _genAllNutrientsCard() {
-    var nutrientValues = {
-      // '食用量': '$inputServingValue X ${inputServingUnit}',
-      // '卡路里': inputServingValue * nutrientsInfo.energy,
-      '蛋白质': inputServingValue * nutrientsInfo.protein,
-      '脂肪': inputServingValue * nutrientsInfo.totalFat,
-      '碳水化合物': inputServingValue * nutrientsInfo.totalCarbohydrate,
-      '钠': inputServingValue * nutrientsInfo.sodium,
-      '胆固醇': nutrientsInfo.cholesterol != null
-          ? inputServingValue * nutrientsInfo.cholesterol!
-          : 0.0,
-      '钾': nutrientsInfo.potassium != null
-          ? inputServingValue * nutrientsInfo.potassium!
-          : 0.0,
-    };
-
-    var subtitles = {
-      // '卡路里': [
-      //   {'': nutrientsInfo.energy / 1000},
-      // ],
-      '脂肪': [
-        {'反式脂肪': nutrientsInfo.transFat},
-        {'多不饱和脂肪': nutrientsInfo.polyunsaturatedFat},
-        {'单不饱和脂肪': nutrientsInfo.monounsaturatedFat},
-        {'饱和脂肪': nutrientsInfo.saturatedFat},
-      ],
-      '碳水化合物': [
-        {'糖': nutrientsInfo.sugar},
-        {'纤维': nutrientsInfo.dietaryFiber},
-      ],
-    };
-
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          // 食用量和能量(卡路里)这两个比较特殊，单独处理
-          _buildCard(
-            "食用量",
-            '${inputServingValue.toStringAsFixed(2)} X $inputServingUnit',
-          ),
-          _buildCard(
-            "卡路里",
-            '${(inputServingValue * nutrientsInfo.energy).toStringAsFixed(2)} 千焦',
-            [
-              Row(
-                children: [
-                  const Expanded(child: Text("")),
-                  // 子行的单位都是克，不用传其他参数
-                  Text(
-                    "${(inputServingValue * nutrientsInfo.energy / oneCalToKjRatio).toStringAsFixed(2)} 大卡",
-                  ),
-                ],
-              )
-            ],
-          ),
-          // 除了食用量和能力行之外，其他处理都一样
-          ...nutrientValues.entries.map((entry) {
-            var title = entry.key;
-            var value = entry.value;
-
-            List<Widget>? subtitleRows;
-
-            if (subtitles.containsKey(title)) {
-              subtitleRows = subtitles[title]!
-                  .where((subtitle) => subtitle.values.first != null)
-                  .map((subtitle) => buildSubtitleRow(
-                      subtitle.keys.first, subtitle.values.first))
-                  .toList();
-            }
-
-            return _buildCard(
-                title,
-                formatNutrientValue(
-                  value,
-                  isCalories: title == '卡路里',
-                  isMilligram: ["钠", "胆固醇", "钾"].contains(title),
-                ),
-                subtitleRows);
-          }).toList()
-        ],
-      ),
-    );
-  }
-
-  // 能量栏位也单独处理的话这里不用格式化千焦和大卡了
-  String formatNutrientValue(
-    double value, {
-    bool isCalories = false, // 是否是卡路里（默认显示克，大卡和毫克要指定）
-    bool isMilligram = false, // 是否是毫克
-  }) {
-    final formattedValue = value.toStringAsFixed(2);
-    return isCalories
-        ? '$formattedValue 千焦'
-        : isMilligram
-            ? '$formattedValue 毫克'
-            : '$formattedValue 克';
-  }
-
-  //  构建卡片
-  Widget _buildCard(String title, String value, [List<Widget>? subtitleRows]) {
-    return Card(
-      child: ListTile(
-        title: Row(
-          children: [
-            Expanded(child: Text(title)),
-            Text(value),
-          ],
-        ),
-        subtitle: (subtitleRows != null && subtitleRows.isNotEmpty)
-            ? Column(children: subtitleRows)
-            : null,
-      ),
-    );
-  }
-
-  // 构建卡片中ListTile的子标题部件
-  Widget buildSubtitleRow(String title, double? value) {
-    return Row(
-      children: [
-        Expanded(child: Text(title)),
-        // 子行的单位都是克，不用传其他参数
-        Text(formatNutrientValue(inputServingValue * value!)),
       ],
     );
   }

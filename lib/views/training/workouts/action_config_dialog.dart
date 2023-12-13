@@ -148,7 +148,7 @@ void showConfigDialog(
                       ),
                     ],
                     // 打开数字键盘
-                    keyboardType: TextInputType.name,
+                    keyboardType: TextInputType.number,
                   ),
                 ),
               ],

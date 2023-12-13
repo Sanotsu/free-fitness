@@ -75,7 +75,7 @@ class _DetailModifyServingInfoState extends State<DetailModifyServingInfo> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('新增单份营养素'),
+        title: const Text('编辑单份营养素'),
       ),
       body: ListView(
         children: [

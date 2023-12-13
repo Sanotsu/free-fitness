@@ -314,6 +314,10 @@ MaterialApp(
 
 **改为`keyboardType: TextInputType.name`可以启用正常键盘。**
 
+**2023-12-13 但是无法换行！！**
+
+这应该是 form_builder 工具库的一个 bug，新版本不兼容问题。查看 issue: https://github.com/flutter-form-builder-ecosystem/flutter_form_builder/issues/1334
+
 7. Chip 部件的默认高度
 
 对于 chip 也有设置默认 MaterialTapTargetSize.padded, 也就是说 chip 有个最小高度 48px。
