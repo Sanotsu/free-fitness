@@ -166,6 +166,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
       FormBuilderTextField(
         name: "user_name",
         readOnly: !isEditing,
+        enabled: isEditing,
         decoration: InputDecoration(
           labelText: "用户名",
           border: !isEditing ? InputBorder.none : null,
@@ -178,6 +179,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
       FormBuilderTextField(
         name: "user_code",
         readOnly: !isEditing,
+        enabled: isEditing,
         decoration: InputDecoration(
           labelText: "用户代号",
           border: !isEditing ? InputBorder.none : null,
@@ -243,6 +245,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
     return FormBuilderTextField(
       name: name,
       readOnly: !isEditing,
+      enabled: isEditing,
       decoration: InputDecoration(
         labelText: labelText,
         suffixText: suffixText,

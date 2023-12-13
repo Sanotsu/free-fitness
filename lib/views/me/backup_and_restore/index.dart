@@ -93,7 +93,11 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
       });
 
       if (!mounted) return;
-      showSnackMessage(context, "已经保存到 $selectedDirectory");
+      showSnackMessage(
+        context,
+        "已经保存到 $selectedDirectory",
+        backgroundColor: Colors.green,
+      );
     } else {
       print('保存操作已取消');
       return;
@@ -250,7 +254,11 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
           });
 
           if (!mounted) return;
-          showSnackMessage(context, "原有数据已删除，备份数据已恢复。");
+          showSnackMessage(
+            context,
+            "原有数据已删除，备份数据已恢复。",
+            backgroundColor: Colors.green,
+          );
         } catch (e) {
           // 弹出报错提示框
           if (!mounted) return;
@@ -341,52 +349,55 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('备份恢复'),
-      ),
-      body: Center(
-        child: Column(
-          children: [
-            TextButton.icon(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text('全量备份'),
-                      content: const Text("确认导出所有数据?"),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            if (!mounted) return;
-                            Navigator.pop(context, false);
-                          },
-                          child: const Text('取消'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            if (!mounted) return;
-                            Navigator.pop(context, true);
-                          },
-                          child: const Text('确认'),
-                        ),
-                      ],
-                    );
-                  },
-                ).then((value) {
-                  if (value != null && value) _exportAllData();
-                });
-              },
-              icon: const Icon(Icons.backup),
-              label: Text("备份", style: TextStyle(fontSize: 20.sp)),
-            ),
-            TextButton.icon(
-              onPressed: restoreDataFromBackup,
-              icon: const Icon(Icons.restore),
-              label: Text("恢复", style: TextStyle(fontSize: 20.sp)),
-            ),
-          ],
-        ),
+      appBar: AppBar(title: const Text('备份恢复')),
+      body: isLoading ? buildLoader(isLoading) : buildBackupButton(),
+    );
+  }
+
+  buildBackupButton() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          TextButton.icon(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: const Text('全量备份'),
+                    content: const Text("确认导出所有数据?"),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          if (!mounted) return;
+                          Navigator.pop(context, false);
+                        },
+                        child: const Text('取消'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          if (!mounted) return;
+                          Navigator.pop(context, true);
+                        },
+                        child: const Text('确认'),
+                      ),
+                    ],
+                  );
+                },
+              ).then((value) {
+                if (value != null && value) _exportAllData();
+              });
+            },
+            icon: const Icon(Icons.backup),
+            label: Text("全量备份", style: TextStyle(fontSize: 20.sp)),
+          ),
+          TextButton.icon(
+            onPressed: restoreDataFromBackup,
+            icon: const Icon(Icons.restore),
+            label: Text("覆写恢复", style: TextStyle(fontSize: 20.sp)),
+          ),
+        ],
       ),
     );
   }

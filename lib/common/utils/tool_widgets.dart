@@ -347,12 +347,12 @@ buildDataTableWithHorizontalScrollbar({
 void showSnackMessage(
   BuildContext context,
   String message, {
-  Color? backgroundColor,
+  Color? backgroundColor = Colors.red,
 }) {
   var snackBar = SnackBar(
     content: Text(message),
     duration: const Duration(seconds: 3),
-    backgroundColor: Colors.red,
+    backgroundColor: backgroundColor,
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
