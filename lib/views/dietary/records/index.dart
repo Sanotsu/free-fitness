@@ -11,10 +11,10 @@ import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
 import '../reports/index.dart';
+import 'add_intake_item/index.dart';
 import 'report_calendar_summary.dart';
 import 'save_meal_photo.dart';
-import 'simple_food_detail.dart';
-import 'simple_food_list.dart';
+import 'add_intake_item/simple_food_detail.dart';
 
 class DietaryRecords extends StatefulWidget {
   const DietaryRecords({super.key});
@@ -204,7 +204,19 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
-            children: [Text(showedDateStr), Icon(Icons.more_vert, size: 24.sp)],
+            children: [
+              // 设置一条白色的下划线，表示可以点击切换
+              Expanded(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Colors.white, width: 1.sp),
+                    ),
+                  ),
+                  child: Text(showedDateStr, textAlign: TextAlign.center),
+                ),
+              ),
+            ],
           ),
           onTap: () {
             _selectDate(context);
@@ -245,7 +257,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => SimpleFoodList(
+                  builder: (context) => AddIntakeItem(
                     mealtime: CusMeals.breakfast,
                     // 注意，这里应该是一个日期选择器插件选中的值，格式化为固定字符串，子组件就不再处理
                     logDate: selectedDateStr,
@@ -587,8 +599,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        // 主页面点击餐次的添加是新增，没有旧数据，需要餐次和日期信息
-                        builder: (context) => SimpleFoodList(
+                        builder: (context) => AddIntakeItem(
                           mealtime: mealtime.value,
                           // 注意，这里应该是一个日期选择器插件选中的值，格式化为固定字符串，子组件就不再处理
                           logDate: selectedDateStr,
