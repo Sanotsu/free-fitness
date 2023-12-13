@@ -463,40 +463,38 @@ List<CusLabel> servingTypeList = [
 ];
 
 // 食物营养素列表(中文名，英文名对照，方便格式化展示之类的)
+// 2023-12-13 补入 FoodNutrientTotals 类对应的简化的key作为enLabel
+// 经过查看，目前就新增食物时在单份营养素填写完之后的格式化成文本；和饮食报告的营养素表格有用到。
 List<CusLabel> nutrientList = [
-  CusLabel(value: "energy", cnLabel: "能量", enLabel: "energy"),
-  CusLabel(value: "protein", cnLabel: "蛋白质", enLabel: "protein"),
-  CusLabel(value: "total_fat", cnLabel: "总脂肪", enLabel: "totalFat"),
-  CusLabel(
-    value: "saturated_fat",
-    cnLabel: "饱和脂肪",
-    enLabel: "saturatedFat",
-  ),
-  CusLabel(value: "trans_fat", cnLabel: "反式脂肪", enLabel: "transFat"),
+  CusLabel(value: "energy", cnLabel: "能量(千焦)", enLabel: "energy"),
+  CusLabel(value: "calorie", cnLabel: "卡路里(大卡)", enLabel: "calorie"),
+  CusLabel(value: "protein", cnLabel: "蛋白质(克)", enLabel: "protein"),
+  CusLabel(value: "total_fat", cnLabel: "总脂肪(克)", enLabel: "totalFat"),
+  CusLabel(value: "saturated_fat", cnLabel: "饱和脂肪(克)", enLabel: "saturatedFat"),
+  CusLabel(value: "trans_fat", cnLabel: "反式脂肪(克)", enLabel: "transFat"),
   CusLabel(
     value: "polyunsaturated_fat",
-    cnLabel: "多不饱和脂肪",
+    cnLabel: "多不饱和脂肪(克)",
     enLabel: "polyunsaturatedFat",
   ),
+  CusLabel(value: "pu_fat", cnLabel: "多不饱和脂肪(克)", enLabel: "puFat"),
   CusLabel(
     value: "monounsaturated_fat",
-    cnLabel: "单不饱和脂肪",
+    cnLabel: "单不饱和脂肪(克)",
     enLabel: "monounsaturatedFat",
   ),
-  CusLabel(value: "cholesterol", cnLabel: "胆固醇", enLabel: "cholesterol"),
+  CusLabel(value: "mu_fat", cnLabel: "单不饱和脂肪(克)", enLabel: "muFat"),
   CusLabel(
     value: "total_carbohydrate",
-    cnLabel: "总碳水化合物",
+    cnLabel: "总碳水化合物(克)",
     enLabel: "totalCarbohydrate",
   ),
-  CusLabel(value: "sugar", cnLabel: "糖", enLabel: "sugar"),
-  CusLabel(
-    value: "dietary_fiber",
-    cnLabel: "膳食纤维",
-    enLabel: "dietaryFiber",
-  ),
-  CusLabel(value: "sodium", cnLabel: "钠", enLabel: "sodium"),
-  CusLabel(value: "potassium", cnLabel: "钾", enLabel: "potassium")
+  CusLabel(value: "total_cho", cnLabel: "总碳水化合物(克)", enLabel: "totalCHO"),
+  CusLabel(value: "sugar", cnLabel: "糖(克)", enLabel: "sugar"),
+  CusLabel(value: "dietary_fiber", cnLabel: "膳食纤维(克)", enLabel: "dietaryFiber"),
+  CusLabel(value: "sodium", cnLabel: "钠(毫克)", enLabel: "sodium"),
+  CusLabel(value: "potassium", cnLabel: "钾(毫克)", enLabel: "potassium"),
+  CusLabel(value: "cholesterol", cnLabel: "胆固醇(毫克)", enLabel: "cholesterol"),
 ];
 
 // 饮食日记的每日主页显示的模式(摘要和详细)

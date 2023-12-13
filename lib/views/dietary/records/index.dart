@@ -87,7 +87,6 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     var tempUser = await _userHelper.queryUserWithIntakeDailyGoal(
       userId: CacheUser.userId,
     );
-    //
 
     // 查询指定用户摄入目标信息，并筛选是否有当天(星期几)特定的摄入目标值
     var dailyGoal = tempUser.intakeGoals

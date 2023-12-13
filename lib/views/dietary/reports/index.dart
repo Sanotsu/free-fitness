@@ -95,8 +95,6 @@ class _DietaryReportsState extends State<DietaryReports> {
 
   /// 有指定日期查询指定日期的饮食记录条目，没有就当前日期
   _queryDailyFoodItemList({Map<String, String>? queryDateRange}) async {
-    print("开始运行查询当日饮食日记条目---------");
-
     if (isLoading) return;
 
     setState(() {
@@ -117,24 +115,29 @@ class _DietaryReportsState extends State<DietaryReports> {
       withDetail: true,
     ) as List<DailyFoodItemWithFoodServing>);
 
-    // 查询用户目标值
-    var tempUser = await _userHelper.queryUser(userId: CacheUser.userId);
+    // 查询用户目标值，根据今天是星期几显示对应的RDA值
+    var tempUser = await _userHelper.queryUserWithIntakeDailyGoal(
+      userId: CacheUser.userId,
+    );
 
-    print("queryDateRange--$queryDateRange ${temp.length}");
-
-    // log("---------测试查询的当前日记item $temp");
+    // 查询指定用户摄入目标信息，并筛选是否有当天(星期几)特定的摄入目标值
+    var dailyGoal = tempUser.intakeGoals
+        .where((e) => e.dayOfWeek == DateTime.now().weekday.toString())
+        .toList();
 
     setState(() {
-      dfiwfsList = temp;
-
-      if (tempUser != null) {
-        valueRDA = tempUser.rdaGoal != null
-            ? tempUser.rdaGoal!
-            : tempUser.gender == "男"
-                ? 2250
-                : 1800;
+      // 如果有对应的星期几的摄入目标，则使用该值
+      if (dailyGoal.isNotEmpty) {
+        valueRDA = dailyGoal.first.rdaDailyGoal;
+      } else if (tempUser.user.rdaGoal != null) {
+        // 如果没有当天特定的，则使用整体的
+        valueRDA = tempUser.user.rdaGoal!;
+      } else {
+        // 如果既没有单独每天的也没有整体的，则默认男女推荐值(不是男的都当做女的)
+        valueRDA = tempUser.user.gender == "男" ? 2250 : 1800;
       }
 
+      dfiwfsList = temp;
       isLoading = false;
     });
   }
@@ -204,8 +207,6 @@ class _DietaryReportsState extends State<DietaryReports> {
       tempMap[key] = formatData(value);
     });
 
-    print("查询一周的结果---$tempMap");
-
     return tempMap;
   }
 
@@ -215,135 +216,39 @@ class _DietaryReportsState extends State<DietaryReports> {
       length: 3, // 选项卡的数量
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('DietaryReports '),
+          title: const Text('饮食报告'),
           bottom: const TabBar(
             tabs: [
               Tab(text: "卡路里"),
               Tab(text: "宏量素"),
-              Tab(text: "营养素(未完)"),
+              Tab(text: "营养素"),
             ],
           ),
           actions: [
-            // 下拉按钮，切换报告的时间范围
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                DropdownButton(
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(10),
-                  ),
-
-                  items: dietaryReportDisplayModeList
-                      .map<DropdownMenuItem<CusLabel>>(
-                        (CusLabel value) => DropdownMenuItem<CusLabel>(
-                          value: value,
-                          child: Text(
-                            value.cnLabel,
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20.sp,
-                            ),
-                          ),
-                        ),
-                      )
-                      .toList(),
-                  value: dropdownValue,
-                  onChanged: (CusLabel? newValue) {
-                    setState(() {
-                      // 修改下拉按钮的显示值
-                      dropdownValue = newValue!;
-                      var dateRange = getDateByOption(dropdownValue.value);
-                      _queryDailyFoodItemList(queryDateRange: dateRange);
-                    });
-                  },
-                  isExpanded: false,
-                  underline: Container(), // 将下划线设置为空的Container
-                ),
+                // 下拉按钮，切换报告的时间范围
+                buildDropdownButton(),
+                // 导出按钮，将指定选择日期范围报告数据导出成pdf
+                buildExportButton(),
               ],
             ),
-            IconButton(
-              onPressed: () async {
-                var dateSelected = await showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: const Text('选择日期范围'),
-                      content: DropdownMenu<CusLabel>(
-                        initialSelection: exportDateList.first,
-                        onSelected: (CusLabel? value) {
-                          setState(() {
-                            exportValue = value!;
-                          });
-                        },
-                        dropdownMenuEntries: exportDateList
-                            .map<DropdownMenuEntry<CusLabel>>((CusLabel value) {
-                          return DropdownMenuEntry<CusLabel>(
-                            value: value,
-                            label: value.cnLabel,
-                          );
-                        }).toList(),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context, false);
-                          },
-                          child: const Text('取消'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context, true);
-                          },
-                          child: const Text('确认'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-                // 弹窗选择导出范围不为空，且不为false，则默认是选择的日期范围
-                if (dateSelected != null && dateSelected) {
-                  String tempStart, tempEnd;
-                  if (exportValue.value == "seven") {
-                    [tempStart, tempEnd] = getStartEndDateString(7);
-                  } else if (exportValue.value == "thirty") {
-                    [tempStart, tempEnd] = getStartEndDateString(30);
-                  } else {
-                    // 导出全部就近20年吧
-                    [tempStart, tempEnd] = getStartEndDateString(365 * 20);
-                  }
-
-                  if (!mounted) return;
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ReportPdfViewer(
-                        startDate: tempStart,
-                        endDate: tempEnd,
-                      ),
-                    ),
-                  );
-                }
-              },
-              icon: const Icon(Icons.print),
-            ),
-            // Padding(
-            //   padding: EdgeInsets.only(right: 10.sp),
-            //   child: IconButton(
-            //     onPressed: () {},
-            //     icon: const Icon(Icons.flag_circle),
-            //   ),
-            // ),
           ],
         ),
         body: isLoading
             ? buildLoader(isLoading)
-            : TabBarView(
-                children: [
-                  SingleChildScrollView(child: buildCalorieTabView()),
-                  SingleChildScrollView(child: buildMacrosTabView()),
-                  SingleChildScrollView(child: buildNutrientsTabView()),
-                ],
-              ),
+            : dfiwfsList.isEmpty
+                ? const Center(
+                    child: Text("暂无饮食摄入记录"),
+                  )
+                : TabBarView(
+                    children: [
+                      SingleChildScrollView(child: buildCalorieTabView()),
+                      SingleChildScrollView(child: buildMacrosTabView()),
+                      SingleChildScrollView(child: buildNutrientsTabView()),
+                    ],
+                  ),
       ),
     );
   }
@@ -362,7 +267,7 @@ class _DietaryReportsState extends State<DietaryReports> {
       /// 单日的卡路里标题
       chart.add(_buildCaloryCardTitle(formatData(dfiwfsList)));
 
-      /// 当日主要营养素占比饼图卡片(默认其实就是卡路里的平涂)
+      /// 当日主要营养素占比饼图卡片(默认其实就是卡路里的饼图)
       chart
           .add(_buildPieChartCard(formatData(dfiwfsList), CusChartType.calory));
     } else {
@@ -453,9 +358,9 @@ class _DietaryReportsState extends State<DietaryReports> {
     );
   }
 
-  /// *******************************营养素 tabview(未完) ************************************
-  /// ？？？营养素tab页面
+  /// *******************************营养素 tabview ************************************
   /// （未完，还没有实现个人配置目标，这里需要和目标营养素的差值比较）
+  /// 2023-12-13 没有这些营养素摄入目标配置，只是显示有摄入多少即可
   buildNutrientsTabView() {
     // 简单示例，等个人配置目标完成再继续
     List<DataRow> rows = [];
@@ -468,24 +373,28 @@ class _DietaryReportsState extends State<DietaryReports> {
       }
     }
 
-    return FittedBox(
-      child: DataTable(
-        columns: const [
-          DataColumn(label: Text('营养素')),
-          DataColumn(label: Text('摄入量'), numeric: true),
-          DataColumn(label: Text('目标量'), numeric: true),
-        ],
-        rows: rows,
-      ),
+    return DataTable(
+      columns: const [
+        DataColumn(
+          label: Text('营养素', style: TextStyle(fontWeight: FontWeight.bold)),
+        ),
+        DataColumn(
+            label: Text('摄入量', style: TextStyle(fontWeight: FontWeight.bold)),
+            numeric: true),
+        // DataColumn(label: Text('目标量'), numeric: true),
+      ],
+      rows: rows,
     );
   }
 
   DataRow _buildDataRow(String attribute, String value) {
+    var temp = nutrientList.where((e) => e.enLabel == attribute).toList();
+
     return DataRow(cells: [
-      DataCell(Text(attribute)),
+      DataCell(Text(temp.isNotEmpty ? temp.first.cnLabel : attribute)),
       DataCell(Text(value)),
       // 示例占位
-      const DataCell(Text("1000")),
+      // const DataCell(Text("1000")),
     ]);
   }
 
@@ -550,10 +459,13 @@ class _DietaryReportsState extends State<DietaryReports> {
       ];
     }
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: legendItems,
+    return Padding(
+      padding: EdgeInsets.only(left: 10.sp),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: legendItems,
+      ),
     );
   }
 
@@ -809,38 +721,102 @@ class _DietaryReportsState extends State<DietaryReports> {
 
   /// -----------------点击下拉切换报告日期范围
   buildDropdownButton() {
-    return SizedBox(
-      height: 50.sp,
-      // 下拉框四周添加框线
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.all(Radius.circular(4.0.sp)),
-        ),
-        child: DropdownButton(
-          borderRadius: const BorderRadius.all(
-            Radius.circular(10),
-          ),
-          items: dietaryReportDisplayModeList
-              .map<DropdownMenuItem<CusLabel>>(
-                (CusLabel value) => DropdownMenuItem<CusLabel>(
-                  value: value,
-                  child: Text(value.enLabel),
+    return DropdownButton(
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
+      // 默认背景是白色，但我需要字体默认是白色，和appbar中其他保持一致，那么背景色改为灰色
+      dropdownColor: const Color.fromARGB(255, 124, 96, 96),
+      items: dietaryReportDisplayModeList
+          .map<DropdownMenuItem<CusLabel>>(
+            (CusLabel value) => DropdownMenuItem<CusLabel>(
+              value: value,
+              child: Text(
+                value.cnLabel,
+                style: TextStyle(color: Colors.white, fontSize: 20.sp),
+              ),
+            ),
+          )
+          .toList(),
+      value: dropdownValue,
+      onChanged: (CusLabel? newValue) {
+        setState(() {
+          // 修改下拉按钮的显示值
+          dropdownValue = newValue!;
+          var dateRange = getDateByOption(dropdownValue.value);
+          _queryDailyFoodItemList(queryDateRange: dateRange);
+        });
+      },
+      isExpanded: false,
+      // 将下划线设置为空的Container
+      underline: Container(),
+    );
+  }
+
+  /// 点击导出按钮
+  buildExportButton() {
+    return IconButton(
+      onPressed: () async {
+        var dateSelected = await showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('选择导出范围'),
+              content: DropdownMenu<CusLabel>(
+                initialSelection: exportDateList.first,
+                onSelected: (CusLabel? value) {
+                  setState(() {
+                    exportValue = value!;
+                  });
+                },
+                dropdownMenuEntries: exportDateList
+                    .map<DropdownMenuEntry<CusLabel>>((CusLabel value) {
+                  return DropdownMenuEntry<CusLabel>(
+                    value: value,
+                    label: value.cnLabel,
+                  );
+                }).toList(),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: const Text('取消'),
                 ),
-              )
-              .toList(),
-          value: dropdownValue,
-          onChanged: (CusLabel? newValue) {
-            setState(() {
-              // 修改下拉按钮的显示值
-              dropdownValue = newValue!;
-              var dateRange = getDateByOption(dropdownValue.value);
-              _queryDailyFoodItemList(queryDateRange: dateRange);
-            });
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: const Text('确认'),
+                ),
+              ],
+            );
           },
-          isExpanded: false,
-        ),
-      ),
+        );
+        // 弹窗选择导出范围不为空，且不为false，则默认是选择的日期范围
+        if (dateSelected != null && dateSelected) {
+          String tempStart, tempEnd;
+          if (exportValue.value == "seven") {
+            [tempStart, tempEnd] = getStartEndDateString(7);
+          } else if (exportValue.value == "thirty") {
+            [tempStart, tempEnd] = getStartEndDateString(30);
+          } else {
+            // 导出全部就近20年吧
+            [tempStart, tempEnd] = getStartEndDateString(365 * 20);
+          }
+
+          if (!mounted) return;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ReportPdfViewer(
+                startDate: tempStart,
+                endDate: tempEnd,
+              ),
+            ),
+          );
+        }
+      },
+      icon: const Icon(Icons.print),
     );
   }
 }
