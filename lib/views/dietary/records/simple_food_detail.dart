@@ -1,7 +1,3 @@
-// ignore_for_file: avoid_print
-
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -63,20 +59,11 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   void initState() {
     super.initState();
 
+    // ---这里显示的摄入量和单位（营养素的食物单份数据）根据来源不同，取值也不同
+    // 新增的时候，一个食物有多种单份营养素，默认取第一个
+    // 修改的时候，fdlr中有对应的serving info  和摄入量的值
+    // --- 区别只是默认显示数据，修改和新增用户修改摄入量和单份类型后，其他显示或其他操作都一样的逻辑。
     _getDefaulFoodServingInfo();
-
-//--------------？？？ 这里显示的摄入量和单位（营养素的食物单份数据）根据来源不同，取值也不同
-// 新增的时候，一个食物有多种单份营养素，默认取第一个
-// 修改的时候，fdlr中有对应的serving info  和摄入量的值
-// --- 区别只是默认显示数据，修改和新增用户修改摄入量和单份类型后，其他显示或其他操作都一样的逻辑。
-
-    setState(() {
-      print("yi饮食主界面或者food list传入的额数据---------------");
-      print(widget.foodItem);
-      log("主页进入详情页的item信息：${widget.dfiwfs}");
-      print(widget.logDate);
-      print(widget.mealtime);
-    });
   }
 
   // 可能存在1种食物多个营养素单份单位，默认取第一个用于显示
@@ -88,8 +75,6 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
 
     // 1 如果有饮食日记条目详情，则是log index 跳转的修改或删除
     if (widget.dfiwfs != null) {
-      print("点击详情进入【修改或删除】");
-
       // 有传入的数据就用传入的
       nutrientsInfo = widget.dfiwfs!.servingInfo;
       inputServingValue = widget.dfiwfs!.dailyFoodItem.foodIntakeSize;
@@ -98,9 +83,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
       inputMealtimeValue = mealtimeList.firstWhere(
           (e) => e.enLabel == widget.dfiwfs!.dailyFoodItem.mealCategory);
     } else {
-      print("点击food list 进入【新增】");
-
-      // 1 如果没有饮食日记条目详情，则是food list跳转的新增
+      // 2 如果没有饮食日记条目详情，则是food list跳转的新增
       // 构建初始化值
       // 没有传入的数据就用列表第一个
       inputServingValue = (nutrientsInfo.servingSize).toDouble();
@@ -114,50 +97,28 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
     for (var info in temp) {
       servingUnitOptions.add(info.servingUnit);
     }
-
-    print("food detail各个初始化值：-------------");
-    print("inputServingValue ： $inputServingValue");
-    print("inputServingUnit ： $inputServingUnit");
-    print("inputMealtimeValue ： $inputMealtimeValue");
-    print("servingUnitOptions ： $servingUnitOptions");
   }
 
   // 修改了摄入量数值和单位，都要重新计算用于显示的营养素信息(这里是重新获取修改后的营养素单位)
   _recalculateNutrients() {
-    print("_recalculateNutrients inputServingUnit $inputServingUnit");
-    print("_recalculateNutrients inputServingValue $inputServingValue");
-
-    var tempList = widget.foodItem.servingInfoList;
-
-    print("-----------temp $tempList inputServingUnit $inputServingUnit ");
-
     //  ？？？注意，如果这里没有匹配的，肯定是哪里出问题了
     // 从用户输入的单份食物单位，找到对应的营养素信息
-    var metricServing =
-        tempList.where((e) => e.servingUnit == inputServingUnit).first;
-
-    print("-----------metricServing $metricServing");
+    var metricServing = widget.foodItem.servingInfoList
+        .where((e) => e.servingUnit == inputServingUnit)
+        .first;
 
     setState(() {
       nutrientsInfo = metricServing;
-      print("处理结果： $nutrientsInfo ");
     });
   }
 
+  // 修改指定的饮食条目的摄入量、单份营养素单位、餐次信息
   _updateDailyFoodItem() async {
-    // 修改只能是日记主页面点击item直接跳转到详情页，就一定有对应的item信息，和log信息
-    // 不修改餐次的话，直接修改表meal food item 对应条目的size和serving info id即可
-    // 因为修改数量和单份信息时已经即时更新了数据，所以这里直接调用db helper方法然后返回即可
-
-    // 1 只修改数量和单位
-
     var updatedMfi = widget.dfiwfs!.dailyFoodItem;
     updatedMfi.foodIntakeSize = inputServingValue;
     updatedMfi.servingInfoId = nutrientsInfo.servingInfoId!;
     updatedMfi.mealCategory = inputMealtimeValue.enLabel;
     updatedMfi.gmtModified = getCurrentDateTime();
-
-    log("修改后的详情条目：$updatedMfi");
 
     var rst = await _dietaryHelper.updateDailyFoodItem(updatedMfi);
 
@@ -165,28 +126,19 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
       if (!mounted) return;
 
       // 父组件应该重新加载(传参到父组件中重新加载)
-      Navigator.pop(context, {"isItemModified": true});
-
-      // 直接这样是重新加载了主页面条目，会重置为今天。即便有选择显示其他日期的话，依旧重置
-      //  Navigator.of(context).pushReplacement(
-      //   MaterialPageRoute(builder: (_) => const DietaryRecords()),
-      // );
+      Navigator.pop(context, true);
     }
   }
 
+  // 删除饮食日记条目不用管用户修改了什么，且一定是饮食日记主页传递而来确定有条目数据
   _removeDailyFoodItem() async {
-    // 删除饮食日记条目不用管用户修改了什么，且一定是饮食日记主页传递而来确定有条目数据
-
     var mfiId = widget.dfiwfs!.dailyFoodItem.dailyFoodItemId!;
-
     var rst = await _dietaryHelper.deleteDailyFoodItem(mfiId);
-
-    print("删除的的条目编号-------：$mfiId $rst");
 
     if (rst > 0) {
       if (!mounted) return;
-      // 父组件应该重新加载(传参到父组件中重新加载，删除修改都是modified)
-      Navigator.pop(context, {"isItemModified": true});
+      // 父组件应该重新加载
+      Navigator.pop(context, true);
     }
   }
 
@@ -204,33 +156,15 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
       gmtCreate: getCurrentDateTime(),
     );
 
-    log("新增的详情条目：$temp");
-
     var rst = await _dietaryHelper.insertDailyFoodItemList([temp]);
-
-    log("新增的详情条目的结果：$rst");
 
     if (rst.isNotEmpty) {
       if (!mounted) return;
 
-      Navigator.of(context).popUntil((route) {
-        print("在food detail 的新增返回route.settings ${route.settings}");
-
-        if (route.settings.name == '/dietaryRecords') {
-          (route.settings.arguments as Map)['isItemAdded'] = true;
-
-          print("在food detail 的新增返回route.settings ${route.settings}");
-
-          return true;
-        } else {
-          return false;
-        }
-      });
-
       // 这个可以直接返回到上上的部件，但也没办法带参数
-      // Navigator.of(context)
-      //   ..pop()
-      //   ..pop(true);
+      Navigator.of(context)
+        ..pop()
+        ..pop(inputMealtimeValue.enLabel);
 
       // 使用 Navigator.pushReplacement() 方法来替换当前的 DietaryRecords 页面，使其状态更新为最新。
       // 但直接这样是重新加载了主页面条目，会重置为今天。即便有选择显示其他日期的话，依旧重置
@@ -280,7 +214,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
             buildNutrientTableArea(),
             // 详细营养素区域
             buildAllNutrientTableArea(),
-            // buildAllNutrientCardArea(),
+            buildAllNutrientCardArea(),
           ],
         ),
       ),
@@ -296,7 +230,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           // 用封装的那个，验证器有问题
           FormBuilderTextField(
             name: 'serving_value',
-            initialValue: inputServingValue.toString(),
+            initialValue: cusDoubleTryToIntString(inputServingValue),
             decoration: const InputDecoration(labelText: '数量'),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             validator: FormBuilderValidators.compose([
@@ -526,7 +460,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           children: [
             _buildTableRow(
               "食用量",
-              '${cusDoubleToString(inputServingValue)} X $inputServingUnit',
+              '${cusDoubleTryToIntString(inputServingValue)} X $inputServingUnit',
             ),
             _buildTableRow(
               "卡路里",
@@ -716,8 +650,6 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
             var value = entry.value;
 
             List<Widget>? subtitleRows;
-
-            // print("value----------------------$title - $value");
 
             if (subtitles.containsKey(title)) {
               subtitleRows = subtitles[title]!

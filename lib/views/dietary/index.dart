@@ -51,7 +51,6 @@ class _DietaryState extends State<Dietary> {
               context,
               const DietaryReports(),
               "饮食报告",
-              routeName: "/dietaryReports",
             ),
           ),
           SizedBox(
@@ -62,7 +61,6 @@ class _DietaryState extends State<Dietary> {
               "食物成分",
               "中国食物营养成分标准",
               dietaryNutritionImageUrl,
-              routeName: "/dietaryFoods",
             ),
           ),
           SizedBox(
@@ -73,7 +71,6 @@ class _DietaryState extends State<Dietary> {
               "饮食日记",
               "每日饮食记录数据管理",
               dietaryLogCoverImageUrl,
-              routeName: "/dietaryRecords",
             ),
           ),
           SizedBox(
@@ -112,7 +109,6 @@ class _DietaryState extends State<Dietary> {
                       context,
                       const DietaryReports(),
                       "饮食报告",
-                      routeName: "/dietaryReports",
                     ),
                   ),
                 ),
@@ -136,7 +132,6 @@ class _DietaryState extends State<Dietary> {
                 "饮食日记",
                 "每日饮食记录数据管理",
                 dietaryLogCoverImageUrl,
-                routeName: "/dietaryRecords",
               ),
               buildCoverCard(
                 context,
@@ -144,7 +139,6 @@ class _DietaryState extends State<Dietary> {
                 "食物成分",
                 "中国食物营养成分标准",
                 dietaryNutritionImageUrl,
-                routeName: "/dietaryFoods",
               ),
             ],
           ),

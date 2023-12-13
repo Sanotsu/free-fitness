@@ -158,6 +158,10 @@ String cusDoubleToString(double? number, {length = 6}) {
       : numberString;
 }
 
+// 如果传入的double没有小数部分，才转为整数字符串；否则就保留指定位数的小数字符串
+String cusDoubleTryToIntString(double number, {int decimalLength = 2}) => number
+    .toStringAsFixed(number.truncateToDouble() == number ? 0 : decimalLength);
+
 /// Returns a list of [DateTime] objects from [first] to [last], inclusive.
 /// 返回从[第一个]到[最后一个]（包括首尾两个）的[DateTime]对象列表。
 List<DateTime> daysInRange(DateTime first, DateTime last) {

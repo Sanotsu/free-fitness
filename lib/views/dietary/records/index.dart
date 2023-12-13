@@ -215,10 +215,9 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           IconButton(
             icon: const Icon(Icons.report),
             onPressed: () {
-              // // 跳过去就是新的模块，返回时就不用再返回这里而是直接回到主页面
-              // Navigator.pushReplacementNamed(
-              //   context,
-              //   "/dietaryReports",
+              // 跳过去就是新的模块，返回时就不用再返回这里而是直接回到主页面
+              // Navigator.of(context).pushReplacement(
+              //   MaterialPageRoute(builder: (_) => const DietaryReports()),
               // );
 
               /// 还是要返回当前页面
@@ -256,6 +255,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
               ).then((value) {
                 // 2023-12-04 之前是在食物详情中有设置一个新增成功的返回参数，确认新增成功后重新加载当前日期的条目数据。
                 // 现在就只要是返回这个页面，都重新加载，也避免了跨级子组件数据返回的设计
+                // 2023-12-13
                 if (value != null) {
                   _queryDailyFoodItemList(mealEnLabel: value as String);
                 }
@@ -761,7 +761,11 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           ).then((value) {
             // 2023-12-04 之前是在食物详情中有设置一个修改或删除成功的返回参数，确认修改或删除成功后重新加载当前日期的条目数据。
             // 现在就只要是返回这个页面，都重新加载，也避免了跨级子组件数据返回的设计
-            _queryDailyFoodItemList();
+
+            // 2023-12-13 点击条目直接进入条目食物详情页面，修改、删除后有返回true才重新查询；否则就是没变动。
+            if (value != null && value) {
+              _queryDailyFoodItemList();
+            }
           });
         },
         // 滑动删除指定饮食日记条目
@@ -802,7 +806,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                         "${logItem.food.brand}-${logItem.food.product}",
                       ),
                       subtitle: _buildListTileText(
-                        '${logItem.dailyFoodItem.foodIntakeSize} * $tempUnit',
+                        '${cusDoubleTryToIntString(logItem.dailyFoodItem.foodIntakeSize)} * $tempUnit',
                       ),
                       dense: true,
                     ),
