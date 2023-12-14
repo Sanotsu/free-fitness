@@ -85,7 +85,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
         title: RichText(
           text: TextSpan(
             children: [
-              TextSpan(text: '周期计划    ', style: TextStyle(fontSize: 20.sp)),
+              TextSpan(text: '周期计划\n', style: TextStyle(fontSize: 20.sp)),
               TextSpan(
                 text: "共 ${planList.length} 个",
                 style: TextStyle(fontSize: 12.sp),
@@ -273,6 +273,57 @@ class _TrainingPlansState extends State<TrainingPlans> {
                       getPlanList();
                     });
                   });
+                },
+                // 长按点击弹窗提示是否删除
+                onLongPress: () async {
+                  // 如果该基础活动有被使用，则不允许直接删除
+                  var list =
+                      await _dbHelper.isPlanUsedByRawSQL(planItem.plan.planId!);
+
+                  if (!mounted) return;
+                  if (list.isNotEmpty) {
+                    commonExceptionDialog(
+                      context,
+                      "异常提醒",
+                      "该计划 ${planItem.plan.planName} 存在跟练记录，暂不支持删除.",
+                    );
+                  } else {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('提示'),
+                          content: Text("是否删除: ${planItem.plan.planName}?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context, false);
+                              },
+                              child: const Text('取消'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context, true);
+                              },
+                              child: const Text('确认'),
+                            ),
+                          ],
+                        );
+                      },
+                    ).then((value) async {
+                      if (value != null && value) {
+                        try {
+                          await _dbHelper.deletePlanById(planItem.plan.planId!);
+
+                          // 删除后重新查询
+                          getPlanList();
+                        } catch (e) {
+                          if (!mounted) return;
+                          commonExceptionDialog(context, "异常提醒", e.toString());
+                        }
+                      }
+                    });
+                  }
                 },
               ),
             ],

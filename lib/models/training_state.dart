@@ -464,3 +464,39 @@ class TrainedLogWithGroupBasic {
     ''';
   }
 }
+
+// 2023-12-14 如果一个动作有被使用，则记录被哪个关联表使用
+class ExerciseUsageVO {
+  int? actionId;
+  int? groupId;
+  int? planId;
+  int? logId;
+
+  ExerciseUsageVO({
+    this.actionId,
+    this.groupId,
+    this.planId,
+    this.logId,
+  });
+
+  // 作为vo，应该只有查询的对应。目前只有联合查询时用到
+  // 注意栏位前缀有不同表的同名栏位，栏位会重复，而不会在栏位前带上表名
+  factory ExerciseUsageVO.fromMap(Map<String, dynamic> map) {
+    return ExerciseUsageVO(
+      actionId: map['action_id'] as int?,
+      groupId: map['group_id'] as int?,
+      planId: map['plan_id'] as int?,
+      logId: map['trained_log_id'] as int?,
+    );
+  }
+
+  // @override
+  // String toString() {
+  //   return 'ExerciseUsageVO {actionId: $actionId, groupId: $groupId, planId: $planId, logId: $logId }';
+  // }
+
+  @override
+  String toString() {
+    return '配置编号:$actionId,训练编号:$groupId,计划编号:$planId,日志:$logId';
+  }
+}

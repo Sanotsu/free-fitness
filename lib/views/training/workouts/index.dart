@@ -331,6 +331,57 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                 });
               }
             },
+            // 长按点击弹窗提示是否删除
+            onLongPress: () async {
+              // 如果该基础活动有被使用，则不允许直接删除
+              var list =
+                  await _dbHelper.isGroupUsedByRawSQL(groupItem.group.groupId!);
+
+              if (!mounted) return;
+              if (list.isNotEmpty) {
+                commonExceptionDialog(
+                  context,
+                  "异常提醒",
+                  "该训练 ${groupItem.group.groupName} 有被计划使用或者存在跟练记录，暂不支持删除.",
+                );
+              } else {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('提示'),
+                      content: Text("是否删除: ${groupItem.group.groupName}?"),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, false);
+                          },
+                          child: const Text('取消'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context, true);
+                          },
+                          child: const Text('确认'),
+                        ),
+                      ],
+                    );
+                  },
+                ).then((value) async {
+                  if (value != null && value) {
+                    try {
+                      await _dbHelper.deleteGroupById(groupItem.group.groupId!);
+
+                      // 删除后重新查询
+                      getGroupList();
+                    } catch (e) {
+                      if (!mounted) return;
+                      commonExceptionDialog(context, "异常提醒", e.toString());
+                    }
+                  }
+                });
+              }
+            },
           ),
         );
       },

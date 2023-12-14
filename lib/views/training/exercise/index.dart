@@ -144,7 +144,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
 
   // 从数据库移除指定基础活动
   _removeExerciseById(id) async {
-    await _dbHelper.deleteExercise(id);
+    await _dbHelper.deleteExerciseById(id);
     _loadExerciseData();
   }
 
@@ -260,6 +260,24 @@ class _TrainingExerciseState extends State<TrainingExercise> {
 
                       // 左滑显示删除确认弹窗，？？？删除时还要检查删除者是否为创建者，这里只是测试左滑删除卡片
                       confirmDismiss: (DismissDirection direction) async {
+                        // 如果该基础活动有被使用，则不允许直接删除
+                        var list = await _dbHelper
+                            .isExerciseUsedByRawSQL(exerciseItem.exerciseId!);
+
+                        print(
+                            "exerciseItem.exerciseId!--${exerciseItem.exerciseId!}");
+                        print(list);
+
+                        if (!mounted) return false;
+                        if (list.isNotEmpty) {
+                          commonExceptionDialog(
+                            context,
+                            "异常提醒",
+                            "该动作 ${exerciseItem.exerciseName} 有被训练或计划使用，暂不支持删除.\n ${list.toString()}",
+                          );
+                          return false;
+                        }
+
                         return await showDialog(
                           context: context,
                           builder: (BuildContext context) {

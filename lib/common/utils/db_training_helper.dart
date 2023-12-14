@@ -214,7 +214,7 @@ class DBTrainingHelper {
       );
 
   // 删除单条数据
-  Future<int> deleteExercise(int id) async =>
+  Future<int> deleteExerciseById(int id) async =>
       (await database).delete(TrainingDdl.tableNameOfExercise,
           where: "exercise_id=?", whereArgs: [id]);
 
@@ -377,6 +377,52 @@ class DBTrainingHelper {
         whereArgs: [groupId],
       );
 
+  // 删除单条训练(同时需要删除其所有的action)
+  Future<dynamic> deleteGroupById(int groupId) async {
+    final db = await database;
+
+    try {
+      return await db.transaction((txn) async {
+        await txn.delete(
+          TrainingDdl.tableNameOfGroup,
+          where: 'group_id = ?',
+          whereArgs: [groupId],
+        );
+
+        await txn.delete(
+          TrainingDdl.tableNameOfAction,
+          where: 'group_id = ?',
+          whereArgs: [groupId],
+        );
+      });
+    } catch (e) {
+      throw Exception("删除指定训练及其动作失败: $e");
+    }
+  }
+
+  // 删除单条训练(同时需要删除其所有的plan has group 关系。group有复用，不会删除)
+  Future<dynamic> deletePlanById(int planId) async {
+    final db = await database;
+
+    try {
+      return await db.transaction((txn) async {
+        await txn.delete(
+          TrainingDdl.tableNameOfPlan,
+          where: 'plan_id = ?',
+          whereArgs: [planId],
+        );
+
+        await txn.delete(
+          TrainingDdl.tableNameOfPlanHasGroup,
+          where: 'plan_id = ?',
+          whereArgs: [planId],
+        );
+      });
+    } catch (e) {
+      throw Exception("删除指定计划及其训练组失败: $e");
+    }
+  }
+
   // 查询指定训练以及其所有动作
   // 训练支持条件查询，估计训练的数量不会多，就暂时不分页；同事关联的动作就全部带出。
   Future<List<GroupWithActions>> searchGroupWithActions({
@@ -395,15 +441,15 @@ class DBTrainingHelper {
       whereArgs.add(groupId);
     }
     if (groupName != null) {
-      where.add("group_name  like ? ");
+      where.add("group_name LIKE ? ");
       whereArgs.add("%$groupName%");
     }
     if (groupCategory != null) {
-      where.add("group_category =? ");
+      where.add("group_category = ? ");
       whereArgs.add(groupCategory);
     }
     if (groupLevel != null) {
-      where.add("group_level =? ");
+      where.add("group_level = ? ");
       whereArgs.add(groupLevel);
     }
 
@@ -424,19 +470,6 @@ class DBTrainingHelper {
         where: 'group_id = ?',
         whereArgs: [group.groupId],
       );
-
-      // final adList = await Future.wait(actionRows.map((a) async {
-      //   final action = TrainingAction.fromMap(a);
-      //   // 理论上一个action一定能查到且仅查到一个exercise，不会为空
-      //   final exercise = Exercise.fromMap((await db.query(
-      //     TrainingDdl.tableNameOfExercise,
-      //     where: 'exercise_id = ?',
-      //     whereArgs: [action.exerciseId],
-      //   ))
-      //       .first);
-
-      //   return ActionDetail(action: action, exercise: exercise);
-      // }));
 
       // 上面是异步的，说是性能要好些
       final adList = <ActionDetail>[];
@@ -925,5 +958,147 @@ class DBTrainingHelper {
     }
 
     return logMap;
+  }
+
+  ///
+  /// 2023-12-14
+  /// 判断某个锻炼是否被使用，有被使用则不允许删除
+  /// 具体就是这个exercise是否有对应的action，
+  ///   该action所属的group是否存在于训练日志中；
+  ///   该action所属的group是否存在于某个计划中，而该计划存在于训练日志中；
+
+  Future<bool> isExerciseUsed(int exerciseId) async {
+    Database db = await database;
+
+    // 1 找到exercise对应的action，如果没有，则是没有被使用
+    var actionRows = await db.query(
+      TrainingDdl.tableNameOfAction,
+      where: 'exercise_id = ? ',
+      whereArgs: [exerciseId],
+    );
+    if (actionRows.isEmpty) return false;
+
+    // 2 找到所有的action，并找到对应的group
+    //  一个exercise可能对应不同group中多个不同的action
+    for (var row in actionRows) {
+      var action = TrainingAction.fromMap(row);
+      // 寻找action所属的group
+      var groupRows = await db.query(
+        TrainingDdl.tableNameOfGroup,
+        where: 'action_id = ? ',
+        whereArgs: [action.actionId],
+      );
+      // 当前动作没被训练使用则继续找下一个
+      if (groupRows.isEmpty) continue;
+
+      // 正常就应该一个action只有一个对应的 group
+      var group = TrainingGroup.fromMap(groupRows.first);
+      // 先判断group有没有直接被使用
+      var rst = await isGroupUsed(group.groupId!);
+      // 2-1 如果action对应的group有被使用，就不用后续操作了
+      if (rst) return true;
+
+      // 2-2 group没有直接使用，再判断包含该group的plan是否有被使用
+      var planRows = await db.query(
+        TrainingDdl.tableNameOfPlanHasGroup,
+        where: 'group_id = ? ',
+        whereArgs: [group.groupId],
+      );
+
+      // 2-2-1 group没有对应的plan，则不用后续操作了
+      if (planRows.isEmpty) return false;
+
+      // 2-2-2 有对应的plan，检测是否有被用到
+      for (var plan in planRows) {
+        var rst = await isPlanUsed(TrainingPlan.fromMap(plan).planId!);
+        // 2-2-2-1 只要有一个被用到，就不用继续了
+        if (rst) return true;
+      }
+    }
+
+    // action、group、plan及其日志都没有用到，就最终也没用到
+    return false;
+  }
+
+  // 指定训练是否已有训练记录
+  Future<bool> isGroupUsed(int groupId) async {
+    Database db = await database;
+
+    var groupLogRows = await db.query(
+      TrainingDdl.tableNameOfTrainedLog,
+      where: 'group_id = ? ',
+      whereArgs: [groupId],
+    );
+
+    if (groupLogRows.isEmpty) return false;
+
+    return true;
+  }
+
+  // 指定计划是否已有运动记录
+  Future<bool> isPlanUsed(int planId) async {
+    Database db = await database;
+
+    var logRows = await db.query(
+      TrainingDdl.tableNameOfTrainedLog,
+      where: 'plan_id = ? ',
+      whereArgs: [planId],
+    );
+
+    if (logRows.isEmpty) return false;
+
+    return true;
+  }
+
+  ///
+  ///  直接联合查询判断是否被使用
+  ///
+  Future<List<ExerciseUsageVO>> isExerciseUsedByRawSQL(int exerciseId) async {
+    Database db = await database;
+
+    // 如果对应的exercise编号关联查询的结果不为空，则说明有被使用，不允许删除
+    var rows = await db.rawQuery(
+      '''
+      SELECT a.action_id,g.group_id,p.plan_id,l.trained_log_id
+      FROM ${TrainingDdl.tableNameOfAction} a
+      LEFT JOIN ${TrainingDdl.tableNameOfGroup}         g   ON g.group_id = a.group_id  
+      LEFT JOIN ${TrainingDdl.tableNameOfPlanHasGroup}  phg ON phg.group_id = g.group_id
+      LEFT JOIN ${TrainingDdl.tableNameOfPlan}          p   ON phg.plan_id = p.plan_id
+      LEFT JOIN ${TrainingDdl.tableNameOfTrainedLog}    l   ON l.plan_id = p.plan_id OR l.group_id = g.group_id
+      WHERE a.exercise_id = $exerciseId;
+      ''',
+    );
+
+    return rows.map((e) => ExerciseUsageVO.fromMap(e)).toList();
+  }
+
+  Future<List<ExerciseUsageVO>> isGroupUsedByRawSQL(int groupId) async {
+    Database db = await database;
+
+    // 这个训练有日志或者训练所属的计划有日志都算，但没法区分group是直接跟练的训练还是计划的某一天
+    var rows = await db.rawQuery(
+      '''
+      SELECT DISTINCT g.group_id,p.plan_id,l.trained_log_id
+      FROM ${TrainingDdl.tableNameOfGroup} g 
+      LEFT JOIN ${TrainingDdl.tableNameOfPlanHasGroup} phg  ON phg.group_id = g.group_id
+      LEFT JOIN ${TrainingDdl.tableNameOfPlan}         p    ON phg.plan_id = p.plan_id
+      LEFT JOIN ${TrainingDdl.tableNameOfTrainedLog}   l    ON l.plan_id = p.plan_id OR l.group_id = g.group_id
+      WHERE a.group_id = $groupId;
+      ''',
+    );
+
+    return rows.map((e) => ExerciseUsageVO.fromMap(e)).toList();
+  }
+
+  Future<List<ExerciseUsageVO>> isPlanUsedByRawSQL(int planId) async {
+    Database db = await database;
+
+    var logRows = await db.query(
+      TrainingDdl.tableNameOfTrainedLog,
+      where: 'plan_id = ? ',
+      whereArgs: [planId],
+    );
+
+    return logRows.map((e) => ExerciseUsageVO.fromMap(e)).toList();
   }
 }

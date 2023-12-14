@@ -312,19 +312,19 @@ Future<int> insertOneRandomGroupAndAction() async {
     groupId: groupId,
     exerciseId: exerciseId1,
     frequency: Random().nextInt(50),
-    equipmentWeight: Random().nextDouble() * 50,
+    equipmentWeight: Random().nextInt(21).toDouble(),
   );
   var action2 = TrainingAction(
     groupId: groupId,
     exerciseId: exerciseId2,
     duration: Random().nextInt(120),
-    equipmentWeight: Random().nextDouble() * 50,
+    equipmentWeight: Random().nextInt(21).toDouble(),
   );
   var action3 = TrainingAction(
     groupId: groupId,
     exerciseId: exerciseId1,
     frequency: Random().nextInt(100),
-    equipmentWeight: Random().nextDouble() * 50,
+    equipmentWeight: Random().nextInt(21).toDouble(),
   );
 
   await _trainingHelper.insertTrainingActionList([action1, action2, action3]);
