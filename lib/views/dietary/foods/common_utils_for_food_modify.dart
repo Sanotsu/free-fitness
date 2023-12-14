@@ -266,6 +266,7 @@ List<ServingInfo> parseServingInfo(
       potassium: props['potassium'],
       contributor: CacheUser.userName,
       gmtCreate: getCurrentDateTime(),
+      isDeleted: false,
     );
   }
 

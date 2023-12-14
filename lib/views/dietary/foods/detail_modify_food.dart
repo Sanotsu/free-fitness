@@ -71,6 +71,7 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
             : null,
         contributor: CacheUser.userName,
         gmtCreate: getCurrentDateTime(),
+        isDeleted: false,
       );
 
       try {

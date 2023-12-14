@@ -42,6 +42,7 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
     description: generateRandomString(50, 100),
     contributor: CacheUser.userName,
     gmtCreate: getCurrentDateTime(),
+    isDeleted: false,
   );
 
   // ？？？注意，业务中好像有有订好是100g,100ml的逻辑
@@ -82,6 +83,7 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
     cholesterol: cholesterol,
     contributor: CacheUser.userName,
     gmtCreate: getCurrentDateTime(),
+    isDeleted: false,
   );
   // 输入标准单份营养素
   var dserving1 = ServingInfo(
@@ -104,6 +106,7 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
     cholesterol: cholesterol / 100,
     contributor: CacheUser.userName,
     gmtCreate: getCurrentDateTime(),
+    isDeleted: false,
   );
 
   // 自定义单份
@@ -126,6 +129,7 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
     cholesterol: Random().nextDouble() * 5000,
     contributor: CacheUser.userName,
     gmtCreate: getCurrentDateTime(),
+    isDeleted: false,
   );
 
   var rst = await _dietaryHelper.insertFoodWithServingInfoList(

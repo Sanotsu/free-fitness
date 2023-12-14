@@ -227,7 +227,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                         .toStringAsFixed(2);
 
                 return ListTile(
-                  title: Text("${food.product}(${food.brand})"),
+                  title: Text("${food.product} (${food.brand})"),
                   subtitle: Text("$intake - $calories 卡路里"),
                 );
               }),

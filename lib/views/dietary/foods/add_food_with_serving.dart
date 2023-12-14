@@ -64,6 +64,7 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
             : null,
         contributor: CacheUser.userName,
         gmtCreate: getCurrentDateTime(),
+        isDeleted: false,
       );
 
       try {

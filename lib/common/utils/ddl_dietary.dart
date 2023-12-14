@@ -22,6 +22,7 @@ class DietaryDdl {
       category    TEXT,
       contributor TEXT,
       gmt_create  TEXT,
+      is_deleted  INTEGER,
       UNIQUE(brand,product)
     );
     """;
@@ -50,6 +51,7 @@ class DietaryDdl {
       gmt_create            TEXT,
       update_user           TEXT,
       gmt_modified          TEXT,
+      is_deleted            INTEGER,
       UNIQUE(food_id,serving_size,serving_unit)
     );
     """;

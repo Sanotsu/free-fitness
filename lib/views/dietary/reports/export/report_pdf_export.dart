@@ -250,7 +250,7 @@ _buildMealSubBodyTable(List<DailyFoodItemWithFoodServing> mealData) {
           verticalAlignment: pw.TableCellVerticalAlignment.middle,
           children: [
             // expandedSubText(
-            //   "${food.product}(${food.brand})\n $intake",
+            //   "${food.product} (${food.brand})\n $intake",
             //   isDouble: false,
             //   align: pw.TextAlign.left,
             // ),
@@ -261,7 +261,7 @@ _buildMealSubBodyTable(List<DailyFoodItemWithFoodServing> mealData) {
                 text: pw.TextSpan(
                   children: [
                     pw.TextSpan(
-                      text: "${food.product}(${food.brand})",
+                      text: "${food.product} (${food.brand})",
                       style: pw.TextStyle(
                         fontSize: 12.sp,
                         color: PdfColors.black,

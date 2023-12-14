@@ -753,6 +753,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           // 先获取到当前item的食物信息，再传递到food detail
           var data = await _dietaryHelper.searchFoodWithServingInfoByFoodId(
             logItem.dailyFoodItem.foodId,
+            onlyNotDeleted: false,
           );
 
           if (data == null) {
@@ -813,7 +814,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                       // 2023-12-12 前面不留空，否则食物名称太长就显示得不好看
                       // leading: SizedBox(width: 0.05.sw),
                       title: _buildListTileText(
-                        "${logItem.food.brand}-${logItem.food.product}",
+                        "${logItem.food.product} (${logItem.food.brand})",
                       ),
                       subtitle: _buildListTileText(
                         '${cusDoubleTryToIntString(logItem.dailyFoodItem.foodIntakeSize)} * $tempUnit',

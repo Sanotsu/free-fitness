@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/dietary_state.dart';
@@ -62,11 +60,8 @@ class _DietaryFoodsState extends State<DietaryFoods> {
       isLoading = true;
     });
 
-    CusDataResult temp = await _queryFood(
-      page: currentPage,
-      size: pageSize,
-      query: query,
-    );
+    CusDataResult temp = await _dietaryHelper
+        .searchFoodWithServingInfoWithPagination(query, currentPage, pageSize);
 
     var newData = temp.data as List<FoodAndServingInfo>;
 
@@ -100,23 +95,6 @@ class _DietaryFoodsState extends State<DietaryFoods> {
     FocusScope.of(context).unfocus();
 
     _loadFoodData();
-  }
-
-  Future<CusDataResult> _queryFood({
-    required int page,
-    required int size,
-    String query = '',
-  }) async {
-    print("进入了_queryFood");
-
-    var data = await _dietaryHelper.searchFoodWithServingInfoWithPagination(
-      query,
-      page,
-      size,
-    );
-    print("进入了_queryFood,查询结果$data");
-
-    return data;
   }
 
   // 进入json文件导入前，先获取权限
@@ -283,8 +261,6 @@ class _DietaryFoodsState extends State<DietaryFoods> {
         ),
 
         onTap: () {
-          print("food lsit 点击了food item ，跳转到food detail ---> ");
-
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -292,7 +268,60 @@ class _DietaryFoodsState extends State<DietaryFoods> {
                 foodItem: fsi,
               ),
             ),
-          );
+          ).then((value) {
+            // 从详情页返回后需要重新查询，因为不知道在内部是不是有变动单份营养素。
+            // 有变动，退出不刷新，再次进入还是能看到旧的；但是返回就刷新对于只是浏览数据不友好。
+            // 因此，详情页会有一个是否被异动的标志，返回true则重新查询；否则就不更新
+            if (value != null && value) {
+              setState(() {
+                foodItems.clear();
+                currentPage = 1;
+              });
+              _loadFoodData();
+            }
+          });
+        },
+        // 长按点击弹窗提示是否删除
+        onLongPress: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: const Text('提示'),
+                content: Text("是否删除: ${food.product}(${food.brand})?"),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context, false);
+                    },
+                    child: const Text('取消'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context, true);
+                    },
+                    child: const Text('确认'),
+                  ),
+                ],
+              );
+            },
+          ).then((value) async {
+            if (value != null && value) {
+              try {
+                await _dietaryHelper.deleteFoodWithServingInfo(food.foodId!);
+
+                // 删除后重新查询
+                setState(() {
+                  foodItems.clear();
+                  currentPage = 1;
+                });
+                _loadFoodData();
+              } catch (e) {
+                if (!mounted) return;
+                commonExceptionDialog(context, "异常提醒", e.toString());
+              }
+            }
+          });
         },
       ),
     );

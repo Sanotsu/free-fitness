@@ -43,6 +43,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   // 新增单份营养素时，选择的营养素类型(标准或者自制)
   CusLabel dropdownValue = servingTypeList.first;
 
+  // 数据是否被修改
+  // (这个标志要返回，如果有被修改，返回上一页列表时要重新查询；没有被修改则不用重新查询)
+  bool isModified = false;
+
   @override
   void initState() {
     super.initState();
@@ -82,78 +86,95 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   /// 表格的单份营养素可选中索引进行删除，可新增；
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: const Text('食物详情'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DetailModifyFood(food: fsInfo.food),
-                ),
-              ).then((value) {
-                // 不管是否修改成功，这里都重新加载
-                // 还是稍微判断一下吧
-                if (value != null && value == true) {
-                  refreshFoodAndServing();
-                }
-              });
-            },
-            icon: Icon(Icons.edit, size: 20.sp),
-          ),
-        ],
-      ),
-      body: ListView(
-        children: [
-          /// 展示食物基本信息表格
-          ...buildFoodTable(fsInfo),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
 
-          /// 展示所有单份的数据，不用实时根据摄入数量修改值
-          Text(
-            "食物单份营养素信息",
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.green,
-            ),
-            textAlign: TextAlign.left,
-          ),
+        // 返回上一页时，返回是否被修改标识，用于父组件判断是否需要重新查询
+        Navigator.pop(context, isModified);
+      },
 
-          /// 当有单份营养素被选中后，显示删除或修改(仅单个被选中时)按钮；默认即可新增
-          SizedBox(
-            height: 50.sp,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                // 2023-12-05 暂时不提供修改，以新增+删除代替修改
-                if (servingSelectedList.where((e) => e == true).length == 1)
-                  TextButton(
-                    onPressed: clickServingInfoModify,
-                    child: const Text("修改"),
+      // WillPopScope(
+      //   onWillPop: () async {
+      //     // 在这里执行返回按钮被点击时的逻辑
+      //     // 比如执行 Navigator.pop() 返回前一个页面并携带数据
+      //     Navigator.pop(context, {"refreshData": true});
+      //     return true; // 返回true表示允许退出当前页面
+      //   },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          title: const Text('食物详情'),
+          actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DetailModifyFood(food: fsInfo.food),
                   ),
-                if (servingSelectedList.where((e) => e == true).isNotEmpty)
-                  TextButton(
-                    onPressed: clickServingInfoDelete,
-                    child: const Text("删除"),
-                  ),
-                TextButton(
-                  onPressed: clickServingInfoAdd,
-                  child: const Text("新增"),
-                ),
-              ],
+                ).then((value) {
+                  // 不管是否修改成功，这里都重新加载
+                  // 还是稍微判断一下吧
+                  if (value != null && value == true) {
+                    refreshFoodAndServing();
+                  }
+                });
+              },
+              icon: Icon(Icons.edit, size: 20.sp),
             ),
-          ),
+          ],
+        ),
+        body: ListView(
+          children: [
+            /// 展示食物基本信息表格
+            ...buildFoodTable(fsInfo),
 
-          SizedBox(height: 20.sp),
-          Card(
-            elevation: 5,
-            child: buildFoodServingDataTable(fsInfo),
-          ),
-          SizedBox(height: 20.sp),
-        ],
+            /// 展示所有单份的数据，不用实时根据摄入数量修改值
+            Text(
+              "食物单份营养素信息",
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+              textAlign: TextAlign.left,
+            ),
+
+            /// 当有单份营养素被选中后，显示删除或修改(仅单个被选中时)按钮；默认即可新增
+            SizedBox(
+              height: 50.sp,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // 2023-12-05 暂时不提供修改，以新增+删除代替修改
+                  if (servingSelectedList.where((e) => e == true).length == 1)
+                    TextButton(
+                      onPressed: clickServingInfoModify,
+                      child: const Text("修改"),
+                    ),
+                  if (servingSelectedList.where((e) => e == true).isNotEmpty)
+                    TextButton(
+                      onPressed: clickServingInfoDelete,
+                      child: const Text("删除"),
+                    ),
+                  TextButton(
+                    onPressed: clickServingInfoAdd,
+                    child: const Text("新增"),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 20.sp),
+            Card(
+              elevation: 5,
+              child: buildFoodServingDataTable(fsInfo),
+            ),
+            SizedBox(height: 20.sp),
+          ],
+        ),
       ),
     );
   }
@@ -184,7 +205,14 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           currentServingInfo: servingInfo,
         ),
       ),
-    );
+    ).then((value) {
+      // 如果食物相关数据被修改，则变动标识设为true
+      if (value != null && value) {
+        setState(() {
+          isModified = true;
+        });
+      }
+    });
   }
 
   clickServingInfoDelete() {
@@ -217,9 +245,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
         builder: (context) {
           return AlertDialog(
             title: const Text('提示'),
-            content: const Text(
-              '''确定删除选中的单份营养素信息？''',
-            ),
+            content: const Text('确定删除选中的单份营养素信息?'),
             actions: [
               TextButton(
                 onPressed: () {
@@ -245,6 +271,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
 
                   if (!mounted) return;
                   Navigator.pop(context);
+                  // 如果食物相关数据被修改，则变动标识设为true
+                  setState(() {
+                    isModified = true;
+                  });
                 },
                 child: const Text('确认'),
               ),
@@ -308,6 +338,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           // 返回单份营养素新增成功的话重新查询当前食物详情数据
           if (value != null && value == true) {
             refreshFoodAndServing();
+            // 如果食物相关数据被修改，则变动标识设为true
+            setState(() {
+              isModified = true;
+            });
           }
         });
       }
@@ -349,6 +383,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
             _buildTableRow("名称", food.product),
             _buildTableRow("标签", food.tags ?? ""),
             _buildTableRow("分类", food.category ?? ""),
+            _buildTableRow("概述", food.description ?? ""),
           ],
         ),
       ),

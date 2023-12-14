@@ -182,6 +182,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
         photos: e.photos?.join(","),
         contributor: CacheUser.userName,
         gmtCreate: getCurrentDateTime(),
+        isDeleted: false,
       );
 
       /// 营养素值全是字符串，而且由于是orc识别，还可以包含无法转换的内容
@@ -203,6 +204,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
         // 其他可选值暂时不对应
         contributor: CacheUser.userName,
         gmtCreate: getCurrentDateTime(),
+        isDeleted: false,
       );
 
       try {

@@ -205,6 +205,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
       if (value != null && value == true) {
         var newItem = await _dietaryHelper.searchFoodWithServingInfoByFoodId(
           fsInfo.food.foodId!,
+          onlyNotDeleted: false,
         );
 
         if (newItem != null) {
@@ -234,7 +235,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
               ),
               TextSpan(
                 text:
-                    "${widget.foodItem.food.product}(${widget.foodItem.food.brand})",
+                    "${widget.foodItem.food.product} (${widget.foodItem.food.brand})",
                 style: TextStyle(fontSize: 12.sp),
               ),
             ],

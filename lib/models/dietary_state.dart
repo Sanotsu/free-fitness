@@ -5,6 +5,7 @@ class Food {
   int? foodId; // 自增的，可以不传
   String brand, product;
   String? description, photos, tags, category, contributor, gmtCreate;
+  bool isDeleted;
 
   Food({
     this.foodId,
@@ -16,6 +17,7 @@ class Food {
     this.category,
     this.contributor,
     this.gmtCreate,
+    required this.isDeleted,
   });
 
   Map<String, dynamic> toMap() {
@@ -29,6 +31,7 @@ class Food {
       'category': category,
       'contributor': contributor,
       'gmt_create': gmtCreate,
+      "is_deleted": isDeleted,
     };
   }
 
@@ -44,6 +47,7 @@ class Food {
       category: map['category'] as String?,
       contributor: map['contributor'] as String?,
       gmtCreate: map['gmt_create'] as String?,
+      isDeleted: map['is_deleted'] == 0 ? false : true,
     );
   }
 
@@ -51,8 +55,9 @@ class Food {
   String toString() {
     return '''
     Food{
-    food_id: $foodId, brand: $brand, product: $product,description:$description, photos: $photos, tags: $tags, 
-    category: $category, contributor: $contributor, gmt_create: $gmtCreate }
+      food_id: $foodId, brand: $brand, product: $product,description:$description, photos: $photos, tags: $tags, 
+      category: $category, contributor: $contributor, gmt_create: $gmtCreate, is_deleted: $isDeleted
+    }
     ''';
   }
 }
@@ -66,6 +71,7 @@ class ServingInfo {
   double energy, protein, totalFat, totalCarbohydrate, sodium;
   double? saturatedFat, transFat, polyunsaturatedFat, monounsaturatedFat;
   double? cholesterol, sugar, dietaryFiber, potassium;
+  bool isDeleted;
 
   ServingInfo({
     this.servingInfoId,
@@ -89,6 +95,7 @@ class ServingInfo {
     this.gmtCreate,
     this.updateUser,
     this.gmtModified,
+    required this.isDeleted,
   });
 
   Map<String, dynamic> toMap() {
@@ -114,6 +121,7 @@ class ServingInfo {
       "gmt_create": gmtCreate,
       "update_user": updateUser,
       "gmt_modified": gmtModified,
+      "is_deleted": isDeleted,
     };
   }
 
@@ -142,6 +150,7 @@ class ServingInfo {
       "gmt_create": gmtCreate,
       "update_user": updateUser,
       "gmt_modified": gmtModified,
+      "is_deleted": isDeleted,
     };
   }
 
@@ -168,6 +177,7 @@ class ServingInfo {
       gmtCreate: map['gmt_create'] as String?,
       updateUser: map['update_user'] as String?,
       gmtModified: map['gmt_modified'] as String?,
+      isDeleted: map['is_deleted'] == 0 ? false : true,
     );
   }
 
@@ -180,7 +190,8 @@ class ServingInfo {
       "energy": $energy, "protein": $protein, "total_fat": $totalFat, "saturated_fat": $saturatedFat, "trans_fat": $transFat, 
       "polyunsaturated_fat": $polyunsaturatedFat, "monounsaturated_fat": $monounsaturatedFat, "cholesterol": $cholesterol, 
       "total_carbohydrate": $totalCarbohydrate, "sugar": $sugar, "dietary_fiber": $dietaryFiber, "sodium": $sodium, "potassium": $potassium, 
-      "contributor": $contributor, "gmt_create": $gmtCreate, "update_user": $updateUser, "gmt_modified": $gmtModified}
+      "contributor": $contributor, "gmt_create": $gmtCreate, "update_user": $updateUser, "gmt_modified": $gmtModified,"is_deleted": $isDeleted
+      }
     ''';
   }
 }

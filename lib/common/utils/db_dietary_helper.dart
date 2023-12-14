@@ -207,12 +207,12 @@ class DBDietaryHelper {
             if (e.isUniqueConstraintError()) {
               // 抛出自定义异常并携带错误信息
               throw Exception(
-                '该食物已存在:\n ${food.brand} - ${food.product}',
+                '该食物已存在:\n ${food.product} (${food.brand})',
               );
             } else if (e.isDuplicateColumnError()) {
               // 抛出自定义异常并携带错误信息
               throw Exception(
-                '该食物已存在 \n ${food.foodId}-${food.brand}-${food.product}',
+                '该食物已存在 \n ${food.foodId}-${food.product} (${food.brand})',
               );
             } else {
               // 其他错误(抛出异常来触发回滚的方式是 sqflite 中常用的做法)
@@ -273,7 +273,7 @@ class DBDietaryHelper {
     for (var item in foods) {
       batch.insert(DietaryDdl.tableNameOfFood, item.toMap());
     }
-    return batch.commit();
+    return await batch.commit();
   }
 
   Future<void> updateFoodWithServingInfo(
@@ -305,25 +305,52 @@ class DBDietaryHelper {
   }
 
   // 删除单条数据
-  Future<void> deleteFoodWithServingInfo(int foodId) async {
+  Future<dynamic> deleteFoodWithServingInfo(int foodId) async {
     final db = await database;
+
     try {
-      await db.transaction((txn) async {
-        await txn.delete(
-          DietaryDdl.tableNameOfServingInfo,
+      return await db.transaction((txn) async {
+        // 先确定该食物是否被使用
+        var itemRows = await txn.query(
+          DietaryDdl.tableNameOfDailyFoodItem,
           where: 'food_id = ?',
           whereArgs: [foodId],
         );
 
-        await txn.delete(
-          DietaryDdl.tableNameOfFood,
-          where: 'food_id = ?',
-          whereArgs: [foodId],
-        );
+        // 如果没有被使用，则物理删除
+        if (itemRows.isEmpty) {
+          await txn.delete(
+            DietaryDdl.tableNameOfServingInfo,
+            where: 'food_id = ?',
+            whereArgs: [foodId],
+          );
+
+          await txn.delete(
+            DietaryDdl.tableNameOfFood,
+            where: 'food_id = ?',
+            whereArgs: [foodId],
+          );
+        } else {
+          // 如果有被使用，则逻辑删除(只有id，没法使用query)
+          await txn.rawUpdate(
+            '''
+              UPDATE ${DietaryDdl.tableNameOfServingInfo} 
+              SET is_deleted = ?  WHERE food_id = ?
+            ''',
+            [1, foodId],
+          );
+
+          await txn.rawUpdate(
+            '''
+              UPDATE ${DietaryDdl.tableNameOfFood} 
+              SET is_deleted = ? WHERE food_id = ?
+            ''',
+            [1, foodId],
+          );
+        }
       });
     } catch (e) {
-      print('Error deleting food with serving info: $e');
-      rethrow;
+      throw Exception("删除食物及其所有单份营养素出错: $e");
     }
   }
 
@@ -335,22 +362,42 @@ class DBDietaryHelper {
     for (var item in siList) {
       batch.insert(DietaryDdl.tableNameOfServingInfo, item.toMap());
     }
-    return batch.commit();
+    return await batch.commit();
   }
 
   // 删除营养素数据列表
   Future<List<Object?>> deleteServingInfoList(List<int> ids) async {
-    var batch = (await database).batch();
+    final db = await database;
+    var batch = db.batch();
 
     for (var id in ids) {
-      batch.delete(
-        DietaryDdl.tableNameOfServingInfo,
-        where: "serving_info_id = ? ",
+      // 先确定该食物是否被使用
+      var itemRows = await db.query(
+        DietaryDdl.tableNameOfDailyFoodItem,
+        where: 'serving_info_id = ?',
         whereArgs: [id],
       );
+
+      print("删除食物营养素 $itemRows");
+      // 如果没有被使用，则物理删除;否则就逻辑删除
+      if (itemRows.isEmpty) {
+        batch.delete(
+          DietaryDdl.tableNameOfServingInfo,
+          where: "serving_info_id = ? ",
+          whereArgs: [id],
+        );
+      } else {
+        batch.rawUpdate(
+          '''
+          UPDATE ${DietaryDdl.tableNameOfServingInfo} 
+          SET is_deleted = ? WHERE serving_info_id = ?
+          ''',
+          [1, id],
+        );
+      }
     }
 
-    return batch.commit();
+    return await batch.commit();
   }
 
   // 关键字查询食物及其不同单份食物营养素
@@ -364,8 +411,8 @@ class DBDietaryHelper {
 
     final foodRows = await db.query(
       DietaryDdl.tableNameOfFood,
-      where: 'brand LIKE ? OR product LIKE ?',
-      whereArgs: ['%$keyword%', '%$keyword%'],
+      where: '(brand LIKE ? OR product LIKE ?) AND is_deleted = ? ',
+      whereArgs: ['%$keyword%', '%$keyword%', 0],
       limit: pageSize,
       offset: offset,
     );
@@ -376,8 +423,8 @@ class DBDietaryHelper {
       final food = Food.fromMap(row);
       final servingInfoRows = await db.query(
         DietaryDdl.tableNameOfServingInfo,
-        where: 'food_id = ?',
-        whereArgs: [food.foodId],
+        where: 'food_id = ? AND is_deleted = ? ',
+        whereArgs: [food.foodId, 0],
       );
 
       final servingInfoList =
@@ -394,8 +441,8 @@ class DBDietaryHelper {
     int? totalCount = Sqflite.firstIntValue(
       await db.rawQuery(
         'SELECT COUNT(*) FROM ${DietaryDdl.tableNameOfFood} '
-        'WHERE brand LIKE ? OR product LIKE ?',
-        ['%$keyword%', '%$keyword%'],
+        'WHERE (brand LIKE ? OR product LIKE ?) AND is_deleted = ?',
+        ['%$keyword%', '%$keyword%', 0],
       ),
     );
 
@@ -407,15 +454,17 @@ class DBDietaryHelper {
 
   // 查询指定食物的单份营养素信息
   Future<FoodAndServingInfo?> searchFoodWithServingInfoByFoodId(
-    int foodId,
-  ) async {
+    int foodId, {
+    // 2023-12-14 默认查询的都是排除了逻辑删除后的数据，只有涉及到饮食摄入条目的才查询所有
+    bool onlyNotDeleted = true,
+  }) async {
     final db = await database;
 
     // 正常来讲，通过food id要么查到一条，要么查不到，所以只返回一个
     final foodRows = await db.query(
       DietaryDdl.tableNameOfFood,
-      where: 'food_id = ?',
-      whereArgs: [foodId],
+      where: onlyNotDeleted ? 'food_id = ? AND is_deleted = ?' : 'food_id = ?',
+      whereArgs: onlyNotDeleted ? [foodId, 0] : [foodId],
     );
 
     if (foodRows.isEmpty) {
@@ -425,8 +474,9 @@ class DBDietaryHelper {
 
       final servingInfoRows = await db.query(
         DietaryDdl.tableNameOfServingInfo,
-        where: 'food_id = ?',
-        whereArgs: [food.foodId],
+        where:
+            onlyNotDeleted ? 'food_id = ? AND is_deleted = ?' : 'food_id = ?',
+        whereArgs: onlyNotDeleted ? [food.foodId, 0] : [food.foodId],
       );
 
       final servingInfoList =
@@ -454,7 +504,7 @@ class DBDietaryHelper {
       batch.insert(DietaryDdl.tableNameOfDailyFoodItem, item.toMap());
     }
 
-    return batch.commit();
+    return await batch.commit();
   }
 
   // 修改单条 daily_food_item
@@ -575,7 +625,7 @@ class DBDietaryHelper {
       batch.insert(DietaryDdl.tableNameOfMealPhoto, item.toMap());
     }
 
-    return batch.commit();
+    return await batch.commit();
   }
 
   // 修改单条餐次照片
