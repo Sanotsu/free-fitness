@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-import 'package:flutter/services.dart' show rootBundle;
+// import 'package:flutter/services.dart' show rootBundle;
 import 'package:printing/printing.dart';
 
 import '../../../../common/global/constants.dart';
@@ -27,9 +27,9 @@ Future<Uint8List> makeReportPdf(
       base: await PdfGoogleFonts.notoSerifHKRegular(),
       bold: await PdfGoogleFonts.notoSerifHKBold(),
       // 但是使用知道的本地字体，会增加app体积
-      fontFallback: [
-        pw.Font.ttf(await rootBundle.load('assets/MiSans-Regular.ttf'))
-      ],
+      // fontFallback: [
+      //   pw.Font.ttf(await rootBundle.load('assets/MiSans-Regular.ttf'))
+      // ],
     ),
   );
 

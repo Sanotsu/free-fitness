@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:flutter/services.dart' show rootBundle;
+// import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
@@ -24,9 +24,9 @@ Future<Uint8List> makeTrainedReportPdf(
       base: await PdfGoogleFonts.notoSerifHKRegular(),
       bold: await PdfGoogleFonts.notoSerifHKBold(),
       // 但是使用知道的本地字体，会增加app体积
-      fontFallback: [
-        pw.Font.ttf(await rootBundle.load('assets/MiSans-Regular.ttf'))
-      ],
+      // fontFallback: [
+      //   pw.Font.ttf(await rootBundle.load('assets/MiSans-Regular.ttf'))
+      // ],
     ),
   );
 
