@@ -264,16 +264,12 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                         var list = await _dbHelper
                             .isExerciseUsedByRawSQL(exerciseItem.exerciseId!);
 
-                        print(
-                            "exerciseItem.exerciseId!--${exerciseItem.exerciseId!}");
-                        print(list);
-
                         if (!mounted) return false;
                         if (list.isNotEmpty) {
                           commonExceptionDialog(
                             context,
                             "异常提醒",
-                            "该动作 ${exerciseItem.exerciseName} 有被训练或计划使用，暂不支持删除.\n ${list.toString()}",
+                            "该动作 ${exerciseItem.exerciseName} 有被训练或计划使用，暂不支持删除.",
                           );
                           return false;
                         }

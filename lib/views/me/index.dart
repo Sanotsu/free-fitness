@@ -211,6 +211,8 @@ class _UserAndSettingsState extends State<UserAndSettings> {
                   /// 用户基本信息展示区域
                   ..._buildBaseUserInfoArea(userInfo),
 
+                  SizedBox(height: 10.sp),
+
                   /// 功能区
                   // 参看别的app大概留几个
                   _buildInfoAndWeightChangeRow(),
@@ -234,8 +236,13 @@ class _UserAndSettingsState extends State<UserAndSettings> {
           if (_avatarPath.isEmpty)
             CircleAvatar(
               maxRadius: 60.sp,
-              backgroundImage: const AssetImage(
-                'assets/profile_icons/Avatar.jpg',
+              backgroundColor: Colors.transparent,
+              backgroundImage: const AssetImage(defaultAvatarImageUrl),
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.grey, width: 2.sp),
+                ),
               ),
             ),
           if (_avatarPath.isNotEmpty)
@@ -244,8 +251,8 @@ class _UserAndSettingsState extends State<UserAndSettings> {
               backgroundImage: FileImage(File(_avatarPath)),
             ),
           Positioned(
-            top: 40.sp,
-            right: 0.5.sw - 75.sp,
+            top: 90.sp,
+            right: 0.5.sw - 70.sp,
             child: Icon(
               userInfo.gender == "男"
                   ? Icons.male
@@ -324,7 +331,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             userInfo.description ?? 'no description',
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 20.sp),
+            style: TextStyle(fontSize: 16.sp),
           )
         ],
       ),

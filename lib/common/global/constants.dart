@@ -20,6 +20,7 @@ const String dietaryMealImageUrl = 'assets/covers/dietary-meal-food.jpg';
 const String workoutManImageUrl = 'assets/covers/workout-man.jpg';
 const String workoutWomanImageUrl = 'assets/covers/workout-woman.jpg';
 const String workoutCalendarImageUrl = 'assets/covers/workout-calendar.jpg';
+const String defaultAvatarImageUrl = 'assets/profile_icons/Avatar.png';
 
 /// 导入的图片默认的地址前缀
 /// (安卓的话指定位置.../DCIM/free-fitness/exercise-images/)下才能读到图片文件

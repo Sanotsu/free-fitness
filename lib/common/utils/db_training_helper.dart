@@ -1083,7 +1083,7 @@ class DBTrainingHelper {
       LEFT JOIN ${TrainingDdl.tableNameOfPlanHasGroup} phg  ON phg.group_id = g.group_id
       LEFT JOIN ${TrainingDdl.tableNameOfPlan}         p    ON phg.plan_id = p.plan_id
       LEFT JOIN ${TrainingDdl.tableNameOfTrainedLog}   l    ON l.plan_id = p.plan_id OR l.group_id = g.group_id
-      WHERE a.group_id = $groupId;
+      WHERE g.group_id = $groupId;
       ''',
     );
 

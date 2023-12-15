@@ -79,6 +79,11 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
       weightTrends = tempList;
       allSpots.clear();
 
+      if (weightTrends.isEmpty) {
+        isLoading = false;
+        return;
+      }
+
       /// 反正构建spot的时候都要遍历，就在遍历是获取最大最小值了
       // 获取到查询的体重列表中的最大值和最小值
       // var minW = tempList.reduce((a, b) => a.weight < b.weight ? a : b);
@@ -200,6 +205,88 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
 
   @override
   Widget build(BuildContext context) {
+    // 添加这个可以横线滚动
+    return weightTrends.isEmpty
+        ? SizedBox(
+            height: 300.sp,
+            child: const Center(child: Text('暂无体重数据')),
+          )
+        : Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      var temp = getStartEndDateString(3);
+                      getWeightData(startDate: temp[0], endDate: temp[1]);
+                    },
+                    child: const Text("最近7天"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      var temp = getStartEndDateString(30);
+                      getWeightData(startDate: temp[0], endDate: temp[1]);
+                    },
+                    child: const Text("最近30天"),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      var temp = getStartEndDateString(90);
+                      getWeightData(startDate: temp[0], endDate: temp[1]);
+                    },
+                    child: const Text("最近90天"),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (isShowSaveButton)
+                    TextButton(
+                      onPressed: _saveChartImage,
+                      child: const Text("保存图表"),
+                    ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        // 每个点最小宽度20；在50以上，每次缩小10；在25-40每次缩小5；
+                        if (spotWidth >= 50.sp) {
+                          spotWidth -= 10.sp;
+                        } else if (spotWidth >= 25.sp) {
+                          spotWidth -= 5.sp;
+                        }
+                      });
+                    },
+                    icon: Icon(
+                      Icons.zoom_out,
+                      size: 24.sp,
+                      color: spotWidth <= 20.sp ? Colors.grey : Colors.blue,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      // 每个点最大宽度120
+                      setState(() {
+                        if (spotWidth <= 110.sp) {
+                          spotWidth += 10.sp;
+                        }
+                      });
+                    },
+                    icon: Icon(
+                      Icons.zoom_in,
+                      size: 24.sp,
+                      color: spotWidth >= 120.sp ? Colors.grey : Colors.blue,
+                    ),
+                  ),
+                ],
+              ),
+              isLoading ? buildLoader(isLoading) : _buildLineChart(),
+            ],
+          );
+  }
+
+  _buildLineChart() {
     // 折线的数据和配置
     final lineBarsData = [
       LineChartBarData(
@@ -245,244 +332,165 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
 
     final tooltipsOnBar = lineBarsData[0];
 
-    // 添加这个可以横线滚动
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TextButton(
-              onPressed: () {
-                var temp = getStartEndDateString(3);
-                getWeightData(startDate: temp[0], endDate: temp[1]);
-              },
-              child: const Text("最近7天"),
-            ),
-            TextButton(
-              onPressed: () {
-                var temp = getStartEndDateString(30);
-                getWeightData(startDate: temp[0], endDate: temp[1]);
-              },
-              child: const Text("最近30天"),
-            ),
-            TextButton(
-              onPressed: () {
-                var temp = getStartEndDateString(90);
-                getWeightData(startDate: temp[0], endDate: temp[1]);
-              },
-              child: const Text("最近90天"),
-            ),
-          ],
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            if (isShowSaveButton)
-              TextButton(
-                onPressed: _saveChartImage,
-                child: const Text("保存图表"),
-              ),
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  // 每个点最小宽度20；在50以上，每次缩小10；在25-40每次缩小5；
-                  if (spotWidth >= 50.sp) {
-                    spotWidth -= 10.sp;
-                  } else if (spotWidth >= 25.sp) {
-                    spotWidth -= 5.sp;
-                  }
-                });
-              },
-              icon: Icon(
-                Icons.zoom_out,
-                size: 24.sp,
-                color: spotWidth <= 20.sp ? Colors.grey : Colors.blue,
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                // 每个点最大宽度120
-                setState(() {
-                  if (spotWidth <= 110.sp) {
-                    spotWidth += 10.sp;
-                  }
-                });
-              },
-              icon: Icon(
-                Icons.zoom_in,
-                size: 24.sp,
-                color: spotWidth >= 120.sp ? Colors.grey : Colors.blue,
-              ),
-            ),
-          ],
-        ),
-        isLoading
-            ? buildLoader(isLoading)
-            : SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Container(
-                  // 四周留点边框方便标题显示完整(上面右边多留点为了数据点提示工具框显示完整)
-                  padding: EdgeInsets.fromLTRB(10.sp, 50.sp, 30.sp, 10.sp),
-                  // 表格的宽度可以根据数量来(这每个sport的宽度可以根据x轴坐标的标题长度来定)
-                  // width: allSpots.length * 60.sp,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Container(
+        // 四周留点边框方便标题显示完整(上面右边多留点为了数据点提示工具框显示完整)
+        padding: EdgeInsets.fromLTRB(10.sp, 50.sp, 30.sp, 10.sp),
+        // 表格的宽度可以根据数量来(这每个sport的宽度可以根据x轴坐标的标题长度来定)
+        // width: allSpots.length * 60.sp,
 
-                  // 要考虑上面padding左右边框和适当的图表最小宽度
-                  width: (allSpots.length * spotWidth) + 80.sp,
-                  height: 300.sp,
-                  child: RepaintBoundary(
-                    key: _chartKey,
-                    child: LineChart(
-                      // 折线图的数据
-                      LineChartData(
-                        // 显示工具提示框的设置
-                        showingTooltipIndicators:
-                            showingTooltipOnSpots.map((index) {
-                          return ShowingTooltipIndicators([
-                            LineBarSpot(
-                              tooltipsOnBar,
-                              lineBarsData.indexOf(tooltipsOnBar),
-                              tooltipsOnBar.spots[index],
-                            ),
-                          ]);
-                        }).toList(),
-                        // 折线图触摸的时候的数据
-                        lineTouchData: LineTouchData(
-                          // 启用触摸反馈
-                          enabled: true,
-                          // 内置触摸处理
-                          handleBuiltInTouches: false,
-                          // 这个触摸反馈是：点击某个点，显示该点的值；再点击就取消显示
-                          touchCallback: (FlTouchEvent event,
-                              LineTouchResponse? response) {
-                            if (response == null ||
-                                response.lineBarSpots == null) {
-                              return;
-                            }
-                            if (event is FlTapUpEvent) {
-                              final spotIndex =
-                                  response.lineBarSpots!.first.spotIndex;
-                              // 点击某个数据点，如果已经展示了工具提示框就从工具提示框点列表移除；没有，则加入
-                              setState(() {
-                                if (showingTooltipOnSpots.contains(spotIndex)) {
-                                  showingTooltipOnSpots.remove(spotIndex);
-                                } else {
-                                  showingTooltipOnSpots.add(spotIndex);
-                                }
-                              });
-                            }
-                          },
-                          // 鼠标解析器(注释了在安卓上好像没影响)
-                          // mouseCursorResolver:
-                          //     (FlTouchEvent event, LineTouchResponse? response) {
-                          //   if (response == null || response.lineBarSpots == null) {
-                          //     return SystemMouseCursors.basic;
-                          //   }
-                          //   return SystemMouseCursors.click;
-                          // },
+        // 要考虑上面padding左右边框和适当的图表最小宽度
+        width: (allSpots.length * spotWidth) + 80.sp,
+        height: 300.sp,
+        child: RepaintBoundary(
+          key: _chartKey,
+          child: LineChart(
+            // 折线图的数据
+            LineChartData(
+              // 显示工具提示框的设置
+              showingTooltipIndicators: showingTooltipOnSpots.map((index) {
+                return ShowingTooltipIndicators([
+                  LineBarSpot(
+                    tooltipsOnBar,
+                    lineBarsData.indexOf(tooltipsOnBar),
+                    tooltipsOnBar.spots[index],
+                  ),
+                ]);
+              }).toList(),
+              // 折线图触摸的时候的数据
+              lineTouchData: LineTouchData(
+                // 启用触摸反馈
+                enabled: true,
+                // 内置触摸处理
+                handleBuiltInTouches: false,
+                // 这个触摸反馈是：点击某个点，显示该点的值；再点击就取消显示
+                touchCallback:
+                    (FlTouchEvent event, LineTouchResponse? response) {
+                  if (response == null || response.lineBarSpots == null) {
+                    return;
+                  }
+                  if (event is FlTapUpEvent) {
+                    final spotIndex = response.lineBarSpots!.first.spotIndex;
+                    // 点击某个数据点，如果已经展示了工具提示框就从工具提示框点列表移除；没有，则加入
+                    setState(() {
+                      if (showingTooltipOnSpots.contains(spotIndex)) {
+                        showingTooltipOnSpots.remove(spotIndex);
+                      } else {
+                        showingTooltipOnSpots.add(spotIndex);
+                      }
+                    });
+                  }
+                },
+                // 鼠标解析器(注释了在安卓上好像没影响)
+                // mouseCursorResolver:
+                //     (FlTouchEvent event, LineTouchResponse? response) {
+                //   if (response == null || response.lineBarSpots == null) {
+                //     return SystemMouseCursors.basic;
+                //   }
+                //   return SystemMouseCursors.click;
+                // },
 
-                          ///  获取触摸点的工具提示框(就是上面触摸反馈时，展示的内容工具提示框的样式)
-                          getTouchedSpotIndicator: (LineChartBarData barData,
-                              List<int> spotIndexes) {
-                            return spotIndexes.map((index) {
-                              return TouchedSpotIndicatorData(
-                                const FlLine(color: Colors.pink),
-                                FlDotData(
-                                  show: true,
-                                  getDotPainter:
-                                      (spot, percent, barData, index) =>
-                                          FlDotCirclePainter(
-                                    // 被选中展示了工具提示框的数据点的半径
-                                    radius: 5,
-                                    color: lerpGradient(
-                                      barData.gradient!.colors,
-                                      barData.gradient!.stops!,
-                                      percent / 100,
-                                    ),
-                                    // 折线上数据点的颜色，如果不那么较真跟着折线的渐变色显示，都统一纯色就好，简单。
-                                    // color: Colors.black,
-                                    strokeWidth: 2,
-                                    strokeColor: Colors.grey,
-                                  ),
-                                ),
-                              );
-                            }).toList();
-                          },
-                          touchTooltipData: LineTouchTooltipData(
-                            tooltipBgColor: Colors.pink,
-                            tooltipRoundedRadius: 8,
-                            getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
-                              return lineBarsSpot.map((lineBarSpot) {
-                                return LineTooltipItem(
-                                  // 工具提示框中的数据可能太长，只取两位小数
-                                  lineBarSpot.y.toStringAsFixed(2),
-                                  TextStyle(
-                                    fontSize: 12.sp,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                );
-                              }).toList();
-                            },
+                ///  获取触摸点的工具提示框(就是上面触摸反馈时，展示的内容工具提示框的样式)
+                getTouchedSpotIndicator:
+                    (LineChartBarData barData, List<int> spotIndexes) {
+                  return spotIndexes.map((index) {
+                    return TouchedSpotIndicatorData(
+                      const FlLine(color: Colors.pink),
+                      FlDotData(
+                        show: true,
+                        getDotPainter: (spot, percent, barData, index) =>
+                            FlDotCirclePainter(
+                          // 被选中展示了工具提示框的数据点的半径
+                          radius: 5,
+                          color: lerpGradient(
+                            barData.gradient!.colors,
+                            barData.gradient!.stops!,
+                            percent / 100,
                           ),
-                        ),
-                        // 折线图的条数据
-                        lineBarsData: lineBarsData,
-                        // y轴最小值
-                        // minY: 0, // ？？？如果是体重的话，传入的数据的最小值减个三五千克，然后间隔单位小一点
-                        minY: (weightTrends
-                                    .reduce((currentWT, nextWT) =>
-                                        currentWT.weight < nextWT.weight
-                                            ? currentWT
-                                            : nextWT)
-                                    .weight)
-                                .floor() -
-                            3, // 最后的-3是避免最小的值就显示在最下面了，还是留点空隙
-                        // 标题数据
-                        titlesData: FlTitlesData(
-                          // 左侧标题
-                          leftTitles: AxisTitles(
-                            // axisNameWidget: Text('体重(kg)'),
-                            // axisNameSize: 24,
-                            // sideTitles: SideTitles(showTitles: false, reservedSize: 0),
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              // interval: 2, // ？？？间隔可以根据数量多少来,不设置就自动来
-                              // interval: (maxWeight - minWeight) / 5,
-                              getTitlesWidget: _leftTitles,
-                              // 标题所需的最大空间（所有标题都将使用此值进行扩展）
-                              reservedSize: 50,
-                            ),
-                          ),
-                          // 底部标题(日期)
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              interval: 1, // ？？？间隔可以根据数量多少来
-                              getTitlesWidget: bottomTitleWidgets,
-                              reservedSize: 40,
-                            ),
-                          ),
-                          // 不显示内容也要设定，否则就是默认的样式
-                          topTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
-                          ),
-                          rightTitles: const AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
-                          ),
-                        ),
-                        // 是否显示辅助线(默认是true)
-                        gridData: const FlGridData(show: true),
-                        // 图表的边框
-                        borderData: FlBorderData(
-                          show: true,
-                          border: Border.all(color: Colors.grey),
+                          // 折线上数据点的颜色，如果不那么较真跟着折线的渐变色显示，都统一纯色就好，简单。
+                          // color: Colors.black,
+                          strokeWidth: 2,
+                          strokeColor: Colors.grey,
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  }).toList();
+                },
+                touchTooltipData: LineTouchTooltipData(
+                  tooltipBgColor: Colors.pink,
+                  tooltipRoundedRadius: 8,
+                  getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
+                    return lineBarsSpot.map((lineBarSpot) {
+                      return LineTooltipItem(
+                        // 工具提示框中的数据可能太长，只取两位小数
+                        lineBarSpot.y.toStringAsFixed(2),
+                        TextStyle(
+                          fontSize: 12.sp,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    }).toList();
+                  },
                 ),
               ),
-      ],
+              // 折线图的条数据
+              lineBarsData: lineBarsData,
+              // y轴最小值
+              // minY: 0, // ？？？如果是体重的话，传入的数据的最小值减个三五千克，然后间隔单位小一点
+              minY: (weightTrends
+                          .reduce((currentWT, nextWT) =>
+                              currentWT.weight < nextWT.weight
+                                  ? currentWT
+                                  : nextWT)
+                          .weight)
+                      .floor() -
+                  3, // 最后的-3是避免最小的值就显示在最下面了，还是留点空隙
+              // 标题数据
+              titlesData: FlTitlesData(
+                // 左侧标题
+                leftTitles: AxisTitles(
+                  // axisNameWidget: Text('体重(kg)'),
+                  // axisNameSize: 24,
+                  // sideTitles: SideTitles(showTitles: false, reservedSize: 0),
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    // interval: 2, // ？？？间隔可以根据数量多少来,不设置就自动来
+                    // interval: (maxWeight - minWeight) / 5,
+                    getTitlesWidget: _leftTitles,
+                    // 标题所需的最大空间（所有标题都将使用此值进行扩展）
+                    reservedSize: 50,
+                  ),
+                ),
+                // 底部标题(日期)
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    interval: 1, // ？？？间隔可以根据数量多少来
+                    getTitlesWidget: bottomTitleWidgets,
+                    reservedSize: 40,
+                  ),
+                ),
+                // 不显示内容也要设定，否则就是默认的样式
+                topTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                rightTitles: const AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+              ),
+              // 是否显示辅助线(默认是true)
+              gridData: const FlGridData(show: true),
+              // 图表的边框
+              borderData: FlBorderData(
+                show: true,
+                border: Border.all(color: Colors.grey),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
