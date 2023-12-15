@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/tool_widgets.dart';
@@ -78,7 +79,9 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
                   });
                 },
                 child: Text(
-                  _showAdvancedOptions ? '收起' : '更多',
+                  _showAdvancedOptions
+                      ? AppLocalizations.of(context)!.lessLabel
+                      : AppLocalizations.of(context)!.moreLabel,
                   style: TextStyle(fontSize: 12.sp),
                 ),
               ),
@@ -99,7 +102,10 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
                     _formKey.currentState?.fields['equipment']?.didChange(null);
                   });
                 },
-                child: Text('重置', style: TextStyle(fontSize: 12.sp)),
+                child: Text(
+                  AppLocalizations.of(context)!.resetLabel,
+                  style: TextStyle(fontSize: 12.sp),
+                ),
               ),
             ),
             Expanded(
@@ -113,7 +119,7 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
               flex: 3,
               child: ElevatedButton(
                 onPressed: _submitForm,
-                child: const Text('查询'),
+                child: Text(AppLocalizations.of(context)!.queryLabel),
               ),
             ),
           ],

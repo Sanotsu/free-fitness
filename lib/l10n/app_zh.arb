@@ -1,0 +1,39 @@
+{
+    "appTitle": "健康追踪",
+    "training": "运动",
+    "trainingReports": "运动报告",
+    "exercise": "动作",
+    "exerciseSubtitle": "动作库管理模块",
+    "exerciseDeleteAlert":"确认要删除该动作？删除后不可恢复！",
+    "exerciseInUse":"该动作 {exerciseName} 有被训练或计划使用，暂不支持删除.",
+    "workout": "训练",
+    "workoutSubtitle": "训练组管理模块",
+    "plan": "计划",
+    "planSubtitle": "计划库管理模块",
+
+    "itemCount": "共 {count} 条",
+
+    "dietary":"饮食",
+    "diary":"手记",
+    "me":"我的",
+    "closeLabel":"关闭",
+    "appExitInfo":"确定要退出 Free Fitness 吗?",
+    "confirmLabel":"确定",
+    "cancelLabel":"取消",
+    "resetLabel":"重置",
+    "queryLabel":"查询",
+    "moreLabel":"更多",
+    "lessLabel":"收起",
+    "enterLabel":"进入",
+    "skipLabel":"跳过",
+    "heightLabel":"身高{unit}",
+    "weightLabel":"体重{unit}",
+    "nameLabel":"怎么称呼您?",
+    "genderLabel":"请选择性别",
+    "exceptionWarningTitle":"异常提醒",
+    "deleteConfirm":"删除确认",
+    "deletedInfo":"该项次已被删除",
+    "initInfo":"初次使用，可以提供一些信息方便称呼\n可以跳过，使用可随时修改的预设数据"
+    
+    
+}

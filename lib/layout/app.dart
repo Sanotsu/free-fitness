@@ -6,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:free_fitness/layout/init_guide_page.dart';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import '../common/global/constants.dart';
 
 import 'home.dart';
@@ -33,7 +35,11 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
       builder: (_, widget) {
         return MaterialApp(
           title: 'free_fitness',
+          onGenerateTitle: (context) {
+            return AppLocalizations.of(context)!.appTitle;
+          },
           localizationsDelegates: const [
+            AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
@@ -42,7 +48,7 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
             Locale('zh', 'CH'),
             Locale('en', 'US'),
           ],
-          locale: const Locale('zh'),
+          locale: const Locale('en'),
           theme: ThemeData(
             primarySwatch: Colors.blue,
             // ？？？2023-11-22：升级到flutter 3.16 之后默认为true，现在还没有兼容修改部件，后续再启用

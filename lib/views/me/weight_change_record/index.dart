@@ -46,7 +46,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('WeightChangeRecord'),
+        title: const Text('体重趋势'),
       ),
       body: ListView(
         children: [
@@ -142,11 +142,23 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "BMI",
-                        style: TextStyle(
-                          fontSize: 24.sp,
-                          fontWeight: FontWeight.bold,
+                      RichText(
+                        textAlign: TextAlign.left,
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "BMI",
+                              style: TextStyle(
+                                fontSize: 24.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const TextSpan(
+                              text: " (15 ~ 40)",
+                              style: TextStyle(color: Colors.green),
+                            ),
+                          ],
                         ),
                       ),
                       ElevatedButton(
@@ -197,6 +209,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
               ],
             ),
           ),
+          SizedBox(height: 20.sp),
         ],
       ),
     );
@@ -232,11 +245,12 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
           ),
           Padding(
             padding: EdgeInsets.only(
-                left: bmi < 15
-                    ? 0
-                    : bmi > 40
-                        ? 300
-                        : (bmi - 15) / 40 * 300.sp),
+              left: bmi < 15
+                  ? 0
+                  : bmi > 40
+                      ? 300
+                      : ((bmi - 15) / (40 - 15) * 300.sp),
+            ),
             child: Icon(Icons.arrow_downward, size: 20.sp),
           ),
           Padding(
@@ -247,38 +261,38 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
               child: Row(
                 children: [
                   Expanded(
-                    flex: 41,
+                    flex: ((18.4 - 15) / (40 - 15) * 300).toInt(),
                     child: Container(
                       color: Colors.grey,
-                      child: const Text("<18.4"),
+                      child: const Text("<18.4", textAlign: TextAlign.end),
                     ),
                   ),
                   Expanded(
-                    flex: 60,
+                    flex: ((23.9 - 18.4) / (40 - 15) * 300).toInt(),
                     child: Container(
                       color: Colors.green,
-                      child: const Text("<23.9"),
+                      child: const Text("<23.9", textAlign: TextAlign.end),
                     ),
                   ),
                   Expanded(
-                    flex: 48,
+                    flex: ((28 - 23.9) / (40 - 15) * 300).toInt(),
                     child: Container(
                       color: Colors.blue,
-                      child: const Text("<28"),
+                      child: const Text("<28", textAlign: TextAlign.end),
                     ),
                   ),
                   Expanded(
-                    flex: 85,
+                    flex: ((35 - 28) / (40 - 15) * 300).toInt(),
                     child: Container(
                       color: Colors.yellow,
-                      child: const Text("<35"),
+                      child: const Text("<35", textAlign: TextAlign.end),
                     ),
                   ),
                   Expanded(
-                    flex: 60,
+                    flex: ((40 - 35) / (40 - 15) * 300).toInt(),
                     child: Container(
                       color: Colors.red,
-                      child: const Text("<40"),
+                      child: const Text("<40", textAlign: TextAlign.end),
                     ),
                   ),
                 ],

@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import '../views/diary/index_table_calendar.dart';
 import '../views/dietary/index.dart';
 import '../views/me/index.dart';
@@ -49,20 +51,20 @@ class _HomePageState extends State<HomePage> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text("关闭"),
-              content: const Text("确认 Free Fitness ?"),
+              title: Text(AppLocalizations.of(context)!.closeLabel),
+              content: Text(AppLocalizations.of(context)!.appExitInfo),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context, true);
                   },
-                  child: const Text('确认'),
+                  child: Text(AppLocalizations.of(context)!.confirmLabel),
                 ),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context, false);
                   },
-                  child: const Text('取消'),
+                  child: Text(AppLocalizations.of(context)!.cancelLabel),
                 ),
               ],
             );
@@ -86,12 +88,23 @@ class _HomePageState extends State<HomePage> {
           // 当item数量小于等于3时会默认fixed模式下使用主题色，大于3时则会默认shifting模式下使用白色。
           // 为了使用主题色，这里手动设置为fixed
           type: BottomNavigationBarType.fixed,
-          items: const <BottomNavigationBarItem>[
+          items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-                icon: Icon(Icons.fitness_center), label: '运动'),
-            BottomNavigationBarItem(icon: Icon(Icons.restaurant), label: '饮食'),
-            BottomNavigationBarItem(icon: Icon(Icons.note), label: '手记'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: '我的'),
+              icon: const Icon(Icons.fitness_center),
+              label: AppLocalizations.of(context)!.training,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.restaurant),
+              label: AppLocalizations.of(context)!.dietary,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.note),
+              label: AppLocalizations.of(context)!.diary,
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.person),
+              label: AppLocalizations.of(context)!.me,
+            ),
           ],
           currentIndex: _selectedIndex,
           // 底部导航栏的颜色

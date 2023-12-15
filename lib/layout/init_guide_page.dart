@@ -5,9 +5,12 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:numberpicker/numberpicker.dart';
 
 import '../common/global/constants.dart';
 import '../common/utils/db_user_helper.dart';
+import '../common/utils/tools.dart';
 import '../models/user_state.dart';
 import 'home.dart';
 
@@ -35,15 +38,18 @@ class _InitGuidePageState extends State<InitGuidePage> {
   // 用户选择的性别
   String selectedGender = "";
 
+  double _currentWeight = 66;
+  double _currentHeight = 170;
+
   // 初始化使用时的默认用户信息(根据用户是否有填写对应栏位修改对应栏位)
   var defaultUser = User(
     userId: 1,
     userName: "FF-user",
     userCode: "FF-user",
     gender: "雷霆战机",
-    description: "一位极具爱心的free-fitness用户",
+    description: "一位富有爱心的free-fitness用户",
     password: "123456",
-    dateOfBirth: "1994-07",
+    dateOfBirth: "1994-07-02",
     height: 170,
     currentWeight: 66,
     targetWeight: 66,
@@ -56,52 +62,107 @@ class _InitGuidePageState extends State<InitGuidePage> {
 
   @override
   Widget build(BuildContext context) {
+    String currentLanguage = Localizations.localeOf(context).languageCode;
+
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text("初次使用，可以提供一些信息方便称呼\n可以跳过，使用可随时修改的预设数据"),
+            Text(AppLocalizations.of(context)!.initInfo),
             Padding(
               padding: EdgeInsets.all(10.sp),
               child: TextFormField(
                 controller: _usernameController,
-                decoration: const InputDecoration(
-                  labelText: '怎么称呼您?',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.nameLabel,
                 ),
               ),
             ),
             Padding(
               padding: EdgeInsets.all(10.sp),
-              child: DropdownButtonFormField<String>(
-                items: genders.map((String gender) {
-                  return DropdownMenuItem<String>(
+              child: DropdownButtonFormField<CusLabel>(
+                items: genderOptions.map((CusLabel gender) {
+                  return DropdownMenuItem<CusLabel>(
                     value: gender,
-                    child: Text(gender),
+                    child: Text(
+                      currentLanguage == "zh" ? gender.cnLabel : gender.enLabel,
+                    ),
                   );
                 }).toList(),
-                onChanged: (String? value) async {
+                onChanged: (CusLabel? value) async {
                   setState(() {
-                    selectedGender = value.toString();
+                    selectedGender = value?.value;
                   });
                 },
-                hint: const Text('请选择性别'),
+                hint: Text(AppLocalizations.of(context)!.genderLabel),
               ),
             ),
+            Card(
+              child: Padding(
+                padding: EdgeInsets.all(10.sp),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    Column(
+                      children: [
+                        Text(AppLocalizations.of(context)!.heightLabel("(cm)")),
+                        SizedBox(height: 10.sp),
+                        DecimalNumberPicker(
+                          value: _currentHeight,
+                          minValue: 50,
+                          maxValue: 240,
+                          decimalPlaces: 1,
+                          itemHeight: 30,
+                          itemWidth: 60.sp,
+                          onChanged: (value) =>
+                              setState(() => _currentHeight = value),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        Text(AppLocalizations.of(context)!.weightLabel("(kg)")),
+                        SizedBox(height: 10.sp),
+                        DecimalNumberPicker(
+                          value: _currentWeight,
+                          minValue: 10,
+                          maxValue: 300,
+                          decimalPlaces: 1,
+                          itemHeight: 30,
+                          itemWidth: 60.sp,
+                          onChanged: (value) =>
+                              setState(() => _currentWeight = value),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 20.sp),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 TextButton(
                   onPressed: _login,
-                  child: const Text('Login'),
+                  child: Text(
+                    AppLocalizations.of(context)!.enterLabel,
+                    style: TextStyle(fontSize: 18.sp),
+                  ),
                 ),
                 TextButton(
                   onPressed: _skip,
-                  child: const Text('Skip'),
+                  child: Text(
+                    AppLocalizations.of(context)!.skipLabel,
+                    style: TextStyle(fontSize: 18.sp),
+                  ),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),
@@ -118,11 +179,30 @@ class _InitGuidePageState extends State<InitGuidePage> {
       defaultUser.gender = selectedGender;
     }
 
+    defaultUser.currentWeight = _currentWeight;
+    defaultUser.height = _currentHeight;
+
     // ？？？这里应该检查保存是否成功
     await _userHelper.insertUserList([defaultUser]);
     // 注意用户编号类型要一致都用int，storage支持的类型String, int, double, Map and List
     await box.write(LocalStorageKey.userId, 1);
     await box.write(LocalStorageKey.userName, username);
+
+    var bmi = _currentWeight / (_currentHeight / 100 * _currentHeight / 100);
+    // 新增体重趋势信息
+    var temp = WeightTrend(
+      userId: CacheUser.userId,
+      weight: _currentWeight,
+      weightUnit: 'kg',
+      height: _currentHeight,
+      heightUnit: 'cm',
+      bmi: bmi,
+      // 日期随机，带上一个插入时的time
+      gmtCreate: getCurrentDateTime(),
+    );
+
+    // ？？？这里应该判断是否新增成功
+    await _userHelper.insertWeightTrendList([temp]);
 
     if (!mounted) return;
     Navigator.pushReplacement(

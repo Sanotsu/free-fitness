@@ -1,0 +1,45 @@
+{
+  "appTitle": "Free Fitness",
+  "training": "Training",
+  "trainingReports": "TrainingReports",
+  "exercise": "Exercises",
+  "exerciseSubtitle": "Exercise management",
+  "exerciseDeleteAlert":"Confirmed to delete the exercise? Deletion is not recoverable!",
+  "exerciseInUse":"Exercise {exerciseName} in use, deletion is not supported",
+  "workout": "Workouts",
+  "workoutSubtitle": "Workout management",
+  "plan": "Plans",
+  "planSubtitle": "Plan management",
+
+  "itemCount": "{count} in total",
+
+  "dietary":"Dietary",
+  "diary":"Diary",
+  "me":"Me",
+  "closeLabel":"Close",
+  "appExitInfo":"Are you sure to exit Free Fitness?",
+  "confirmLabel":"Confirm",
+  "cancelLabel":"Cancel",
+  "resetLabel":"reset",
+  "queryLabel":"query",
+  "moreLabel":"More",
+  "lessLabel":"Less",
+  "enterLabel":"Enter",
+  "skipLabel":"Skip",
+  "heightLabel":"Height{unit}",
+  "weightLabel":"Weight{unit}",
+  "nameLabel":"please input your name",
+  "genderLabel":"please select your gender",
+  "exceptionWarningTitle":"Exception Warning",
+  "deleteConfirm":"Delete Confirm",
+  "deletedInfo":"The item has been deleted.",
+  "initInfo":"Could you please provide some basic info? \nOr just click 'Skip' button to use default info."
+
+
+
+
+  
+
+  
+ 
+}

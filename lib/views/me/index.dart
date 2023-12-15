@@ -15,6 +15,7 @@ import 'backup_and_restore/index.dart';
 import 'intake_goals/intake_target.dart';
 import 'training_setting/index.dart';
 import 'user_gallery/meal_photo_gallery.dart';
+import 'user_info/index.dart';
 import 'user_info/modify_user/index.dart';
 import 'weight_change_record/index.dart';
 
@@ -305,35 +306,37 @@ class _UserAndSettingsState extends State<UserAndSettings> {
 
       SizedBox(height: 10.sp),
       // username
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            userInfo.userName,
-            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 26.sp),
-          )
-        ],
+
+      Text(
+        userInfo.userName,
+        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 26.sp),
+        textAlign: TextAlign.center,
+        softWrap: true,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
+
       // usercode
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text("@${userInfo.userCode ?? 'unkown'}"),
-        ],
+
+      Text(
+        "@${userInfo.userCode ?? 'unkown'}",
+        textAlign: TextAlign.center,
+        softWrap: true,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
+
       SizedBox(height: 10.sp),
       // 用户简介 description
-      Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            userInfo.description ?? 'no description',
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 16.sp),
-          )
-        ],
+      Padding(
+        padding: EdgeInsets.all(10.sp),
+        child: Text(
+          userInfo.description ?? 'no description',
+          softWrap: true,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: 16.sp),
+        ),
       ),
     ];
   }
@@ -351,12 +354,10 @@ class _UserAndSettingsState extends State<UserAndSettings> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ModifyUserPage(user: userInfo),
+                  builder: (context) => const UserInfo(),
                 ),
               ).then((value) {
                 // 确认新增成功后重新加载当前日期的条目数据
-
-                print("我的设置返回带过来的结果==========$value");
                 _queryLoginedUserInfo();
               });
             },

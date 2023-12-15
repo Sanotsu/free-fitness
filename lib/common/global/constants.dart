@@ -327,42 +327,53 @@ Map<CusNutType, Color> cusNutrientColors = {
 
 final List<String> genders = ['男', '女', '雷霆战机', '其他'];
 
+final List<CusLabel> genderOptions = [
+  CusLabel(enLabel: 'male', cnLabel: "男", value: 'male'),
+  CusLabel(enLabel: 'female', cnLabel: "女", value: 'female'),
+  CusLabel(
+    enLabel: 'thunder fighter jet',
+    cnLabel: "雷霆战机",
+    value: 'thunder fighter',
+  ),
+  CusLabel(enLabel: 'other', cnLabel: "其他", value: 'other'),
+];
+
 /// 基础活动的一些分类选项
 /// 来源： https://lite.datasette.io/?json=https://github.com/yuhonas/free-exercise-db/blob/main/dist/exercises.json#/data/exercises?_facet=force
 List<CusLabel> mechanicOptions = [
-  CusLabel(enLabel: '', cnLabel: "孤立动作", value: 'isolation'),
-  CusLabel(enLabel: '', cnLabel: "复合动作", value: 'compound'),
+  CusLabel(enLabel: 'isolation', cnLabel: "孤立动作", value: 'isolation'),
+  CusLabel(enLabel: 'compound', cnLabel: "复合动作", value: 'compound'),
 ];
 
 List<CusLabel> forceOptions = [
-  CusLabel(enLabel: '', cnLabel: "拉", value: 'pull'),
-  CusLabel(enLabel: '', cnLabel: "推", value: 'push'),
-  CusLabel(enLabel: '', cnLabel: "静", value: 'static'),
-  CusLabel(enLabel: '', cnLabel: "其他", value: 'other'),
+  CusLabel(enLabel: 'pull', cnLabel: "拉", value: 'pull'),
+  CusLabel(enLabel: 'push', cnLabel: "推", value: 'push'),
+  CusLabel(enLabel: 'static', cnLabel: "静", value: 'static'),
+  CusLabel(enLabel: 'other', cnLabel: "其他", value: 'other'),
 ];
 
 List<CusLabel> levelOptions = [
-  CusLabel(enLabel: '', cnLabel: "初级", value: 'beginner'),
-  CusLabel(enLabel: '', cnLabel: "中级", value: 'intermediate'),
-  CusLabel(enLabel: '', cnLabel: "专家", value: 'expert'),
+  CusLabel(enLabel: 'beginner', cnLabel: "初级", value: 'beginner'),
+  CusLabel(enLabel: 'intermediate', cnLabel: "中级", value: 'intermediate'),
+  CusLabel(enLabel: 'expert', cnLabel: "专家", value: 'expert'),
 ];
 
 // 锻炼是计时还是计次
 List<CusLabel> countingOptions = [
-  CusLabel(enLabel: '', cnLabel: "计时", value: 'timed'),
-  CusLabel(enLabel: '', cnLabel: "计次", value: 'counted'),
+  CusLabel(enLabel: 'timed', cnLabel: "计时", value: 'timed'),
+  CusLabel(enLabel: 'counted', cnLabel: "计次", value: 'counted'),
 ];
 
 // 这个分类除了exercise外，plan计划也用这个
 List<CusLabel> categoryOptions = [
-  CusLabel(enLabel: '', cnLabel: "力量", value: 'strength'),
-  CusLabel(enLabel: '', cnLabel: "拉伸", value: 'stretching'),
-  CusLabel(enLabel: '', cnLabel: "肌肉增强", value: 'plyometrics'),
-  CusLabel(enLabel: '', cnLabel: "力量举重", value: 'powerlifting'),
-  CusLabel(enLabel: '', cnLabel: "大力士", value: 'strongman'),
-  CusLabel(enLabel: '', cnLabel: "有氧", value: 'cardio'),
-  CusLabel(enLabel: '', cnLabel: "无氧", value: 'anaerobic'),
-  CusLabel(enLabel: '', cnLabel: "其他", value: 'other'),
+  CusLabel(enLabel: 'strength', cnLabel: "力量", value: 'strength'),
+  CusLabel(enLabel: 'stretching', cnLabel: "拉伸", value: 'stretching'),
+  CusLabel(enLabel: 'plyometrics', cnLabel: "肌肉增强", value: 'plyometrics'),
+  CusLabel(enLabel: 'power lifting', cnLabel: "力量举重", value: 'powerlifting'),
+  CusLabel(enLabel: 'strongman', cnLabel: "大力士", value: 'strongman'),
+  CusLabel(enLabel: 'cardio', cnLabel: "有氧", value: 'cardio'),
+  CusLabel(enLabel: 'anaerobic', cnLabel: "无氧", value: 'anaerobic'),
+  CusLabel(enLabel: 'other', cnLabel: "其他", value: 'other'),
 ];
 
 // 训练组的分类示例(？？？可以考虑也用上面那一个？)
@@ -370,56 +381,56 @@ List<CusLabel> groupCategoryOptions = [
   CusLabel(enLabel: 'chest training', cnLabel: "练胸", value: 'chest_training'),
   CusLabel(enLabel: 'arm training', cnLabel: "练臂", value: 'arm_training'),
   CusLabel(enLabel: 'slimming', cnLabel: "减肥", value: 'slimming'),
-  CusLabel(enLabel: '', cnLabel: "其他", value: 'other'),
+  CusLabel(enLabel: 'other', cnLabel: "其他", value: 'other'),
 ];
 
 List<CusLabel> equipmentOptions = [
-  CusLabel(enLabel: '', cnLabel: "无器械", value: 'body'),
-  CusLabel(enLabel: '', cnLabel: "杠铃", value: 'barbell'),
-  CusLabel(enLabel: '', cnLabel: "哑铃", value: 'dumbbell'),
-  CusLabel(enLabel: '', cnLabel: "缆绳", value: 'cable'),
-  CusLabel(enLabel: '', cnLabel: "壶铃", value: 'kettlebells'),
-  CusLabel(enLabel: '', cnLabel: "健身带", value: 'bands'),
-  CusLabel(enLabel: '', cnLabel: "健身实心球", value: 'medicine ball'),
-  CusLabel(enLabel: '', cnLabel: "健身球", value: 'exercise ball'),
-  CusLabel(enLabel: '', cnLabel: "泡沫辊", value: 'foam roll'),
-  CusLabel(enLabel: '', cnLabel: "e-z卷曲棒", value: 'e-z curl bar'),
-  CusLabel(enLabel: '', cnLabel: "机器", value: 'machine'),
-  CusLabel(enLabel: '', cnLabel: "其他", value: 'other'),
+  CusLabel(enLabel: 'body', cnLabel: "无器械", value: 'body'),
+  CusLabel(enLabel: 'barbell', cnLabel: "杠铃", value: 'barbell'),
+  CusLabel(enLabel: 'dumbbell', cnLabel: "哑铃", value: 'dumbbell'),
+  CusLabel(enLabel: 'cable', cnLabel: "缆绳", value: 'cable'),
+  CusLabel(enLabel: 'kettlebells', cnLabel: "壶铃", value: 'kettlebells'),
+  CusLabel(enLabel: 'bands', cnLabel: "健身带", value: 'bands'),
+  CusLabel(enLabel: 'medicine ball', cnLabel: "健身实心球", value: 'medicine ball'),
+  CusLabel(enLabel: 'exercise ball', cnLabel: "健身球", value: 'exercise ball'),
+  CusLabel(enLabel: 'foam roll', cnLabel: "泡沫辊", value: 'foam roll'),
+  CusLabel(enLabel: 'e-z curl bar', cnLabel: "e-z卷曲棒", value: 'e-z curl bar'),
+  CusLabel(enLabel: 'machine', cnLabel: "机器", value: 'machine'),
+  CusLabel(enLabel: 'other', cnLabel: "其他", value: 'other'),
 ];
 
 List<CusLabel> standardDurationOptions = [
-  CusLabel(enLabel: '', cnLabel: "1 秒", value: '1'),
-  CusLabel(enLabel: '', cnLabel: "2 秒", value: '2'),
-  CusLabel(enLabel: '', cnLabel: "3 秒", value: '3'),
-  CusLabel(enLabel: '', cnLabel: "4 秒", value: '4'),
-  CusLabel(enLabel: '', cnLabel: "5 秒", value: '5'),
-  CusLabel(enLabel: '', cnLabel: "6 秒", value: '6'),
-  CusLabel(enLabel: '', cnLabel: "7 秒", value: '7'),
-  CusLabel(enLabel: '', cnLabel: "8 秒", value: '8'),
-  CusLabel(enLabel: '', cnLabel: "9 秒", value: '9'),
-  CusLabel(enLabel: '', cnLabel: "10 秒", value: '10'),
+  CusLabel(enLabel: '1 s', cnLabel: "1 秒", value: '1'),
+  CusLabel(enLabel: '2 s', cnLabel: "2 秒", value: '2'),
+  CusLabel(enLabel: '3 s', cnLabel: "3 秒", value: '3'),
+  CusLabel(enLabel: '4 s', cnLabel: "4 秒", value: '4'),
+  CusLabel(enLabel: '5 s', cnLabel: "5 秒", value: '5'),
+  CusLabel(enLabel: '6 s', cnLabel: "6 秒", value: '6'),
+  CusLabel(enLabel: '7 s', cnLabel: "7 秒", value: '7'),
+  CusLabel(enLabel: '8 s', cnLabel: "8 秒", value: '8'),
+  CusLabel(enLabel: '9 s', cnLabel: "9 秒", value: '9'),
+  CusLabel(enLabel: '10 s', cnLabel: "10 秒", value: '10'),
 ];
 
 final List<CusLabel> musclesOptions = [
-  CusLabel(enLabel: '', cnLabel: "四头肌", value: 'quadriceps'),
-  CusLabel(enLabel: '', cnLabel: "肩膀", value: 'shoulders'),
-  CusLabel(enLabel: '', cnLabel: "腹肌", value: 'abdominals'),
-  CusLabel(enLabel: '', cnLabel: "胸部", value: 'chest'),
-  CusLabel(enLabel: '', cnLabel: "腘绳肌腱", value: 'hamstrings'),
-  CusLabel(enLabel: '', cnLabel: "三头肌", value: 'triceps'),
-  CusLabel(enLabel: '', cnLabel: "二头肌", value: 'biceps'),
-  CusLabel(enLabel: '', cnLabel: "背阔肌", value: 'lats'),
-  CusLabel(enLabel: '', cnLabel: "中背", value: 'middle back'),
-  CusLabel(enLabel: '', cnLabel: "小腿肌", value: 'calves'),
-  CusLabel(enLabel: '', cnLabel: "下背肌肉", value: 'lower back'),
-  CusLabel(enLabel: '', cnLabel: "前臂", value: 'forearms'),
-  CusLabel(enLabel: '', cnLabel: "臀肌", value: 'glutes'),
-  CusLabel(enLabel: '', cnLabel: "斜方肌", value: 'trapezius'),
-  CusLabel(enLabel: '', cnLabel: "内收肌", value: 'adductors'),
-  CusLabel(enLabel: '', cnLabel: "展肌", value: 'abductors'),
-  CusLabel(enLabel: '', cnLabel: "脖子", value: 'neck'),
-  CusLabel(enLabel: '', cnLabel: "其他", value: 'other'),
+  CusLabel(enLabel: 'quadriceps', cnLabel: "四头肌", value: 'quadriceps'),
+  CusLabel(enLabel: 'shoulders', cnLabel: "肩膀", value: 'shoulders'),
+  CusLabel(enLabel: 'abdominals', cnLabel: "腹肌", value: 'abdominals'),
+  CusLabel(enLabel: 'chest', cnLabel: "胸部", value: 'chest'),
+  CusLabel(enLabel: 'hamstrings', cnLabel: "腘绳肌腱", value: 'hamstrings'),
+  CusLabel(enLabel: 'triceps', cnLabel: "三头肌", value: 'triceps'),
+  CusLabel(enLabel: 'biceps', cnLabel: "二头肌", value: 'biceps'),
+  CusLabel(enLabel: 'lats', cnLabel: "背阔肌", value: 'lats'),
+  CusLabel(enLabel: 'middle back', cnLabel: "中背", value: 'middle back'),
+  CusLabel(enLabel: 'calves', cnLabel: "小腿肌", value: 'calves'),
+  CusLabel(enLabel: 'lower back', cnLabel: "下背肌肉", value: 'lower back'),
+  CusLabel(enLabel: 'forearms', cnLabel: "前臂", value: 'forearms'),
+  CusLabel(enLabel: 'glutes', cnLabel: "臀肌", value: 'glutes'),
+  CusLabel(enLabel: 'trapezius', cnLabel: "斜方肌", value: 'trapezius'),
+  CusLabel(enLabel: 'adductors', cnLabel: "内收肌", value: 'adductors'),
+  CusLabel(enLabel: 'abductors', cnLabel: "展肌", value: 'abductors'),
+  CusLabel(enLabel: 'neck', cnLabel: "脖子", value: 'neck'),
+  CusLabel(enLabel: 'other', cnLabel: "其他", value: 'other'),
 ];
 
 List<String> cnLabelList = mealNameMap.values.map((cl) => cl.cnLabel).toList();

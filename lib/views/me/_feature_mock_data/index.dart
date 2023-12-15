@@ -163,6 +163,32 @@ class _FeatureMockDemoState extends State<FeatureMockDemo> {
                 },
                 child: const Text("插入两条训练日志(先新增基础数据)"),
               ),
+
+              ElevatedButton(
+                onPressed: () async {
+                  await _dietaryHelper.deleteDB();
+                  await _trainingHelper.deleteDB();
+                  await _diaryHelper.deleteDB();
+
+                  if (!mounted) return;
+                  _showSimpleDialog(context, "已删除所有数据");
+                },
+                child: const Text("删除所有数据"),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  await insertDailyLogDataDemo(7, 30, 7);
+                  await insertOneRandomPlanHasGroup();
+                  await insertOneQuillDemo();
+                  await insertExtraUsers();
+                  await insertBMIDemo();
+                  await insertTrainingLogDemo();
+
+                  if (!mounted) return;
+                  _showSimpleDialog(context, "已插入所有数据");
+                },
+                child: const Text("插入所有数据"),
+              ),
             ],
           ),
         ),

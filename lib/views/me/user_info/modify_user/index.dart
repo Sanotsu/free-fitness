@@ -26,9 +26,6 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
   // 保存中
   bool isLoading = false;
 
-  // 是否处于编辑中(查看基本信息就不让修改)
-  bool isEditing = false;
-
   @override
   void initState() {
     super.initState();
@@ -39,12 +36,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         setState(() {
           _formKey.currentState?.patchValue(widget.user!.toStringMap());
         });
-      } else {
-        // 没有传值，那就是新增，则直接是编辑状态
-        setState(() {
-          isEditing = true;
-        });
-      }
+      } else {}
     });
   }
 
@@ -60,7 +52,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
       var tempUser = User(
         userName: temp['user_name'],
         userCode: temp['user_code'],
-        gender: temp['gendar'],
+        gender: (temp['gendar'] as CusLabel).value,
         dateOfBirth: temp['date_of_birth'] != null
             ? DateFormat(constDateFormat)
                 .format(temp['date_of_birth'] as DateTime)
@@ -69,6 +61,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         currentWeight: double.tryParse(temp['current_weight']),
         rdaGoal: int.tryParse(temp['rda_goal']),
         actionRestTime: int.tryParse(temp['action_rest_time']),
+        description: temp['description'],
       );
 
       try {
@@ -82,13 +75,9 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         if (!mounted) return;
         setState(() {
           isLoading = false;
-          isEditing = false;
         });
 
-        // 如果是新增用户，点保存则返回尚义页；如果是修改用户，点保存是只退出编辑状态
-        if (widget.user == null) {
-          Navigator.pop(context, true);
-        }
+        Navigator.pop(context, true);
       } catch (e) {
         // 将错误信息展示给用户
         if (!mounted) return;
@@ -108,15 +97,10 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
       appBar: AppBar(
         title: Text(widget.user == null ? '新增用户信息' : '修改用户信息'),
         actions: [
-          if (!isEditing)
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  isEditing = true;
-                });
-              },
-              icon: const Icon(Icons.edit),
-            ),
+          TextButton(
+            onPressed: _saveUser,
+            child: const Text('保存', style: TextStyle(color: Colors.white)),
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -133,28 +117,6 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
                 ),
               ),
             ),
-            if (isEditing)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        isEditing = false;
-                      });
-                      // 如果是新增用户，点取消者返回；如果是修改用户，点取消是只退出编辑状态
-                      if (widget.user == null) {
-                        Navigator.pop(context);
-                      }
-                    },
-                    child: const Text('取消'),
-                  ),
-                  TextButton(
-                    onPressed: _saveUser,
-                    child: const Text('保存'),
-                  ),
-                ],
-              )
           ],
         ),
       ),
@@ -165,12 +127,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
     return [
       FormBuilderTextField(
         name: "user_name",
-        readOnly: !isEditing,
-        enabled: isEditing,
-        decoration: InputDecoration(
-          labelText: "用户名",
-          border: !isEditing ? InputBorder.none : null,
-        ),
+        decoration: const InputDecoration(labelText: "用户名"),
         keyboardType: TextInputType.name,
         validator: FormBuilderValidators.compose([
           FormBuilderValidators.required(errorText: '用户名不可为空'),
@@ -178,49 +135,42 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
       ),
       FormBuilderTextField(
         name: "user_code",
-        readOnly: !isEditing,
-        enabled: isEditing,
-        decoration: InputDecoration(
-          labelText: "用户代号",
-          border: !isEditing ? InputBorder.none : null,
-        ),
+        decoration: const InputDecoration(labelText: "用户代号"),
         keyboardType: TextInputType.name,
       ),
-      FormBuilderDropdown<String>(
+      FormBuilderDropdown<CusLabel>(
         name: "gendar",
-        enabled: isEditing,
-        initialValue: '男',
-        decoration: InputDecoration(
-          labelText: "性别",
-          border: !isEditing ? InputBorder.none : null,
-        ),
-        items: genders
+        initialValue: widget.user == null
+            ? genderOptions.first
+            : genderOptions.firstWhere(
+                (e) => e.value == widget.user?.gender,
+                orElse: () => genderOptions.first,
+              ),
+        decoration: const InputDecoration(labelText: "性别"),
+        items: genderOptions
             .map((unit) => DropdownMenuItem(
                   alignment: AlignmentDirectional.center,
                   value: unit,
-                  child: Text(unit),
+                  child: Text(unit.cnLabel),
                 ))
             .toList(),
       ),
       FormBuilderDateTimePicker(
         name: 'date_of_birth',
-        enabled: isEditing,
         initialEntryMode: DatePickerEntryMode.calendar,
         format: DateFormat(constDateFormat),
-        initialValue: DateTime.now(),
+        initialValue: widget.user == null
+            ? DateTime.now()
+            : DateTime.tryParse(widget.user?.dateOfBirth ?? "1970-01-01"),
         inputType: InputType.date,
         decoration: InputDecoration(
           labelText: '出生年月',
-          border: !isEditing ? InputBorder.none : null,
-          suffixIcon: !isEditing
-              ? null
-              : IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () {
-                    _formKey.currentState!.fields['date_of_birth']
-                        ?.didChange(null);
-                  },
-                ),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              _formKey.currentState!.fields['date_of_birth']?.didChange(null);
+            },
+          ),
         ),
         locale: const Locale.fromSubtags(languageCode: 'zh'),
       ),
@@ -235,8 +185,21 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
           ),
         ],
       ),
-      _buildDoubleTextField('rda_goal', "RDA", "大卡"),
-      _buildDoubleTextField('action_rest_time', "锻炼间隔休息时间", "秒"),
+      Row(
+        children: [
+          Expanded(child: _buildDoubleTextField('rda_goal', "RDA", "大卡")),
+          SizedBox(width: 10.sp),
+          Expanded(
+            child: _buildDoubleTextField('action_rest_time', "锻炼间隔休息时间", "秒"),
+          ),
+        ],
+      ),
+      FormBuilderTextField(
+        name: "description",
+        maxLines: 3,
+        decoration: const InputDecoration(labelText: "简述"),
+        keyboardType: TextInputType.name,
+      ),
     ];
   }
 
@@ -244,12 +207,9 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
     // 这里的只读就用全局的isEditing了，不作为参数传递了
     return FormBuilderTextField(
       name: name,
-      readOnly: !isEditing,
-      enabled: isEditing,
       decoration: InputDecoration(
         labelText: labelText,
         suffixText: suffixText,
-        border: !isEditing ? InputBorder.none : null,
       ),
       // 正则来只允许输入数字和小数点
       inputFormatters: [

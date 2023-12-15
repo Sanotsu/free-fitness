@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/training_state.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
@@ -180,9 +181,11 @@ class _TrainingExerciseState extends State<TrainingExercise> {
         title: RichText(
           text: TextSpan(
             children: [
-              TextSpan(text: '动作库\n', style: TextStyle(fontSize: 20.sp)),
               TextSpan(
-                text: "共 $itemsCount 条",
+                  text: '${AppLocalizations.of(context)!.exercise}\n',
+                  style: TextStyle(fontSize: 20.sp)),
+              TextSpan(
+                text: AppLocalizations.of(context)!.itemCount(itemsCount),
                 style: TextStyle(fontSize: 12.sp),
               ),
             ],
@@ -268,8 +271,9 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                         if (list.isNotEmpty) {
                           commonExceptionDialog(
                             context,
-                            "异常提醒",
-                            "该动作 ${exerciseItem.exerciseName} 有被训练或计划使用，暂不支持删除.",
+                            AppLocalizations.of(context)!.exceptionWarningTitle,
+                            AppLocalizations.of(context)!
+                                .exerciseInUse(exerciseItem.exerciseName),
                           );
                           return false;
                         }
@@ -278,18 +282,27 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: const Text("删除确认"),
-                              content: const Text("确认要删除该动作？删除后不可恢复！"),
+                              title: Text(
+                                AppLocalizations.of(context)!.deleteConfirm,
+                              ),
+                              content: Text(
+                                AppLocalizations.of(context)!
+                                    .exerciseDeleteAlert,
+                              ),
                               actions: <Widget>[
                                 TextButton(
                                   onPressed: () =>
                                       Navigator.of(context).pop(true),
-                                  child: const Text("确定"),
+                                  child: Text(
+                                    AppLocalizations.of(context)!.confirmLabel,
+                                  ),
                                 ),
                                 ElevatedButton(
                                   onPressed: () =>
                                       Navigator.of(context).pop(false),
-                                  child: const Text("取消"),
+                                  child: Text(
+                                    AppLocalizations.of(context)!.cancelLabel,
+                                  ),
                                 ),
                               ],
                             );
@@ -307,9 +320,11 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                         if (!mounted) return;
 
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('已删除该项'),
-                            duration: Duration(seconds: 2),
+                          SnackBar(
+                            content: Text(
+                              AppLocalizations.of(context)!.deletedInfo,
+                            ),
+                            duration: const Duration(seconds: 2),
                           ),
                         );
                       },
@@ -395,13 +410,17 @@ class _TrainingExerciseState extends State<TrainingExercise> {
   }
 
   _propertyText(String prefix, String item, List<CusLabel> options) {
+    String currentLanguage = Localizations.localeOf(context).languageCode;
+
+    print("currentLanguage----$currentLanguage");
+
     // 数据库存的是英文，这里找到对应的中文显示
-    var label = options
-        .firstWhere(
-          (element) => element.value == item,
-          orElse: () => CusLabel(cnLabel: '[无]', enLabel: 'No Data', value: ''),
-        )
-        .cnLabel;
+    var op = options.firstWhere(
+      (element) => element.value == item,
+      orElse: () => CusLabel(cnLabel: '[无]', enLabel: 'No Data', value: ''),
+    );
+
+    var label = currentLanguage == "cn" ? op.cnLabel : op.enLabel;
 
     return Expanded(
       child: Padding(
