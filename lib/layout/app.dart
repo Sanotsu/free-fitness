@@ -48,7 +48,13 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
             Locale('zh', 'CH'),
             Locale('en', 'US'),
           ],
-          locale: const Locale('en'),
+          // locale: null,
+          // locale: const Locale('en'),
+
+          locale: box.read('language') == 'system'
+              ? null
+              : Locale(box.read('language')),
+
           theme: ThemeData(
             primarySwatch: Colors.blue,
             // ？？？2023-11-22：升级到flutter 3.16 之后默认为true，现在还没有兼容修改部件，后续再启用
@@ -59,15 +65,17 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
               titleTextStyle: TextStyle(fontSize: 20.sp),
             ),
           ),
-          // theme: lightTheme,
-          // theme: darkTheme,
 
-          // theme: FlexThemeData.light(
-          //   scheme: FlexScheme.aquaBlue,
-          // ),
+          // 默认使用浅色主题，预览一个深色主题使用的预设值
           darkTheme: FlexThemeData.dark(scheme: FlexScheme.mandyRed),
-          // 根据系统设置使用深色或浅色主题
           themeMode: ThemeMode.light,
+
+          // 根据系统设置使用深色或浅色主题(当有完善的深色模式之后再启用)
+          // theme: box.read('mode') == 'system'
+          //     ? null
+          //     : box.read('mode') == 'dark'
+          //         ? FlexThemeData.dark(scheme: FlexScheme.mandyRed)
+          //         : FlexThemeData.light(scheme: FlexScheme.aquaBlue),
 
           // 使用了initalRoute就不能使用home了，参看文档：
           // https://flutter.cn/docs/cookbook/navigation/named-routes#2-define-the-routes

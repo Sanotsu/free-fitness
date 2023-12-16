@@ -277,6 +277,15 @@ class _TrainingReportsState extends State<TrainingReports> {
         if (snapshot.hasData) {
           List<TrainedLogWithGroupBasic> data = snapshot.data!;
 
+          if (data.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.only(top: 100.sp),
+                child: Text("暂无训练记录", style: TextStyle(fontSize: 20.sp)),
+              ),
+            );
+          }
+
           // TrainedLogWithGroupBasic-->tlwgb
           // 计算所有训练日志的累加时间
           int totalRest = data.fold(
@@ -546,12 +555,6 @@ class _TrainingReportsState extends State<TrainingReports> {
                       ),
                     ],
                   ),
-
-                  // ListTile(
-                  //   onTap: () => print('${value[index]}'),
-                  //   title: Text('${value[index].group?.groupName} '),
-                  //   subtitle: Text('${value[index].log.trainedStartTime} '),
-                  // ),
                 );
               },
             );
@@ -575,6 +578,15 @@ class _TrainingReportsState extends State<TrainingReports> {
           AsyncSnapshot<List<TrainedLogWithGroupBasic>> snapshot) {
         if (snapshot.hasData) {
           List<TrainedLogWithGroupBasic> data = snapshot.data!;
+
+          if (data.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.only(top: 100.sp),
+                child: Text("最近30天暂无训练记录", style: TextStyle(fontSize: 20.sp)),
+              ),
+            );
+          }
 
           // 将最近30天的记录，按天分组并排序展示。
           Map<String, List<TrainedLogWithGroupBasic>> logGroupedByDate = {};

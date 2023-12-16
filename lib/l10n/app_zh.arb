@@ -33,7 +33,14 @@
     "exceptionWarningTitle":"异常提醒",
     "deleteConfirm":"删除确认",
     "deletedInfo":"该项次已被删除",
-    "initInfo":"初次使用，可以提供一些信息方便称呼\n可以跳过，使用可随时修改的预设数据"
+    "initInfo":"初次使用，可以提供一些信息方便称呼\n可以跳过，使用可随时修改的预设数据",
+    "moreSettings":"更多设置",
+    "languageSetting":"切换语言",
+    "followSystem":"跟随系统",
+    "themeSetting":"切换主题",
+    "darkMode":"深色模式",
+    "lightMode":"浅色模式"
+    
     
     
 }

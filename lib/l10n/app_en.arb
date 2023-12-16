@@ -33,7 +33,13 @@
   "exceptionWarningTitle":"Exception Warning",
   "deleteConfirm":"Delete Confirm",
   "deletedInfo":"The item has been deleted.",
-  "initInfo":"Could you please provide some basic info? \nOr just click 'Skip' button to use default info."
+  "initInfo":"Could you please provide some basic info? \nOr just click 'Skip' button to use default info.",
+  "moreSettings":"More Settings",
+  "languageSetting":"Language",
+  "followSystem":"System",
+  "themeSetting":"Theme Mode",
+  "darkMode":"Dark Mode",
+  "lightMode":"Light Mode"
 
 
 

@@ -13,8 +13,8 @@ import '../../models/user_state.dart';
 import '_feature_mock_data/index.dart';
 import 'backup_and_restore/index.dart';
 import 'intake_goals/intake_target.dart';
+import 'more_settings/index.dart';
 import 'training_setting/index.dart';
-import 'user_gallery/meal_photo_gallery.dart';
 import 'user_info/index.dart';
 import 'user_info/modify_user/index.dart';
 import 'weight_change_record/index.dart';
@@ -214,13 +214,13 @@ class _UserAndSettingsState extends State<UserAndSettings> {
 
                   SizedBox(height: 10.sp),
 
-                  /// 功能区
-                  // 参看别的app大概留几个
+                  /// 功能区，参看别的app大概留几个
+                  // 基本信息和体重趋势
                   _buildInfoAndWeightChangeRow(),
-
+                  // 摄入目标和运动设置
                   _buildIntakeGoalAndRestTimeRow(),
-
-                  _buildMealPhotoAndQARow(),
+                  // 备份还原和更多设置
+                  _buildBakAndRestoreAndMoreSettingRow(),
                 ],
               ),
             ),
@@ -437,25 +437,9 @@ class _UserAndSettingsState extends State<UserAndSettings> {
     );
   }
 
-  _buildMealPhotoAndQARow() {
+  _buildBakAndRestoreAndMoreSettingRow() {
     return Row(
       children: [
-        Expanded(
-          child: NewCusSettingCard(
-            leadingIcon: Icons.photo_album_outlined,
-            title: '饮食相册',
-            onTap: () {
-              // 处理相应的点击事件
-              print("(点击进入饮食相册页面)……");
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MealPhotoGallery(),
-                ),
-              );
-            },
-          ),
-        ),
         Expanded(
           child: NewCusSettingCard(
             leadingIcon: Icons.backup,
@@ -467,6 +451,22 @@ class _UserAndSettingsState extends State<UserAndSettings> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const BackupAndRestore(),
+                ),
+              );
+            },
+          ),
+        ),
+        Expanded(
+          child: NewCusSettingCard(
+            leadingIcon: Icons.more_horiz,
+            title: '更多设置',
+            onTap: () {
+              // 处理相应的点击事件
+              print("(点击进入更多设置页面)……");
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MoreSettings(),
                 ),
               );
             },
