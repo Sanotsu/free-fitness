@@ -18,6 +18,7 @@ import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/diary_state.dart';
 import '../../../models/dietary_state.dart';
 import '../../../models/user_state.dart';
@@ -95,7 +96,7 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
       if (!mounted) return;
       showSnackMessage(
         context,
-        "已经保存到 $selectedDirectory",
+        CusAL.of(context).bakSuccessNote(selectedDirectory),
         backgroundColor: Colors.green,
       );
     } else {
@@ -256,7 +257,7 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
           if (!mounted) return;
           showSnackMessage(
             context,
-            "原有数据已删除，备份数据已恢复。",
+            CusAL.of(context).resSuccessNote,
             backgroundColor: Colors.green,
           );
         } catch (e) {
@@ -349,7 +350,7 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('备份恢复')),
+      appBar: AppBar(title: Text(CusAL.of(context).bakLabels("0"))),
       body: isLoading ? buildLoader(isLoading) : buildBackupButton(),
     );
   }
@@ -365,22 +366,22 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
                 context: context,
                 builder: (context) {
                   return AlertDialog(
-                    title: const Text('全量备份'),
-                    content: const Text("确认导出所有数据?"),
+                    title: Text(CusAL.of(context).bakLabels("1")),
+                    content: Text(CusAL.of(context).bakOpNote),
                     actions: [
                       TextButton(
                         onPressed: () {
                           if (!mounted) return;
                           Navigator.pop(context, false);
                         },
-                        child: const Text('取消'),
+                        child: Text(CusAL.of(context).cancelLabel),
                       ),
                       TextButton(
                         onPressed: () {
                           if (!mounted) return;
                           Navigator.pop(context, true);
                         },
-                        child: const Text('确认'),
+                        child: Text(CusAL.of(context).confirmLabel),
                       ),
                     ],
                   );
@@ -390,12 +391,18 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
               });
             },
             icon: const Icon(Icons.backup),
-            label: Text("全量备份", style: TextStyle(fontSize: 20.sp)),
+            label: Text(
+              CusAL.of(context).bakLabels("1"),
+              style: TextStyle(fontSize: 20.sp),
+            ),
           ),
           TextButton.icon(
             onPressed: restoreDataFromBackup,
             icon: const Icon(Icons.restore),
-            label: Text("覆写恢复", style: TextStyle(fontSize: 20.sp)),
+            label: Text(
+              CusAL.of(context).bakLabels("2"),
+              style: TextStyle(fontSize: 20.sp),
+            ),
           ),
         ],
       ),

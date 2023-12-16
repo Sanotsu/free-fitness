@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../layout/app.dart';
+import '../../../models/cus_app_localizations.dart';
 
 class MoreSettings extends StatefulWidget {
   const MoreSettings({super.key});
@@ -17,7 +17,7 @@ class _MoreSettingsState extends State<MoreSettings> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.moreSettings),
+        title: Text(CusAL.of(context).moreSettings),
       ),
       body: ListView(
         children: [
@@ -26,19 +26,19 @@ class _MoreSettingsState extends State<MoreSettings> {
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(AppLocalizations.of(context)!.languageSetting),
+                Text(CusAL.of(context).languageSetting),
                 Text(
                   box.read("language") == "zh"
                       ? "简体中文"
                       : box.read("language") == "en"
                           ? "English"
-                          : AppLocalizations.of(context)!.followSystem,
+                          : CusAL.of(context).followSystem,
                 ),
               ],
             ),
             children: [
               _buildLanguageListItem(
-                AppLocalizations.of(context)!.followSystem,
+                CusAL.of(context).followSystem,
                 'system',
               ),
               _buildLanguageListItem('简体中文', 'zh'),
@@ -50,30 +50,30 @@ class _MoreSettingsState extends State<MoreSettings> {
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(AppLocalizations.of(context)!.themeSetting),
+                Text(CusAL.of(context).themeSetting),
                 Text(
                   box.read("mode") == "dark"
-                      ? AppLocalizations.of(context)!.darkMode
+                      ? CusAL.of(context).darkMode
                       : box.read("mode") == "light"
-                          ? AppLocalizations.of(context)!.lightMode
-                          : AppLocalizations.of(context)!.followSystem,
+                          ? CusAL.of(context).lightMode
+                          : CusAL.of(context).followSystem,
                 ),
               ],
             ),
             children: [
               _buildModeListItem(
                 const Icon(Icons.sync),
-                AppLocalizations.of(context)!.followSystem,
+                CusAL.of(context).followSystem,
                 'system',
               ),
               _buildModeListItem(
                 const Icon(Icons.wb_sunny_outlined),
-                AppLocalizations.of(context)!.darkMode,
+                CusAL.of(context).darkMode,
                 'dark',
               ),
               _buildModeListItem(
                 const Icon(Icons.brightness_2),
-                AppLocalizations.of(context)!.lightMode,
+                CusAL.of(context).lightMode,
                 'light',
               ),
             ],

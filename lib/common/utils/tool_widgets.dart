@@ -40,7 +40,7 @@ IconData genRandomIcon() =>
 
 // 指定卡路里转化为千焦数值
 String caloryToKjStr(int calory) =>
-    "${(calory * oneCalToKjRatio).toStringAsFixed(2)} 千焦";
+    (calory * oneCalToKjRatio).toStringAsFixed(2);
 
 // 绘制转圈圈
 Widget buildLoader(bool isLoading) {

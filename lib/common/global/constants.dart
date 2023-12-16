@@ -37,8 +37,8 @@ class LocalStorageKey {
   static const String userName = 'user_name';
   static const String userCode = 'user_code';
   static const String password = 'password';
-  static const String gender = 'password';
-  static const String description = 'password';
+  static const String gender = 'gender';
+  static const String description = 'description';
 }
 
 // 缓存中存放的用户信息，方便统一查询(这个box导出也都在用，就像单例)
@@ -325,17 +325,15 @@ Map<CusNutType, Color> cusNutrientColors = {
 /// 列表区
 /// ********************************************************
 
-final List<String> genders = ['男', '女', '雷霆战机', '其他'];
-
 final List<CusLabel> genderOptions = [
-  CusLabel(enLabel: 'male', cnLabel: "男", value: 'male'),
-  CusLabel(enLabel: 'female', cnLabel: "女", value: 'female'),
+  CusLabel(enLabel: 'Male', cnLabel: "男", value: 'male'),
+  CusLabel(enLabel: 'Female', cnLabel: "女", value: 'female'),
   CusLabel(
-    enLabel: 'thunder fighter jet',
+    enLabel: 'Thunder Fighter',
     cnLabel: "雷霆战机",
     value: 'thunder fighter',
   ),
-  CusLabel(enLabel: 'other', cnLabel: "其他", value: 'other'),
+  CusLabel(enLabel: 'Other', cnLabel: "其他", value: 'other'),
 ];
 
 /// 基础活动的一些分类选项

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/global/constants.dart';
+import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 
 class WeekIntakeBarChart extends StatefulWidget {
   // 需要展示的一周七天的数据(宏量素摄入目标和实际摄入都可以通用，但数据结构需要一致)
@@ -52,13 +54,26 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
             String getNutrientString(String name, int index) {
               double nutrientAmount = toYList[index] - fromYList[index];
               double percentage = (nutrientAmount / toYList[2]) * 100;
-              return '$name ${nutrientAmount.toStringAsFixed(2)}克(${percentage.toStringAsFixed(2)}%)';
+              return '$name ${nutrientAmount.toStringAsFixed(2)} ${CusAL.of(context).unitLabels('0')} (${percentage.toStringAsFixed(2)}%)';
             }
 
-            String weekDay = weekdayStringMap[group.x + 1]?.cnLabel ?? "";
-            String choStr = getNutrientString('碳水', 0);
-            String fatStr = getNutrientString('脂肪', 1);
-            String proteinStr = getNutrientString('蛋白质', 2);
+            String weekDay = showCusLableMapLabel(
+              context,
+              weekdayStringMap[group.x + 1],
+            );
+
+            String choStr = getNutrientString(
+              CusAL.of(context).mainNutrients('4'),
+              0,
+            );
+            String fatStr = getNutrientString(
+              CusAL.of(context).mainNutrients('3'),
+              1,
+            );
+            String proteinStr = getNutrientString(
+              CusAL.of(context).mainNutrients('2'),
+              2,
+            );
 
             // 构建气泡框显示的内容
             return BarTooltipItem(
@@ -112,7 +127,7 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
     return SideTitleWidget(
       axisSide: meta.axisSide,
       child: Text(
-        weekdayStringMap[value.toInt() + 1]?.cnLabel ?? '',
+        showCusLableMapLabel(context, weekdayStringMap[value.toInt() + 1]),
         style: TextStyle(fontSize: 12.sp),
       ),
     );
@@ -127,7 +142,7 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
     return SideTitleWidget(
       axisSide: meta.axisSide,
       child: Text(
-        "${meta.formattedValue} 克",
+        "${meta.formattedValue} ${CusAL.of(context).unitLabels('0')}",
         style: TextStyle(fontSize: 12.sp),
       ),
     );

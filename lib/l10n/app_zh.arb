@@ -1,5 +1,57 @@
 {
     "appTitle": "健康追踪",
+
+    
+
+    "mainNutrients": "{num, select, 0{能量} 1{卡路里} 2{蛋白质} 3{脂肪} 4{碳水} other{其他} }",
+    "@moduleTitles": {
+    "description": "主要营养素标签"
+    },
+    "fatNutrients": "{num, select, 0{总脂肪} 1{饱和脂肪} 2{反式脂肪} 3{多不饱和脂肪} 4{单不饱和脂肪} other{其他} }",
+    "@moduleTitles": {
+    "description": "脂肪相关营养素标签"
+    },
+    "choNutrients": "{num, select, 0{总碳水化合物} 1{糖} 2{膳食纤维} other{其他} }",
+    "@moduleTitles": {
+    "description": "碳水相关营养素标签"
+    },
+    "microNutrients": "{num, select, 0{钠} 1{钾} 2{胆固醇} other{其他} }",
+    "@moduleTitles": {
+    "description": "微量元素相关营养素标签"
+    },
+
+    "unitLabels": "{num, select, 0{克} 1{毫克} 2{大卡} 3{千焦} 4{公分} 5{公斤} other{其他} }",
+    "@moduleTitles": {
+    "description": "各种单位"
+    },
+
+    "averageGoal": "整体宏量素目标",
+    "dailyGoal": "每日宏量素目标",
+    "dailyGoalBars": "每日宏量素目标图示",
+
+
+    "moduleTitles": "{ titles, select, 0{运动} 1{饮食} 2{手记日历} 3{用户与设置} other{其他} }",
+    "@moduleTitles": {
+    "description": "各个模块主页appbar的标题文字"
+    },
+
+    "changeAvatarLabels": "{ num, select, 0{切换头像} 1{指定选项} 2{拍照} 3{相册} other{其他} }",
+    "@moduleTitles": {
+    "description": "用户设置页面切换头像需要的几个标签"
+    },
+
+    "bakLabels": "{ num, select, 0{备份恢复} 1{全量备份} 2{覆写恢复}  other{其他} }",
+    "@moduleTitles": {
+    "description": "用户与设置页面的备份与恢复的标签"
+    },
+    "bakOpNote": "确认导出所有数据?",
+    "bakSuccessNote": "已经保存到 {dir}",
+    "resSuccessNote": "原有数据已删除，备份数据已恢复。",
+
+    "restIntervals":"跟练动作间隔休息时间(秒)",
+    "chooseSeconds":"选择休息间隔(秒)",
+
+
     "training": "运动",
     "trainingReports": "运动报告",
     "exercise": "动作",
@@ -18,6 +70,7 @@
     "me":"我的",
     "closeLabel":"关闭",
     "appExitInfo":"确定要退出 Free Fitness 吗?",
+
     "confirmLabel":"确定",
     "cancelLabel":"取消",
     "resetLabel":"重置",
@@ -26,6 +79,9 @@
     "lessLabel":"收起",
     "enterLabel":"进入",
     "skipLabel":"跳过",
+    "saveLabel":"保存",
+    "eidtLabel":"修改",
+
     "heightLabel":"身高{unit}",
     "weightLabel":"体重{unit}",
     "nameLabel":"怎么称呼您?",
@@ -39,8 +95,8 @@
     "followSystem":"跟随系统",
     "themeSetting":"切换主题",
     "darkMode":"深色模式",
-    "lightMode":"浅色模式"
-    
+    "lightMode":"浅色模式",
+    "settingLabels": "{ setting, select, 0{基本信息} 1{体重趋势} 2{摄入目标} 3{运动设置} 4{备份恢复} 5{更多设置} other{未知设置} }"
     
     
 }

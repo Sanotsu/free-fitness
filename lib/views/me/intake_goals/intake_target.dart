@@ -10,6 +10,8 @@ import 'package:free_fitness/models/user_state.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import 'week_intake_bar_chart.dart';
 
 class IntakeTargetPage extends StatefulWidget {
@@ -53,14 +55,6 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
     6: CusMacro(calory: 2250, carbs: 120, fat: 25, protein: 60),
     7: CusMacro(calory: 2250, carbs: 120, fat: 25, protein: 60),
   };
-
-// ----------------------
-
-  // 模拟数据
-  final List<double> calorieData = [2000, 1800, 2200, 2500, 1900, 2300, 2100];
-  final List<double> fatData = [50, 45, 55, 60, 48, 58, 52];
-  final List<double> proteinData = [80, 75, 85, 90, 78, 88, 82];
-  final List<double> carbData = [150, 140, 160, 170, 145, 165, 155];
 
   @override
   void initState() {
@@ -147,7 +141,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('摄入目标'),
+        title: Text(CusAL.of(context).settingLabels('2')),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -176,7 +170,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "每日宏量素目标图示",
+              CusAL.of(context).dailyGoalBars,
               textAlign: TextAlign.left,
               style: TextStyle(
                 fontSize: 24.sp,
@@ -190,15 +184,15 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
               children: [
                 Container(width: 16.sp, height: 16.sp, color: Colors.grey),
                 SizedBox(width: 8.sp),
-                const Text("碳水"),
+                Text(CusAL.of(context).mainNutrients('4')),
                 SizedBox(width: 8.sp),
                 Container(width: 16.sp, height: 16.sp, color: Colors.red),
                 SizedBox(width: 8.sp),
-                const Text("脂肪"),
+                Text(CusAL.of(context).mainNutrients('3')),
                 SizedBox(width: 8.sp),
                 Container(width: 16.sp, height: 16.sp, color: Colors.green),
                 SizedBox(width: 8.sp),
-                const Text("蛋白质")
+                Text(CusAL.of(context).mainNutrients('2'))
               ],
             ),
             SizedBox(height: 10.sp),
@@ -224,7 +218,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                 Expanded(
                   flex: 3,
                   child: Text(
-                    "整体宏量素目标",
+                    CusAL.of(context).averageGoal,
                     style: TextStyle(
                       fontSize: 24.sp,
                       fontWeight: FontWeight.w400,
@@ -242,7 +236,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                           _isEditing = !_isEditing;
                         });
                       },
-                      child: const Text('取消'),
+                      child: Text(CusAL.of(context).cancelLabel),
                     ),
                   ),
                 Expanded(
@@ -252,7 +246,6 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                       // 先保存到数据库，然后再显示非修改画面
 
                       if (_isEditing) {
-                        print("现在是修改后点击了保存");
                         if (_macrosFormKey.currentState!.saveAndValidate()) {
                           setState(() {
                             user.rdaGoal = int.parse(_macrosFormKey
@@ -277,7 +270,11 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                         _isEditing = !_isEditing;
                       });
                     },
-                    child: Text(_isEditing ? '保存' : '修改'),
+                    child: Text(
+                      _isEditing
+                          ? CusAL.of(context).saveLabel
+                          : CusAL.of(context).eidtLabel,
+                    ),
                   ),
                 ),
               ],
@@ -292,20 +289,40 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildFormTextField(_isEditing, 'calory', '卡路里', '大卡'),
+                    _buildFormTextField(
+                      _isEditing,
+                      'calory',
+                      CusAL.of(context).mainNutrients('1'),
+                      CusAL.of(context).unitLabels('2'),
+                    ),
                     // 显示大卡对应千焦数据(靠右显示)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(
-                          equivalentKJdata,
+                          "$equivalentKJdata ${CusAL.of(context).unitLabels('3')}",
                           style: TextStyle(fontSize: 14.sp),
                         )
                       ],
                     ),
-                    _buildFormTextField(_isEditing, 'carbs', '碳水', '克'),
-                    _buildFormTextField(_isEditing, 'fat', '脂肪', '克'),
-                    _buildFormTextField(_isEditing, 'protein', '蛋白质', '克'),
+                    _buildFormTextField(
+                      _isEditing,
+                      'carbs',
+                      CusAL.of(context).mainNutrients('4'),
+                      CusAL.of(context).unitLabels('0'),
+                    ),
+                    _buildFormTextField(
+                      _isEditing,
+                      'fat',
+                      CusAL.of(context).mainNutrients('3'),
+                      CusAL.of(context).unitLabels('0'),
+                    ),
+                    _buildFormTextField(
+                      _isEditing,
+                      'protein',
+                      CusAL.of(context).mainNutrients('2'),
+                      CusAL.of(context).unitLabels('0'),
+                    ),
                   ],
                 ),
               ),
@@ -364,7 +381,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "每日宏量素目标",
+              CusAL.of(context).dailyGoal,
               textAlign: TextAlign.left,
               style: TextStyle(
                 fontSize: 24.sp,
@@ -408,7 +425,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
               refreshWeekMacrosData();
             },
             child: Text(
-              weekdayStringMap[index + 1]?.cnLabel ?? '',
+              showCusLableMapLabel(context, weekdayStringMap[index + 1]),
               style: TextStyle(fontSize: 14.sp, color: Colors.black),
             ),
           ),
@@ -432,7 +449,12 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
               children: [
                 Expanded(
                   flex: 3,
-                  child: Text(weekdayStringMap[selectedDay]?.cnLabel ?? ''),
+                  child: Text(
+                    showCusLableMapLabel(
+                      context,
+                      weekdayStringMap[selectedDay],
+                    ),
+                  ),
                 ),
                 // 如果是编辑状态，可以点取消
                 if (_isWeekdayEditing)
@@ -444,27 +466,51 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                           _isWeekdayEditing = !_isWeekdayEditing;
                         });
                       },
-                      child: const Text('取消'),
+                      child: Text(CusAL.of(context).cancelLabel),
                     ),
                   ),
                 Expanded(
                   flex: 1,
                   child: TextButton(
                     onPressed: _updateWeekMacroData,
-                    child: Text(_isWeekdayEditing ? '保存' : '修改'),
+                    child: Text(
+                      _isWeekdayEditing
+                          ? CusAL.of(context).saveLabel
+                          : CusAL.of(context).eidtLabel,
+                    ),
                   ),
                 ),
               ],
             ),
-            _buildFormTextField(_isWeekdayEditing, 'calory', '卡路里', '大卡'),
+            _buildFormTextField(
+              _isWeekdayEditing,
+              'calory',
+              CusAL.of(context).mainNutrients('1'),
+              CusAL.of(context).unitLabels('2'),
+            ),
             // 显示大卡对应千焦数据(靠右显示)
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [Text(weekKJdata, style: TextStyle(fontSize: 14.sp))],
             ),
-            _buildFormTextField(_isWeekdayEditing, 'carbs', '碳水', '克'),
-            _buildFormTextField(_isWeekdayEditing, 'fat', '脂肪', '克'),
-            _buildFormTextField(_isWeekdayEditing, 'protein', '蛋白质', '克'),
+            _buildFormTextField(
+              _isWeekdayEditing,
+              'carbs',
+              CusAL.of(context).mainNutrients('4'),
+              CusAL.of(context).unitLabels('0'),
+            ),
+            _buildFormTextField(
+              _isWeekdayEditing,
+              'fat',
+              CusAL.of(context).mainNutrients('3'),
+              CusAL.of(context).unitLabels('0'),
+            ),
+            _buildFormTextField(
+              _isWeekdayEditing,
+              'protein',
+              CusAL.of(context).mainNutrients('2'),
+              CusAL.of(context).unitLabels('0'),
+            ),
           ],
         ),
       ),

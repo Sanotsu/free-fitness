@@ -5,10 +5,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
-
 import '../../../common/utils/tool_widgets.dart';
 import '../../common/global/constants.dart';
 import '../../common/utils/db_user_helper.dart';
+import '../../models/cus_app_localizations.dart';
 import '../../models/user_state.dart';
 import '_feature_mock_data/index.dart';
 import 'backup_and_restore/index.dart';
@@ -69,6 +69,9 @@ class _UserAndSettingsState extends State<UserAndSettings> {
       userInfo = tempUser;
       if (tempUser.avatar != null) {
         _avatarPath = tempUser.avatar!;
+      } else {
+        // 不清空，切换用户可能还是之前用户的头像
+        _avatarPath = "";
       }
       isLoading = false;
     });
@@ -167,9 +170,26 @@ class _UserAndSettingsState extends State<UserAndSettings> {
 
   @override
   Widget build(BuildContext context) {
+    // 计算屏幕剩余的高度
+    // 设备屏幕的总高度
+    //  - 屏幕顶部的安全区域高度，即状态栏的高度
+    //  - 屏幕底部的安全区域高度，即导航栏的高度或者虚拟按键的高度
+    //  - 应用程序顶部的工具栏（如 AppBar）的高度
+    //  - 应用程序底部的导航栏的高度
+    //  - 组件的边框间隔(不一定就是2)
+    double screenBodyHeight = MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.top -
+        MediaQuery.of(context).padding.bottom -
+        kToolbarHeight -
+        kBottomNavigationBarHeight;
+
+    print("screenBodyHeight--------$screenBodyHeight");
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('用户与设置'),
+        title: Text(
+          CusAL.of(context).moduleTitles('3'),
+        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -207,20 +227,29 @@ class _UserAndSettingsState extends State<UserAndSettings> {
               color: Colors.white54,
               child: ListView(
                 children: [
-                  SizedBox(height: 10.sp),
-
-                  /// 用户基本信息展示区域
+                  /// 用户基本信息展示区域(固定高度10+120+120=250)
                   ..._buildBaseUserInfoArea(userInfo),
 
-                  SizedBox(height: 10.sp),
-
                   /// 功能区，参看别的app大概留几个
+                  /// 功能区的占位就是除去状态栏、标题、底部按钮、头像区域个人信息外的高度进行等分
+                  /// 底部还预留20sp
                   // 基本信息和体重趋势
-                  _buildInfoAndWeightChangeRow(),
+                  SizedBox(
+                    height: (screenBodyHeight - 250 - 20) / 3,
+                    child: _buildInfoAndWeightChangeRow(),
+                  ),
+
                   // 摄入目标和运动设置
-                  _buildIntakeGoalAndRestTimeRow(),
+                  SizedBox(
+                    height: (screenBodyHeight - 250 - 20) / 3,
+                    child: _buildIntakeGoalAndRestTimeRow(),
+                  ),
+
                   // 备份还原和更多设置
-                  _buildBakAndRestoreAndMoreSettingRow(),
+                  SizedBox(
+                    height: (screenBodyHeight - 250 - 20) / 3,
+                    child: _buildBakAndRestoreAndMoreSettingRow(),
+                  ),
                 ],
               ),
             ),
@@ -230,6 +259,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
   // 用户基本信息展示区域
   _buildBaseUserInfoArea(User userInfo) {
     return [
+      SizedBox(height: 10.sp),
       Stack(
         alignment: Alignment.center,
         children: [
@@ -255,15 +285,15 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             top: 90.sp,
             right: 0.5.sw - 70.sp,
             child: Icon(
-              userInfo.gender == "男"
+              userInfo.gender == "male"
                   ? Icons.male
-                  : (userInfo.gender == "女"
+                  : (userInfo.gender == "female"
                       ? Icons.female
                       : Icons.circle_outlined),
               size: 30.sp,
-              color: userInfo.gender == "男"
+              color: userInfo.gender == "male"
                   ? Colors.red
-                  : userInfo.gender == "女"
+                  : userInfo.gender == "female"
                       ? Colors.green
                       : Colors.black,
             ),
@@ -277,65 +307,79 @@ class _UserAndSettingsState extends State<UserAndSettings> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('指定选项'),
+                      title: Text(
+                        CusAL.of(context).changeAvatarLabels('1'),
+                      ),
                       actions: [
                         TextButton(
                           onPressed: () {
                             Navigator.of(context).pop();
                             _pickImage(ImageSource.camera);
                           },
-                          child: const Text('拍照'),
+                          child: Text(
+                            CusAL.of(context).changeAvatarLabels('2'),
+                          ),
                         ),
                         TextButton(
                           onPressed: () {
                             Navigator.of(context).pop();
                             _pickImage(ImageSource.gallery);
                           },
-                          child: const Text('相册'),
+                          child: Text(
+                            CusAL.of(context).changeAvatarLabels('3'),
+                          ),
                         ),
                       ],
                     );
                   },
                 );
               },
-              child: Text('切换头像', style: TextStyle(fontSize: 12.sp)),
+              child: Text(
+                CusAL.of(context).changeAvatarLabels('0'),
+                style: TextStyle(fontSize: 12.sp),
+              ),
             ),
           ),
         ],
       ),
+      SizedBox(
+        height: 120.sp,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            // 用户名、代号、简述
+            ListTile(
+              title: Text(
+                userInfo.userName,
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 26.sp),
+                textAlign: TextAlign.center,
+                softWrap: true,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text(
+                "@${userInfo.userCode ?? 'unkown'}",
+                textAlign: TextAlign.center,
+                softWrap: true,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
 
-      SizedBox(height: 10.sp),
-      // username
-
-      Text(
-        userInfo.userName,
-        style: TextStyle(fontWeight: FontWeight.w900, fontSize: 26.sp),
-        textAlign: TextAlign.center,
-        softWrap: true,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-
-      // usercode
-
-      Text(
-        "@${userInfo.userCode ?? 'unkown'}",
-        textAlign: TextAlign.center,
-        softWrap: true,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-
-      SizedBox(height: 10.sp),
-      // 用户简介 description
-      Padding(
-        padding: EdgeInsets.all(10.sp),
-        child: Text(
-          userInfo.description ?? 'no description',
-          softWrap: true,
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 16.sp),
+            // 用户简介 description
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.sp),
+              child: Text(
+                "${userInfo.description ?? 'no description'} ",
+                textAlign: TextAlign.center,
+                softWrap: true,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 16.sp),
+              ),
+            ),
+          ],
         ),
       ),
     ];
@@ -347,7 +391,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
         Expanded(
           child: NewCusSettingCard(
             leadingIcon: Icons.account_circle_outlined,
-            title: '基本信息',
+            title: CusAL.of(context).settingLabels('0'),
             onTap: () {
               // 处理相应的点击事件
 
@@ -365,8 +409,8 @@ class _UserAndSettingsState extends State<UserAndSettings> {
         ),
         Expanded(
           child: NewCusSettingCard(
-            leadingIcon: Icons.flag_circle,
-            title: '体重趋势',
+            leadingIcon: Icons.table_chart_outlined,
+            title: CusAL.of(context).settingLabels('1'),
             onTap: () {
               // 处理相应的点击事件
               print("(点击进入体重趋势页面)……");
@@ -393,8 +437,8 @@ class _UserAndSettingsState extends State<UserAndSettings> {
       children: [
         Expanded(
           child: NewCusSettingCard(
-            leadingIcon: Icons.flag_circle,
-            title: '摄入目标',
+            leadingIcon: Icons.flag_circle_outlined,
+            title: CusAL.of(context).settingLabels('2'),
             onTap: () {
               // 处理相应的点击事件
               print("(点击进入摄入目标页面)……");
@@ -414,8 +458,8 @@ class _UserAndSettingsState extends State<UserAndSettings> {
         ),
         Expanded(
           child: NewCusSettingCard(
-            leadingIcon: Icons.flag_circle,
-            title: '运动设置',
+            leadingIcon: Icons.run_circle_outlined,
+            title: CusAL.of(context).settingLabels('3'),
             onTap: () {
               // 处理相应的点击事件
               print("(点击进入运动设置页面)……");
@@ -442,8 +486,8 @@ class _UserAndSettingsState extends State<UserAndSettings> {
       children: [
         Expanded(
           child: NewCusSettingCard(
-            leadingIcon: Icons.backup,
-            title: '备份恢复',
+            leadingIcon: Icons.backup_outlined,
+            title: CusAL.of(context).settingLabels('4'),
             onTap: () {
               // 处理相应的点击事件
               print("(点击进入备份恢复页面)……");
@@ -458,8 +502,8 @@ class _UserAndSettingsState extends State<UserAndSettings> {
         ),
         Expanded(
           child: NewCusSettingCard(
-            leadingIcon: Icons.more_horiz,
-            title: '更多设置',
+            leadingIcon: Icons.more_horiz_outlined,
+            title: CusAL.of(context).settingLabels('5'),
             onTap: () {
               // 处理相应的点击事件
               print("(点击进入更多设置页面)……");
@@ -503,15 +547,14 @@ class NewCusSettingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(2.sp),
-      // height: 100.sp,
       child: Card(
         elevation: 5,
         color: Colors.white70,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10.sp),
         ),
         child: ListTile(
-          leading: Icon(leadingIcon, color: Colors.black54),
+          leading: Icon(leadingIcon),
           title: Text(
             title,
             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),

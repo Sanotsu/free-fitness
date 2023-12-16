@@ -1,5 +1,57 @@
 {
   "appTitle": "Free Fitness",
+
+  "mainNutrients": "{num, select, 0{Energy} 1{Calorie} 2{Protein} 3{Fat} 4{CHO} other{Other} }",
+  "@moduleTitles": {
+  "description": "主要营养素标签"
+  },
+  "fatNutrients": "{num, select, 0{Fat} 1{SaturatedFat} 2{TransFat} 3{puFat} 4{muFat} other{Other} }",
+  "@moduleTitles": {
+  "description": "脂肪相关营养素标签"
+  },
+  "choNutrients": "{num, select, 0{CHO} 1{Sugar} 2{DietaryFiber} other{Other} }",
+  "@moduleTitles": {
+  "description": "碳水相关营养素标签"
+  },
+  "microNutrients": "{num, select, 0{Sodium} 1{Potassium} 2{Cholesterol} other{Other} }",
+  "@moduleTitles": {
+  "description": "微量元素相关营养素标签"
+  },
+
+  "unitLabels": "{num, select, 0{g} 1{mg} 2{kcal} 3{kj} 4{cm} 5{kg} other{Other} }",
+  "@moduleTitles": {
+  "description": "各种单位"
+  },
+
+  "averageGoal": "Macronutrient Goals",
+  "dailyGoal": "Daily Goals",
+  "dailyGoalBars": "Daily Goals Chart",
+
+
+
+
+  "moduleTitles": "{ titles, select, 0{Training} 1{Dietary} 2{Daily Calendar} 3{User & Settings} other{Other} }",
+  "@moduleTitles": {
+  "description": "各个模块主页appbar的标题文字"
+  },
+
+  "changeAvatarLabels": "{ num, select, 0{Change Avatar} 1{Options} 2{Camera} 3{Gallery} other{Other} }",
+  "@moduleTitles": {
+  "description": "用户设置页面切换头像需要的几个标签"
+  },
+
+  "bakLabels": "{ num, select, 0{Backup & Restore} 1{Full Backup} 2{Overwrite Restore}  other{Other} }",
+  "@moduleTitles": {
+  "description": "用户与设置页面的备份与恢复的标签"
+  },
+  "bakOpNote": "Confirm exporting all data?",
+  "bakSuccessNote": "Has been saved to {dir}.",
+  "resSuccessNote": "The original data has been deleted, and the backup data has been restored.",
+
+  "restIntervals":"Rest time between follow-up exercises (s)",
+  "chooseSeconds":"Choose a time interval (s)",
+
+
   "training": "Training",
   "trainingReports": "TrainingReports",
   "exercise": "Exercises",
@@ -18,6 +70,7 @@
   "me":"Me",
   "closeLabel":"Close",
   "appExitInfo":"Are you sure to exit Free Fitness?",
+
   "confirmLabel":"Confirm",
   "cancelLabel":"Cancel",
   "resetLabel":"reset",
@@ -26,6 +79,9 @@
   "lessLabel":"Less",
   "enterLabel":"Enter",
   "skipLabel":"Skip",
+  "saveLabel":"Save",
+  "eidtLabel":"Edit",
+
   "heightLabel":"Height{unit}",
   "weightLabel":"Weight{unit}",
   "nameLabel":"please input your name",
@@ -39,7 +95,9 @@
   "followSystem":"System",
   "themeSetting":"Theme Mode",
   "darkMode":"Dark Mode",
-  "lightMode":"Light Mode"
+  "lightMode":"Light Mode",
+  "settingLabels": "{ setting, select, 0{Basic Info} 1{Weight Trend} 2{Intake Goal} 3{Training Setting} 4{Backup & Restore} 5{More Settings} other{Unknown Setting} }"
+ 
 
 
 

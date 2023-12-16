@@ -134,7 +134,7 @@ class _DietaryReportsState extends State<DietaryReports> {
         valueRDA = tempUser.user.rdaGoal!;
       } else {
         // 如果既没有单独每天的也没有整体的，则默认男女推荐值(不是男的都当做女的)
-        valueRDA = tempUser.user.gender == "男" ? 2250 : 1800;
+        valueRDA = tempUser.user.gender == "male" ? 2250 : 1800;
       }
 
       dfiwfsList = temp;

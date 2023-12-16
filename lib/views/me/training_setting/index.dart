@@ -5,6 +5,7 @@ import 'package:free_fitness/models/user_state.dart';
 import 'package:numberpicker/numberpicker.dart';
 
 import '../../../common/utils/db_user_helper.dart';
+import '../../../models/cus_app_localizations.dart';
 
 class TrainingSetting extends StatefulWidget {
   final User userInfo;
@@ -34,13 +35,13 @@ class _TrainingSettingState extends State<TrainingSetting> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('运动设置'),
+        title: Text(CusAL.of(context).settingLabels('3')),
       ),
       body: ListView(
         children: [
           _buildListItem(
-            '跟练动作间隔休息时间',
-            "${user.actionRestTime ?? 10} 秒",
+            CusAL.of(context).restIntervals,
+            "${user.actionRestTime ?? 10}",
             () => _openActionRestTimeDialog(),
           ),
         ],
@@ -64,7 +65,10 @@ class _TrainingSettingState extends State<TrainingSetting> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('选择休息间隔(秒)', textAlign: TextAlign.center),
+          title: Text(
+            CusAL.of(context).chooseSeconds,
+            textAlign: TextAlign.center,
+          ),
           content: StatefulBuilder(
             builder: (context, setState) {
               return NumberPicker(
@@ -88,7 +92,7 @@ class _TrainingSettingState extends State<TrainingSetting> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('取消'),
+              child: Text(CusAL.of(context).cancelLabel),
             ),
             TextButton(
               onPressed: () async {
@@ -101,7 +105,7 @@ class _TrainingSettingState extends State<TrainingSetting> {
                 if (!mounted) return;
                 Navigator.of(context).pop();
               },
-              child: const Text('确认'),
+              child: Text(CusAL.of(context).confirmLabel),
             ),
           ],
         );

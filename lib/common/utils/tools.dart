@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:intl/intl.dart';
 
@@ -259,4 +260,10 @@ Future<void> deleteFilesInDirectory(String directoryPath) async {
       }
     }
   }
+}
+
+// 根据当前语言显示 CusLabel 的 中文或者英文
+showCusLableMapLabel(BuildContext context, CusLabel? cusLable) {
+  String curLang = Localizations.localeOf(context).languageCode;
+  return curLang == "zh" ? cusLable?.cnLabel ?? '' : cusLable?.enLabel ?? '';
 }
