@@ -1,3 +1,5 @@
+import '../common/global/constants.dart';
+
 /// 用户基础信息和用户设置相关的表
 
 /// 基础表表
@@ -65,7 +67,7 @@ class User {
       "avatar": avatar,
       "password": password,
       "description": description,
-      "date_of_birth": DateTime.tryParse(dateOfBirth ?? "1970-01-01"),
+      "date_of_birth": DateTime.tryParse(dateOfBirth ?? unknownDateString),
       "height": height?.toString(),
       "height_unit": heightUnit?.toString(),
       "current_weight": currentWeight?.toString(),

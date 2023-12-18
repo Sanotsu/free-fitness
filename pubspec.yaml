@@ -54,7 +54,7 @@ dependencies:
   logger: ^2.0.2+1
   # 文件选择
   file_picker: ^5.5.0
-  # 两种倒计时部件
+  # 圆形倒计时部件
   circular_countdown_timer: ^0.2.3
   # 富文本编辑
   flutter_quill: ^8.6.1

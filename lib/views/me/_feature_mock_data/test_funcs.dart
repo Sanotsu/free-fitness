@@ -504,10 +504,10 @@ insertOneQuillDemo() async {
 
   // 生成一个随机数来获取分类列表
   var tempNum = Random().nextInt(5);
-  var tempCates = [];
+  var tempMoods = [];
   for (var i = 0; i < tempNum; i++) {
-    tempCates.add(
-      diaryCategoryList[Random().nextInt(diaryCategoryList.length)].cnLabel,
+    tempMoods.add(
+      diaryMoodList[Random().nextInt(diaryMoodList.length)].cnLabel,
     );
   }
 
@@ -523,11 +523,12 @@ insertOneQuillDemo() async {
 
   var tempDiary = Diary(
     date: dates[Random().nextInt(dates.length)],
-    title: "【测试】${generateRandomString(5, 10)}",
+    title: "测试-${generateRandomString(5, 10)}",
     content: jsonString,
     tags: tempTags.join(","),
-    category: tempCates.join(","),
-    mood: diaryMoodList[Random().nextInt(diaryMoodList.length)].cnLabel,
+    mood: tempMoods.join(","),
+    category:
+        diaryCategoryList[Random().nextInt(diaryCategoryList.length)].cnLabel,
     userId: Random().nextInt(3) + 1,
     gmtCreate: getCurrentDateTime(),
   );

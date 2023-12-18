@@ -171,6 +171,11 @@ class DBDiaryHelper {
       (await database).update(DiaryDdl.tableNameOfDiary, diary.toMap(),
           where: 'diary_id = ?', whereArgs: [diary.diaryId]);
 
+  // 删除单条数据
+  Future<int> deleteDiaryById(int id) async =>
+      (await database).delete(DiaryDdl.tableNameOfDiary,
+          where: 'diary_id = ?', whereArgs: [id]);
+
   // 关键字模糊查询基础活动
   Future<CusDataResult> queryDiaryByKeyword({
     required String keyword,

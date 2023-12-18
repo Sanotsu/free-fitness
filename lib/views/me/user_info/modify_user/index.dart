@@ -184,7 +184,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         format: DateFormat(constDateFormat),
         initialValue: widget.user == null
             ? DateTime.now()
-            : DateTime.tryParse(widget.user?.dateOfBirth ?? "1970-01-01"),
+            : DateTime.tryParse(widget.user?.dateOfBirth ?? unknownDateString),
         inputType: InputType.date,
         decoration: InputDecoration(
           labelText: CusAL.of(context).userInfoLabels("3"),

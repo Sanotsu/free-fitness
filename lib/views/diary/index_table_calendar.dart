@@ -9,6 +9,7 @@ import '../../common/global/constants.dart';
 import '../../common/utils/db_diary_helper.dart';
 import '../../common/utils/tool_widgets.dart';
 import '../../common/utils/tools.dart';
+import '../../models/cus_app_localizations.dart';
 import '../../models/diary_state.dart';
 import 'diary_modify_rich_text.dart';
 import 'index_timeline.dart';
@@ -51,7 +52,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
   void initState() {
     super.initState();
     // 获取当前日期的事件
-    _getEventsForInitDay();
+    _queryDairyList(_focusedDay);
   }
 
   @override
@@ -62,15 +63,21 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
 
   // 初始化事件，以当前日查询对应的手记数据
   // 因为不能再改变state中用await，所以单独一个函数
-  _getEventsForInitDay() async {
+  _queryDairyList(DateTime datetime) async {
     if (isLoading) return;
 
     setState(() {
       isLoading = true;
     });
 
+    // 当前月的起止日期
+    var [startDate, endDate] = getMonthStartEndDateString(datetime);
+
     // 必须查询所有数据，否则表格日历中，比如给每个有手记的日期标识maker就做不到
-    List<Diary> temp = await _dbHelper.queryDiaryByDateRange();
+    List<Diary> temp = await _dbHelper.queryDiaryByDateRange(
+      startDate: startDate,
+      endDate: endDate,
+    );
 
     print("1111当前日期查询的手记数据 _selectedDay :$_selectedDay temp $temp");
     setState(() {
@@ -93,8 +100,6 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
 
   // 当某一天被选中时的回调
   _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    print("某天被选中--------$selectedDay $focusedDay");
-
     if (!isSameDay(_selectedDay, selectedDay)) {
       setState(() {
         _selectedDay = selectedDay;
@@ -116,8 +121,6 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
 
   // 当日期范围被选中时
   _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
-    print("日期被_onRangeSelected了---$start --$end $focusedDay");
-
     setState(() {
       _selectedDay = null;
       _focusedDay = focusedDay;
@@ -146,7 +149,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('手记日历'),
+        title: Text(CusAL.of(context).diaryLables("0")),
         actions: [
           TextButton(
             onPressed: () {
@@ -160,22 +163,26 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
             style: ButtonStyle(
               foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
             ),
-            child: const Text("时间线模式"),
+            child: Text(CusAL.of(context).diaryLables("1")),
           ),
           TextButton.icon(
             onPressed: () {
-              print("跳转到富文本新增页面");
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const DiaryModifyRichText(),
                 ),
               ).then((value) {
+                // 避免之前有范围选中，先重置为空
+                setState(() {
+                  _rangeStart = null;
+                  _rangeEnd = null;
+                });
                 // 编辑页面返回后，重新加载手记数据
-                _getEventsForInitDay();
+                _queryDairyList(_focusedDay);
               });
             },
-            label: const Text("添加手记"),
+            label: Text(CusAL.of(context).addLabel("")),
             icon: const Icon(Icons.add),
             style: ButtonStyle(
               foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
@@ -188,73 +195,12 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
           ? buildLoader(isLoading)
           : Column(
               children: [
-                // 日历的一些配置
-                TableCalendar(
-                  locale: 'zh_CN',
-                  firstDay: kFirstDay,
-                  lastDay: kLastDay,
-                  focusedDay: _focusedDay,
-                  selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                  rangeStartDay: _rangeStart,
-                  rangeEndDay: _rangeEnd,
-                  calendarFormat: _calendarFormat,
-                  rangeSelectionMode: _rangeSelectionMode,
-                  // 如果不使用这个函数，当日的数量标记是不会显示的。这也不能是异步函数
-                  eventLoader: _getDiarysForADay,
-                  startingDayOfWeek: StartingDayOfWeek.monday,
-                  // 默认的一些日历样式配置，可以自定义日历UI
-                  calendarStyle: const CalendarStyle(
-                    // 不是当月的日期不显示
-                    outsideDaysVisible: false,
-                  ),
-                  availableCalendarFormats: const {
-                    CalendarFormat.month: '展示整月',
-                    CalendarFormat.twoWeeks: '展示两周',
-                    CalendarFormat.week: '展示一周',
-                  },
-                  // 自定义修改日历的样式
-                  calendarBuilders: CalendarBuilders(
-                    // 这里可以很自定义很多样式，比如单标签多标签等等。
-                    // 简单示例：当天的手记超过3个，就是黄底黑色；否则就是绿底白字
-                    markerBuilder: (context, date, list) {
-                      if (list.isEmpty) return Container();
-                      return Align(
-                        alignment: Alignment.bottomRight,
-                        child: Container(
-                          width: 15,
-                          height: 15,
-                          color: list.length < 3 ? Colors.green : Colors.yellow,
-                          child: Center(
-                            child: Text(
-                              "${list.length}",
-                              style: TextStyle(
-                                color: list.length < 3
-                                    ? Colors.white
-                                    : Colors.black,
-                                fontSize: 10.sp,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  onDaySelected: _onDaySelected,
-                  onDayLongPressed: _onDayLongPressed,
-                  onRangeSelected: _onRangeSelected,
-                  onFormatChanged: (format) {
-                    if (_calendarFormat != format) {
-                      setState(() {
-                        _calendarFormat = format;
-                      });
-                    }
-                  },
-                  onPageChanged: (focusedDay) {
-                    _focusedDay = focusedDay;
-                  },
-                ),
-                const SizedBox(height: 8.0),
-                // 日历某些操作改变后，显示对应的手记内容列表
+                /// 表格日历的一些配置
+                _buildDiaryCalender(),
+
+                Divider(thickness: 5.sp, height: 8.sp),
+
+                /// 日历某些操作改变后，显示对应的手记内容列表
                 Expanded(
                   child: ValueListenableBuilder<List<Diary>>(
                     valueListenable: _selectedEvents,
@@ -269,6 +215,75 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
     );
   }
 
+  _buildDiaryCalender() {
+    return TableCalendar(
+      locale: box.read('language') == "en" ? "en_US" : 'zh_CN',
+      firstDay: kFirstDay,
+      lastDay: kLastDay,
+      focusedDay: _focusedDay,
+      selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+      rangeStartDay: _rangeStart,
+      rangeEndDay: _rangeEnd,
+      calendarFormat: _calendarFormat,
+      rangeSelectionMode: _rangeSelectionMode,
+      // 如果不使用这个函数，当日的数量标记是不会显示的。这也不能是异步函数
+      eventLoader: _getDiarysForADay,
+      startingDayOfWeek: StartingDayOfWeek.monday,
+      // 默认的一些日历样式配置，可以自定义日历UI
+      calendarStyle: const CalendarStyle(
+        // 不是当月的日期不显示
+        outsideDaysVisible: false,
+      ),
+      availableCalendarFormats: {
+        CalendarFormat.month: CusAL.of(context).calenderLables("0"),
+        CalendarFormat.twoWeeks: CusAL.of(context).calenderLables("1"),
+        CalendarFormat.week: CusAL.of(context).calenderLables("2"),
+      },
+      // 自定义修改日历的样式
+      calendarBuilders: CalendarBuilders(
+        // 这里可以很自定义很多样式，比如单标签多标签等等。
+        // 简单示例：当天的手记超过3个，就是黄底黑色；否则就是绿底白字
+        markerBuilder: (context, date, list) {
+          if (list.isEmpty) return Container();
+          return Align(
+            alignment: Alignment.bottomRight,
+            child: Container(
+              width: 15,
+              height: 15,
+              color: list.length < 3 ? Colors.green : Colors.yellow,
+              child: Center(
+                child: Text(
+                  "${list.length}",
+                  style: TextStyle(
+                    color: list.length < 3 ? Colors.white : Colors.black,
+                    fontSize: 10.sp,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+      onDaySelected: _onDaySelected,
+      onDayLongPressed: _onDayLongPressed,
+      onRangeSelected: _onRangeSelected,
+      onFormatChanged: (format) {
+        if (_calendarFormat != format) {
+          setState(() {
+            _calendarFormat = format;
+          });
+        }
+      },
+      // 当日历点击标题处的上下页切换后的回调
+      onPageChanged: (focusedDay) {
+        _focusedDay = focusedDay;
+        // 当页面切换时，这个聚焦日期为当前页面所在月份的第一天。
+        // 页面切换后重新查询当前月的手记数据
+        _queryDairyList(focusedDay);
+      },
+    );
+  }
+
   _buildDiaryList(List<Diary> diarys) {
     return ListView.builder(
       itemCount: diarys.length,
@@ -276,26 +291,20 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
         var diary = diarys[index];
 
         // 先排除原本就是空字符串
-        // var initTags = diary.tags?.split(",") ?? [];
         var initTags = (diary.tags != null && diary.tags!.trim().isNotEmpty)
             ? diary.tags!.trim().split(",")
             : [];
-        // var initCategorys = diary.category?.split(",") ?? [];
-        var initCategorys =
-            (diary.category != null && diary.category!.trim().isNotEmpty)
-                ? diary.category!.trim().split(",")
-                : [];
 
-        var initMood = diary.mood ?? "";
+        var initMoods = (diary.mood != null && diary.mood!.trim().isNotEmpty)
+            ? diary.mood!.trim().split(",")
+            : [];
 
-        var chipLength = initTags.length + initCategorys.length + 1;
+        var initCategory = diary.category ?? "";
 
-        return Container(
-          margin: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0.sp),
-          decoration: BoxDecoration(
-            border: Border.all(),
-            borderRadius: BorderRadius.circular(12.0),
-          ),
+        var chipLength = initTags.length + initMoods.length + 1;
+
+        return Card(
+          elevation: 3,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -307,12 +316,12 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                 children: [
                   ...[
                     buildSmallButtonTag(
-                      initMood,
+                      initCategory,
                       bgColor: Colors.lightBlue,
                       labelTextSize: 10.sp,
                     ),
                     // 如果标签很多，只显示2个，然后整体剩下的用一个数字代替
-                    ...initCategorys
+                    ...initMoods
                         .map((cate) {
                           return buildSmallButtonTag(
                             cate,
@@ -323,7 +332,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                         .toList()
                         .sublist(
                           0,
-                          initCategorys.length > 2 ? 2 : initCategorys.length,
+                          initMoods.length > 1 ? 1 : initMoods.length,
                         ),
                     ...initTags
                         .map((tag) {
@@ -336,18 +345,28 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                         .toList()
                         .sublist(
                           0,
-                          initTags.length > 2 ? 2 : initTags.length,
+                          initTags.length > 1 ? 1 : initTags.length,
                         ),
                   ],
-                  if (chipLength > 5)
+                  if (chipLength > 3)
                     buildSmallButtonTag(
-                      '+${chipLength - 5}',
+                      '+${chipLength - 3}',
                       bgColor: Colors.white,
                       labelTextSize: 10.sp,
                     ),
                 ],
               ),
+
               ListTile(
+                title: Text(diary.title),
+                subtitle: Text(
+                  "${CusAL.of(context).lastModified}: ${diarys[index].gmtModified ?? diarys[index].gmtCreate}",
+                ),
+                trailing: Icon(
+                  Icons.arrow_forward,
+                  size: 16.sp,
+                  color: Theme.of(context).primaryColor,
+                ),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -356,14 +375,57 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                           DiaryModifyRichText(diaryItem: diary),
                     ),
                   ).then((value) {
+                    // 避免之前有范围选中，先重置为空
+                    setState(() {
+                      _rangeStart = null;
+                      _rangeEnd = null;
+                    });
                     // 编辑页面返回后，重新加载手记数据
-                    _getEventsForInitDay();
+                    _queryDairyList(_focusedDay);
                   });
                 },
-                title: Text(diary.title),
-                subtitle: Text(
-                  "上次修改时间: ${diarys[index].gmtModified ?? diarys[index].gmtCreate}",
-                ),
+                // 长按点击弹窗提示是否删除
+                onLongPress: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text(CusAL.of(context).deleteConfirm),
+                        content: Text(
+                          CusAL.of(context).deleteNote(diary.title),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context, false);
+                            },
+                            child: Text(CusAL.of(context).cancelLabel),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context, true);
+                            },
+                            child: Text(CusAL.of(context).confirmLabel),
+                          ),
+                        ],
+                      );
+                    },
+                  ).then((value) async {
+                    if (value != null && value) {
+                      try {
+                        await _dbHelper.deleteDiaryById(diary.diaryId!);
+                        _queryDairyList(_focusedDay);
+                      } catch (e) {
+                        if (!mounted) return;
+                        commonExceptionDialog(
+                          context,
+                          CusAL.of(context).exceptionWarningTitle,
+                          e.toString(),
+                        );
+                      }
+                    }
+                  });
+                },
               ),
             ],
           ),

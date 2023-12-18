@@ -14,6 +14,7 @@ import '../../common/global/constants.dart';
 import '../../common/utils/db_diary_helper.dart';
 import '../../common/utils/tool_widgets.dart';
 import '../../common/utils/tools.dart';
+import '../../models/cus_app_localizations.dart';
 
 ///
 /// 2023-11-23 不是很完善，但基本能用。
@@ -61,10 +62,10 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
   // 手动输入标签的文本框控制器，和存放标签的数组
   final _tagTextController = TextEditingController();
   // 这里是标签的初始值，实际用时可以为空数组或空字符串
-  List<String> initTags = ["手记"];
+  List<String> initTags = [];
   // 分类和心情的初始值
-  String initMood = "喜悦";
-  List<String> initCategorys = ["生活"];
+  String initCategory = "";
+  List<String> initMoods = [];
 
   // 手记的题目
   final _titleTextController = TextEditingController();
@@ -111,14 +112,12 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
 
       initTitle = item.title;
       _titleTextController.text = initTitle;
-      initMood = item.mood ?? "";
+      initCategory = item.category ?? "";
       // 先排除原本的数据就是一个空字符串，因此空字符串用逗号分割后是还有一个空字符串的字符串列表
-      // initCategorys = item.category?.split(",").toList() ?? [];
-      initCategorys =
-          (item.category != null && item.category!.trim().isNotEmpty)
-              ? item.category!.trim().split(",")
-              : [];
-      // initTags = item.tags?.split(",").toList() ?? [];
+      initMoods = (item.mood != null && item.mood!.trim().isNotEmpty)
+          ? item.mood!.trim().split(",")
+          : [];
+
       initTags = (item.tags != null && item.tags!.trim().isNotEmpty)
           ? item.tags!.trim().split(",")
           : [];
@@ -154,10 +153,18 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
   _handleSaveButtonClick() async {
     FocusScope.of(context).requestFocus(FocusNode());
 
+    // 没有标题则不行
+    if (initTitle.isEmpty) {
+      return showSnackMessage(
+        context,
+        CusAL.of(context).requiredErrorText(CusAL.of(context).diaryLables("2")),
+      );
+    }
+
     print("点击了保存按钮--------------数据分别为:");
     print("tags----------$initTags");
-    print("initMood----------$initMood");
-    print("initCategorys----------$initCategorys");
+    print("initMood----------$initCategory");
+    print("initCategorys----------$initMoods");
     print("富文本的内容toPlainText----------${_controller.document.toPlainText()}");
 
     var delta = _controller.document.toDelta();
@@ -174,9 +181,10 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
       date: getCurrentDate(),
       title: initTitle,
       content: jsonString,
-      tags: initTags.join(","),
-      category: initCategorys.join(","),
-      mood: initMood,
+      // ？？？中英文显示文字不一样，存入数据库字符也不一样，暂时不区分处理了
+      tags: initTags.isEmpty ? "" : initTags.join(","),
+      category: initCategory,
+      mood: initMoods.isEmpty ? "" : initMoods.join(","),
       userId: CacheUser.userId,
     );
 
@@ -234,20 +242,20 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             context: context,
             builder: (context) {
               return AlertDialog(
-                title: const Text("关闭"),
+                title: Text(CusAL.of(context).closeLabel),
                 content: const Text("当前处于编辑状态，继续返回将丢失未保存的内容，确认返回?"),
                 actions: [
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context, true);
                     },
-                    child: const Text('确认'),
+                    child: Text(CusAL.of(context).confirmLabel),
                   ),
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context, false);
                     },
-                    child: const Text('取消'),
+                    child: Text(CusAL.of(context).cancelLabel),
                   ),
                 ],
               );
@@ -281,15 +289,15 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
               children: [
                 TextSpan(
                   text: (initDiaryId == null)
-                      ? '新增手记'
+                      ? CusAL.of(context).addLabel(CusAL.of(context).diary)
                       : isEditing
-                          ? "编辑手记"
-                          : '手记',
+                          ? CusAL.of(context).eidtLabel(CusAL.of(context).diary)
+                          : CusAL.of(context).diary,
                   style: TextStyle(fontSize: 20.sp),
                 ),
                 if (lastSavedTime != null)
                   TextSpan(
-                    text: "\n上次修改: $lastSavedTime",
+                    text: "\n${CusAL.of(context).lastModified}: $lastSavedTime",
                     style: TextStyle(fontSize: 12.sp),
                   ),
               ],
@@ -416,7 +424,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             // 预览时居中，编辑时靠左
             textAlign: isEditing ? TextAlign.start : TextAlign.center,
             decoration: InputDecoration(
-              hintText: ' 一句话也好，哪怕想写的不多^~^',
+              hintText: CusAL.of(context).diaryTitleNote,
               contentPadding: EdgeInsets.symmetric(vertical: 2.sp),
               // 预览时不显示边框
               border: isEditing
@@ -453,7 +461,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                 labelTextSize: 12.sp,
               );
             }).toList(),
-            ...initCategorys.map((cate) {
+            ...initMoods.map((cate) {
               return buildSmallButtonTag(
                 cate,
                 bgColor: Colors.limeAccent,
@@ -461,7 +469,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
               );
             }).toList(),
             buildSmallButtonTag(
-              initMood,
+              initCategory,
               bgColor: Colors.lightBlue,
               labelTextSize: 12.sp,
             ),
@@ -475,25 +483,25 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
     return [
       // 这个只能单选，表现类似 radio
       _buildSingleSelectRow(
-        "心情",
-        "mood",
-        _moodChipOptions(),
-        initialValue: initMood,
+        "分类",
+        "category",
+        _categoryChipOptions(),
+        initialValue: initCategory,
         onChanged: (value) {
           setState(() {
-            initMood = value;
+            initCategory = value;
           });
         },
       ),
       // 这个可以多选，表现类似 checkbox
       _buildMultiSelectRow(
-        "分类",
-        "category",
-        _categoryChipOptions(),
-        initialValue: initCategorys,
+        "心情",
+        "mood",
+        _moodChipOptions(),
+        initialValue: initMoods,
         onChanged: (value) {
           setState(() {
-            initCategorys = value?.map((v) => v.toString()).toList() ?? [];
+            initMoods = value?.map((v) => v.toString()).toList() ?? [];
           });
         },
       ),
@@ -525,8 +533,10 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
         child: QuillProvider(
           configurations: QuillConfigurations(
             controller: _controller,
-            sharedConfigurations: const QuillSharedConfigurations(
-              locale: Locale('zh', 'CN'),
+            sharedConfigurations: QuillSharedConfigurations(
+              locale: box.read('language') == 'system'
+                  ? null
+                  : Locale(box.read('language')),
             ),
           ),
           child: Column(
@@ -536,7 +546,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                 Card(
                   elevation: 3,
                   child: ExpansionTile(
-                    title: const Text('展开富文本编辑工具栏'),
+                    title: Text(CusAL.of(context).richTextToolNote),
                     leading: const Icon(Icons.tag, color: Colors.green),
                     backgroundColor: Colors.white,
                     initiallyExpanded: isQuillToolbarExpanded, // 是否默认展开
@@ -592,24 +602,24 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
     );
   }
 
-  ///
-  /// 来源自 diary_modify_form
-  ///
-
   // 这些选项都是FormBuilderChipOption类型
-  List<FormBuilderChipOption<String>> _moodChipOptions() {
-    return diaryMoodList
-        .map((e) => FormBuilderChipOption(value: e.cnLabel))
-        .toList();
-  }
-
   List<FormBuilderChipOption<String>> _categoryChipOptions() {
     return diaryCategoryList
-        .map((e) => FormBuilderChipOption(value: e.cnLabel))
+        .map(
+          (e) => FormBuilderChipOption(value: showCusLableMapLabel(context, e)),
+        )
         .toList();
   }
 
-  // 分类多选行
+  List<FormBuilderChipOption<String>> _moodChipOptions() {
+    return diaryMoodList
+        .map(
+          (e) => FormBuilderChipOption(value: showCusLableMapLabel(context, e)),
+        )
+        .toList();
+  }
+
+  // 心情多选行
   _buildMultiSelectRow(
     String title,
     String name,
@@ -633,15 +643,15 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             // 标签被选中时的颜色
             selectedColor: Colors.blue,
             // 选项列表中文字样式
-            labelStyle: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500),
+            labelStyle: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w500),
             // 标签的内边距
             labelPadding: EdgeInsets.all(1.sp),
             // // 设置标签的形状样式(四个圆角为5的方形,默认是圆形)
-            // shape: RoundedRectangleBorder(
-            //   borderRadius: BorderRadius.circular(5.0),
-            //   // 边框是宽度为1的灰色
-            //   // side: BorderSide(color: Colors.grey, width: 1.sp),
-            // ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(1.0),
+              // 边框是宽度为1的灰色
+              // side: BorderSide(color: Colors.grey, width: 1.sp),
+            ),
             onChanged: onChanged,
           ),
         ),
@@ -649,7 +659,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
     );
   }
 
-  // 心情单选行
+  // 分类单选行
   _buildSingleSelectRow(
     String title,
     String name,
@@ -673,15 +683,15 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             // 标签被选中时的颜色
             selectedColor: Colors.blue,
             // 选项列表中文字样式
-            labelStyle: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500),
+            labelStyle: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w500),
             // 标签的内边距
             labelPadding: EdgeInsets.all(1.sp),
             // 设置标签的形状样式(四个圆角为5的方形,默认是圆形)
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5.0),
-              // 边框是宽度为1的灰色
-              // side: BorderSide(color: Colors.grey, width: 1.sp),
-            ),
+            // shape: RoundedRectangleBorder(
+            //   borderRadius: BorderRadius.circular(5.0),
+            //   // 边框是宽度为1的灰色
+            //   // side: BorderSide(color: Colors.grey, width: 1.sp),
+            // ),
             onChanged: onChanged,
           ),
         ),
@@ -704,7 +714,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             controller: _tagTextController,
             readOnly: !isEditing,
             decoration: InputDecoration(
-                hintText: '  输入标签(输入逗号或分号自动分割)',
+                hintText: CusAL.of(context).diaryTagsNote,
                 contentPadding: EdgeInsets.symmetric(vertical: 2.sp),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),

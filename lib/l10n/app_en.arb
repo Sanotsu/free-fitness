@@ -88,6 +88,23 @@
 
   "userInfo":"User Info",
 
+  "diaryLables": "{num, select, 0{Diary Calendar} 1{Timeline Mode} 2{Title} 3{Content} other{Other} }",
+  "@diaryLables": {
+  "description": "手记显示模式"
+  },
+
+  "calenderLables": "{num, select, 0{Month} 1{2 weeks} 2{Week} other{其他} }",
+  "@calenderLables": {
+  "description": "日历表格切换显示模式"
+  },
+
+  "diaryTitleNote":" All is well ^~^",
+  "diaryTagsNote":" tags (split by entering comma or semi)",
+  "richTextToolNote":" Expand Quill Toolbar",
+
+  "lastModified":"Last Modified",
+
+
   "confirmLabel":"Confirm",
   "cancelLabel":"Cancel",
   "resetLabel":"reset",
@@ -102,6 +119,9 @@
   "recordLabel":"Record",
   "manageLabel":"Manage",
   "removeSelected": "Remove Selected",
+
+
+  "alertTitle": "Alert",
 
   "noRecordNote": "No data yet.",
 
@@ -122,7 +142,7 @@
   "genderLabel":"please select your gender",
   "exceptionWarningTitle":"Exception Warning",
   "deleteConfirm":"Delete Confirm",
-  "deleteNote":"Are you sure to delete the selected data?",
+  "deleteNote":"Are you sure to delete the selected data {data}?",
   "deletedInfo":"The item has been deleted.",
   "initInfo":"Could you please provide some basic info? \nOr just click 'Next' button to use default info.",
   "moreSettings":"More Settings",

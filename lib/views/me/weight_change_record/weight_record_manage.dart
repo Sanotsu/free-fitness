@@ -138,7 +138,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
                 builder: (context) {
                   return AlertDialog(
                     title: Text(CusAL.of(context).deleteConfirm),
-                    content: Text(CusAL.of(context).deleteNote),
+                    content: Text(CusAL.of(context).deleteNote("")),
                     actions: [
                       TextButton(
                         onPressed: () {

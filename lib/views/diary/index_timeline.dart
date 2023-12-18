@@ -8,9 +8,9 @@ import 'package:timeline_tile/timeline_tile.dart';
 import '../../common/global/constants.dart';
 import '../../common/utils/db_diary_helper.dart';
 import '../../common/utils/tool_widgets.dart';
+import '../../models/cus_app_localizations.dart';
 import '../../models/diary_state.dart';
 import 'diary_modify_rich_text.dart';
-import 'index.dart';
 
 class IndexTimeline extends StatefulWidget {
   const IndexTimeline({Key? key}) : super(key: key);
@@ -124,44 +124,31 @@ class _IndexTimelineState extends State<IndexTimeline> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("手记时间线"),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              print("保留测试的旧版本主页");
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const DiaryIndex(),
-                ),
-              );
-            },
-            child: const Text("<old>"),
-          ),
-        ],
+        title: Text(CusAL.of(context).diaryLables("1")),
       ),
 
       // 设置整个背景色为渐变色
-      body: DecoratedBox(
-        decoration: const BoxDecoration(
-          // 设置渐变色
-          // gradient: LinearGradient(
-          //   begin: Alignment.topCenter,
-          //   end: Alignment.bottomCenter,
-          //   colors: [Colors.blue, Colors.green],
-          // ),
-          // 纯背景色
-          color: Color.fromARGB(255, 169, 150, 184),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Expanded(
-              child: _buildListArea(),
-            ),
-          ],
-        ),
-      ),
+      // body: DecoratedBox(
+      //   decoration: const BoxDecoration(
+      //       // 设置渐变色
+      //       // gradient: LinearGradient(
+      //       //   begin: Alignment.topCenter,
+      //       //   end: Alignment.bottomCenter,
+      //       //   colors: [Colors.blue, Colors.green],
+      //       // ),
+      //       // 纯背景色
+      //       // color: Color.fromARGB(255, 219, 214, 223),
+      //       ),
+      //   child: Column(
+      //     mainAxisSize: MainAxisSize.min,
+      //     children: <Widget>[
+      //       Expanded(
+      //         child: _buildListArea(),
+      //       ),
+      //     ],
+      //   ),
+      // ),
+      body: _buildListArea(),
     );
   }
 
@@ -177,14 +164,6 @@ class _IndexTimelineState extends State<IndexTimeline> {
           // 示意图可以有多个，就去第一张好了
           var diaryItem = diaryList[index];
 
-          // 创建时间(不使用最后修改时间是避免时间线显示出现时间不连续的尴尬)
-          // var createDate = DateFormat(constDateFormat).format(
-          //   DateTime.parse(diaryItem.gmtCreate ?? '1970-01-01 00:00:00'),
-          // );
-
-          var createTime = DateFormat(constTimeFormat).format(
-            DateTime.parse(diaryItem.gmtCreate ?? '1970-01-01 00:00:00'),
-          );
           return TimelineTile(
             alignment: TimelineAlign.manual,
             lineXY: 0.3,
@@ -194,194 +173,189 @@ class _IndexTimelineState extends State<IndexTimeline> {
               width: 50,
               height: 50,
               indicator: _CusIndicator(
-                number: '${diaryItem.mood}',
+                category: '${diaryItem.category}',
                 borderColor: borderColor,
               ),
               // 连接线是否画在图标的后面(默认是false，表示线没有画在图标后面)
               drawGap: true,
             ),
             beforeLineStyle: LineStyle(color: borderColor),
-            startChild: Container(
-              // 内外边距
-              // padding: EdgeInsets.all(5.sp),
-              margin: EdgeInsets.all(5.sp),
-              // 限制盒子最低高度
-              constraints: BoxConstraints(minHeight: 40.sp),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
+            startChild: _buildListStartChild(diaryItem),
+            endChild: _buildListEndChild(diaryItem),
+          );
+        }
+      },
+    );
+  }
+
+  _buildListStartChild(Diary diaryItem) {
+    // 创建时间(不使用最后修改时间是避免时间线显示出现时间不连续的尴尬)
+    var createTime = DateFormat(constTimeFormat).format(
+      DateTime.parse(diaryItem.gmtCreate ?? unknownDateTimeString),
+    );
+
+    return Container(
+      // 内外边距
+      // padding: EdgeInsets.all(5.sp),
+      margin: EdgeInsets.all(5.sp),
+      // 限制盒子最低高度
+      constraints: BoxConstraints(minHeight: 40.sp),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            diaryItem.date,
+            style: TextStyle(fontSize: 14.sp),
+          ),
+          Text(
+            createTime,
+            style: TextStyle(fontSize: 16.sp),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _buildListEndChild(Diary diaryItem) {
+    return GestureDetector(
+      child: Card(
+        elevation: 4,
+        child: Container(
+          constraints: BoxConstraints(minHeight: 80.sp),
+          // 内外边距
+          padding: EdgeInsets.all(2.sp),
+          margin: EdgeInsets.all(2.sp),
+          // color: Colors.transparent,
+          // 装饰和颜色不能同时设置
+          // decoration: BoxDecoration(
+          //   border: Border.all(color: Colors.black54, width: 1),
+          //   borderRadius: BorderRadius.circular(10),
+          // ),
+          // 不要用ListTile，很难看也很难布局
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  // RichText(
-                  //   textAlign: TextAlign.end,
-                  //   text: TextSpan(
-                  //     children: [
-                  //       TextSpan(
-                  //         text: '$createDate\n',
-                  //         style: TextStyle(
-                  //           fontSize: 15.sp, // text的默认字体大小
-                  //           color: Colors.black,
-                  //         ),
-                  //       ),
-                  //       TextSpan(
-                  //         text: createTime,
-                  //         style: TextStyle(
-                  //           fontSize: 10.sp,
-                  //           color: Colors.black,
-                  //         ),
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  Text(
-                    diaryItem.date,
-                    style: TextStyle(fontSize: 14.sp),
-                  ),
-                  Text(
-                    createTime,
-                    style: TextStyle(fontSize: 16.sp),
+                  Expanded(flex: 4, child: Text(diaryItem.title)),
+                  Expanded(
+                    flex: 1,
+                    child: Icon(
+                      Icons.arrow_forward,
+                      size: 16.sp,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   ),
                 ],
               ),
-            ),
-            endChild: GestureDetector(
-              child: Container(
-                constraints: BoxConstraints(minHeight: 80.sp),
-                // 内外边距
-                padding: EdgeInsets.all(2.sp),
-                margin: EdgeInsets.all(2.sp),
-                // color: Colors.transparent,
-                // 装饰和颜色不能同时设置
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black54, width: 1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                // 不要用ListTile，很难看也很难布局
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Expanded(
-                          flex: 4,
-                          child: Text(diaryItem.title),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Icon(Icons.arrow_forward, size: 16.sp),
-                        ),
-                      ],
-                    ),
-                    Wrap(
-                      // 子组件横向的间距
-                      // spacing: 2,
-                      // 子组件纵向的间距
-                      runSpacing: 5,
-                      // 排布方向
-                      alignment: WrapAlignment.spaceAround,
-                      children: [
-                        // 先排除原本就是空字符串之后再分割
-                        // ...(diaryItem.category?.split(",") ?? [])
-                        ...((diaryItem.category != null &&
-                                    diaryItem.category!.trim().isNotEmpty)
-                                ? diaryItem.category!.trim().split(",")
-                                : [])
-                            .map((cate) {
-                          return buildTinyButtonTag(
-                            cate,
-                            bgColor: const Color.fromARGB(255, 125, 185, 172),
-                            labelTextSize: 8.sp,
-                          );
-                        }).toList(),
-                        // ...(diaryItem.tags?.split(",") ?? [])
-                        ...((diaryItem.tags != null &&
-                                    diaryItem.tags!.trim().isNotEmpty)
-                                ? diaryItem.tags!.trim().split(",")
-                                : [])
-                            .map((tag) {
-                          return buildTinyButtonTag(
-                            tag,
-                            bgColor: const Color.fromARGB(255, 139, 139, 132),
-                            labelTextSize: 8.sp,
-                          );
-                        }).toList(),
-                      ],
-                    ),
-                  ],
-                ),
+              SizedBox(height: 5.sp),
+              Wrap(
+                // 子组件横向的间距
+                // spacing: 2,
+                // 子组件纵向的间距
+                runSpacing: 5,
+                // 排布方向
+                alignment: WrapAlignment.spaceAround,
+                children: [
+                  // 先排除原本就是空字符串之后再分割
+                  ...((diaryItem.mood != null &&
+                              diaryItem.mood!.trim().isNotEmpty)
+                          ? diaryItem.mood!.trim().split(",")
+                          : [])
+                      .map((mood) {
+                    return buildTinyButtonTag(
+                      mood,
+                      bgColor: Colors.limeAccent,
+                      labelTextSize: 8.sp,
+                    );
+                  }).toList(),
+                  ...((diaryItem.tags != null &&
+                              diaryItem.tags!.trim().isNotEmpty)
+                          ? diaryItem.tags!.trim().split(",")
+                          : [])
+                      .map((tag) {
+                    return buildTinyButtonTag(
+                      tag,
+                      bgColor: Colors.lightGreen,
+                      labelTextSize: 8.sp,
+                    );
+                  }).toList(),
+                ],
               ),
-              onTap: () {
-                Navigator.of(context)
-                    .push(
-                  MaterialPageRoute(
-                    builder: (BuildContext ctx) => DiaryModifyRichText(
-                      diaryItem: diaryItem,
-                    ),
-                  ),
-                )
-                    .then((value) {
-                  // 编辑页面返回后，重新加载手记数据
-                  setState(() {
-                    currentPage = 1; // 数据库查询的时候会从0开始offset
-                    pageSize = 10;
-                    diaryList = [];
-                  });
-                  loadMoreDiary();
-                });
-              },
+            ],
+          ),
+        ),
+      ),
+      onTap: () {
+        Navigator.of(context)
+            .push(
+          MaterialPageRoute(
+            builder: (BuildContext ctx) => DiaryModifyRichText(
+              diaryItem: diaryItem,
             ),
-          );
+          ),
+        )
+            .then((value) {
+          // 编辑页面返回后，重新加载手记数据
+          setState(() {
+            currentPage = 1; // 数据库查询的时候会从0开始offset
+            pageSize = 10;
+            diaryList = [];
+          });
+          loadMoreDiary();
+        });
+      },
+      // 长按点击弹窗提示是否删除
+      onLongPress: () {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text(CusAL.of(context).deleteConfirm),
+              content: Text(
+                CusAL.of(context).deleteNote(diaryItem.title),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: Text(CusAL.of(context).cancelLabel),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: Text(CusAL.of(context).confirmLabel),
+                ),
+              ],
+            );
+          },
+        ).then((value) async {
+          if (value != null && value) {
+            try {
+              await _dbHelper.deleteDiaryById(diaryItem.diaryId!);
 
-          // 使用card没办法设置透明，使用body给的背景色
-          // return Card(
-          //   elevation: 10,
-          //   color: Colors.transparent,
-          //   child: GestureDetector(
-          //     onTap: () {
-          //       // 点击查看手记详情
-
-          //       Navigator.of(context).push(
-          //         MaterialPageRoute(
-          //           builder: (BuildContext ctx) => DiaryModifyRichText(
-          //             diaryItem: diaryItem,
-          //           ),
-          //         ),
-          //       );
-          //     },
-          //     child: Row(
-          //       children: [
-          //         Expanded(
-          //           flex: 9,
-          //           child: ListTile(
-          //             title: Text(
-          //               "$index-${diaryItem.title}",
-          //               overflow: TextOverflow.ellipsis,
-          //               maxLines: 2,
-          //               style: TextStyle(
-          //                   fontSize: 16.sp, fontWeight: FontWeight.bold),
-          //             ),
-          //             subtitle: Text(diaryItem.date),
-          //           ),
-          //         ),
-          //         Expanded(
-          //           flex: 6,
-          //           child: SizedBox(
-          //             height: 80.sp,
-          //             child: Padding(
-          //               padding: EdgeInsets.all(5.sp),
-          //               child: Image.asset(
-          //                 placeholderImageUrl,
-          //                 fit: BoxFit.scaleDown,
-          //               ),
-          //             ),
-          //           ),
-          //         ),
-          //       ],
-          //     ),
-          //   ),
-          // );
-        }
+              // 删除后重新查询
+              setState(() {
+                currentPage = 1; // 数据库查询的时候会从0开始offset
+                pageSize = 10;
+                diaryList.clear();
+              });
+              loadMoreDiary();
+            } catch (e) {
+              if (!mounted) return;
+              commonExceptionDialog(
+                context,
+                CusAL.of(context).exceptionWarningTitle,
+                e.toString(),
+              );
+            }
+          }
+        });
       },
     );
   }
@@ -391,11 +365,11 @@ class _IndexTimelineState extends State<IndexTimeline> {
 class _CusIndicator extends StatelessWidget {
   const _CusIndicator({
     Key? key,
-    required this.number,
+    required this.category,
     required this.borderColor,
   }) : super(key: key);
 
-  final String number;
+  final String category;
   final Color borderColor;
 
   @override
@@ -404,10 +378,7 @@ class _CusIndicator extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.fromBorderSide(
-          BorderSide(
-            color: const Color.fromARGB(255, 112, 78, 78).withOpacity(0.5),
-            width: 4,
-          ),
+          BorderSide(color: Colors.green, width: 4.sp),
         ),
       ),
       child: Center(
@@ -417,7 +388,7 @@ class _CusIndicator extends StatelessWidget {
         //   labelTextSize: 12.sp,
         // ),
         child: Text(
-          number,
+          category,
           style: TextStyle(fontSize: 14.sp),
         ),
       ),

@@ -8,6 +8,9 @@ import 'package:get_storage/get_storage.dart';
 const constDatetimeFormat = "yyyy-MM-dd HH:mm:ss";
 const constDateFormat = "yyyy-MM-dd";
 const constTimeFormat = "HH:mm:ss";
+// 未知的时间字符串
+const unknownDateTimeString = '1970-01-01 00:00:00';
+const unknownDateString = '1970-01-01';
 
 // 1 大卡 = 4.184 千焦
 const double oneCalToKjRatio = 4.18400;
