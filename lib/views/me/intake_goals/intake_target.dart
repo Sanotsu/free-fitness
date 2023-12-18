@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -67,9 +65,9 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
       // (注意key要和表单中name一致。因为是两个不同的表单，所以和每日营养素目标表单同名了也不影响)
       initialMacrosMap = {
         "calory": (user.rdaGoal ?? 0).toString(),
-        "carbs": (user.choGoal ?? 0).toString(),
-        "fat": (user.fatGoal ?? 0).toString(),
-        "protein": (user.proteinGoal ?? 0).toString(),
+        "carbs": cusDoubleTryToIntString(user.choGoal ?? 0),
+        "fat": cusDoubleTryToIntString(user.fatGoal ?? 0),
+        "protein": cusDoubleTryToIntString(user.proteinGoal ?? 0),
       };
 
       equivalentKJdata = caloryToKjStr(user.rdaGoal ?? 0);
@@ -124,15 +122,13 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
     setState(() {
       // 给每日营养素目标设置初始值
       initialWeekMacrosMap = {
-        "calory": intakeData[selectedDay]?.calory.toString(),
-        "carbs": intakeData[selectedDay]?.carbs.toString(),
-        "fat": intakeData[selectedDay]?.fat.toString(),
-        "protein": intakeData[selectedDay]?.protein.toString(),
+        "calory": intakeData[selectedDay]!.calory.toString(),
+        "carbs": cusDoubleTryToIntString(intakeData[selectedDay]!.carbs),
+        "fat": cusDoubleTryToIntString(intakeData[selectedDay]!.fat),
+        "protein": cusDoubleTryToIntString(intakeData[selectedDay]!.protein),
       };
 
-      print("initialWeekMacrosMap-------$initialWeekMacrosMap");
-
-      weekKJdata = caloryToKjStr(intakeData[selectedDay]?.calory ?? 0);
+      weekKJdata = caloryToKjStr(intakeData[selectedDay]!.calory);
       _weekMacrosFormKey.currentState?.patchValue(initialWeekMacrosMap);
     });
   }
@@ -273,7 +269,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                     child: Text(
                       _isEditing
                           ? CusAL.of(context).saveLabel
-                          : CusAL.of(context).eidtLabel,
+                          : CusAL.of(context).eidtLabel(""),
                     ),
                   ),
                 ),
@@ -476,7 +472,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                     child: Text(
                       _isWeekdayEditing
                           ? CusAL.of(context).saveLabel
-                          : CusAL.of(context).eidtLabel,
+                          : CusAL.of(context).eidtLabel(""),
                     ),
                   ),
                 ),
@@ -521,7 +517,6 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
   _updateWeekMacroData() async {
     // 先保存到数据库，然后再显示非修改画面
     if (_isWeekdayEditing) {
-      print("现在是修改后点击了保存");
       if (_weekMacrosFormKey.currentState!.saveAndValidate()) {
         CusMacro newData = CusMacro(
           calory: int.parse(

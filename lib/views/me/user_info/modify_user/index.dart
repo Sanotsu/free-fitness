@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_user_helper.dart';
 import '../../../../common/utils/tool_widgets.dart';
+import '../../../../common/utils/tools.dart';
+import '../../../../models/cus_app_localizations.dart';
 import '../../../../models/user_state.dart';
 
 class ModifyUserPage extends StatefulWidget {
@@ -81,7 +83,11 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
       } catch (e) {
         // 将错误信息展示给用户
         if (!mounted) return;
-        commonExceptionDialog(context, "异常提醒", e.toString());
+        commonExceptionDialog(
+          context,
+          CusAL.of(context).exceptionWarningTitle,
+          e.toString(),
+        );
 
         setState(() {
           isLoading = false;
@@ -95,11 +101,18 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.user == null ? '新增用户信息' : '修改用户信息'),
+        title: Text(
+          widget.user == null
+              ? CusAL.of(context).addLabel(CusAL.of(context).userInfo)
+              : CusAL.of(context).eidtLabel(CusAL.of(context).userInfo),
+        ),
         actions: [
           TextButton(
             onPressed: _saveUser,
-            child: const Text('保存', style: TextStyle(color: Colors.white)),
+            child: Text(
+              CusAL.of(context).saveLabel,
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -127,15 +140,23 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
     return [
       FormBuilderTextField(
         name: "user_name",
-        decoration: const InputDecoration(labelText: "用户名"),
+        decoration: InputDecoration(
+          labelText: CusAL.of(context).userInfoLabels("0"),
+        ),
         keyboardType: TextInputType.name,
         validator: FormBuilderValidators.compose([
-          FormBuilderValidators.required(errorText: '用户名不可为空'),
+          FormBuilderValidators.required(
+            errorText: CusAL.of(context).requiredErrorText(
+              CusAL.of(context).userInfoLabels("0"),
+            ),
+          ),
         ]),
       ),
       FormBuilderTextField(
         name: "user_code",
-        decoration: const InputDecoration(labelText: "用户代号"),
+        decoration: InputDecoration(
+          labelText: CusAL.of(context).userInfoLabels("1"),
+        ),
         keyboardType: TextInputType.name,
       ),
       FormBuilderDropdown<CusLabel>(
@@ -146,12 +167,14 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
                 (e) => e.value == widget.user?.gender,
                 orElse: () => genderOptions.first,
               ),
-        decoration: const InputDecoration(labelText: "性别"),
+        decoration: InputDecoration(
+          labelText: CusAL.of(context).userInfoLabels("2"),
+        ),
         items: genderOptions
             .map((unit) => DropdownMenuItem(
                   alignment: AlignmentDirectional.center,
                   value: unit,
-                  child: Text(unit.cnLabel),
+                  child: Text(showCusLableMapLabel(context, unit)),
                 ))
             .toList(),
       ),
@@ -164,7 +187,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
             : DateTime.tryParse(widget.user?.dateOfBirth ?? "1970-01-01"),
         inputType: InputType.date,
         decoration: InputDecoration(
-          labelText: '出生年月',
+          labelText: CusAL.of(context).userInfoLabels("3"),
           suffixIcon: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () {
@@ -177,27 +200,46 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
       Row(
         children: [
           Expanded(
-            child: _buildDoubleTextField('height', "身高", "公分"),
+            child: _buildDoubleTextField(
+              'height',
+              CusAL.of(context).userInfoLabels("4"),
+              CusAL.of(context).unitLabels("4"),
+            ),
           ),
           SizedBox(width: 10.sp),
           Expanded(
-            child: _buildDoubleTextField('current_weight', "体重", "公斤"),
+            child: _buildDoubleTextField(
+              'current_weight',
+              CusAL.of(context).userInfoLabels("5"),
+              CusAL.of(context).unitLabels("5"),
+            ),
           ),
         ],
       ),
       Row(
         children: [
-          Expanded(child: _buildDoubleTextField('rda_goal', "RDA", "大卡")),
+          Expanded(
+              child: _buildDoubleTextField(
+            'rda_goal',
+            CusAL.of(context).userGoalLabels("0"),
+            CusAL.of(context).unitLabels("2"),
+          )),
           SizedBox(width: 10.sp),
           Expanded(
-            child: _buildDoubleTextField('action_rest_time', "锻炼间隔休息时间", "秒"),
+            child: _buildDoubleTextField(
+              'action_rest_time',
+              CusAL.of(context).userGoalLabels("1"),
+              CusAL.of(context).unitLabels("6"),
+            ),
           ),
         ],
       ),
       FormBuilderTextField(
         name: "description",
         maxLines: 3,
-        decoration: const InputDecoration(labelText: "简述"),
+        decoration: InputDecoration(
+          labelText: CusAL.of(context).userInfoLabels("6"),
+        ),
         keyboardType: TextInputType.name,
       ),
     ];

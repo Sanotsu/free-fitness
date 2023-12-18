@@ -7,6 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:free_fitness/layout/init_guide_page.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:free_fitness/models/cus_app_localizations.dart';
 
 import '../common/global/constants.dart';
 
@@ -20,13 +21,10 @@ class FreeFitnessApp extends StatefulWidget {
 }
 
 class _FreeFitnessAppState extends State<FreeFitnessApp> {
-  // 获取缓存中的用户编号
-  int? get getUserId => box.read(LocalStorageKey.userId);
-
   // 应用程序的根部件
   @override
   Widget build(BuildContext context) {
-    print("getUserId---$getUserId");
+    print("getUserId---${box.read(LocalStorageKey.userId)}");
 
     return ScreenUtilInit(
       designSize: const Size(360, 640), // 1080p / 3 ,单位dp
@@ -36,7 +34,7 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
         return MaterialApp(
           title: 'free_fitness',
           onGenerateTitle: (context) {
-            return AppLocalizations.of(context)!.appTitle;
+            return CusAL.of(context).appTitle;
           },
           localizationsDelegates: const [
             AppLocalizations.delegate,
@@ -81,7 +79,9 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
           // https://flutter.cn/docs/cookbook/navigation/named-routes#2-define-the-routes
 
           // 如果没有在缓存获取到用户信息，就要用户输入；否则就直接进入首页
-          home: getUserId != null ? const HomePage() : const InitGuidePage(),
+          home: box.read(LocalStorageKey.userId) != null
+              ? const HomePage()
+              : const InitGuidePage(),
         );
       },
     );

@@ -5,12 +5,12 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:numberpicker/numberpicker.dart';
 
 import '../common/global/constants.dart';
 import '../common/utils/db_user_helper.dart';
 import '../common/utils/tools.dart';
+import '../models/cus_app_localizations.dart';
 import '../models/user_state.dart';
 import 'home.dart';
 
@@ -71,13 +71,13 @@ class _InitGuidePageState extends State<InitGuidePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(AppLocalizations.of(context)!.initInfo),
+            Text(CusAL.of(context).initInfo),
             Padding(
               padding: EdgeInsets.all(10.sp),
               child: TextFormField(
                 controller: _usernameController,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.nameLabel,
+                  labelText: CusAL.of(context).nameLabel,
                 ),
               ),
             ),
@@ -97,7 +97,7 @@ class _InitGuidePageState extends State<InitGuidePage> {
                     selectedGender = value?.value;
                   });
                 },
-                hint: Text(AppLocalizations.of(context)!.genderLabel),
+                hint: Text(CusAL.of(context).genderLabel),
               ),
             ),
             Card(
@@ -109,7 +109,7 @@ class _InitGuidePageState extends State<InitGuidePage> {
                   children: <Widget>[
                     Column(
                       children: [
-                        Text(AppLocalizations.of(context)!.heightLabel("(cm)")),
+                        Text(CusAL.of(context).heightLabel("(cm)")),
                         SizedBox(height: 10.sp),
                         DecimalNumberPicker(
                           value: _currentHeight,
@@ -125,7 +125,7 @@ class _InitGuidePageState extends State<InitGuidePage> {
                     ),
                     Column(
                       children: [
-                        Text(AppLocalizations.of(context)!.weightLabel("(kg)")),
+                        Text(CusAL.of(context).weightLabel("(kg)")),
                         SizedBox(height: 10.sp),
                         DecimalNumberPicker(
                           value: _currentWeight,
@@ -150,14 +150,14 @@ class _InitGuidePageState extends State<InitGuidePage> {
                 TextButton(
                   onPressed: _login,
                   child: Text(
-                    AppLocalizations.of(context)!.enterLabel,
+                    CusAL.of(context).enterLabel,
                     style: TextStyle(fontSize: 18.sp),
                   ),
                 ),
                 TextButton(
                   onPressed: _skip,
                   child: Text(
-                    AppLocalizations.of(context)!.skipLabel,
+                    CusAL.of(context).skipLabel,
                     style: TextStyle(fontSize: 18.sp),
                   ),
                 ),

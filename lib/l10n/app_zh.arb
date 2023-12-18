@@ -4,24 +4,24 @@
     
 
     "mainNutrients": "{num, select, 0{能量} 1{卡路里} 2{蛋白质} 3{脂肪} 4{碳水} other{其他} }",
-    "@moduleTitles": {
+    "@mainNutrients": {
     "description": "主要营养素标签"
     },
     "fatNutrients": "{num, select, 0{总脂肪} 1{饱和脂肪} 2{反式脂肪} 3{多不饱和脂肪} 4{单不饱和脂肪} other{其他} }",
-    "@moduleTitles": {
+    "@fatNutrients": {
     "description": "脂肪相关营养素标签"
     },
     "choNutrients": "{num, select, 0{总碳水化合物} 1{糖} 2{膳食纤维} other{其他} }",
-    "@moduleTitles": {
+    "@choNutrients": {
     "description": "碳水相关营养素标签"
     },
     "microNutrients": "{num, select, 0{钠} 1{钾} 2{胆固醇} other{其他} }",
-    "@moduleTitles": {
+    "@microNutrients": {
     "description": "微量元素相关营养素标签"
     },
 
-    "unitLabels": "{num, select, 0{克} 1{毫克} 2{大卡} 3{千焦} 4{公分} 5{公斤} other{其他} }",
-    "@moduleTitles": {
+    "unitLabels": "{num, select, 0{克} 1{毫克} 2{大卡} 3{千焦} 4{公分} 5{公斤} 6{秒} other{其他} }",
+    "@unitLabels": {
     "description": "各种单位"
     },
 
@@ -36,12 +36,12 @@
     },
 
     "changeAvatarLabels": "{ num, select, 0{切换头像} 1{指定选项} 2{拍照} 3{相册} other{其他} }",
-    "@moduleTitles": {
+    "@changeAvatarLabels": {
     "description": "用户设置页面切换头像需要的几个标签"
     },
 
     "bakLabels": "{ num, select, 0{备份恢复} 1{全量备份} 2{覆写恢复}  other{其他} }",
-    "@moduleTitles": {
+    "@bakLabels": {
     "description": "用户与设置页面的备份与恢复的标签"
     },
     "bakOpNote": "确认导出所有数据?",
@@ -50,6 +50,23 @@
 
     "restIntervals":"跟练动作间隔休息时间(秒)",
     "chooseSeconds":"选择休息间隔(秒)",
+
+    "bmiLabels": "{ num, select, 0{偏瘦} 1{正常} 2{超重} 3{肥胖} 4{过胖} other{Other} }",
+    "@bmiLabels": {
+    "description": "bmi的几个标签"
+    },
+    "weightRecord": "体重记录",
+
+    "userInfoLabels": "{num, select, 0{用户名称} 1{用户代号} 2{性别} 3{出生年月} 4{身高} 5{体重} 6{简述} other{其他} }",
+    "@userInfoLabels": {
+    "description": "用户基本信息的栏位"
+    },
+
+    "userGoalLabels": "{num, select, 0{RDA} 1{锻炼休息时间} other{其他} }",
+    "@userInfoLabels": {
+    "description": "用户设置目标的栏位"
+    },
+
 
 
     "training": "运动",
@@ -71,6 +88,9 @@
     "closeLabel":"关闭",
     "appExitInfo":"确定要退出 Free Fitness 吗?",
 
+    "userInfo":"用户信息",
+
+
     "confirmLabel":"确定",
     "cancelLabel":"取消",
     "resetLabel":"重置",
@@ -78,16 +98,35 @@
     "moreLabel":"更多",
     "lessLabel":"收起",
     "enterLabel":"进入",
-    "skipLabel":"跳过",
+    "skipLabel":"下一步",
     "saveLabel":"保存",
-    "eidtLabel":"修改",
+    "eidtLabel":"修改{name}",
+    "addLabel":"新增{name}",
+    "recordLabel":"记录",
+    "manageLabel":"管理",
+    "removeSelected": "移除选中动作",
+  
 
+    "noRecordNote": "暂无数据.",
+
+    "lastDayLabels": "最近{count}天",
+    "@lastDayLabels": {
+    "description": "最近几天的选项标签"
+    },
+
+    "allRecords":"选中的日期范围内的所有数据:",
+    "serialLabel":"序号",
+    "measuredTime":"测量时间",
+    "selectDateRange": "选择范围",
+
+    
     "heightLabel":"身高{unit}",
     "weightLabel":"体重{unit}",
     "nameLabel":"怎么称呼您?",
     "genderLabel":"请选择性别",
     "exceptionWarningTitle":"异常提醒",
     "deleteConfirm":"删除确认",
+    "deleteNote":"确认删除选择的数据？",
     "deletedInfo":"该项次已被删除",
     "initInfo":"初次使用，可以提供一些信息方便称呼\n可以跳过，使用可随时修改的预设数据",
     "moreSettings":"更多设置",
@@ -96,7 +135,9 @@
     "themeSetting":"切换主题",
     "darkMode":"深色模式",
     "lightMode":"浅色模式",
-    "settingLabels": "{ setting, select, 0{基本信息} 1{体重趋势} 2{摄入目标} 3{运动设置} 4{备份恢复} 5{更多设置} other{未知设置} }"
+    "settingLabels": "{ setting, select, 0{基本信息} 1{体重趋势} 2{摄入目标} 3{运动设置} 4{备份恢复} 5{更多设置} other{未知设置} }",
+
+    "requiredErrorText":"{text}不可为空"
     
     
 }

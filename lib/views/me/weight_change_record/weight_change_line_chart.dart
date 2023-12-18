@@ -14,6 +14,7 @@ import 'package:image_gallery_saver/image_gallery_saver.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/user_state.dart';
 
 class WeightChangeLineChart extends StatefulWidget {
@@ -183,7 +184,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
     if (byteData != null) {
       final result = await ImageGallerySaver.saveImage(
         byteData.buffer.asUint8List(),
-        name: "图表",
+        name: "${getCurrentDateTime()}图表",
       );
       print(result);
     }
@@ -209,7 +210,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
     return weightTrends.isEmpty
         ? SizedBox(
             height: 300.sp,
-            child: const Center(child: Text('暂无体重数据')),
+            child: Center(child: Text(CusAL.of(context).noRecordNote)),
           )
         : Column(
             children: [
@@ -221,21 +222,21 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
                       var temp = getStartEndDateString(3);
                       getWeightData(startDate: temp[0], endDate: temp[1]);
                     },
-                    child: const Text("最近7天"),
+                    child: Text(CusAL.of(context).lastDayLabels("7")),
                   ),
                   TextButton(
                     onPressed: () {
                       var temp = getStartEndDateString(30);
                       getWeightData(startDate: temp[0], endDate: temp[1]);
                     },
-                    child: const Text("最近30天"),
+                    child: Text(CusAL.of(context).lastDayLabels("30")),
                   ),
                   TextButton(
                     onPressed: () {
                       var temp = getStartEndDateString(90);
                       getWeightData(startDate: temp[0], endDate: temp[1]);
                     },
-                    child: const Text("最近90天"),
+                    child: Text(CusAL.of(context).lastDayLabels("90")),
                   ),
                 ],
               ),
@@ -245,7 +246,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
                   if (isShowSaveButton)
                     TextButton(
                       onPressed: _saveChartImage,
-                      child: const Text("保存图表"),
+                      child: Text(CusAL.of(context).saveLabel),
                     ),
                   IconButton(
                     onPressed: () {

@@ -2,28 +2,28 @@
   "appTitle": "Free Fitness",
 
   "mainNutrients": "{num, select, 0{Energy} 1{Calorie} 2{Protein} 3{Fat} 4{CHO} other{Other} }",
-  "@moduleTitles": {
+  "@mainNutrients": {
   "description": "主要营养素标签"
   },
   "fatNutrients": "{num, select, 0{Fat} 1{SaturatedFat} 2{TransFat} 3{puFat} 4{muFat} other{Other} }",
-  "@moduleTitles": {
+  "@fatNutrients": {
   "description": "脂肪相关营养素标签"
   },
   "choNutrients": "{num, select, 0{CHO} 1{Sugar} 2{DietaryFiber} other{Other} }",
-  "@moduleTitles": {
+  "@choNutrients": {
   "description": "碳水相关营养素标签"
   },
   "microNutrients": "{num, select, 0{Sodium} 1{Potassium} 2{Cholesterol} other{Other} }",
-  "@moduleTitles": {
+  "@microNutrients": {
   "description": "微量元素相关营养素标签"
   },
 
-  "unitLabels": "{num, select, 0{g} 1{mg} 2{kcal} 3{kj} 4{cm} 5{kg} other{Other} }",
-  "@moduleTitles": {
+  "unitLabels": "{num, select, 0{g} 1{mg} 2{kcal} 3{kj} 4{cm} 5{kg} 6{s} other{Other} }",
+  "@unitLabels": {
   "description": "各种单位"
   },
 
-  "averageGoal": "Macronutrient Goals",
+  "averageGoal": "Nutrient Goals",
   "dailyGoal": "Daily Goals",
   "dailyGoalBars": "Daily Goals Chart",
 
@@ -36,12 +36,12 @@
   },
 
   "changeAvatarLabels": "{ num, select, 0{Change Avatar} 1{Options} 2{Camera} 3{Gallery} other{Other} }",
-  "@moduleTitles": {
+  "@changeAvatarLabels": {
   "description": "用户设置页面切换头像需要的几个标签"
   },
 
   "bakLabels": "{ num, select, 0{Backup & Restore} 1{Full Backup} 2{Overwrite Restore}  other{Other} }",
-  "@moduleTitles": {
+  "@bakLabels": {
   "description": "用户与设置页面的备份与恢复的标签"
   },
   "bakOpNote": "Confirm exporting all data?",
@@ -51,6 +51,21 @@
   "restIntervals":"Rest time between follow-up exercises (s)",
   "chooseSeconds":"Choose a time interval (s)",
 
+  "bmiLabels": "{ num, select, 0{UWT} 1{NWT} 2{OWT} 3{Fat} 4{Obesity} other{Other} }",
+  "@bmiLabels": {
+  "description": "bmi的几个标签"
+  },
+  "weightRecord": "Weight Record",
+
+  "userInfoLabels": "{num, select, 0{UserName} 1{UserCode} 2{Gender} 3{DateOfBirth} 4{Height} 5{Weight} 6{Description} other{Other} }",
+  "@userInfoLabels": {
+  "description": "用户基本信息的栏位"
+  },
+
+  "userGoalLabels": "{num, select, 0{RDA} 1{RestIntervals} other{Other} }",
+  "@userInfoLabels": {
+  "description": "用户设置目标的栏位"
+  },
 
   "training": "Training",
   "trainingReports": "TrainingReports",
@@ -71,6 +86,8 @@
   "closeLabel":"Close",
   "appExitInfo":"Are you sure to exit Free Fitness?",
 
+  "userInfo":"User Info",
+
   "confirmLabel":"Confirm",
   "cancelLabel":"Cancel",
   "resetLabel":"reset",
@@ -78,9 +95,26 @@
   "moreLabel":"More",
   "lessLabel":"Less",
   "enterLabel":"Enter",
-  "skipLabel":"Skip",
+  "skipLabel":"Next",
   "saveLabel":"Save",
-  "eidtLabel":"Edit",
+  "eidtLabel":"Edit {name}",
+  "addLabel":"Add {name}",
+  "recordLabel":"Record",
+  "manageLabel":"Manage",
+  "removeSelected": "Remove Selected",
+
+  "noRecordNote": "No data yet.",
+
+
+  "lastDayLabels": "last {count} days",
+  "@lastDayLabels": {
+  "description": "最近几天的选项标签"
+  },
+
+  "allRecords":"All data in selected range:",
+  "serialLabel":"No.",
+  "measuredTime":"Measured Time",
+  "selectDateRange": "Change Range",
 
   "heightLabel":"Height{unit}",
   "weightLabel":"Weight{unit}",
@@ -88,16 +122,18 @@
   "genderLabel":"please select your gender",
   "exceptionWarningTitle":"Exception Warning",
   "deleteConfirm":"Delete Confirm",
+  "deleteNote":"Are you sure to delete the selected data?",
   "deletedInfo":"The item has been deleted.",
-  "initInfo":"Could you please provide some basic info? \nOr just click 'Skip' button to use default info.",
+  "initInfo":"Could you please provide some basic info? \nOr just click 'Next' button to use default info.",
   "moreSettings":"More Settings",
   "languageSetting":"Language",
   "followSystem":"System",
   "themeSetting":"Theme Mode",
   "darkMode":"Dark Mode",
   "lightMode":"Light Mode",
-  "settingLabels": "{ setting, select, 0{Basic Info} 1{Weight Trend} 2{Intake Goal} 3{Training Setting} 4{Backup & Restore} 5{More Settings} other{Unknown Setting} }"
- 
+  "settingLabels": "{ setting, select, 0{Basic Info} 1{Weight Trend} 2{Intake Goal} 3{Training Setting} 4{Backup & Restore} 5{More Settings} other{Unknown Setting} }",
+  
+  "requiredErrorText":"{text} required"
 
 
 

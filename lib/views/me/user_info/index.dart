@@ -8,6 +8,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/user_state.dart';
 import 'modify_user/index.dart';
 
@@ -57,7 +59,7 @@ class _UserInfoState extends State<UserInfo> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('基本信息'),
+        title: Text(CusAL.of(context).settingLabels("0")),
         actions: [
           TextButton(
               onPressed: () {
@@ -73,9 +75,9 @@ class _UserInfoState extends State<UserInfo> {
                   _queryLoginedUserInfo();
                 });
               },
-              child: const Text(
-                "修改",
-                style: TextStyle(color: Colors.white),
+              child: Text(
+                CusAL.of(context).eidtLabel(""),
+                style: const TextStyle(color: Colors.white),
               ))
         ],
       ),
@@ -110,36 +112,61 @@ class _UserInfoState extends State<UserInfo> {
                 ),
                 Row(
                   children: [
-                    _buildListItem('用户名称', user.userName),
-                    _buildListItem('用户代号', user.userCode ?? ""),
+                    _buildListItem(
+                      CusAL.of(context).userInfoLabels("0"),
+                      user.userName,
+                    ),
+                    _buildListItem(
+                      CusAL.of(context).userInfoLabels("1"),
+                      user.userCode ?? "",
+                    ),
                   ],
                 ),
                 Row(
                   children: [
                     _buildListItem(
-                      '性别',
-                      genderOptions
-                          .firstWhere((e) => e.value == user.gender)
-                          .cnLabel,
+                      CusAL.of(context).userInfoLabels("2"),
+                      showCusLableMapLabel(
+                        context,
+                        genderOptions.firstWhere((e) => e.value == user.gender),
+                      ),
                     ),
-                    _buildListItem('出生年月', user.dateOfBirth ?? ""),
+                    _buildListItem(
+                      CusAL.of(context).userInfoLabels("3"),
+                      user.dateOfBirth ?? "",
+                    ),
                   ],
                 ),
                 Row(
                   children: [
-                    _buildListItem('身高', '${user.height ?? ""} 公分'),
-                    _buildListItem('体重', '${user.currentWeight ?? ""} 公斤'),
+                    _buildListItem(
+                      CusAL.of(context).userInfoLabels("4"),
+                      '${cusDoubleTryToIntString(user.height ?? 0)} ${CusAL.of(context).unitLabels("4")}',
+                    ),
+                    _buildListItem(
+                      CusAL.of(context).userInfoLabels("5"),
+                      '${cusDoubleTryToIntString(user.currentWeight ?? 0)} ${CusAL.of(context).unitLabels("5")}',
+                    ),
                   ],
                 ),
                 Row(
                   children: [
-                    _buildListItem('RDA', '${user.rdaGoal ?? ""} 大卡'),
-                    _buildListItem('锻炼休息时间', '${user.actionRestTime ?? ""} 秒'),
+                    _buildListItem(
+                      CusAL.of(context).userGoalLabels("0"),
+                      '${user.rdaGoal ?? ""} ${CusAL.of(context).unitLabels("2")}',
+                    ),
+                    _buildListItem(
+                      CusAL.of(context).userGoalLabels("1"),
+                      '${user.actionRestTime ?? ""} ${CusAL.of(context).unitLabels("6")}',
+                    ),
                   ],
                 ),
                 Row(
                   children: [
-                    _buildListItem('简述', user.description ?? ""),
+                    _buildListItem(
+                      CusAL.of(context).userInfoLabels("6"),
+                      user.description ?? "",
+                    ),
                   ],
                 ),
               ],

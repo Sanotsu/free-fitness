@@ -7,6 +7,7 @@ import 'package:numberpicker/numberpicker.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/user_state.dart';
 import 'weight_change_line_chart.dart';
 import 'weight_record_manage.dart';
@@ -46,7 +47,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('体重趋势'),
+        title: Text(CusAL.of(context).settingLabels('1')),
       ),
       body: ListView(
         children: [
@@ -60,7 +61,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "体重",
+                      CusAL.of(context).weightLabel(''),
                       style: TextStyle(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.bold,
@@ -97,7 +98,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                               },
                             );
                           },
-                          child: const Text("管理"),
+                          child: Text(CusAL.of(context).manageLabel),
                         ),
                         SizedBox(width: 10.sp),
                         ElevatedButton(
@@ -123,7 +124,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                               },
                             );
                           },
-                          child: const Text("记录"),
+                          child: Text(CusAL.of(context).recordLabel),
                         ),
                       ],
                     )
@@ -183,29 +184,26 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                             },
                           );
                         },
-                        child: const Text("记录"),
+                        child: Text(CusAL.of(context).recordLabel),
                       ),
                     ],
                   ),
-                  _buildBmiArea(),
+                  _buildBmiArea(context),
                 ],
               ),
             ),
           ),
 
           /// 占位的
-          Container(
-            width: 50,
+          SizedBox(
             height: 30,
-            color: Colors.grey, // 默认灰色
-
             child: Row(
               children: [
-                Expanded(flex: 5, child: Container(color: Colors.grey)),
-                Expanded(flex: 5, child: Container(color: Colors.green)),
-                Expanded(flex: 5, child: Container(color: Colors.blue)),
-                Expanded(flex: 5, child: Container(color: Colors.yellow)),
-                Expanded(flex: 5, child: Container(color: Colors.red)),
+                Expanded(child: Container(color: Colors.grey)),
+                Expanded(child: Container(color: Colors.green)),
+                Expanded(child: Container(color: Colors.blue)),
+                Expanded(child: Container(color: Colors.yellow)),
+                Expanded(child: Container(color: Colors.red)),
               ],
             ),
           ),
@@ -215,7 +213,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
     );
   }
 
-  _buildBmiArea() {
+  _buildBmiArea(BuildContext context) {
     // 存的是kg
     var tempWeight = user.currentWeight ?? 0;
     // 存的是cm，所以要/100
@@ -228,6 +226,13 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
     ///   对应矩形长度：0-300.sp
     ///   然后每个范围显示不同的颜色，指针也是使用padding进行偏移描点。
     /// 改一个，全都乱，尤其是flex
+    /// 2023-12-18 几个区间用计算式
+    var uwtFlex = ((18.4 - 15) / (40 - 15) * 300).toInt();
+    var nwtFlex = ((23.9 - 18.4) / (40 - 15) * 300).toInt();
+    var owtFlex = ((28 - 23.9) / (40 - 15) * 300).toInt();
+    var fatFlex = ((35 - 28) / (40 - 15) * 300).toInt();
+    var obesityFlex = ((40 - 35) / (40 - 15) * 300).toInt();
+
     return SizedBox(
       width: 320.sp,
       child: Column(
@@ -240,7 +245,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                 bmi.toStringAsFixed(2),
                 style: TextStyle(fontSize: 20.sp),
               ),
-              buildWeightBmiText(bmi),
+              buildWeightBmiText(bmi, context),
             ],
           ),
           Padding(
@@ -261,35 +266,35 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
               child: Row(
                 children: [
                   Expanded(
-                    flex: ((18.4 - 15) / (40 - 15) * 300).toInt(),
+                    flex: uwtFlex,
                     child: Container(
                       color: Colors.grey,
                       child: const Text("<18.4", textAlign: TextAlign.end),
                     ),
                   ),
                   Expanded(
-                    flex: ((23.9 - 18.4) / (40 - 15) * 300).toInt(),
+                    flex: nwtFlex,
                     child: Container(
                       color: Colors.green,
                       child: const Text("<23.9", textAlign: TextAlign.end),
                     ),
                   ),
                   Expanded(
-                    flex: ((28 - 23.9) / (40 - 15) * 300).toInt(),
+                    flex: owtFlex,
                     child: Container(
                       color: Colors.blue,
                       child: const Text("<28", textAlign: TextAlign.end),
                     ),
                   ),
                   Expanded(
-                    flex: ((35 - 28) / (40 - 15) * 300).toInt(),
+                    flex: fatFlex,
                     child: Container(
                       color: Colors.yellow,
                       child: const Text("<35", textAlign: TextAlign.end),
                     ),
                   ),
                   Expanded(
-                    flex: ((40 - 35) / (40 - 15) * 300).toInt(),
+                    flex: obesityFlex,
                     child: Container(
                       color: Colors.red,
                       child: const Text("<40", textAlign: TextAlign.end),
@@ -304,13 +309,28 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
             child: SizedBox(
               height: 30.sp,
               width: 300.sp,
-              child: const Row(
+              child: Row(
                 children: [
-                  Expanded(flex: 41, child: Text("偏瘦")),
-                  Expanded(flex: 60, child: Text("正常")),
-                  Expanded(flex: 48, child: Text("超重")),
-                  Expanded(flex: 85, child: Text("肥胖")),
-                  Expanded(flex: 60, child: Text("过胖")),
+                  Expanded(
+                    flex: uwtFlex,
+                    child: Text(CusAL.of(context).bmiLabels('0')),
+                  ),
+                  Expanded(
+                    flex: nwtFlex,
+                    child: Text(CusAL.of(context).bmiLabels('1')),
+                  ),
+                  Expanded(
+                    flex: owtFlex,
+                    child: Text(CusAL.of(context).bmiLabels('2')),
+                  ),
+                  Expanded(
+                    flex: fatFlex,
+                    child: Text(CusAL.of(context).bmiLabels('3')),
+                  ),
+                  Expanded(
+                    flex: obesityFlex,
+                    child: Text(CusAL.of(context).bmiLabels('4')),
+                  ),
                 ],
               ),
             ),
@@ -337,7 +357,10 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                   Card(
                     child: Column(
                       children: [
-                        Text("体重(kg)", style: TextStyle(fontSize: 20.sp)),
+                        Text(
+                          CusAL.of(context).weightLabel('(kg)'),
+                          style: TextStyle(fontSize: 20.sp),
+                        ),
                         DecimalNumberPicker(
                           value: _currentWeight,
                           minValue: 10,
@@ -354,7 +377,10 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                     Card(
                       child: Column(
                         children: [
-                          Text("身高(cm)", style: TextStyle(fontSize: 20.sp)),
+                          Text(
+                            CusAL.of(context).weightLabel('(cm)'),
+                            style: TextStyle(fontSize: 20.sp),
+                          ),
                           DecimalNumberPicker(
                             value: _currentHeight,
                             minValue: 50,
@@ -399,7 +425,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                       if (!mounted) return;
                       Navigator.of(context).pop();
                     },
-                    child: const Text('保存'),
+                    child: Text(CusAL.of(context).saveLabel),
                   ),
                 ],
               ),
@@ -411,30 +437,30 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
   }
 }
 
-buildWeightBmiText(double bmi) {
+buildWeightBmiText(double bmi, BuildContext context) {
   if (bmi < 18.4) {
     return Text(
-      "偏瘦",
+      CusAL.of(context).bmiLabels("0"),
       style: TextStyle(color: Colors.grey, fontSize: 20.sp),
     );
   } else if (bmi < 23.9) {
     return Text(
-      "正常",
+      CusAL.of(context).bmiLabels("1"),
       style: TextStyle(color: Colors.green, fontSize: 20.sp),
     );
   } else if (bmi < 28) {
     return Text(
-      "超重",
+      CusAL.of(context).bmiLabels("2"),
       style: TextStyle(color: Colors.blue, fontSize: 20.sp),
     );
   } else if (bmi < 35) {
     return Text(
-      "肥胖",
+      CusAL.of(context).bmiLabels("3"),
       style: TextStyle(color: Colors.yellow, fontSize: 20.sp),
     );
   } else {
     return Text(
-      "过胖",
+      CusAL.of(context).bmiLabels("4"),
       style: TextStyle(color: Colors.red, fontSize: 20.sp),
     );
   }

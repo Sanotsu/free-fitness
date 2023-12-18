@@ -3,8 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
+import '../models/cus_app_localizations.dart';
 import '../views/diary/index_table_calendar.dart';
 import '../views/dietary/index.dart';
 import '../views/me/index.dart';
@@ -51,20 +50,20 @@ class _HomePageState extends State<HomePage> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: Text(AppLocalizations.of(context)!.closeLabel),
-              content: Text(AppLocalizations.of(context)!.appExitInfo),
+              title: Text(CusAL.of(context).closeLabel),
+              content: Text(CusAL.of(context).appExitInfo),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context, true);
                   },
-                  child: Text(AppLocalizations.of(context)!.confirmLabel),
+                  child: Text(CusAL.of(context).confirmLabel),
                 ),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pop(context, false);
                   },
-                  child: Text(AppLocalizations.of(context)!.cancelLabel),
+                  child: Text(CusAL.of(context).cancelLabel),
                 ),
               ],
             );
@@ -91,19 +90,19 @@ class _HomePageState extends State<HomePage> {
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: const Icon(Icons.fitness_center),
-              label: AppLocalizations.of(context)!.training,
+              label: CusAL.of(context).training,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.restaurant),
-              label: AppLocalizations.of(context)!.dietary,
+              label: CusAL.of(context).dietary,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.note),
-              label: AppLocalizations.of(context)!.diary,
+              label: CusAL.of(context).diary,
             ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.person),
-              label: AppLocalizations.of(context)!.me,
+              label: CusAL.of(context).me,
             ),
           ],
           currentIndex: _selectedIndex,

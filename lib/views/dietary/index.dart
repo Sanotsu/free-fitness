@@ -5,8 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../common/components/cus_cards.dart';
 import '../../common/global/constants.dart';
-import '../me/user_gallery/meal_photo_gallery.dart';
 import 'foods/index.dart';
+import 'meal_gallery/meal_photo_gallery.dart';
 import 'records/index.dart';
 import 'reports/index.dart';
 

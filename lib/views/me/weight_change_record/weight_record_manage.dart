@@ -3,8 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../common/global/constants.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/user_state.dart';
 
 class WeightRecordManage extends StatefulWidget {
@@ -26,6 +29,10 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
   int wtItemsNum = 0;
   List<bool> wtSelectedList = [false];
 
+  // 提供一个用户自定义的筛选范围(默认最近14天)
+  DateTime _startDate = DateTime.now().add(const Duration(days: -14));
+  DateTime _endDate = DateTime.now();
+
   @override
   void initState() {
     super.initState();
@@ -33,7 +40,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
     getWeightData();
   }
 
-  getWeightData({String? startDate, String? endDate}) async {
+  getWeightData() async {
     if (isLoading) return;
 
     setState(() {
@@ -42,8 +49,12 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
 
     var tempList = await _userHelper.queryWeightTrendByUser(
       userId: widget.user.userId,
-      startDate: startDate,
-      endDate: endDate,
+      startDate: formatDateToString(_startDate, formatter: constDatetimeFormat),
+      // 因为选择的日期范围不带时间，默认是结束日期的00:00:00,所以查询时加一天才能查询到包含结束日期的数据
+      endDate: formatDateToString(
+        _endDate.add(const Duration(days: 1)),
+        formatter: constDatetimeFormat,
+      ),
       gmtCreateSort: 'DESC',
     );
 
@@ -58,20 +69,52 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
     });
   }
 
+  Future<void> _selectDateRange() async {
+    final DateTimeRange? picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2010),
+      lastDate: DateTime(2030),
+      initialDateRange: DateTimeRange(
+        start: _startDate,
+        end: _endDate,
+      ),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _startDate = picked.start;
+        _endDate = picked.end;
+
+        getWeightData();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('WeightRecord'),
+        title: Text(CusAL.of(context).weightRecord),
       ),
       body: isLoading
           ? buildLoader(isLoading)
           : Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                const Text("这里应该预留一个日期范围选择的查询(todo)"),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Text(
+                      "${formatDateToString(_startDate)} ~ ${formatDateToString(_endDate)}",
+                    ),
+                    ElevatedButton(
+                      onPressed: _selectDateRange,
+                      child: Text(CusAL.of(context).selectDateRange),
+                    ),
+                  ],
+                ),
                 _buildRemoveButton(),
-                _buildExerciseDataTable(),
+                _buildExerciseDataTable(context),
               ],
             ),
     );
@@ -84,7 +127,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            "所有的体重记录如下:",
+            CusAL.of(context).allRecords,
             style: TextStyle(fontSize: 14.sp),
             textAlign: TextAlign.start,
           ),
@@ -94,20 +137,20 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
                 context: context,
                 builder: (context) {
                   return AlertDialog(
-                    title: const Text('删除确认'),
-                    content: const Text('确认删除选择的数据？'),
+                    title: Text(CusAL.of(context).deleteConfirm),
+                    content: Text(CusAL.of(context).deleteNote),
                     actions: [
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context, false);
                         },
-                        child: const Text('取消'),
+                        child: Text(CusAL.of(context).cancelLabel),
                       ),
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context, true);
                         },
-                        child: const Text('确认'),
+                        child: Text(CusAL.of(context).confirmLabel),
                       ),
                     ],
                   );
@@ -150,14 +193,17 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
                 );
               });
             },
-            child: Text("移除选中动作", style: TextStyle(fontSize: 14.sp)),
+            child: Text(
+              CusAL.of(context).removeSelected,
+              style: TextStyle(fontSize: 14.sp),
+            ),
           ),
         ],
       ),
     );
   }
 
-  _buildExerciseDataTable() {
+  _buildExerciseDataTable(BuildContext context) {
     return Expanded(
       child: SingleChildScrollView(
         child: DataTable(
@@ -166,13 +212,22 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
           headingRowHeight: 25, // 设置表头行高
           horizontalMargin: 10, // 设置水平边距
           columnSpacing: 5.sp, // 设置列间距
-          columns: const <DataColumn>[
+          columns: <DataColumn>[
             // DataColumn(label: Text('索引')),
             // 删除时查看是否删掉了
-            DataColumn(label: Text('编号'), numeric: true),
-            DataColumn(label: Text('测量时间'), numeric: true),
-            DataColumn(label: Text('体重(kg)'), numeric: true),
-            DataColumn(label: Text('bmi'), numeric: true),
+            DataColumn(
+              label: Text(CusAL.of(context).serialLabel),
+              numeric: true,
+            ),
+            DataColumn(
+              label: Text(CusAL.of(context).measuredTime),
+              numeric: true,
+            ),
+            DataColumn(
+              label: Text(CusAL.of(context).weightLabel("(kg)")),
+              numeric: true,
+            ),
+            const DataColumn(label: Text('BMI'), numeric: true),
           ],
           rows: List<DataRow>.generate(
             wtItemsNum,
@@ -228,7 +283,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
                   SizedBox(
                     width: 60.sp,
                     child: Text(
-                      weightTrends[index].weight.toStringAsFixed(2),
+                      cusDoubleTryToIntString(weightTrends[index].weight),
                       style: TextStyle(fontSize: 14.sp),
                       textAlign: TextAlign.end,
                     ),
