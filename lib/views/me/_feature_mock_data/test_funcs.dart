@@ -506,8 +506,9 @@ insertOneQuillDemo() async {
   var tempNum = Random().nextInt(5);
   var tempMoods = [];
   for (var i = 0; i < tempNum; i++) {
+    var mood = diaryMoodList[Random().nextInt(diaryMoodList.length)];
     tempMoods.add(
-      diaryMoodList[Random().nextInt(diaryMoodList.length)].cnLabel,
+      box.read('language') == "en" ? mood.enLabel : mood.cnLabel,
     );
   }
 
@@ -521,14 +522,15 @@ insertOneQuillDemo() async {
   // 随机插入的手记在今天往前10天的随机一天中
   var dates = getAdjacentDatesInRange(10);
 
+  var cate = diaryCategoryList[Random().nextInt(diaryCategoryList.length)];
+
   var tempDiary = Diary(
     date: dates[Random().nextInt(dates.length)],
     title: "测试-${generateRandomString(5, 10)}",
     content: jsonString,
     tags: tempTags.join(","),
     mood: tempMoods.join(","),
-    category:
-        diaryCategoryList[Random().nextInt(diaryCategoryList.length)].cnLabel,
+    category: box.read('language') == "en" ? cate.enLabel : cate.cnLabel,
     userId: Random().nextInt(3) + 1,
     gmtCreate: getCurrentDateTime(),
   );

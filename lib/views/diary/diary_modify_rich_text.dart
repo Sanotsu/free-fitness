@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -98,6 +96,10 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
     quillFocusNode.dispose();
     tagTextFocusNode.dispose();
     titleTextFocusNode.dispose();
+    _tagTextController.dispose();
+    _titleTextController.dispose();
+    _scrollController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -161,21 +163,9 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
       );
     }
 
-    print("点击了保存按钮--------------数据分别为:");
-    print("tags----------$initTags");
-    print("initMood----------$initCategory");
-    print("initCategorys----------$initMoods");
-    print("富文本的内容toPlainText----------${_controller.document.toPlainText()}");
-
     var delta = _controller.document.toDelta();
-    print("富文本的内容toDelta----------${_controller.document.toDelta()}");
-
     final rawJson = delta.toJson();
     String jsonString = json.encode(rawJson);
-
-    print("富文本的内容 rawJson---------$rawJson");
-    print("富文本的内容 jsonString---------$jsonString");
-    print("题目 initTitle---------$initTitle");
 
     var tempDiary = Diary(
       date: getCurrentDate(),
@@ -188,34 +178,43 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
       userId: CacheUser.userId,
     );
 
-    // ？？？这里应该有错误检查
-    // 如果是新增
-    if (initDiaryId == null) {
-      print("新增手记-------$initDiaryId");
+    try {
+      // ？？？这里应该有错误检查
+      // 如果是新增
+      if (initDiaryId == null) {
+        tempDiary.gmtCreate = getCurrentDateTime();
+        var newDiaryId = await _dbHelper.insertDiary(tempDiary);
 
-      tempDiary.gmtCreate = getCurrentDateTime();
-      var newDiaryId = await _dbHelper.insertDiary(tempDiary);
+        setState(() {
+          initDiaryId = newDiaryId;
+        });
+      } else {
+        // 如果是修改
+        tempDiary.diaryId = initDiaryId;
+        tempDiary.gmtCreate = widget.diaryItem?.gmtCreate;
+        tempDiary.gmtModified = getCurrentDateTime();
+        await _dbHelper.updateDiary(tempDiary);
+      }
 
       setState(() {
-        initDiaryId = newDiaryId;
+        isEditing = !isEditing;
+        isQuillToolbarExpanded = false;
+        // ？？？应该是取上面新增或保存时的时间，但者差距不大，先这样
+        lastSavedTime = getCurrentDateTime();
       });
-    } else {
-      print("修改手记-------$initDiaryId");
+    } catch (e) {
+      // 弹出报错提示框
+      if (!mounted) return;
 
-      // 如果是修改
-      tempDiary.diaryId = initDiaryId;
-      tempDiary.gmtModified = getCurrentDateTime();
-      await _dbHelper.updateDiary(tempDiary);
+      commonExceptionDialog(
+        context,
+        CusAL.of(context).exceptionWarningTitle,
+        e.toString(),
+      );
+
+      // 中止操作
+      return;
     }
-
-    print("initDiaryId---$initDiaryId");
-
-    setState(() {
-      isEditing = !isEditing;
-      isQuillToolbarExpanded = false;
-      // ？？？应该是取上面新增或保存时的时间，但者差距不大，先这样
-      lastSavedTime = getCurrentDateTime();
-    });
   }
 
   @override
@@ -224,7 +223,6 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
       // 点击返回键时暂停返回
       canPop: false,
       onPopInvoked: (didPop) async {
-        print("didPop-----------$didPop");
         if (didPop) {
           return;
         }
@@ -325,7 +323,6 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                     // 正常来讲这个查询有结果就是一个数据的数组，在helper的时候就这样判断？
                     var temp = await _dbHelper.queryDiaryById(initDiaryId!);
 
-                    print("temp  --${temp.first}");
                     // 能查到结果，将其数据格式化显示
                     if (temp.isNotEmpty) {
                       setState(() {

@@ -178,6 +178,7 @@ class DBDiaryHelper {
 
   // 关键字模糊查询基础活动
   Future<CusDataResult> queryDiaryByKeyword({
+    required int userId,
     required String keyword,
     required int pageSize, // 一次查询条数显示
     required int page, // 一次查询的偏移量，用于分页
@@ -190,8 +191,9 @@ class DBDiaryHelper {
       // 查询指定关键字当前页的数据
       List<Map<String, dynamic>> maps = await db.query(
         DiaryDdl.tableNameOfDiary,
-        where: 'title LIKE ? OR content LIKE ? LIMIT ? OFFSET ?',
-        whereArgs: ['%$keyword%', '%$keyword%', pageSize, offset],
+        where:
+            '(title LIKE ? OR content LIKE ?) AND user_id = ? LIMIT ? OFFSET ?',
+        whereArgs: ['%$keyword%', '%$keyword%', userId, pageSize, offset],
       );
       final list = maps.map((row) => Diary.fromMap(row)).toList();
 
@@ -199,8 +201,8 @@ class DBDiaryHelper {
       int? totalCount = Sqflite.firstIntValue(
         await db.rawQuery(
           'SELECT COUNT(*) FROM ${DiaryDdl.tableNameOfDiary} '
-          'WHERE title LIKE ? OR content LIKE ?',
-          ['%$keyword%', '%$keyword%'],
+          'WHERE (title LIKE ? OR content LIKE ?) AND user_id = ?',
+          ['%$keyword%', '%$keyword%', userId],
         ),
       );
 
@@ -214,7 +216,8 @@ class DBDiaryHelper {
   }
 
   // 按日期范围查询(查询某一天也要起止为同一个即可)，查询所有
-  Future<List<Diary>> queryDiaryByDateRange({
+  Future<List<Diary>> queryDiaryByDateRange(
+    int userId, {
     String? startDate,
     String? endDate,
   }) async {
@@ -222,6 +225,9 @@ class DBDiaryHelper {
 
     final where = <String>[];
     final whereArgs = <dynamic>[];
+
+    where.add('user_id = ?');
+    whereArgs.add(userId);
 
     if (startDate != null) {
       where.add('date >= ?');

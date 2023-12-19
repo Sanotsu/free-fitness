@@ -22,20 +22,20 @@ class IndexTimeline extends StatefulWidget {
 class _IndexTimelineState extends State<IndexTimeline> {
   final DBDiaryHelper _dbHelper = DBDiaryHelper();
 
-  // final _queryFormKey = GlobalKey<FormBuilderState>();
-
-  // 展示训练列表(训练列表一次性查询所有，应该不会太多)
+  // 展示手记列表(手记一次性10条，上滑加载更多)
   List<Diary> diaryList = [];
-  // 数据库中符合条件的锻炼一共有多少
+  // 数据库中符合条件的手记一共有多少
   int diaryCount = 0;
 
-  // 可以筛选训练，条件用个map来存，初始化一个空map
-  Map<String, dynamic> conditionMap = {};
   int currentPage = 1; // 数据库查询的时候会从0开始offset
   int pageSize = 10;
   bool isLoading = false;
 
   ScrollController scrollController = ScrollController();
+
+  // 手记关键字查询
+  TextEditingController searchController = TextEditingController();
+  String query = '';
 
   // 时间线连接线的颜色
   Color borderColor = const Color.fromARGB(255, 112, 78, 78).withOpacity(0.5);
@@ -52,6 +52,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
   void dispose() {
     scrollController.removeListener(_scrollListener);
     scrollController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
@@ -77,32 +78,22 @@ class _IndexTimelineState extends State<IndexTimeline> {
       isLoading = true;
     });
 
-    // 等待查询结果
-    CusDataResult temp;
-    if (conditionMap.isEmpty) {
-      temp = await _dbHelper.queryDiaryByKeyword(
-        pageSize: pageSize,
-        page: currentPage,
-        keyword: "",
-      );
-    } else {
-      // ？？？处理条件，使用条件查询
-      temp = await _dbHelper.queryDiaryByKeyword(
-        pageSize: pageSize,
-        page: currentPage,
-        keyword: "",
-      );
-    }
+    // 等待查询结果，处理条件，使用条件查询
+    CusDataResult temp = await _dbHelper.queryDiaryByKeyword(
+      userId: CacheUser.userId,
+      pageSize: pageSize,
+      page: currentPage,
+      keyword: query,
+    );
 
     List<Diary> newData = temp.data as List<Diary>;
 
-    // 如果没有更多数据，则在底部显示
+    // 如果没有更多数据，则在底部显示回弹
     if (newData.isEmpty) {
-      // 显示 "没有更多" 的信息
       if (!mounted) return;
       scrollController.animateTo(
         scrollController.position.pixels, // 回弹的距离
-        duration: const Duration(milliseconds: 1000), // 动画持续300毫秒
+        duration: const Duration(milliseconds: 300), // 动画持续300毫秒
         curve: Curves.easeOut,
       );
     }
@@ -115,16 +106,41 @@ class _IndexTimelineState extends State<IndexTimeline> {
       currentPage++;
       // 重置状态为查询完成
       isLoading = false;
-
-      print("diaryList---$diaryList");
     });
+  }
+
+  /// 处理点击了搜索按钮
+  _handleSearch() {
+    // 取消键盘输入框聚焦
+    FocusScope.of(context).unfocus();
+    setState(() {
+      diaryList.clear();
+      currentPage = 1;
+      query = searchController.text;
+    });
+    loadMoreDiary();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(CusAL.of(context).diaryLables("1")),
+        title: RichText(
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: CusAL.of(context).diaryLables("1"),
+                style: TextStyle(fontSize: 18.sp),
+              ),
+              TextSpan(
+                text: "\n${CusAL.of(context).itemCount(diaryCount)}",
+                style: TextStyle(fontSize: 12.sp),
+              ),
+            ],
+          ),
+        ),
       ),
 
       // 设置整个背景色为渐变色
@@ -148,7 +164,44 @@ class _IndexTimelineState extends State<IndexTimeline> {
       //     ],
       //   ),
       // ),
-      body: _buildListArea(),
+      body: Padding(
+        padding: EdgeInsets.all(8.sp),
+        child: Column(
+          children: [
+            /// 搜索区域
+            _buildSearchRowArea(),
+            SizedBox(height: 5.sp),
+
+            /// 食物列表区域
+            Expanded(child: _buildListArea()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 查询条件输入行
+  _buildSearchRowArea() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10.sp),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                hintText: CusAL.of(context).queryKeywordHintText(
+                  CusAL.of(context).diary,
+                ),
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: _handleSearch,
+            child: Text(CusAL.of(context).searchLabel),
+          ),
+        ],
+      ),
     );
   }
 

@@ -16,7 +16,7 @@ class DiaryDdl {
       category      TEXT,
       mood          TEXT,
       photos        TEXT,
-      userId        INTEGER,
+      user_id       INTEGER,
       gmt_create    TEXT,
       gmt_modified  TEXT
     );

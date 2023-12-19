@@ -75,11 +75,11 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
 
     // 必须查询所有数据，否则表格日历中，比如给每个有手记的日期标识maker就做不到
     List<Diary> temp = await _dbHelper.queryDiaryByDateRange(
+      CacheUser.userId,
       startDate: startDate,
       endDate: endDate,
     );
 
-    print("1111当前日期查询的手记数据 _selectedDay :$_selectedDay temp $temp");
     setState(() {
       diaryList = temp;
       // 初始化时设定当前选中的日期就是聚焦的日期
@@ -113,10 +113,9 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
     _selectedEvents.value = _getDiarysForADay(selectedDay);
   }
 
-  // 当某个日期被长按
+  // 当某个日期被长按可以新增备注？？？
   _onDayLongPressed(DateTime selectedDay, DateTime focusedDay) {
     print("日期被长按了---$selectedDay --$focusedDay");
-    // 长按某一天，可以新增备注？？？
   }
 
   // 当日期范围被选中时

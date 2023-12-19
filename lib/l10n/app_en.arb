@@ -119,6 +119,7 @@
   "recordLabel":"Record",
   "manageLabel":"Manage",
   "removeSelected": "Remove Selected",
+  "searchLabel":"Search",
 
 
   "alertTitle": "Alert",
@@ -135,6 +136,9 @@
   "serialLabel":"No.",
   "measuredTime":"Measured Time",
   "selectDateRange": "Change Range",
+
+  "queryKeywordHintText": "Please enter {key} keywords",
+
 
   "heightLabel":"Height{unit}",
   "weightLabel":"Weight{unit}",

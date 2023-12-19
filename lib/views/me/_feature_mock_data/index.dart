@@ -129,11 +129,13 @@ class _FeatureMockDemoState extends State<FeatureMockDemo> {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      await insertOneQuillDemo();
+                      for (var i = 0; i < 10; i++) {
+                        await insertOneQuillDemo();
+                      }
                       if (!mounted) return;
-                      _showSimpleDialog(context, "已新增一篇【手记】示例");
+                      _showSimpleDialog(context, "已新增10篇【手记】示例");
                     },
-                    child: const Text("新增一篇手记"),
+                    child: const Text("新增10篇手记"),
                   ),
                   ElevatedButton(
                     onPressed: () async {
@@ -179,7 +181,9 @@ class _FeatureMockDemoState extends State<FeatureMockDemo> {
                 onPressed: () async {
                   await insertDailyLogDataDemo(7, 30, 7);
                   await insertOneRandomPlanHasGroup();
-                  await insertOneQuillDemo();
+                  for (var i = 0; i < 10; i++) {
+                    await insertOneQuillDemo();
+                  }
                   await insertExtraUsers();
                   await insertBMIDemo();
                   await insertTrainingLogDemo();

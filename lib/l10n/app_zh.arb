@@ -120,6 +120,8 @@
     "recordLabel":"记录",
     "manageLabel":"管理",
     "removeSelected": "移除选中动作",
+    "searchLabel":"搜索",
+
   
     "alertTitle": "提示",
 
@@ -134,6 +136,8 @@
     "serialLabel":"序号",
     "measuredTime":"测量时间",
     "selectDateRange": "选择范围",
+
+    "queryKeywordHintText": "请输入{key}关键字",
 
     
     "heightLabel":"身高{unit}",

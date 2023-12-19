@@ -28,7 +28,7 @@ class Diary {
       "category": category,
       "mood": mood,
       "photos": photos,
-      "userId": userId,
+      "user_id": userId,
       "gmt_create": gmtCreate,
       "gmt_modified": gmtModified,
     };
