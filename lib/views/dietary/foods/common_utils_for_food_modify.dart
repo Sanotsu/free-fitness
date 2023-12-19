@@ -9,6 +9,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 
 ///
@@ -24,7 +25,7 @@ import '../../../models/dietary_state.dart';
 ///
 
 /// 构建食物的单份营养素使用formbuilder的表单栏位
-buildServingModifyFormColumn(CusLabel servingType) {
+buildServingModifyFormColumn(BuildContext context, CusLabel servingType) {
   return Column(
     children: [
       if (servingType.value == "metric")
@@ -44,11 +45,17 @@ buildServingModifyFormColumn(CusLabel servingType) {
             Flexible(
               child: FormBuilderTextField(
                 name: "serving_unit",
-                decoration: const InputDecoration(labelText: "*单位"),
+                decoration: InputDecoration(
+                  labelText: "*${CusAL.of(context).servingUnit}",
+                ),
                 // 2023-12-04 需要指定使用name，原本默认的.text会弹安全键盘，可能无法输入中文
                 keyboardType: TextInputType.name,
                 validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(errorText: "单位不可为空"),
+                  FormBuilderValidators.required(
+                    errorText: CusAL.of(context).requiredErrorText(
+                      CusAL.of(context).servingUnit,
+                    ),
+                  ),
                 ]),
               ),
             ),
@@ -58,10 +65,18 @@ buildServingModifyFormColumn(CusLabel servingType) {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Flexible(flex: 1, child: SizedBox()),
-            const Flexible(flex: 2, child: Text("等价度量值及单位")),
+            Flexible(
+              flex: 2,
+              child: Text(CusAL.of(context).servingEquivalence),
+            ),
             Flexible(
               flex: 1,
-              child: _cusTextField("metric_serving_size", "", suffix: ''),
+              child: _cusTextField(
+                context,
+                "metric_serving_size",
+                "",
+                suffix: '',
+              ),
             ),
             _buildUnitDropdown("metric_serving_unit"),
           ],
@@ -69,19 +84,90 @@ buildServingModifyFormColumn(CusLabel servingType) {
       ],
 
       // 食物的品牌和产品名称(没有对应数据库，没法更人性化的筛选，都是用户输入)
-      _cusTextField("energy", "*能量", suffix: "千焦", errorText: '能量不可为空'),
-      _cusTextField("protein", "*蛋白质", errorText: '蛋白质不可为空'),
-      _cusTextField("total_fat", "*脂肪", errorText: '脂肪不可为空'),
-      _cusSubTextFieldRow("saturated_fat", "饱和脂肪"),
-      _cusSubTextFieldRow("trans_fat", "反式脂肪"),
-      _cusSubTextFieldRow("polyunsaturated_fat", "多不饱和脂肪"),
-      _cusSubTextFieldRow("monounsaturated_fat", "单不饱和脂肪"),
-      _cusTextField("total_carbohydrate", "*总碳水化合物", errorText: '总碳水化合物不可为空'),
-      _cusSubTextFieldRow("sugar", "糖"),
-      _cusSubTextFieldRow("dietary_fiber", "膳食纤维"),
-      _cusTextField("sodium", "*钠", suffix: '毫克', errorText: '钠不可为空'),
-      _cusTextField("potassium", "钾", suffix: '毫克'),
-      _cusTextField("cholesterol", "胆固醇", suffix: '毫克'),
+      _cusTextField(
+        context,
+        "energy",
+        "*${CusAL.of(context).mainNutrients('0')}",
+        suffix: CusAL.of(context).unitLabels('3'),
+        errorText: CusAL.of(context).requiredErrorText(
+          CusAL.of(context).mainNutrients('0'),
+        ),
+      ),
+      _cusTextField(
+        context,
+        "protein",
+        "*${CusAL.of(context).mainNutrients('2')}",
+        errorText: CusAL.of(context).requiredErrorText(
+          CusAL.of(context).mainNutrients('2'),
+        ),
+      ),
+      _cusTextField(
+        context,
+        "total_fat",
+        "*${CusAL.of(context).mainNutrients('3')}",
+        errorText: CusAL.of(context).requiredErrorText(
+          CusAL.of(context).mainNutrients('2'),
+        ),
+      ),
+      _cusSubTextFieldRow(
+        context,
+        "saturated_fat",
+        CusAL.of(context).fatNutrients('1'),
+      ),
+      _cusSubTextFieldRow(
+        context,
+        "trans_fat",
+        CusAL.of(context).fatNutrients('2'),
+      ),
+      _cusSubTextFieldRow(
+        context,
+        "polyunsaturated_fat",
+        CusAL.of(context).fatNutrients('3'),
+      ),
+      _cusSubTextFieldRow(
+        context,
+        "monounsaturated_fat",
+        CusAL.of(context).fatNutrients('4'),
+      ),
+      _cusTextField(
+        context,
+        "total_carbohydrate",
+        "*${CusAL.of(context).mainNutrients('4')}",
+        errorText: CusAL.of(context).requiredErrorText(
+          CusAL.of(context).mainNutrients('4'),
+        ),
+      ),
+      _cusSubTextFieldRow(
+        context,
+        "sugar",
+        CusAL.of(context).choNutrients('1'),
+      ),
+      _cusSubTextFieldRow(
+        context,
+        "dietary_fiber",
+        CusAL.of(context).choNutrients('2'),
+      ),
+      _cusTextField(
+        context,
+        "sodium",
+        "*${CusAL.of(context).microNutrients('0')}",
+        suffix: CusAL.of(context).unitLabels('1'),
+        errorText: CusAL.of(context).requiredErrorText(
+          CusAL.of(context).microNutrients('0'),
+        ),
+      ),
+      _cusTextField(
+        context,
+        "potassium",
+        CusAL.of(context).microNutrients('1'),
+        suffix: CusAL.of(context).unitLabels('1'),
+      ),
+      _cusTextField(
+        context,
+        "cholesterol",
+        CusAL.of(context).microNutrients('2'),
+        suffix: CusAL.of(context).unitLabels('2'),
+      ),
     ],
   );
 }
@@ -108,9 +194,10 @@ _buildUnitDropdown(String name) {
 
 // 这个修改的表单栏位，大部分都是文本输入框，且要求输入数字
 _cusTextField(
+  BuildContext context,
   String name,
   String labelText, {
-  String? suffix = "克",
+  String? suffix,
   String? errorText,
   String? initialValue,
   TextInputType? keyboardType,
@@ -120,7 +207,7 @@ _cusTextField(
     initialValue: initialValue,
     decoration: InputDecoration(
       labelText: labelText,
-      suffixText: suffix,
+      suffixText: suffix ?? CusAL.of(context).unitLabels('0'),
     ),
     // 正则来只允许输入数字和小数点
     inputFormatters: [
@@ -141,13 +228,13 @@ _cusTextField(
 }
 
 // 像脂肪还有细分像，是个row，前面有空白。单位都是克，只需要name和名称即可
-_cusSubTextFieldRow(String name, String labelText) {
+_cusSubTextFieldRow(BuildContext context, String name, String labelText) {
   return Row(
     children: [
       const Expanded(flex: 1, child: SizedBox()),
       Expanded(
         flex: 4,
-        child: _cusTextField(name, labelText),
+        child: _cusTextField(context, name, labelText),
       ),
     ],
   );
@@ -155,44 +242,59 @@ _cusSubTextFieldRow(String name, String labelText) {
 
 /// 修改食物基本信息时表单所需栏位
 /// 新增的时候还有标准单份和客制化单份单选框等其他内容，所以这里只是column的值
-buildFoodModifyFormColumns({List<PlatformFile>? initImages}) {
+buildFoodModifyFormColumns(BuildContext context,
+    {List<PlatformFile>? initImages}) {
   return [
     // 食物的品牌和产品名称(没有对应数据库，没法更人性化的筛选，都是用户输入)
     cusFormBuilerTextField(
-      "brand",
-      labelText: '*食物品牌',
-      validator: FormBuilderValidators.compose([
-        FormBuilderValidators.required(errorText: '品牌不可为空'),
-      ]),
-    ),
-    cusFormBuilerTextField(
       "product",
-      labelText: '*产品名称',
+      labelText: '*${CusAL.of(context).foodLabels("0")}',
       validator: FormBuilderValidators.compose([
         FormBuilderValidators.required(errorText: '名称不可为空'),
       ]),
     ),
-    cusFormBuilerTextField("description", maxLines: 4, labelText: '简述'),
-    cusFormBuilerTextField("tags", labelText: '标签'),
-    cusFormBuilerTextField("category", labelText: '分类'),
+    cusFormBuilerTextField(
+      "brand",
+      labelText: '*${CusAL.of(context).foodLabels("1")}',
+      validator: FormBuilderValidators.compose([
+        FormBuilderValidators.required(
+          errorText: CusAL.of(context).requiredErrorText(
+            CusAL.of(context).foodLabels("1"),
+          ),
+        ),
+      ]),
+    ),
+    cusFormBuilerTextField(
+      "tags",
+      labelText: CusAL.of(context).foodLabels("2"),
+    ),
+    cusFormBuilerTextField(
+      "category",
+      labelText: CusAL.of(context).foodLabels("3"),
+    ),
+    cusFormBuilerTextField(
+      "description",
+      maxLines: 4,
+      labelText: CusAL.of(context).foodLabels("4"),
+    ),
 
     const SizedBox(height: 10),
     // 上传活动示例图片（静态图或者gif）
     FormBuilderFilePicker(
       name: 'images',
-      decoration: const InputDecoration(labelText: '演示图片'),
+      decoration: InputDecoration(labelText: CusAL.of(context).foodLabels("5")),
       initialValue: initImages,
       maxFiles: null,
       allowMultiple: true,
       previewImages: true,
       onChanged: (val) => debugPrint(val.toString()),
-      typeSelectors: const [
+      typeSelectors: [
         TypeSelector(
           type: FileType.image,
           selector: Row(
             children: <Widget>[
-              Icon(Icons.file_upload),
-              Text('图片上传'),
+              const Icon(Icons.file_upload),
+              Text(CusAL.of(context).imageUploadLabel),
             ],
           ),
         )
@@ -214,6 +316,8 @@ List<ServingInfo> parseServingInfo(
   String servingType, {
   // 如果有传食物，说明是给已有的食物添加新的单份营养素信息，则修改其对应食物编号
   int? foodId,
+  // 2023-12-19 如果有传单份营养素编号，说明是修改单份营养素，不额外增加其他单份数据
+  int? servingInfoId,
 }) {
   // 创建单份营养素实例
   ServingInfo createServingInfo(double multiplier, int size, String unit) {
@@ -294,6 +398,11 @@ List<ServingInfo> parseServingInfo(
 
   servingList.add(createServingInfo(1.0, inputSize, inputUnit));
 
+  // 2023-12-19 如果有单份营养素信息，则不需要1ml/g的值
+  if (servingInfoId != null) {
+    return servingList;
+  }
+
   // 如果是标准的，还需要保留1ml/g的值(标准度量为100ml/g，单个ml/g的营养素比例就是其0.01)
   if (servingType == 'metric') {
     servingList.add(createServingInfo(0.01, 1, "1$originUnit"));
@@ -310,8 +419,6 @@ List<ServingInfo> parseServingInfo(
   //     servingList.add(createServingInfo(tempMultiplier, 1, "1$tempUnit"));
   //   }
   // }
-
-  print("食物新增时处理后的营养素信息servingList $servingList");
 
   return servingList;
 }

@@ -164,18 +164,15 @@ class _IndexTimelineState extends State<IndexTimeline> {
       //     ],
       //   ),
       // ),
-      body: Padding(
-        padding: EdgeInsets.all(8.sp),
-        child: Column(
-          children: [
-            /// 搜索区域
-            _buildSearchRowArea(),
-            SizedBox(height: 5.sp),
+      body: Column(
+        children: [
+          /// 搜索区域
+          _buildSearchRowArea(),
+          SizedBox(height: 5.sp),
 
-            /// 食物列表区域
-            Expanded(child: _buildListArea()),
-          ],
-        ),
+          /// 食物列表区域
+          Expanded(child: _buildListArea()),
+        ],
       ),
     );
   }
@@ -219,12 +216,12 @@ class _IndexTimelineState extends State<IndexTimeline> {
 
           return TimelineTile(
             alignment: TimelineAlign.manual,
-            lineXY: 0.3,
+            lineXY: 0.32,
             isFirst: index == 0,
             isLast: index == diaryList.length - 1,
             indicatorStyle: IndicatorStyle(
-              width: 50,
-              height: 50,
+              width: 65,
+              height: 40,
               indicator: _CusIndicator(
                 category: '${diaryItem.category}',
                 borderColor: borderColor,
@@ -293,7 +290,15 @@ class _IndexTimelineState extends State<IndexTimeline> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Expanded(flex: 4, child: Text(diaryItem.title)),
+                  Expanded(
+                      flex: 4,
+                      child: Text(
+                        diaryItem.title,
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )),
                   Expanded(
                     flex: 1,
                     child: Icon(
@@ -311,7 +316,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
                 // 子组件纵向的间距
                 runSpacing: 5,
                 // 排布方向
-                alignment: WrapAlignment.spaceAround,
+                alignment: WrapAlignment.start,
                 children: [
                   // 先排除原本就是空字符串之后再分割
                   ...((diaryItem.mood != null &&
@@ -369,7 +374,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
             return AlertDialog(
               title: Text(CusAL.of(context).deleteConfirm),
               content: Text(
-                CusAL.of(context).deleteNote(diaryItem.title),
+                CusAL.of(context).deleteNote('\n${diaryItem.title}'),
               ),
               actions: [
                 TextButton(
@@ -429,10 +434,11 @@ class _CusIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
+        shape: BoxShape.rectangle,
         border: Border.fromBorderSide(
           BorderSide(color: Colors.green, width: 4.sp),
         ),
+        borderRadius: BorderRadius.all(Radius.circular(20.sp)),
       ),
       child: Center(
         // child: buildSmallButtonTag(
@@ -442,7 +448,7 @@ class _CusIndicator extends StatelessWidget {
         // ),
         child: Text(
           category,
-          style: TextStyle(fontSize: 14.sp),
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
         ),
       ),
     );

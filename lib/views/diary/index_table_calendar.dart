@@ -391,7 +391,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                       return AlertDialog(
                         title: Text(CusAL.of(context).deleteConfirm),
                         content: Text(
-                          CusAL.of(context).deleteNote(diary.title),
+                          CusAL.of(context).deleteNote('\n${diary.title}'),
                         ),
                         actions: [
                           TextButton(

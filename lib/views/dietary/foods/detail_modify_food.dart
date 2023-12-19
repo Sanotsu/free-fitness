@@ -9,6 +9,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 import 'common_utils_for_food_modify.dart';
 
@@ -86,10 +87,14 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
         // 或者显示一个SnackBar
         var errorMessage = "数据插入数据库失败,可能该产品已存在";
 
+        if (!mounted) return;
         if (e is DatabaseException) {
           /// 它默认有判断是否是哪种错误，常见的唯一值重复还可以指定检查哪个栏位重复。
           if (e.isUniqueConstraintError()) {
-            errorMessage = '该【食物品牌】+【产品名称】已存在！';
+            // errorMessage = '该【食物品牌】+【产品名称】已存在！';
+            errorMessage = CusAL.of(context).uniqueErrorText(
+              "${CusAL.of(context).foodLabels('0')}(${CusAL.of(context).foodLabels('1')})",
+            );
           }
         }
 
@@ -99,7 +104,7 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
       }
     } else {
       if (!mounted) return;
-      showErrorMessage(context, "表单验证未通过！");
+      showErrorMessage(context, CusAL.of(context).invalidFormErrorText);
     }
   }
 
@@ -117,7 +122,9 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('食物基本信息修改'),
+        title: Text(
+          CusAL.of(context).eidtLabel(CusAL.of(context).foodBasicInfo),
+        ),
       ),
       body: _buildFoodForm(),
     );
@@ -133,7 +140,10 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
               key: _foodFormKey,
               child: Column(
                 children: [
-                  ...buildFoodModifyFormColumns(initImages: initImages),
+                  ...buildFoodModifyFormColumns(
+                    context,
+                    initImages: initImages,
+                  ),
                 ],
               ),
             ),
@@ -150,7 +160,7 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
                   onPressed: () {
                     Navigator.pop(context, false);
                   },
-                  child: const Text("取消"),
+                  child: Text(CusAL.of(context).cancelLabel),
                 ),
               ),
               // 两个按钮之间的占位空白
@@ -159,7 +169,7 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
                 flex: 4,
                 child: ElevatedButton(
                   onPressed: _updateFoodInfo,
-                  child: const Text("确定"),
+                  child: Text(CusAL.of(context).confirmLabel),
                 ),
               ),
             ],

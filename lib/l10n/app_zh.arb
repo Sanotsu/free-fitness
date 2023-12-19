@@ -83,6 +83,42 @@
     "itemCount": "共 {count} 条",
 
     "dietary":"饮食",
+    "dietaryReports":"饮食报告",
+    "foodCompo":"食物成分",
+    "foodCompoSubtitle": "常见食物营养成分标准",
+    "dietaryRecords":"饮食日记",
+    "dietaryRecordsSubtitle":"每日饮食记录数据管理",
+    "mealGallery":"餐食相册",
+    "mealGallerySubtitle":"浏览已有餐点食物照片",
+    
+    "food":"食物",
+    "notFound":"找不到?",
+    "foodName":"食物名称",
+    "foodDetail":"食物详情",
+    "foodBasicInfo":"食物基本信息",
+    "foodNutrientInfo":"食物单份营养素信息",
+    "servingUnit":"单份单位",
+    "servingEquivalence":"等价度量值及单位",
+    "nutrientLabel":"营养成分",
+
+
+    "foodTableMainLabels": "{num, select, 0{单份} 1{能量(大卡)} 2{蛋白质(克)} 3{脂肪(克)} 4{碳水(克)} 5{微量元素(毫克)} other{其他} }",
+    "@foodTableMainLabels": {
+    "description": "表格展示营养素的主要栏位"
+    },
+
+    "foodLabels": "{num, select, 0{名称} 1{品牌} 2{标签} 3{分类} 4{概述} 5{图片} 6{代号} other{Other} }",
+    "@foodLabels": {
+    "description": "表格展示营养素的主要栏位"
+    },
+
+    "foodImport":"导入食物JSON数据",
+    "importFinished":"数据已经插入数据库",
+    "uploadingItem":"待上传的动作信息概述如下",
+    "jsonFiles":"json文件列表:",
+    "foodLabelNote":"从左到右为: 索引-代号-名称-能量(大卡)",
+
+
     "diary":"手记",
     "me":"我的",
     "closeLabel":"关闭",
@@ -114,14 +150,19 @@
     "lessLabel":"收起",
     "enterLabel":"进入",
     "skipLabel":"下一步",
+    "backLabel":"返回",
     "saveLabel":"保存",
     "eidtLabel":"修改{name}",
     "addLabel":"新增{name}",
+    "deleteLabel":"删除",
     "recordLabel":"记录",
     "manageLabel":"管理",
-    "removeSelected": "移除选中动作",
+    "removeSelected": "移除选中项次",
     "searchLabel":"搜索",
+    "optionsLabel":"选项",
+    "imageUploadLabel":"图片上传",
 
+    "tipLabel":"提示",
   
     "alertTitle": "提示",
 
@@ -146,7 +187,7 @@
     "genderLabel":"请选择性别",
     "exceptionWarningTitle":"异常提醒",
     "deleteConfirm":"删除确认",
-    "deleteNote":"确认删除选择的数据{data}？",
+    "deleteNote":"确认删除选择的数据?{data}",
     "deletedInfo":"该项次已被删除",
     "initInfo":"初次使用，可以提供一些信息方便称呼\n可以跳过，使用可随时修改的预设数据",
     "moreSettings":"更多设置",
@@ -157,6 +198,14 @@
     "lightMode":"浅色模式",
     "settingLabels": "{ setting, select, 0{基本信息} 1{体重趋势} 2{摄入目标} 3{运动设置} 4{备份恢复} 5{更多设置} other{未知设置} }",
 
+    
+
+    "importJsonError":"导入json文件出错",
+    "importJsonErrorText":"文件名称:\n{path}\n\n错误信息:\n{msg}",
+
+    "invalidFormErrorText":"表单验证未通过",
+    "uniqueErrorText":"{text}已存在",
+    "noStorageErrorText":"用户已禁止访问内部存储,无法进行json文件导入。",
     "requiredErrorText":"{text}不可为空"
     
     

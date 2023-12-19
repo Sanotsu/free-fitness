@@ -304,6 +304,14 @@ class DBDietaryHelper {
     }
   }
 
+  Future<int> updateSingleServingInfo(ServingInfo servingInfo) async =>
+      await (await database).update(
+        DietaryDdl.tableNameOfServingInfo,
+        servingInfo.toMap(),
+        where: 'serving_info_id = ?',
+        whereArgs: [servingInfo.servingInfoId],
+      );
+
   // 删除单条数据
   Future<dynamic> deleteFoodWithServingInfo(int foodId) async {
     final db = await database;

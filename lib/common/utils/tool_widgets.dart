@@ -5,6 +5,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:math' as math;
 
+import '../../models/cus_app_localizations.dart';
 import '../global/constants.dart';
 
 //  hexadecimal color code 转为 material color
@@ -231,7 +232,7 @@ commonExceptionDialog(BuildContext context, String title, String message) {
             onPressed: () {
               Navigator.pop(context);
             },
-            child: const Text('确认'),
+            child: Text(CusAL.of(context).confirmLabel),
           ),
         ],
       );

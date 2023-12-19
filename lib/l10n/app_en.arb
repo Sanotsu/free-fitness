@@ -5,11 +5,11 @@
   "@mainNutrients": {
   "description": "主要营养素标签"
   },
-  "fatNutrients": "{num, select, 0{Fat} 1{SaturatedFat} 2{TransFat} 3{puFat} 4{muFat} other{Other} }",
+  "fatNutrients": "{num, select, 0{TotalFat} 1{SaturatedFat} 2{TransFat} 3{puFat} 4{muFat} other{Other} }",
   "@fatNutrients": {
   "description": "脂肪相关营养素标签"
   },
-  "choNutrients": "{num, select, 0{CHO} 1{Sugar} 2{DietaryFiber} other{Other} }",
+  "choNutrients": "{num, select, 0{TotalCHO} 1{Sugar} 2{DietaryFiber} other{Other} }",
   "@choNutrients": {
   "description": "碳水相关营养素标签"
   },
@@ -81,6 +81,45 @@
   "itemCount": "{count} in total",
 
   "dietary":"Dietary",
+  "dietaryReports":"Dietary Reports",
+  "foodCompo":"Food Composition",
+  "foodCompoSubtitle": "Nutritional composition",
+  "dietaryRecords":"Dietary Records",
+  "dietaryRecordsSubtitle":"Daily dietary records",
+  "mealGallery":"Meal Gallery",
+  "mealGallerySubtitle":"View daily meal photos",
+
+  "food":"Foods",
+  "notFound":"NotFound?",
+  "foodName":"Name",
+  "foodDetail":"Food Detail",
+  "foodBasicInfo":"Food Basic Info",
+  "foodNutrientInfo":"Food Nutrient Info",
+  "servingUnit":"Serving Unit",
+  "servingEquivalence":"Equivalence Unit",
+  "nutrientLabel":"Nutrients",
+
+
+  "foodTableMainLabels": "{num, select, 0{Unit} 1{Energy(kcal)} 2{Protein(g)} 3{Fat(g)} 4{CHO(g)} 5{Micronutrient(mg)} other{Other} }",
+  "@foodTableMainLabels": {
+  "description": "表格展示营养素的主要栏位"
+  },
+
+  "foodLabels": "{num, select, 0{Product} 1{Brand}  2{Tags} 3{Category} 4{Description} 5{Images} 6{Code} other{Other} }",
+  "@foodLabels": {
+  "description": "表格展示营养素的主要栏位"
+  },
+
+
+  "foodImport":"Import Food Json",
+  "importFinished":"Data has been inserted into the database",
+  "uploadingItem":"An overview of the items:",
+  "jsonFiles":"Json Files:",
+  "foodLabelNote":"LTR: index - code - name - energy(kcal)",
+
+  
+ 
+
   "diary":"Diary",
   "me":"Me",
   "closeLabel":"Close",
@@ -93,7 +132,7 @@
   "description": "手记显示模式"
   },
 
-  "calenderLables": "{num, select, 0{Month} 1{2 weeks} 2{Week} other{其他} }",
+  "calenderLables": "{num, select, 0{Month} 1{2 weeks} 2{Week} other{Other} }",
   "@calenderLables": {
   "description": "日历表格切换显示模式"
   },
@@ -113,14 +152,18 @@
   "lessLabel":"Less",
   "enterLabel":"Enter",
   "skipLabel":"Next",
+  "backLabel":"Back",
   "saveLabel":"Save",
   "eidtLabel":"Edit {name}",
   "addLabel":"Add {name}",
+  "deleteLabel":"Delete",
   "recordLabel":"Record",
   "manageLabel":"Manage",
   "removeSelected": "Remove Selected",
   "searchLabel":"Search",
-
+  "optionsLabel":"Options",
+  "imageUploadLabel":"Image Upload",
+  "tipLabel":"Notification",
 
   "alertTitle": "Alert",
 
@@ -146,7 +189,7 @@
   "genderLabel":"please select your gender",
   "exceptionWarningTitle":"Exception Warning",
   "deleteConfirm":"Delete Confirm",
-  "deleteNote":"Are you sure to delete the selected data {data}?",
+  "deleteNote":"Are you sure to delete the selected data?{data}",
   "deletedInfo":"The item has been deleted.",
   "initInfo":"Could you please provide some basic info? \nOr just click 'Next' button to use default info.",
   "moreSettings":"More Settings",
@@ -157,6 +200,12 @@
   "lightMode":"Light Mode",
   "settingLabels": "{ setting, select, 0{Basic Info} 1{Weight Trend} 2{Intake Goal} 3{Training Setting} 4{Backup & Restore} 5{More Settings} other{Unknown Setting} }",
   
+  "importJsonError":"Import json file error",
+  "importJsonErrorText":"Filename:\n{path}\n\nError:\n{msg}",
+
+  "invalidFormErrorText":"Form validation failed",
+  "uniqueErrorText":"{text} already exists",
+  "noStorageErrorText":"The user has disabled access to internal storage and cannot import JSON files",
   "requiredErrorText":"{text} required"
 
 

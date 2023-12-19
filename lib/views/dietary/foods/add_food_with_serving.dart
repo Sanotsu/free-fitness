@@ -10,6 +10,7 @@ import 'package:free_fitness/common/utils/tools.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 import 'add_food_serving_info.dart';
 import 'common_utils_for_food_modify.dart';
@@ -127,7 +128,7 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
         var temp = nutrientList.where((e) => e.value == key).toList();
 
         if (temp.isNotEmpty) {
-          tempList.add('${temp[0].cnLabel}:$value');
+          tempList.add('${showCusLableMapLabel(context, temp[0])}:$value');
         }
       });
 
@@ -141,7 +142,7 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('新增食物'),
+        title: Text(CusAL.of(context).addLabel(CusAL.of(context).food)),
       ),
       body: _buildFoodForm(),
     );
@@ -158,7 +159,7 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
                 child: Column(
                   children: [
                     // 食物的品牌和产品名称(没有对应数据库，没法更人性化的筛选，都是用户输入)
-                    ...buildFoodModifyFormColumns(),
+                    ...buildFoodModifyFormColumns(context),
                     // 单份营养素类型
                     _buildServingTypeRadio(),
                     // 单份营养素数据简单显示
@@ -182,7 +183,7 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
                   onPressed: () {
                     Navigator.pop(context, {"isFoodModified": false});
                   },
-                  child: const Text("返回"),
+                  child: Text(CusAL.of(context).backLabel),
                 ),
               ),
               // 两个按钮之间的占位空白
@@ -191,7 +192,7 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
                 flex: 4,
                 child: ElevatedButton(
                   onPressed: _addFoodAndServingList,
-                  child: const Text("添加"),
+                  child: Text(CusAL.of(context).addLabel("")),
                 ),
               ),
             ],
@@ -204,13 +205,13 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
   // 构建单份营养素的类型单选框
   _buildServingTypeRadio() {
     return FormBuilderRadioGroup(
-      decoration: const InputDecoration(labelText: '营养成分'),
+      decoration: InputDecoration(labelText: CusAL.of(context).nutrientLabel),
       name: 'serving_info_type',
       validator: FormBuilderValidators.required(),
       options: servingTypeList
           .map(
             (servingType) => FormBuilderFieldOption(
-              value: servingType.cnLabel,
+              value: showCusLableMapLabel(context, servingType),
               // 当点击被选中的单选框的文本时，弹出的营养素表单才带有之前返回的数据
               // 单选框值变化后的弹窗，则是全新的表单
               child: GestureDetector(
@@ -218,7 +219,8 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
                   final currentValue = _foodFormKey
                       .currentState?.fields['serving_info_type']?.value;
 
-                  if (currentValue == servingType.cnLabel) {
+                  if (currentValue ==
+                      showCusLableMapLabel(context, servingType)) {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -230,7 +232,7 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
                     ).then(_handleServingFormCallback);
                   }
                 },
-                child: Text(servingType.cnLabel),
+                child: Text(showCusLableMapLabel(context, servingType)),
               ),
             ),
           )
@@ -240,7 +242,9 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
           // 有切换单份类型之后，先要把存的之前的单份营养素信息清空
           tempServingFormData = null;
           inputServingInfos = [];
-          servingType = servingTypeList.firstWhere((e) => e.cnLabel == value);
+          servingType = servingTypeList.firstWhere(
+            (e) => showCusLableMapLabel(context, e) == value,
+          );
         });
 
         Navigator.push(
@@ -257,6 +261,9 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
 
   // 单份营养素详情页面返回后的处理逻辑
   _handleServingFormCallback(value) {
+    // 从编辑单份营养素详情回来不要聚焦输入框
+    FocusScope.of(context).requestFocus(FocusNode());
+
     if (value != null) {
       // 此页面是新增食物带营养素，所以没有食物信息
       var servingList = parseServingInfo(
@@ -271,6 +278,11 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
         inputServingInfos = servingList;
       });
       _formatTempServingFormDate();
+    } else {
+      // 如果是空返回，则还是要清空旧的格式化数据
+      setState(() {
+        formattedTempServingFormData = "";
+      });
     }
   }
 }

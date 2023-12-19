@@ -469,7 +469,7 @@ List<CusLabel> servingTypeList = [
     value: "metric",
   ),
   CusLabel(
-    enLabel: "1 serving( e.g. 1 glass, 1 piece)",
+    enLabel: "1 serving( e.g. 1 piece)",
     cnLabel: "1 份(勺/杯/块 等)",
     value: "custom",
   ),

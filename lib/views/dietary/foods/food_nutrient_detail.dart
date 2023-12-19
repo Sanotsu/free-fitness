@@ -9,6 +9,7 @@ import '../../../common/components/dialog_widgets.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import 'detail_modify_food.dart';
 import 'detail_modify_serving_info.dart';
 
@@ -105,7 +106,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: const Text('食物详情'),
+          title: Text(CusAL.of(context).foodDetail),
           actions: [
             IconButton(
               onPressed: () {
@@ -133,7 +134,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
 
             /// 展示所有单份的数据，不用实时根据摄入数量修改值
             Text(
-              "食物单份营养素信息",
+              CusAL.of(context).foodNutrientInfo,
               style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
@@ -152,16 +153,16 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
                   if (servingSelectedList.where((e) => e == true).length == 1)
                     TextButton(
                       onPressed: clickServingInfoModify,
-                      child: const Text("修改"),
+                      child: Text(CusAL.of(context).eidtLabel("")),
                     ),
                   if (servingSelectedList.where((e) => e == true).isNotEmpty)
                     TextButton(
                       onPressed: clickServingInfoDelete,
-                      child: const Text("删除"),
+                      child: Text(CusAL.of(context).deleteLabel),
                     ),
                   TextButton(
                     onPressed: clickServingInfoAdd,
-                    child: const Text("新增"),
+                    child: Text(CusAL.of(context).addLabel("")),
                   ),
                 ],
               ),
@@ -189,8 +190,6 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
 
     var servingInfo = fsInfo.servingInfoList[trueIndices];
 
-    print("servingInfo---$servingInfo");
-
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -198,7 +197,9 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           /// 这个值真没地方取啊
           /// 2023-12-06 简单判断是否是标准度量
           servingType: (servingInfo.servingUnit.toLowerCase() == "100ml" ||
-                  servingInfo.servingUnit.toLowerCase() == "100g")
+                  servingInfo.servingUnit.toLowerCase() == "100g" ||
+                  servingInfo.servingUnit.toLowerCase() == "1mg" ||
+                  servingInfo.servingUnit.toLowerCase() == "1g")
               ? servingTypeList.first
               : servingTypeList.last,
           food: fsInfo.food,
@@ -206,8 +207,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
         ),
       ),
     ).then((value) {
-      // 如果食物相关数据被修改，则变动标识设为true
-      if (value != null && value) {
+      // 返回单份营养素新增成功的话重新查询当前食物详情数据
+      if (value != null && value == true) {
+        refreshFoodAndServing();
+        // 如果食物相关数据被修改，则变动标识设为true
         setState(() {
           isModified = true;
         });
@@ -221,19 +224,18 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('警告'),
+            title: Text(CusAL.of(context).alertTitle),
             content: const Text(
               '''至少保留一个单份营养素信息。
               \n若要删除所有数据，请考虑删除该条食物信息。
-              \n若要更新全部单份营养素，请先新增完成后，再删除旧的数据。
-              \n暂时不提供单份营养素的修改，请以【删除+新增】代替修改。''',
+              \n若要更新全部单份营养素，请先新增完成后，再删除旧的数据。''',
             ),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text('确认'),
+                child: Text(CusAL.of(context).confirmLabel),
               ),
             ],
           );
@@ -244,14 +246,14 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('提示'),
-            content: const Text('确定删除选中的单份营养素信息?'),
+            title: Text(CusAL.of(context).deleteConfirm),
+            content: Text(CusAL.of(context).deleteNote("")),
             actions: [
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text('取消'),
+                child: Text(CusAL.of(context).cancelLabel),
               ),
               TextButton(
                 onPressed: () async {
@@ -276,7 +278,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
                     isModified = true;
                   });
                 },
-                child: const Text('确认'),
+                child: Text(CusAL.of(context).confirmLabel),
               ),
             ],
           );
@@ -288,9 +290,9 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   clickServingInfoAdd() {
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (ctx) {
         return AlertDialog(
-          title: const Text('选择单份类型'),
+          title: Text(CusAL.of(ctx).optionsLabel),
           content: DropdownMenu<CusLabel>(
             initialSelection: servingTypeList.first,
             onSelected: (CusLabel? value) {
@@ -302,23 +304,23 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
                 .map<DropdownMenuEntry<CusLabel>>((CusLabel value) {
               return DropdownMenuEntry<CusLabel>(
                 value: value,
-                label: value.cnLabel,
+                label: showCusLableMapLabel(context, value),
               );
             }).toList(),
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context, false);
+                Navigator.pop(ctx, false);
               },
-              child: const Text('取消'),
+              child: Text(CusAL.of(ctx).cancelLabel),
             ),
             TextButton(
               onPressed: () {
                 if (!mounted) return;
-                Navigator.pop(context, true);
+                Navigator.pop(ctx, true);
               },
-              child: const Text('确认'),
+              child: Text(CusAL.of(ctx).confirmLabel),
             ),
           ],
         );
@@ -351,7 +353,6 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   /// 表格显示食物基本信息
   buildFoodTable(FoodAndServingInfo info) {
     var food = info.food;
-    // var imageList = food.photos?.split(",") ?? [];
     List<String> imageList = [];
     // 先要排除image是个空字符串在分割
     if (food.photos != null && food.photos!.trim().isNotEmpty) {
@@ -360,7 +361,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
 
     return [
       Text(
-        "食物基本信息",
+        CusAL.of(context).foodBasicInfo,
         style: TextStyle(
           fontSize: 20.sp,
           fontWeight: FontWeight.bold,
@@ -374,16 +375,31 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           border: TableBorder.all(), // 设置表格边框
           // 设置每列的宽度占比
           columnWidths: const {
-            0: FlexColumnWidth(1),
-            1: FlexColumnWidth(4),
+            0: FlexColumnWidth(4),
+            1: FlexColumnWidth(9),
           },
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           children: [
-            _buildTableRow("品牌", food.brand),
-            _buildTableRow("名称", food.product),
-            _buildTableRow("标签", food.tags ?? ""),
-            _buildTableRow("分类", food.category ?? ""),
-            _buildTableRow("概述", food.description ?? ""),
+            _buildTableRow(
+              CusAL.of(context).foodLabels("0"),
+              food.product,
+            ),
+            _buildTableRow(
+              CusAL.of(context).foodLabels("1"),
+              food.brand,
+            ),
+            _buildTableRow(
+              CusAL.of(context).foodLabels("2"),
+              food.tags ?? "",
+            ),
+            _buildTableRow(
+              CusAL.of(context).foodLabels("3"),
+              food.category ?? "",
+            ),
+            _buildTableRow(
+              CusAL.of(context).foodLabels("4"),
+              food.description ?? "",
+            ),
           ],
         ),
       ),
@@ -401,6 +417,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           child: Text(
             label,
             style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+            textAlign: TextAlign.center,
           ),
         ),
         Padding(
@@ -422,12 +439,12 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     return buildDataTableWithHorizontalScrollbar(
       scrollController: _scrollController,
       columns: [
-        _buildDataColumn("单份"),
-        _buildDataColumn("能量(大卡)"),
-        _buildDataColumn("蛋白质(克)"),
-        _buildDataColumn("脂肪(克)"),
-        _buildDataColumn("碳水(克)"),
-        _buildDataColumn("微量元素(毫克)"),
+        _buildDataColumn(CusAL.of(context).foodTableMainLabels("0")),
+        _buildDataColumn(CusAL.of(context).foodTableMainLabels("1")),
+        _buildDataColumn(CusAL.of(context).foodTableMainLabels("2")),
+        _buildDataColumn(CusAL.of(context).foodTableMainLabels("3")),
+        _buildDataColumn(CusAL.of(context).foodTableMainLabels("4")),
+        _buildDataColumn(CusAL.of(context).foodTableMainLabels("5")),
       ],
       rows: List<DataRow>.generate(servingList.length, (index) {
         var serving = servingList[index];
@@ -515,14 +532,33 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("总脂肪 ", style: TextStyle(fontSize: 14.sp)),
+              Text(
+                '${CusAL.of(context).fatNutrients("0")}  ',
+                style: TextStyle(fontSize: 14.sp),
+              ),
               Text(totalFat, style: TextStyle(fontSize: 14.sp)),
             ],
           ),
-          _buildDetailRowCellText("反式脂肪 ", transFat),
-          _buildDetailRowCellText("饱和脂肪 ", transFat),
-          _buildDetailRowCellText("单不饱和脂肪 ", transFat),
-          _buildDetailRowCellText("多不饱和脂肪 ", transFat),
+          if (saturatedFat.isNotEmpty)
+            _buildDetailRowCellText(
+              '${CusAL.of(context).fatNutrients("1")}  ',
+              saturatedFat,
+            ),
+          if (transFat.isNotEmpty)
+            _buildDetailRowCellText(
+              '${CusAL.of(context).fatNutrients("2")}  ',
+              transFat,
+            ),
+          if (puFat.isNotEmpty)
+            _buildDetailRowCellText(
+              '${CusAL.of(context).fatNutrients("3")}  ',
+              puFat,
+            ),
+          if (muFat.isNotEmpty)
+            _buildDetailRowCellText(
+              '${CusAL.of(context).fatNutrients("4")}  ',
+              muFat,
+            ),
         ],
       ),
     );
@@ -536,12 +572,23 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("总碳水 ", style: TextStyle(fontSize: 14.sp)),
+              Text(
+                '${CusAL.of(context).choNutrients("0")}  ',
+                style: TextStyle(fontSize: 14.sp),
+              ),
               Text(totalCho, style: TextStyle(fontSize: 14.sp)),
             ],
           ),
-          _buildDetailRowCellText("糖 ", sugar),
-          _buildDetailRowCellText("膳食纤维 ", dietaryFiber),
+          if (sugar.isNotEmpty)
+            _buildDetailRowCellText(
+              '${CusAL.of(context).choNutrients("1")}  ',
+              sugar,
+            ),
+          if (dietaryFiber.isNotEmpty)
+            _buildDetailRowCellText(
+              '${CusAL.of(context).choNutrients("2")}  ',
+              dietaryFiber,
+            ),
         ],
       ),
     );
@@ -559,24 +606,35 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("钠 ", style: TextStyle(fontSize: 14.sp)),
+              Text(
+                '${CusAL.of(context).microNutrients("0")}  ',
+                style: TextStyle(fontSize: 14.sp),
+              ),
               Text(sodium, style: TextStyle(fontSize: 14.sp)),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("钾 ", style: TextStyle(fontSize: 14.sp)),
-              Text(potassium, style: TextStyle(fontSize: 14.sp)),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("胆固醇 ", style: TextStyle(fontSize: 14.sp)),
-              Text(cholesterol, style: TextStyle(fontSize: 14.sp)),
-            ],
-          ),
+          if (potassium.isNotEmpty)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${CusAL.of(context).microNutrients("1")}  ',
+                  style: TextStyle(fontSize: 14.sp),
+                ),
+                Text(potassium, style: TextStyle(fontSize: 14.sp)),
+              ],
+            ),
+          if (cholesterol.isNotEmpty)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${CusAL.of(context).microNutrients("2")}  ',
+                  style: TextStyle(fontSize: 14.sp),
+                ),
+                Text(cholesterol, style: TextStyle(fontSize: 14.sp)),
+              ],
+            ),
         ],
       ),
     );

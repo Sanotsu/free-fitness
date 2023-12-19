@@ -7,6 +7,7 @@ import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import 'food_json_import.dart';
 import 'add_food_with_serving.dart';
 import 'food_nutrient_detail.dart';
@@ -116,7 +117,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
         _loadFoodData();
       });
     } else {
-      showSnackMessage(context, "用户已禁止访问内部存储,无法进行json文件导入。");
+      showSnackMessage(context, CusAL.of(context).noStorageErrorText);
     }
   }
 
@@ -127,9 +128,12 @@ class _DietaryFoodsState extends State<DietaryFoods> {
         title: RichText(
           text: TextSpan(
             children: [
-              TextSpan(text: '食物\n', style: TextStyle(fontSize: 20.sp)),
               TextSpan(
-                text: "共 $itemsCount 条",
+                text: "${CusAL.of(context).food}\n",
+                style: TextStyle(fontSize: 20.sp),
+              ),
+              TextSpan(
+                text: CusAL.of(context).itemCount(itemsCount),
                 style: TextStyle(fontSize: 12.sp),
               ),
             ],
@@ -182,7 +186,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
                   });
                 },
                 child: Text(
-                  "找不到?",
+                  CusAL.of(context).notFound,
                   style: TextStyle(fontSize: 14.sp, color: Colors.white),
                 ),
               ),
@@ -199,14 +203,16 @@ class _DietaryFoodsState extends State<DietaryFoods> {
                 Expanded(
                   child: TextField(
                     controller: searchController,
-                    decoration: const InputDecoration(
-                      hintText: '请输入产品或品牌关键字',
+                    decoration: InputDecoration(
+                      hintText: CusAL.of(context).queryKeywordHintText(
+                        CusAL.of(context).food,
+                      ),
                     ),
                   ),
                 ),
                 ElevatedButton(
                   onPressed: _handleSearch,
-                  child: const Text('搜索'),
+                  child: Text(CusAL.of(context).searchLabel),
                 ),
               ],
             ),
@@ -241,6 +247,18 @@ class _DietaryFoodsState extends State<DietaryFoods> {
     var foodEnergy =
         (firstServing?.energy ?? 0 / oneCalToKjRatio).toStringAsFixed(0);
 
+    // 能量文字
+    var text1 = "$foodUnit - $foodEnergy ${CusAL.of(context).unitLabels('2')}";
+    // 碳水文字
+    var text2 =
+        "${CusAL.of(context).mainNutrients('4')} ${formatDoubleToString(firstServing?.totalCarbohydrate ?? 0)} ${CusAL.of(context).unitLabels('0')}";
+    // 脂肪文字
+    var text3 =
+        "${CusAL.of(context).mainNutrients('3')} ${formatDoubleToString(firstServing?.totalFat ?? 0)} ${CusAL.of(context).unitLabels('0')}";
+    // 蛋白质文字
+    var text4 =
+        "${CusAL.of(context).mainNutrients('2')} ${formatDoubleToString(firstServing?.protein ?? 0)} ${CusAL.of(context).unitLabels('0')}";
+
     return Card(
       elevation: 5,
       child: ListTile(
@@ -250,10 +268,11 @@ class _DietaryFoodsState extends State<DietaryFoods> {
           maxLines: 2,
           softWrap: true,
           overflow: TextOverflow.ellipsis,
+          style: TextStyle(color: Theme.of(context).primaryColor),
         ),
         // 单份食物营养素
         subtitle: Text(
-          "$foodUnit - $foodEnergy 大卡 \n碳水 ${formatDoubleToString(firstServing?.totalCarbohydrate ?? 0)} g , 脂肪 ${formatDoubleToString(firstServing?.totalFat ?? 0)} g , 蛋白质 ${formatDoubleToString(firstServing?.protein ?? 0)} g",
+          "$text1\n$text2 , $text3 , $text4",
           style: TextStyle(fontSize: 14.sp),
           maxLines: 2,
           softWrap: true,
@@ -287,20 +306,23 @@ class _DietaryFoodsState extends State<DietaryFoods> {
             context: context,
             builder: (context) {
               return AlertDialog(
-                title: const Text('提示'),
-                content: Text("是否删除: ${food.product}(${food.brand})?"),
+                title: Text(CusAL.of(context).deleteConfirm),
+                content: Text(
+                  CusAL.of(context)
+                      .deleteNote('\n${food.product}(${food.brand})'),
+                ),
                 actions: [
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context, false);
                     },
-                    child: const Text('取消'),
+                    child: Text(CusAL.of(context).cancelLabel),
                   ),
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context, true);
                     },
-                    child: const Text('确认'),
+                    child: Text(CusAL.of(context).confirmLabel),
                   ),
                 ],
               );
@@ -318,7 +340,11 @@ class _DietaryFoodsState extends State<DietaryFoods> {
                 _loadFoodData();
               } catch (e) {
                 if (!mounted) return;
-                commonExceptionDialog(context, "异常提醒", e.toString());
+                commonExceptionDialog(
+                  context,
+                  CusAL.of(context).exceptionWarningTitle,
+                  e.toString(),
+                );
               }
             }
           });
@@ -344,7 +370,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5.0), // 设置所有圆角的大小
                 // 设置展开前的背景色
-                color: const Color.fromARGB(255, 195, 198, 201),
+                // color: const Color.fromARGB(255, 195, 198, 201),
               ),
               child: Padding(
                 padding: EdgeInsets.all(10.sp),
@@ -354,15 +380,15 @@ class _DietaryFoodsState extends State<DietaryFoods> {
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
                     children: [
-                      TextSpan(
-                        text: '食物名称: ',
-                        style: TextStyle(fontSize: 14.sp, color: Colors.black),
-                      ),
+                      // TextSpan(
+                      //   text: "${CusAL.of(context).foodName} ",
+                      //   style: TextStyle(fontSize: 14.sp, color: Colors.black),
+                      // ),
                       TextSpan(
                         text: foodName,
                         style: TextStyle(
                           fontSize: 16.sp,
-                          color: Colors.black,
+                          color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -383,22 +409,37 @@ class _DietaryFoodsState extends State<DietaryFoods> {
               columnSpacing: 10.sp, // 设置列间距为 10 像素
               columns: [
                 DataColumn(
-                  label: Text('单份', style: TextStyle(fontSize: 14.sp)),
+                  label: Text(
+                    CusAL.of(context).foodTableMainLabels("0"),
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
                 ),
                 DataColumn(
-                  label: Text('能量(大卡)', style: TextStyle(fontSize: 14.sp)),
+                  label: Text(
+                    CusAL.of(context).foodTableMainLabels("1"),
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
                   numeric: true,
                 ),
                 DataColumn(
-                  label: Text('蛋白质(克)', style: TextStyle(fontSize: 14.sp)),
+                  label: Text(
+                    CusAL.of(context).foodTableMainLabels("2"),
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
                   numeric: true,
                 ),
                 DataColumn(
-                  label: Text('脂肪(克)', style: TextStyle(fontSize: 14.sp)),
+                  label: Text(
+                    CusAL.of(context).foodTableMainLabels("3"),
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
                   numeric: true,
                 ),
                 DataColumn(
-                  label: Text('碳水(克)', style: TextStyle(fontSize: 14.sp)),
+                  label: Text(
+                    CusAL.of(context).foodTableMainLabels("4"),
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
                   numeric: true,
                 ),
               ],

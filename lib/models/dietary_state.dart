@@ -121,7 +121,7 @@ class ServingInfo {
       "gmt_create": gmtCreate,
       "update_user": updateUser,
       "gmt_modified": gmtModified,
-      "is_deleted": isDeleted,
+      "is_deleted": isDeleted ? 1 : 0,
     };
   }
 

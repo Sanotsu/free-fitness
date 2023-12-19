@@ -11,6 +11,7 @@ import 'package:free_fitness/models/dietary_state.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/food_composition.dart';
 
 class FoodJsonImport extends StatefulWidget {
@@ -84,8 +85,8 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
 
           commonExceptionDialog(
             context,
-            "导入json文件出错",
-            '文件名称:\n${file.path}\n\n错误信息:\n$e',
+            CusAL.of(context).importJsonError,
+            CusAL.of(context).importJsonErrorText(file.path, e.toString),
           );
 
           setState(() {
@@ -141,8 +142,8 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
 
             commonExceptionDialog(
               context,
-              "导入json文件出错",
-              '文件名称:\n${file.path}\n\n错误信息:\n$e',
+              CusAL.of(context).importJsonError,
+              CusAL.of(context).importJsonErrorText(file.path, e.toString),
             );
 
             setState(() {
@@ -215,7 +216,11 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
       } on Exception catch (e) {
         // 将错误信息展示给用户
         if (!mounted) return;
-        commonExceptionDialog(context, "异常提醒", e.toString());
+        commonExceptionDialog(
+          context,
+          CusAL.of(context).exceptionWarningTitle,
+          e.toString(),
+        );
 
         setState(() {
           isLoading = false;
@@ -241,14 +246,14 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('完成'),
-          content: const Text('数据已经插入数据库'),
+          title: Text(CusAL.of(context).tipLabel),
+          content: Text(CusAL.of(context).importFinished),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('确认'),
+              child: Text(CusAL.of(context).confirmLabel),
             ),
           ],
         );
@@ -260,19 +265,22 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('导入食物JSON数据'),
+        title: Text(CusAL.of(context).foodImport),
         actions: [
           TextButton.icon(
             onPressed: foodComps.isNotEmpty ? _saveToDb : null,
             icon: Icon(
               Icons.save,
-              color: foodComps.isNotEmpty ? Colors.white : Colors.black87,
+              color: foodComps.isNotEmpty
+                  ? Theme.of(context).canvasColor
+                  : Theme.of(context).disabledColor,
             ),
             label: Text(
-              "保存",
+              CusAL.of(context).saveLabel,
               style: TextStyle(
-                fontSize: 20.sp,
-                color: foodComps.isNotEmpty ? Colors.white : Colors.black87,
+                color: foodComps.isNotEmpty
+                    ? Theme.of(context).canvasColor
+                    : Theme.of(context).disabledColor,
               ),
             ),
           ),
@@ -314,14 +322,9 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
               icon: Icon(
                 Icons.drive_folder_upload,
                 size: 30.sp,
-                color: Colors.blue,
+                color: Theme.of(context).primaryColor,
               ),
             ),
-
-            // child: ElevatedButton(
-            //   onPressed: _openFileExplorer,
-            //   child: Text('文件夹', style: TextStyle(fontSize: 14.sp)),
-            // ),
           ),
           Expanded(
             child: IconButton(
@@ -329,13 +332,9 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
               icon: Icon(
                 Icons.file_upload,
                 size: 30.sp,
-                color: Colors.blue,
+                color: Theme.of(context).primaryColor,
               ),
             ),
-            // child: ElevatedButton(
-            //   onPressed: _openJsonFiles,
-            //   child: Text('json文件', style: TextStyle(fontSize: 14.sp)),
-            // ),
           ),
           Expanded(
             child: IconButton(
@@ -351,34 +350,12 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
               icon: Icon(
                 Icons.clear,
                 size: 30.sp,
-                color: Colors.blue,
+                color: foodComps.isNotEmpty
+                    ? Theme.of(context).canvasColor
+                    : Theme.of(context).disabledColor,
               ),
             ),
-            // child: ElevatedButton(
-            //   onPressed: () {
-            //     setState(() {
-            //       jsons = [];
-            //       foodComps = [];
-            //     });
-            //   },
-            //   child: Text('重置', style: TextStyle(fontSize: 14.sp)),
-            // ),
           ),
-          // Expanded(
-          //   child: IconButton(
-          //     onPressed: foodComps.isNotEmpty ? _saveToDb : null,
-          //     disabledColor: Colors.grey,
-          //     icon: Icon(
-          //       Icons.save,
-          //       size: 30.sp,
-          //       color: foodComps.isNotEmpty ? Colors.blue : Colors.grey,
-          //     ),
-          //   ),
-          //   // child: ElevatedButton(
-          //   //   onPressed: _saveToDb,
-          //   //   child: Text('存到数据库', style: TextStyle(fontSize: 14.sp)),
-          //   // ),
-          // ),
         ],
       ),
     );
@@ -388,7 +365,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
   _buildJsonFileInfoArea() {
     return [
       Text(
-        "json文件列表:",
+        CusAL.of(context).jsonFiles,
         style: TextStyle(fontSize: 14.sp),
         textAlign: TextAlign.start,
       ),
@@ -399,7 +376,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
           itemCount: jsons.length,
           itemBuilder: (context, index) {
             return Text(
-              'PATH: ${jsons[index].path}',
+              jsons[index].path,
               style: TextStyle(fontSize: 12.sp),
               textAlign: TextAlign.start,
             );
@@ -417,14 +394,14 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
         text: TextSpan(
           children: [
             TextSpan(
-              text: "食物信息(共${foodComps.length}条) ",
+              text: CusAL.of(context).itemCount(foodComps.length),
               style: TextStyle(
                 fontSize: 14.sp,
                 color: Colors.black,
               ),
             ),
             TextSpan(
-              text: "从左到右为: 索引-代号-名称-能量(大卡)",
+              text: "  ${CusAL.of(context).foodLabelNote}",
               style: TextStyle(
                 fontSize: 12.sp,
                 color: Colors.green,
@@ -495,7 +472,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "待上传的动作信息概述如下:",
+              CusAL.of(context).uploadingItem,
               style: TextStyle(fontSize: 14.sp),
               textAlign: TextAlign.start,
             ),
@@ -521,7 +498,10 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
                   );
                 });
               },
-              child: Text("移除选中动作", style: TextStyle(fontSize: 14.sp)),
+              child: Text(
+                CusAL.of(context).removeSelected,
+                style: TextStyle(fontSize: 14.sp),
+              ),
             ),
           ],
         ),
@@ -535,11 +515,29 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
             horizontalMargin: 10, // 设置水平边距
             columnSpacing: 5.sp, // 设置列间距
             columns: <DataColumn>[
-              DataColumn(label: Text('索引', style: TextStyle(fontSize: 13.sp))),
-              DataColumn(label: Text('代号', style: TextStyle(fontSize: 13.sp))),
-              DataColumn(label: Text('名称', style: TextStyle(fontSize: 13.sp))),
               DataColumn(
-                label: Text('能量(大卡)', style: TextStyle(fontSize: 13.sp)),
+                label: Text(
+                  CusAL.of(context).serialLabel,
+                  style: TextStyle(fontSize: 13.sp),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  CusAL.of(context).foodLabels('6'),
+                  style: TextStyle(fontSize: 13.sp),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  CusAL.of(context).foodLabels('2'),
+                  style: TextStyle(fontSize: 13.sp),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  CusAL.of(context).foodTableMainLabels('1'),
+                  style: TextStyle(fontSize: 13.sp),
+                ),
                 numeric: true,
               ),
             ],

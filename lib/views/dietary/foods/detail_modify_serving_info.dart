@@ -7,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 import 'common_utils_for_food_modify.dart';
 
@@ -54,7 +55,6 @@ class _DetailModifyServingInfoState extends State<DetailModifyServingInfo> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // 如果有传表单的初始对象值，就显示该值
       if (widget.currentServingInfo != null) {
-        print("有传当前表单值过来--${widget.currentServingInfo}");
         // 有其他类型可能无法给表单初始化赋值，全部转为string map就可以了
         var map = widget.currentServingInfo!.toStringMap();
 
@@ -75,7 +75,9 @@ class _DetailModifyServingInfoState extends State<DetailModifyServingInfo> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('编辑单份营养素'),
+        title: Text(
+          CusAL.of(context).eidtLabel(CusAL.of(context).foodNutrientInfo),
+        ),
       ),
       body: ListView(
         children: [
@@ -84,7 +86,10 @@ class _DetailModifyServingInfoState extends State<DetailModifyServingInfo> {
             child: SingleChildScrollView(
               child: FormBuilder(
                 key: _servingInfoformKey,
-                child: buildServingModifyFormColumn(widget.servingType),
+                child: buildServingModifyFormColumn(
+                  context,
+                  widget.servingType,
+                ),
               ),
             ),
           ),
@@ -97,7 +102,7 @@ class _DetailModifyServingInfoState extends State<DetailModifyServingInfo> {
                   onPressed: () {
                     Navigator.pop(context, false);
                   },
-                  child: const Text("取消"),
+                  child: Text(CusAL.of(context).cancelLabel),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -105,8 +110,12 @@ class _DetailModifyServingInfoState extends State<DetailModifyServingInfo> {
                       // 营养素表单保存验证通过后，要先格式化成指定类型数据，再才能保持到db
                       var servingList = parseServingInfo(
                         _servingInfoformKey.currentState!.value,
+                        // 2023-12-19 修改都当做是非标准
                         widget.servingType.value,
                         foodId: widget.food.foodId,
+                        servingInfoId: (widget.currentServingInfo != null)
+                            ? widget.currentServingInfo!.servingInfoId!
+                            : null,
                       );
 
                       try {
@@ -116,13 +125,26 @@ class _DetailModifyServingInfoState extends State<DetailModifyServingInfo> {
                           isLoading = true;
                         });
 
-                        await _dietaryHelper.insertFoodWithServingInfoList(
-                          servingInfoList: servingList,
-                        );
+                        // 有传单份详情是修改，没有则是新增
+                        if (widget.currentServingInfo != null) {
+                          // ？？？表单返回的是列表 servingList，而里面的单份是写死了的，不知道实际修改后的值是什么。
+                          var temp = servingList[0];
+                          temp.servingInfoId =
+                              widget.currentServingInfo!.servingInfoId!;
+                          _dietaryHelper.updateSingleServingInfo(temp);
+                        } else {
+                          await _dietaryHelper.insertFoodWithServingInfoList(
+                            servingInfoList: servingList,
+                          );
+                        }
                       } on Exception catch (e) {
                         // 将错误信息展示给用户
                         if (!mounted) return;
-                        commonExceptionDialog(context, "异常提醒", e.toString());
+                        commonExceptionDialog(
+                          context,
+                          CusAL.of(context).exceptionWarningTitle,
+                          e.toString(),
+                        );
 
                         setState(() {
                           isLoading = false;
@@ -137,7 +159,7 @@ class _DetailModifyServingInfoState extends State<DetailModifyServingInfo> {
                       Navigator.pop(context, true);
                     }
                   },
-                  child: const Text("添加"),
+                  child: Text(CusAL.of(context).addLabel("")),
                 ),
               ],
             ),

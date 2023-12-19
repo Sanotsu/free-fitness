@@ -5,6 +5,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/global/constants.dart';
+import '../../../models/cus_app_localizations.dart';
 import 'common_utils_for_food_modify.dart';
 
 class FoodServingInfoModify extends StatefulWidget {
@@ -46,7 +47,9 @@ class _FoodServingInfoModifyState extends State<FoodServingInfoModify> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('编辑单份营养素'),
+        title: Text(
+          CusAL.of(context).eidtLabel(CusAL.of(context).foodNutrientInfo),
+        ),
       ),
       body: ListView(
         children: [
@@ -58,7 +61,10 @@ class _FoodServingInfoModifyState extends State<FoodServingInfoModify> {
                 initialValue: widget.currentServingInfo != null
                     ? widget.currentServingInfo!
                     : {},
-                child: buildServingModifyFormColumn(widget.servingType),
+                child: buildServingModifyFormColumn(
+                  context,
+                  widget.servingType,
+                ),
               ),
             ),
           ),
@@ -72,7 +78,7 @@ class _FoodServingInfoModifyState extends State<FoodServingInfoModify> {
                   Navigator.pop(context, temp);
                 }
               },
-              child: const Text("添加"),
+              child: Text(CusAL.of(context).saveLabel),
             ),
           ),
         ],
