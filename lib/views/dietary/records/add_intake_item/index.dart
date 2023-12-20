@@ -8,6 +8,7 @@ import '../../../../common/utils/tool_widgets.dart';
 
 import '../../../../common/utils/tools.dart';
 
+import '../../../../models/cus_app_localizations.dart';
 import '../../../../models/dietary_state.dart';
 import '../../foods/add_food_with_serving.dart';
 import 'simple_food_detail.dart';
@@ -252,7 +253,11 @@ class _AddIntakeItemState extends State<AddIntakeItem>
     } catch (e) {
       // 将错误信息展示给用户
       if (!mounted) return;
-      commonExceptionDialog(context, "异常提醒", e.toString());
+      commonExceptionDialog(
+        context,
+        CusAL.of(context).exceptionWarningTitle,
+        e.toString(),
+      );
 
       setState(() {
         isRecentLoading = false;
@@ -271,9 +276,9 @@ class _AddIntakeItemState extends State<AddIntakeItem>
           actions: buildAppBarActions(),
           bottom: TabBar(
             controller: _tabController,
-            tabs: const [
-              Tab(text: "最近记录"),
-              Tab(text: "食物列表"),
+            tabs: [
+              Tab(text: CusAL.of(context).dietaryAddTabs('0')),
+              Tab(text: CusAL.of(context).dietaryAddTabs('1')),
             ],
           ),
         ),
@@ -316,7 +321,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
               return DropdownMenuItem<CusLabel>(
                 value: value,
                 child: Text(
-                  value.cnLabel,
+                  showCusLableMapLabel(context, value),
                   style: TextStyle(fontSize: 15.sp),
                 ),
               );
@@ -339,9 +344,9 @@ class _AddIntakeItemState extends State<AddIntakeItem>
       if (_tabController.index == 0 && selectedIndexes.isNotEmpty)
         TextButton(
           onPressed: _saveSelectedRecentListToDb,
-          child: const Text(
-            '添加',
-            style: TextStyle(color: Colors.white),
+          child: Text(
+            CusAL.of(context).addLabel(""),
+            style: TextStyle(color: Theme.of(context).canvasColor),
           ),
         ),
 
@@ -349,14 +354,15 @@ class _AddIntakeItemState extends State<AddIntakeItem>
       if (isShowAddButton)
         Row(
           children: [
-            const Text("找不到?"),
+            Text(CusAL.of(context).notFound),
             IconButton(
               icon: const Icon(Icons.add),
               onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => const AddfoodWithServing()),
+                    builder: (context) => const AddfoodWithServing(),
+                  ),
                 ).then((value) {
                   // 不管是否新增成功，这里都重新加载；
                   // 因为没有清空查询条件，所以新增的食物关键字不包含查询条件中，不会显示
@@ -400,11 +406,11 @@ class _AddIntakeItemState extends State<AddIntakeItem>
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: "$tempIntake * ${e.servingInfo.servingUnit}",
+                    text: "$tempIntake * ${e.servingInfo.servingUnit} - ",
                     style: TextStyle(fontSize: 15.sp, color: Colors.black),
                   ),
                   TextSpan(
-                    text: " - $tempCalories 大卡",
+                    text: "$tempCalories ${CusAL.of(context).unitLabels('2')}",
                     style: TextStyle(fontSize: 15.sp, color: Colors.green),
                   ),
                 ],
@@ -471,14 +477,16 @@ class _AddIntakeItemState extends State<AddIntakeItem>
           Expanded(
             child: TextField(
               controller: searchController,
-              decoration: const InputDecoration(
-                hintText: '请输入产品或品牌关键字',
+              decoration: InputDecoration(
+                hintText: CusAL.of(context).queryKeywordHintText(
+                  CusAL.of(context).food,
+                ),
               ),
             ),
           ),
           ElevatedButton(
             onPressed: _handleSearch,
-            child: const Text('搜索'),
+            child: Text(CusAL.of(context).searchLabel),
           ),
         ],
       ),
@@ -505,7 +513,9 @@ class _AddIntakeItemState extends State<AddIntakeItem>
           overflow: TextOverflow.ellipsis,
         ),
         // 单份食物营养素
-        subtitle: Text("$foodUnit - ${cusDoubleToString(foodEnergy)} 大卡"),
+        subtitle: Text(
+          "$foodUnit - ${cusDoubleToString(foodEnergy)} ${CusAL.of(context).unitLabels('2')}",
+        ),
         // 点击这个添加就是默认添加单份营养素的食物，那就直接返回日志页面。
         trailing: IconButton(
           onPressed: () async {

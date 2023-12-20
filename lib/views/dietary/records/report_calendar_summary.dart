@@ -9,7 +9,9 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
+import 'format_tools.dart';
 
 /// 默认的日历显示范围，当前月的前后3个月
 /// ？？？实际手记的日历显示范围的话，就第一个手记的月份，到当前月份即可
@@ -114,7 +116,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('饮食日历表格统计'),
+        title: Text(CusAL.of(context).dietaryCalendar),
       ),
       body: SingleChildScrollView(
         child: isLoading
@@ -124,116 +126,14 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
                   /// 日历显示每日的卡路里数量
                   SizedBox(
                     height: 0.7.sh,
-                    child: TableCalendar<DailyFoodItemWithFoodServing>(
-                      locale: 'zh_CN',
-                      firstDay: kFirstDay,
-                      lastDay: kLastDay,
-                      focusedDay: _focusedDay,
-                      // 显示日历标题
-                      headerVisible: true,
-                      // 日历标题的一些配置
-                      headerStyle: const HeaderStyle(
-                        // 标题居中(不显示格式化按钮的话可以设为true)
-                        titleCentered: true,
-                        // 不显示CalendarFormat按钮
-                        formatButtonVisible: false,
-                        // 控制FormatButton内的文本：true显示下一个CalendarFormat的值；false显示当前的值。
-                        // formatButtonShowsNext: false,
-                      ),
-                      // 不显示格式化按钮的话，这个也可以不写了
-                      // availableCalendarFormats: const {
-                      //   CalendarFormat.month: '本月',
-                      //   CalendarFormat.twoWeeks: '两周',
-                      //   CalendarFormat.week: '本周',
-                      // },
-                      // 日历的宽度是给定父组件的1/7，有父组件高度则要把这个设为true才能铺面，否则是默认的。
-                      shouldFillViewport: true,
-                      // 决定哪些天需要被标记
-                      selectedDayPredicate: (day) =>
-                          isSameDay(_selectedDay, day),
-                      // 固定为月展示形式，不变化了
-                      calendarFormat: CalendarFormat.month,
-                      // 不开始范围选择
-                      rangeSelectionMode: RangeSelectionMode.disabled,
-                      // 如果不使用这个函数，当日的数量标记是不会显示的。这也不能是异步函数
-                      eventLoader: _getDialyItemsForADay,
-                      // 当某天被选中后的回调
-                      onDaySelected: _onDaySelected,
-                      // 当日历点击标题处的上下页切换后的回调
-                      onPageChanged: (focusedDay) {
-                        _focusedDay = focusedDay;
-                        // 当页面切换时，这个聚焦日期为当前页面所在月份的第一天。
-                        // 页面切换后重新查询当前月的饮食记录数据
-                        _queryDailyFoodItemList(focusedDay);
-                      },
-                      // 默认的一些日历样式配置，可以自定义日历UI
-                      calendarStyle: const CalendarStyle(
-                        // 不是当月的日期不显示
-                        outsideDaysVisible: false,
-                      ),
-                      // 自定义修改日历的样式
-                      calendarBuilders: CalendarBuilders(
-                        // 这里可以很自定义很多样式，比如单标签多标签等等。
-                        // 简单示例：每天的底部显示当天的摄入值
-                        // 默认就在底部中间
-                        markerBuilder: (context, date, list) {
-                          if (list.isEmpty) return Container();
-
-                          var tempCalories =
-                              _formatIntakeItemListForMarker(list)
-                                  .firstWhere((e) => e.label == "calorie")
-                                  .value;
-
-                          // return Container(
-                          //   width: 200,
-                          //   // height: 20,
-                          //   color: Colors.yellow,
-                          //   child: Center(
-                          //     child: Text(
-                          //       "${tempCalories.toStringAsFixed(1)}大卡",
-                          //       maxLines: 2,
-                          //       overflow: TextOverflow.ellipsis,
-                          //       style: TextStyle(
-                          //         color: Colors.black,
-                          //         fontSize: 10.sp,
-                          //       ),
-                          //     ),
-                          //   ),
-                          // );
-
-                          return Align(
-                            alignment: Alignment.bottomCenter,
-                            child: Container(
-                              width: 36,
-                              height: 16,
-                              color: tempCalories < 2250
-                                  ? Colors.green
-                                  : Colors.yellow,
-                              child: Center(
-                                child: Text(
-                                  tempCalories.toStringAsFixed(0),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.clip,
-                                  style: TextStyle(
-                                    color: tempCalories < 3
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontSize: 12.sp,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+                    child: _buildTableCalendar(),
                   ),
-                  const SizedBox(height: 8.0),
+                  SizedBox(height: 8.sp),
 
                   /// 总计本月摄入量和平均到每天的摄入量
                   _buildDailyAverageCount(),
 
-                  const SizedBox(height: 8.0),
+                  SizedBox(height: 8.sp),
 
                   /// 日历某些操作改变后，显示对应的手记内容列表
                   ValueListenableBuilder<List<DailyFoodItemWithFoodServing>>(
@@ -245,15 +145,101 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
                         return Container();
                       }
 
-                      var formatList = _formatIntakeItemListForMarker(value);
                       return Card(
                         elevation: 5,
-                        child: _buildSelectedDayListView(value, formatList),
+                        child: _buildSelectedDayListView(
+                          value,
+                          formatIntakeItemListForMarker(context, value),
+                        ),
                       );
                     },
                   ),
                 ],
               ),
+      ),
+    );
+  }
+
+  /// 构建当月每天摄入卡路里的日历
+  _buildTableCalendar() {
+    return TableCalendar<DailyFoodItemWithFoodServing>(
+      locale: box.read('language') == "en" ? "en_US" : 'zh_CN',
+      firstDay: kFirstDay,
+      lastDay: kLastDay,
+      focusedDay: _focusedDay,
+      // 显示日历标题
+      headerVisible: true,
+      // 日历标题的一些配置
+      headerStyle: const HeaderStyle(
+        // 标题居中(不显示格式化按钮的话可以设为true)
+        titleCentered: true,
+        // 不显示CalendarFormat按钮
+        formatButtonVisible: false,
+        // 控制FormatButton内的文本：true显示下一个CalendarFormat的值；false显示当前的值。
+        // formatButtonShowsNext: false,
+      ),
+      // 不显示格式化按钮的话，这个也可以不写了
+      // availableCalendarFormats: const {
+      //   CalendarFormat.month: '本月',
+      //   CalendarFormat.twoWeeks: '两周',
+      //   CalendarFormat.week: '本周',
+      // },
+      // 日历的宽度是给定父组件的1/7，有父组件高度则要把这个设为true才能铺面，否则是默认的。
+      shouldFillViewport: true,
+      // 决定哪些天需要被标记
+      selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+      // 固定为月展示形式，不变化了
+      calendarFormat: CalendarFormat.month,
+      // 不开始范围选择
+      rangeSelectionMode: RangeSelectionMode.disabled,
+      // 如果不使用这个函数，当日的数量标记是不会显示的。这也不能是异步函数
+      eventLoader: _getDialyItemsForADay,
+      // 当某天被选中后的回调
+      onDaySelected: _onDaySelected,
+      // 当日历点击标题处的上下页切换后的回调
+      onPageChanged: (focusedDay) {
+        _focusedDay = focusedDay;
+        // 当页面切换时，这个聚焦日期为当前页面所在月份的第一天。
+        // 页面切换后重新查询当前月的饮食记录数据
+        _queryDailyFoodItemList(focusedDay);
+      },
+      // 默认的一些日历样式配置，可以自定义日历UI
+      calendarStyle: const CalendarStyle(
+        // 不是当月的日期不显示
+        outsideDaysVisible: false,
+      ),
+      // 自定义修改日历的样式
+      calendarBuilders: CalendarBuilders(
+        // 这里可以很自定义很多样式，比如单标签多标签等等。
+        // 简单示例：每天的底部显示当天的摄入值
+        // 默认就在底部中间
+        markerBuilder: (context, date, list) {
+          if (list.isEmpty) return Container();
+
+          var tempCalories = formatIntakeItemListForMarker(context, list)
+              .firstWhere((e) => e.label == "calorie")
+              .value;
+
+          return Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              width: 36,
+              height: 16,
+              color: tempCalories < 2250 ? Colors.green : Colors.yellow,
+              child: Center(
+                child: Text(
+                  tempCalories.toStringAsFixed(0),
+                  maxLines: 2,
+                  overflow: TextOverflow.clip,
+                  style: TextStyle(
+                    color: tempCalories < 3 ? Colors.white : Colors.black,
+                    fontSize: 12.sp,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -272,7 +258,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
 
     var days = groupedByDate.keys.length;
 
-    var tempList = _formatIntakeItemListForMarker(dfiwfsList);
+    var tempList = formatIntakeItemListForMarker(context, dfiwfsList);
 
     var totalCalorie = tempList.firstWhere((e) => e.label == "calorie").value;
     var totalProtein = tempList.firstWhere((e) => e.label == "protein").value;
@@ -286,7 +272,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            "当月摄入统计",
+            CusAL.of(context).dietaryCalendarLabels('0'),
             style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.bold,
@@ -296,80 +282,45 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
-                // dataRowHeight: 10.sp,
                 dataRowMinHeight: 30.sp, // 设置行高范围
                 dataRowMaxHeight: 50.sp,
                 headingRowHeight: 40, // 设置表头行高
                 horizontalMargin: 10, // 设置水平边距
                 columnSpacing: 10.sp, // 设置列间距
-                columns: const [
-                  DataColumn(label: Text(''), numeric: true),
-                  DataColumn(label: Text('能量(大卡)'), numeric: true),
-                  DataColumn(label: Text('蛋白质(克)'), numeric: true),
-                  DataColumn(label: Text('脂肪(克)'), numeric: true),
-                  DataColumn(label: Text('碳水(克)'), numeric: true),
+                columns: [
+                  const DataColumn(label: Text(''), numeric: true),
+                  _buildDataColumn(1),
+                  _buildDataColumn(2),
+                  _buildDataColumn(3),
+                  _buildDataColumn(4),
                 ],
                 rows: [
                   DataRow(
                     cells: [
                       DataCell(
-                        Text("总计", style: TextStyle(fontSize: 14.sp)),
-                      ),
-                      DataCell(
                         Text(
-                          totalCalorie.toStringAsFixed(2),
+                          CusAL.of(context).countLabels('0'),
                           style: TextStyle(fontSize: 14.sp),
                         ),
                       ),
-                      DataCell(
-                        Text(
-                          totalProtein.toStringAsFixed(2),
-                          style: TextStyle(fontSize: 14.sp),
-                        ),
-                      ),
-                      DataCell(
-                        Text(
-                          totalFat.toStringAsFixed(2),
-                          style: TextStyle(fontSize: 14.sp),
-                        ),
-                      ),
-                      DataCell(
-                        Text(
-                          totalCho.toStringAsFixed(2),
-                          style: TextStyle(fontSize: 14.sp),
-                        ),
-                      ),
+                      _buildDataCell(totalCalorie),
+                      _buildDataCell(totalProtein),
+                      _buildDataCell(totalFat),
+                      _buildDataCell(totalCho),
                     ],
                   ),
                   DataRow(
                     cells: [
                       DataCell(
-                        Text("平均", style: TextStyle(fontSize: 14.sp)),
-                      ),
-                      DataCell(
                         Text(
-                          (totalCalorie / days).toStringAsFixed(2),
+                          CusAL.of(context).countLabels('1'),
                           style: TextStyle(fontSize: 14.sp),
                         ),
                       ),
-                      DataCell(
-                        Text(
-                          (totalProtein / days).toStringAsFixed(2),
-                          style: TextStyle(fontSize: 14.sp),
-                        ),
-                      ),
-                      DataCell(
-                        Text(
-                          (totalFat / days).toStringAsFixed(2),
-                          style: TextStyle(fontSize: 14.sp),
-                        ),
-                      ),
-                      DataCell(
-                        Text(
-                          (totalCho / days).toStringAsFixed(2),
-                          style: TextStyle(fontSize: 14.sp),
-                        ),
-                      ),
+                      _buildDataCell(totalCalorie / days),
+                      _buildDataCell(totalProtein / days),
+                      _buildDataCell(totalFat / days),
+                      _buildDataCell(totalCho / days),
                     ],
                   )
                 ]),
@@ -379,110 +330,21 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
     );
   }
 
-  // 格式化带营养素详情的饮食记录条目数据列表
-  List<CusNutrientInfo> _formatIntakeItemListForMarker(
-    List<DailyFoodItemWithFoodServing> list,
-  ) {
-    var tempEnergy = 0.0;
-    var tempProtein = 0.0;
-    var tempFat = 0.0;
-    var tempCHO = 0.0;
-    // 这几个在底部总计可能用到
-    var tempSodium = 0.0;
-    var tempCholesterol = 0.0;
-    var tempDietaryFiber = 0.0;
-    var tempPotassium = 0.0;
-    var tempSugar = 0.0;
+  // 月统计和日平均统计的表格的标题和正文的样式是一样的
+  DataColumn _buildDataColumn(int i) {
+    return DataColumn(
+      label: Text(CusAL.of(context).foodTableMainLabels(i.toString())),
+      numeric: true,
+    );
+  }
 
-    for (var e in list) {
-      var foodIntakeSize = e.dailyFoodItem.foodIntakeSize;
-      var servingInfo = e.servingInfo;
-      tempEnergy += foodIntakeSize * servingInfo.energy;
-      tempProtein += foodIntakeSize * servingInfo.protein;
-      tempFat += foodIntakeSize * servingInfo.totalFat;
-      tempCHO += foodIntakeSize * servingInfo.totalCarbohydrate;
-      tempSodium += foodIntakeSize * servingInfo.sodium;
-      tempCholesterol += foodIntakeSize * (servingInfo.cholesterol ?? 0);
-      tempDietaryFiber += foodIntakeSize * (servingInfo.dietaryFiber ?? 0);
-      tempPotassium += foodIntakeSize * (servingInfo.potassium ?? 0);
-      tempSugar += foodIntakeSize * (servingInfo.sugar ?? 0);
-    }
-
-    var tempCalories = tempEnergy / oneCalToKjRatio;
-
-    // 当日主要营养素表格数据
-    return [
-      CusNutrientInfo(
-        label: "calorie",
-        value: tempCalories,
-        color: cusNutrientColors[CusNutType.calorie]!,
-        name: '卡路里',
-        unit: '大卡',
+  DataCell _buildDataCell(double number) {
+    return DataCell(
+      Text(
+        cusDoubleTryToIntString(number),
+        style: TextStyle(fontSize: 14.sp),
       ),
-      CusNutrientInfo(
-        label: "energy",
-        value: tempEnergy,
-        color: cusNutrientColors[CusNutType.energy]!,
-        name: '能量',
-        unit: '千焦',
-      ),
-      CusNutrientInfo(
-        label: "protein",
-        value: tempProtein,
-        color: cusNutrientColors[CusNutType.protein]!,
-        name: '蛋白质',
-        unit: '克',
-      ),
-      CusNutrientInfo(
-        label: "fat",
-        value: tempFat,
-        color: cusNutrientColors[CusNutType.totalFat]!,
-        name: '脂肪',
-        unit: '克',
-      ),
-      CusNutrientInfo(
-        label: "cho",
-        value: tempCHO,
-        color: cusNutrientColors[CusNutType.totalCHO]!,
-        name: '碳水',
-        unit: '克',
-      ),
-      CusNutrientInfo(
-        label: "dietaryFiber",
-        value: tempDietaryFiber,
-        color: cusNutrientColors[CusNutType.dietaryFiber]!,
-        name: '膳食纤维',
-        unit: '克',
-      ),
-      CusNutrientInfo(
-        label: "sugar",
-        value: tempSugar,
-        color: cusNutrientColors[CusNutType.sugar]!,
-        name: '糖',
-        unit: '克',
-      ),
-      CusNutrientInfo(
-        label: "sodium",
-        value: tempSodium,
-        color: cusNutrientColors[CusNutType.sodium]!,
-        name: '钠',
-        unit: '毫克',
-      ),
-      CusNutrientInfo(
-        label: "cholesterol",
-        value: tempCholesterol,
-        color: cusNutrientColors[CusNutType.cholesterol]!,
-        name: '胆固醇',
-        unit: '毫克',
-      ),
-      CusNutrientInfo(
-        label: "potassium",
-        value: tempPotassium,
-        color: cusNutrientColors[CusNutType.potassium]!,
-        name: '钾',
-        unit: '毫克',
-      ),
-    ];
+    );
   }
 
   /// 构建被选中当日的摄入基础信息部件
@@ -496,7 +358,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          "当日摄入总量",
+          CusAL.of(context).dietaryCalendarLabels('1'),
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.bold,
@@ -508,7 +370,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
           child: _buildSummaryTable(formatList),
         ),
         Text(
-          "详细摄入数据",
+          CusAL.of(context).dietaryCalendarLabels('2'),
           style: TextStyle(
             fontSize: 20.sp,
             fontWeight: FontWeight.bold,
@@ -535,11 +397,11 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
               ),
               child: ListTile(
                 title: Text(
-                  '食物: ${food.product} (${food.brand})',
+                  '${CusAL.of(context).foodName}: ${food.product} (${food.brand})',
                   style: TextStyle(fontSize: 15.sp),
                 ),
                 subtitle: Text(
-                  '份量: ${intakeSize.toStringAsFixed(2)} x $servingUnit',
+                  '${CusAL.of(context).eatableSize}: ${cusDoubleTryToIntString(intakeSize)} x $servingUnit',
                   style: TextStyle(fontSize: 15.sp),
                 ),
               ),
@@ -551,31 +413,30 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
   }
 
   Widget _buildSummaryTable(List<CusNutrientInfo> formatList) {
-    var calorie = formatList
-        .firstWhere((e) => e.label == "calorie")
-        .value
-        .toStringAsFixed(2);
-    var protein = formatList
-        .firstWhere((e) => e.label == "protein")
-        .value
-        .toStringAsFixed(2);
-    var cho =
-        formatList.firstWhere((e) => e.label == "cho").value.toStringAsFixed(2);
-    var fat =
-        formatList.firstWhere((e) => e.label == "fat").value.toStringAsFixed(2);
+    var calorie = cusDoubleTryToIntString(
+      formatList.firstWhere((e) => e.label == "calorie").value,
+    );
+    var protein = cusDoubleTryToIntString(
+      formatList.firstWhere((e) => e.label == "protein").value,
+    );
+    var cho = cusDoubleTryToIntString(
+      formatList.firstWhere((e) => e.label == "cho").value,
+    );
+    var fat = cusDoubleTryToIntString(
+      formatList.firstWhere((e) => e.label == "fat").value,
+    );
 
     return DataTable(
-        // dataRowHeight: 10.sp,
         dataRowMinHeight: 40.sp, // 设置行高范围
         dataRowMaxHeight: 50.sp,
         headingRowHeight: 40, // 设置表头行高
         horizontalMargin: 10, // 设置水平边距
         columnSpacing: 20.sp, // 设置列间距
-        columns: const [
-          DataColumn(label: Text('能量(大卡)'), numeric: true),
-          DataColumn(label: Text('蛋白质(克)'), numeric: true),
-          DataColumn(label: Text('脂肪(克)'), numeric: true),
-          DataColumn(label: Text('碳水(克)'), numeric: true),
+        columns: [
+          _buildDataColumn(1),
+          _buildDataColumn(2),
+          _buildDataColumn(3),
+          _buildDataColumn(4),
         ],
         rows: [
           DataRow(

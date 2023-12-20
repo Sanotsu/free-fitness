@@ -3,6 +3,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:free_fitness/models/cus_app_localizations.dart';
 import 'package:free_fitness/models/user_state.dart';
 import 'package:intl/intl.dart';
 
@@ -152,13 +153,13 @@ class _DietaryReportsState extends State<DietaryReports> {
       var cate = item.dailyFoodItem.mealCategory;
 
       // 按餐次统计总量
-      if (cate == mealNameMap[CusMeals.breakfast]!.enLabel) {
+      if (cate == MealLabels.enBreakfast) {
         nt.bfEnergy += foodIntakeSize * servingInfo.energy;
-      } else if (cate == mealNameMap[CusMeals.lunch]!.enLabel) {
+      } else if (cate == MealLabels.enLunch) {
         nt.lunchEnergy += foodIntakeSize * servingInfo.energy;
-      } else if (cate == mealNameMap[CusMeals.dinner]!.enLabel) {
+      } else if (cate == MealLabels.enDinner) {
         nt.dinnerEnergy += foodIntakeSize * servingInfo.energy;
-      } else if (cate == mealNameMap[CusMeals.other]!.enLabel) {
+      } else if (cate == MealLabels.enOther) {
         nt.otherEnergy += foodIntakeSize * servingInfo.energy;
       }
 
@@ -216,17 +217,18 @@ class _DietaryReportsState extends State<DietaryReports> {
       length: 3, // 选项卡的数量
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('饮食报告'),
-          bottom: const TabBar(
+          title: Text(CusAL.of(context).dietaryReports),
+          bottom: TabBar(
             tabs: [
-              Tab(text: "卡路里"),
-              Tab(text: "宏量素"),
-              Tab(text: "营养素"),
+              Tab(text: CusAL.of(context).dietaryReportTabs('0')),
+              Tab(text: CusAL.of(context).dietaryReportTabs('1')),
+              Tab(text: CusAL.of(context).dietaryReportTabs('2')),
             ],
           ),
           actions: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 // 下拉按钮，切换报告的时间范围
                 buildDropdownButton(),
@@ -239,8 +241,8 @@ class _DietaryReportsState extends State<DietaryReports> {
         body: isLoading
             ? buildLoader(isLoading)
             : dfiwfsList.isEmpty
-                ? const Center(
-                    child: Text("暂无饮食摄入记录"),
+                ? Center(
+                    child: Text(CusAL.of(context).noRecordNote),
                   )
                 : TabBarView(
                     children: [
@@ -295,11 +297,11 @@ class _DietaryReportsState extends State<DietaryReports> {
         text: TextSpan(
           children: <TextSpan>[
             TextSpan(
-              text: '卡路里\n',
+              text: '${CusAL.of(context).dietaryReportTabs('0')}\n',
               style: TextStyle(fontSize: 16.sp, color: Colors.black),
             ),
             TextSpan(
-              text: fntVO.calorie.toStringAsFixed(2),
+              text: cusDoubleTryToIntString(fntVO.calorie),
               style: TextStyle(
                 color: Colors.red,
                 fontSize: 24.sp,
@@ -316,13 +318,15 @@ class _DietaryReportsState extends State<DietaryReports> {
           Expanded(
               flex: 1,
               child: Text(
-                "目标已达成 ${(fntVO.calorie / valueRDA * 100).toStringAsFixed(2)} %",
+                CusAL.of(context).goalAchieved(
+                  cusDoubleTryToIntString((fntVO.calorie / valueRDA * 100)),
+                ),
                 textAlign: TextAlign.left,
               )),
           Expanded(
               flex: 1,
               child: Text(
-                "目标 $valueRDA 大卡",
+                "${CusAL.of(context).goalLabel(valueRDA)} ${CusAL.of(context).unitLabels('2')}",
                 textAlign: TextAlign.right,
               )),
         ],
@@ -369,18 +373,26 @@ class _DietaryReportsState extends State<DietaryReports> {
 
     for (var entry in properties) {
       if (entry.value != 0) {
-        rows.add(_buildDataRow(entry.key, entry.value.toStringAsFixed(2)));
+        rows.add(
+            _buildDataRow(entry.key, cusDoubleTryToIntString(entry.value)));
       }
     }
 
     return DataTable(
-      columns: const [
+      columns: [
         DataColumn(
-          label: Text('营养素', style: TextStyle(fontWeight: FontWeight.bold)),
+          label: Text(
+            CusAL.of(context).dietaryReportTabs('2'),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
         DataColumn(
-            label: Text('摄入量', style: TextStyle(fontWeight: FontWeight.bold)),
-            numeric: true),
+          label: Text(
+            CusAL.of(context).eatableSize,
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          numeric: true,
+        ),
         // DataColumn(label: Text('目标量'), numeric: true),
       ],
       rows: rows,
@@ -391,7 +403,9 @@ class _DietaryReportsState extends State<DietaryReports> {
     var temp = nutrientList.where((e) => e.enLabel == attribute).toList();
 
     return DataRow(cells: [
-      DataCell(Text(temp.isNotEmpty ? temp.first.cnLabel : attribute)),
+      DataCell(Text(temp.isNotEmpty
+          ? showCusLableMapLabel(context, temp.first)
+          : attribute)),
       DataCell(Text(value)),
       // 示例占位
       // const DataCell(Text("1000")),
@@ -443,19 +457,61 @@ class _DietaryReportsState extends State<DietaryReports> {
           fntVO.otherCalorie;
 
       legendItems = [
-        _buildLegendItem(Colors.grey, '早餐', fntVO.bfCalorie, total, "大卡"),
-        _buildLegendItem(Colors.red, '午餐', fntVO.lunchCalorie, total, "大卡"),
-        _buildLegendItem(Colors.green, '晚餐', fntVO.dinnerCalorie, total, "大卡"),
-        _buildLegendItem(Colors.blue, '小食', fntVO.otherCalorie, total, "大卡"),
+        _buildLegendItem(
+          Colors.grey,
+          CusAL.of(context).mealLabels('0'),
+          fntVO.bfCalorie,
+          total,
+          CusAL.of(context).unitLabels('2'),
+        ),
+        _buildLegendItem(
+          Colors.red,
+          CusAL.of(context).mealLabels('1'),
+          fntVO.lunchCalorie,
+          total,
+          CusAL.of(context).unitLabels('2'),
+        ),
+        _buildLegendItem(
+          Colors.green,
+          CusAL.of(context).mealLabels('2'),
+          fntVO.dinnerCalorie,
+          total,
+          CusAL.of(context).unitLabels('2'),
+        ),
+        _buildLegendItem(
+          Colors.blue,
+          CusAL.of(context).mealLabels('3'),
+          fntVO.otherCalorie,
+          total,
+          CusAL.of(context).unitLabels('2'),
+        ),
       ];
     } else {
       // 否则就是宏量素 macro
       double total = fntVO.totalCHO + fntVO.totalFat + fntVO.protein;
 
       legendItems = [
-        _buildLegendItem(Colors.grey, '碳水', fntVO.totalCHO, total, "克"),
-        _buildLegendItem(Colors.red, '脂肪', fntVO.totalFat, total, "克"),
-        _buildLegendItem(Colors.green, '蛋白质', fntVO.protein, total, "克"),
+        _buildLegendItem(
+          Colors.grey,
+          CusAL.of(context).mainNutrients('4'),
+          fntVO.totalCHO,
+          total,
+          CusAL.of(context).unitLabels('0'),
+        ),
+        _buildLegendItem(
+          Colors.red,
+          CusAL.of(context).mainNutrients('3'),
+          fntVO.totalFat,
+          total,
+          CusAL.of(context).unitLabels('0'),
+        ),
+        _buildLegendItem(
+          Colors.green,
+          CusAL.of(context).mainNutrients('2'),
+          fntVO.protein,
+          total,
+          CusAL.of(context).unitLabels('0'),
+        ),
       ];
     }
 
@@ -480,7 +536,7 @@ class _DietaryReportsState extends State<DietaryReports> {
           SizedBox(width: 8.sp),
           Expanded(
             child: Text(
-              '$label - ${(value / total * 100).toStringAsFixed(1)}% - ${value.toStringAsFixed(2)} $unit',
+              '$label - ${(value / total * 100).toStringAsFixed(1)}% - ${cusDoubleTryToIntString(value)} $unit',
             ),
           ),
         ],
@@ -544,8 +600,17 @@ class _DietaryReportsState extends State<DietaryReports> {
           ];
 
     List<String> labels = type == CusChartType.calory
-        ? ["早餐", "午餐", "晚餐", "小食"]
-        : ["碳水", "脂肪", "蛋白质"];
+        ? [
+            CusAL.of(context).mealLabels('0'),
+            CusAL.of(context).mealLabels('1'),
+            CusAL.of(context).mealLabels('2'),
+            CusAL.of(context).mealLabels('3'),
+          ]
+        : [
+            CusAL.of(context).mainNutrients('4'),
+            CusAL.of(context).mainNutrients('3'),
+            CusAL.of(context).mainNutrients('2'),
+          ];
 
     // 根据颜色和标签绘制图例
     List<Widget> legendWidgets = colors
@@ -558,6 +623,7 @@ class _DietaryReportsState extends State<DietaryReports> {
                   height: 14.sp,
                   color: entry.value,
                 ),
+                SizedBox(width: 4.sp),
                 Text(labels[entry.key]),
                 SizedBox(width: 8.sp),
               ],
@@ -571,7 +637,11 @@ class _DietaryReportsState extends State<DietaryReports> {
         child: Column(
           children: [
             ListTile(
-              title: Text(type == CusChartType.calory ? '食物摄入' : '宏量素摄入'),
+              title: Text(
+                type == CusChartType.calory
+                    ? CusAL.of(context).intakeLabels('0')
+                    : CusAL.of(context).intakeLabels('1'),
+              ),
             ),
             SizedBox(height: 10.sp),
             Row(
@@ -622,7 +692,7 @@ class _DietaryReportsState extends State<DietaryReports> {
               ),
             ),
             DataCell(Text(entry.value.length.toString())),
-            DataCell(Text(tempNt.calorie.toStringAsFixed(2))),
+            DataCell(Text(cusDoubleTryToIntString(tempNt.calorie))),
           ],
         );
       } else {
@@ -640,9 +710,9 @@ class _DietaryReportsState extends State<DietaryReports> {
                 ),
               ),
             ),
-            DataCell(Text(tempNt.totalCHO.toStringAsFixed(2))),
-            DataCell(Text(tempNt.totalFat.toStringAsFixed(2))),
-            DataCell(Text(tempNt.protein.toStringAsFixed(2))),
+            DataCell(Text(cusDoubleTryToIntString(tempNt.totalCHO))),
+            DataCell(Text(cusDoubleTryToIntString(tempNt.totalFat))),
+            DataCell(Text(cusDoubleTryToIntString(tempNt.protein))),
           ],
         );
       }
@@ -650,14 +720,17 @@ class _DietaryReportsState extends State<DietaryReports> {
 
     tempRows.add(DataRow(
       cells: [
-        const DataCell(
-          Text("合计", style: TextStyle(fontWeight: FontWeight.bold)),
+        DataCell(
+          Text(
+            CusAL.of(context).countLabels('0'),
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
         DataCell(
           Text(
             type == CusChartType.calory
                 ? "x ${dfiwfsList.length}"
-                : fntVO.totalCHO.toStringAsFixed(2),
+                : cusDoubleTryToIntString(fntVO.totalCHO),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
@@ -665,8 +738,8 @@ class _DietaryReportsState extends State<DietaryReports> {
           SizedBox(
             child: Text(
               type == CusChartType.calory
-                  ? fntVO.calorie.toStringAsFixed(2)
-                  : fntVO.totalFat.toStringAsFixed(2),
+                  ? cusDoubleTryToIntString(fntVO.calorie)
+                  : cusDoubleTryToIntString(fntVO.totalFat),
               textAlign: TextAlign.end,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -676,7 +749,7 @@ class _DietaryReportsState extends State<DietaryReports> {
           DataCell(
             SizedBox(
               child: Text(
-                fntVO.protein.toStringAsFixed(2),
+                cusDoubleTryToIntString(fntVO.protein),
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
@@ -690,7 +763,13 @@ class _DietaryReportsState extends State<DietaryReports> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          ListTile(title: Text(type == CusChartType.calory ? '食物摄入' : '宏量素摄入')),
+          ListTile(
+            title: Text(
+              type == CusChartType.calory
+                  ? CusAL.of(context).intakeLabels('0')
+                  : CusAL.of(context).intakeLabels('1'),
+            ),
+          ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 5.sp),
             // 根据其子部件的大小调整其自身的大小(等比例缩放)，从而使得子部件能够适应父部件的大小。
@@ -699,16 +778,37 @@ class _DietaryReportsState extends State<DietaryReports> {
               child: DataTable(
                 columnSpacing: 10.0,
                 columns: type == CusChartType.calory
-                    ? const [
-                        DataColumn(label: Text('食物名称')),
-                        DataColumn(label: Text('摄入次数'), numeric: true),
-                        DataColumn(label: Text('摄入(大卡)'), numeric: true),
+                    ? [
+                        DataColumn(label: Text(CusAL.of(context).foodName)),
+                        DataColumn(
+                          label: Text(CusAL.of(context).intakeLabels('2')),
+                          numeric: true,
+                        ),
+                        DataColumn(
+                          label: Text(CusAL.of(context).intakeLabels('3')),
+                          numeric: true,
+                        ),
                       ]
-                    : const [
-                        DataColumn(label: Text('食物名称')),
-                        DataColumn(label: Text('碳水(克)'), numeric: true),
-                        DataColumn(label: Text('脂肪(克)'), numeric: true),
-                        DataColumn(label: Text('蛋白质(克)'), numeric: true),
+                    : [
+                        DataColumn(label: Text(CusAL.of(context).foodName)),
+                        DataColumn(
+                          label: Text(
+                            CusAL.of(context).foodTableMainLabels('4'),
+                          ),
+                          numeric: true,
+                        ),
+                        DataColumn(
+                          label: Text(
+                            CusAL.of(context).foodTableMainLabels('3'),
+                          ),
+                          numeric: true,
+                        ),
+                        DataColumn(
+                          label: Text(
+                            CusAL.of(context).foodTableMainLabels('2'),
+                          ),
+                          numeric: true,
+                        ),
                       ],
                 rows: tempRows,
               ),
@@ -725,13 +825,15 @@ class _DietaryReportsState extends State<DietaryReports> {
       borderRadius: const BorderRadius.all(Radius.circular(10)),
       // 默认背景是白色，但我需要字体默认是白色，和appbar中其他保持一致，那么背景色改为灰色
       dropdownColor: const Color.fromARGB(255, 124, 96, 96),
+      isDense: true,
       items: dietaryReportDisplayModeList
           .map<DropdownMenuItem<CusLabel>>(
             (CusLabel value) => DropdownMenuItem<CusLabel>(
               value: value,
               child: Text(
-                value.cnLabel,
-                style: TextStyle(color: Colors.white, fontSize: 20.sp),
+                showCusLableMapLabel(context, value),
+                style: TextStyle(color: Colors.white, fontSize: 15.sp),
+                textAlign: TextAlign.end,
               ),
             ),
           )
@@ -759,34 +861,39 @@ class _DietaryReportsState extends State<DietaryReports> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: const Text('选择导出范围'),
-              content: DropdownMenu<CusLabel>(
-                initialSelection: exportDateList.first,
-                onSelected: (CusLabel? value) {
-                  setState(() {
-                    exportValue = value!;
-                  });
-                },
-                dropdownMenuEntries: exportDateList
-                    .map<DropdownMenuEntry<CusLabel>>((CusLabel value) {
-                  return DropdownMenuEntry<CusLabel>(
-                    value: value,
-                    label: value.cnLabel,
-                  );
-                }).toList(),
+              title: Text(CusAL.of(context).exportRangeNote),
+              content: SizedBox(
+                height: 60.sp,
+                child: Center(
+                  child: DropdownMenu<CusLabel>(
+                    initialSelection: exportDateList.first,
+                    onSelected: (CusLabel? value) {
+                      setState(() {
+                        exportValue = value!;
+                      });
+                    },
+                    dropdownMenuEntries: exportDateList
+                        .map<DropdownMenuEntry<CusLabel>>((CusLabel value) {
+                      return DropdownMenuEntry<CusLabel>(
+                        value: value,
+                        label: showCusLableMapLabel(context, value),
+                      );
+                    }).toList(),
+                  ),
+                ),
               ),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context, false);
                   },
-                  child: const Text('取消'),
+                  child: Text(CusAL.of(context).cancelLabel),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.pop(context, true);
                   },
-                  child: const Text('确认'),
+                  child: Text(CusAL.of(context).confirmLabel),
                 ),
               ],
             );

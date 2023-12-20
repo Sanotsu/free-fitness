@@ -3,7 +3,7 @@
 
     
 
-    "mainNutrients": "{num, select, 0{能量} 1{卡路里} 2{蛋白质} 3{脂肪} 4{碳水} other{其他} }",
+    "mainNutrients": "{num, select, 0{能量} 1{卡路里} 2{蛋白质} 3{脂肪} 4{碳水} 5{RDI} other{其他} }",
     "@mainNutrients": {
     "description": "主要营养素标签"
     },
@@ -90,16 +90,29 @@
     "dietaryRecordsSubtitle":"每日饮食记录数据管理",
     "mealGallery":"餐食相册",
     "mealGallerySubtitle":"浏览已有餐点食物照片",
+
+    "mealPhotos":"餐次相册",
+
+    "mealLabels": "{num, select, 0{早餐} 1{午餐} 2{晚餐} 3{小食} other{其他} }",
+    "@mealLabels": {
+    "description": "餐次信息"
+    },
     
     "food":"食物",
     "notFound":"找不到?",
-    "foodName":"食物名称",
+    "foodName":"食物名",
     "foodDetail":"食物详情",
     "foodBasicInfo":"食物基本信息",
     "foodNutrientInfo":"食物单份营养素信息",
     "servingUnit":"单份单位",
     "servingEquivalence":"等价度量值及单位",
     "nutrientLabel":"营养成分",
+    "mainNutrientLabel":"主要营养信息",
+    "allNutrientLabel":"全部营养信息",
+    "eatableSize":"食用量",
+
+    "dietaryReportExport":"饮食记录导出",
+
 
 
     "foodTableMainLabels": "{num, select, 0{单份} 1{能量(大卡)} 2{蛋白质(克)} 3{脂肪(克)} 4{碳水(克)} 5{微量元素(毫克)} other{其他} }",
@@ -112,11 +125,61 @@
     "description": "表格展示营养素的主要栏位"
     },
 
+    "countLabels": "{num, select, 0{总计} 1{平均} other{Other} }",
+    "@countLabels": {
+    "description": "总计平均等标签"
+    },
+
     "foodImport":"导入食物JSON数据",
     "importFinished":"数据已经插入数据库",
     "uploadingItem":"待上传的动作信息概述如下",
     "jsonFiles":"json文件列表:",
     "foodLabelNote":"从左到右为: 索引-代号-名称-能量(大卡)",
+
+    "rangeLabels": "{num, select, 0{昨天} 1{今天} 2{明天} 3{上周} 4{本周} other{其他} }",
+    "@rangeLabels": {
+    "description": "几个常见的时间范围"
+    },
+
+    "calorieLabels": "{num, select, 0{剩余的卡路里} 1{消耗的卡路里} 2{卡路里} other{其他} }",
+    "@calorieLabels": {
+    "description": "饮食日记条目的头部说明"
+    },
+
+    "illustratedDesc": "{num, select, 0{当日三大营养素占比} 1{主要营养素摄入量} 2{卡路里} other{Other} }",
+    "@illustratedDesc": {
+    "description": "饮食日记条目的底部的图示说明"
+    },
+
+    "photoLabel":"照片 ({count})",
+
+    "dietaryAddTabs": "{num, select, 0{最近记录} 1{食物列表} 2{数量} 3{单位} 4{添加新单位?} 5{餐次}  other{其他} }",
+    "@dietaryAddTabs": {
+    "description": "饮食日记条目新增时的tab页面标题和表单栏位"
+    },
+
+    "dietaryReportTabs": "{num, select, 0{卡路里} 1{宏量素} 2{营养素} other{其他} }",
+    "@dietaryReportTabs": {
+    "description": "饮食报告页面的tab页面标题和表单栏位"
+    },
+
+    "intakeLabels": "{num, select, 0{食物摄入} 1{宏量素摄入} 2{摄入次数} 3{摄入大卡} other{其他} }",
+    "@intakeLabels": {
+    "description": "饮食报告页面食物摄入相关栏位"
+    },
+
+
+
+    "goalAchieved":"目标已达成{pct}%",
+    "goalLabel":"目标: {number}",
+
+
+    "dietaryCalendar":"饮食日历表格统计",
+
+    "dietaryCalendarLabels": "{num, select, 0{当月摄入统计} 1{当日摄入总量} 2{详细摄入数据} other{Other} }",
+    "@dietaryCalendarLabels": {
+    "description": "饮食日历表格统计的栏位标签"
+    },
 
 
     "diary":"手记",
@@ -153,6 +216,7 @@
     "backLabel":"返回",
     "saveLabel":"保存",
     "eidtLabel":"修改{name}",
+    "updateLabel":"更新",
     "addLabel":"新增{name}",
     "deleteLabel":"删除",
     "recordLabel":"记录",
@@ -163,6 +227,7 @@
     "imageUploadLabel":"图片上传",
 
     "tipLabel":"提示",
+    "itemLabel":"{num} 项",
   
     "alertTitle": "提示",
 
@@ -198,7 +263,7 @@
     "lightMode":"浅色模式",
     "settingLabels": "{ setting, select, 0{基本信息} 1{体重趋势} 2{摄入目标} 3{运动设置} 4{备份恢复} 5{更多设置} other{未知设置} }",
 
-    
+    "exportRangeNote":"选择导出范围",
 
     "importJsonError":"导入json文件出错",
     "importJsonErrorText":"文件名称:\n{path}\n\n错误信息:\n{msg}",
@@ -206,7 +271,9 @@
     "invalidFormErrorText":"表单验证未通过",
     "uniqueErrorText":"{text}已存在",
     "noStorageErrorText":"用户已禁止访问内部存储,无法进行json文件导入。",
-    "requiredErrorText":"{text}不可为空"
+    "requiredErrorText":"{text}不可为空",
+    "numericErrorText":"{text}只能是数字"
+    
     
     
 }

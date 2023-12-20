@@ -1,7 +1,7 @@
 {
   "appTitle": "Free Fitness",
 
-  "mainNutrients": "{num, select, 0{Energy} 1{Calorie} 2{Protein} 3{Fat} 4{CHO} other{Other} }",
+  "mainNutrients": "{num, select, 0{Energy} 1{Calorie} 2{Protein} 3{Fat} 4{CHO} 5{RDI} other{Other} }",
   "@mainNutrients": {
   "description": "主要营养素标签"
   },
@@ -89,6 +89,14 @@
   "mealGallery":"Meal Gallery",
   "mealGallerySubtitle":"View daily meal photos",
 
+  "mealPhotos":"Meal Photos",
+
+  "mealLabels": "{num, select, 0{Breakfast} 1{Lunch} 2{Dinner} 3{Other} other{其他} }",
+  "@mealLabels": {
+  "description": "餐次信息"
+  },
+    
+
   "food":"Foods",
   "notFound":"NotFound?",
   "foodName":"Name",
@@ -98,7 +106,11 @@
   "servingUnit":"Serving Unit",
   "servingEquivalence":"Equivalence Unit",
   "nutrientLabel":"Nutrients",
+  "mainNutrientLabel":"Main Nutrients",
+  "allNutrientLabel":"Nutritional Information",
+  "eatableSize":"Eatable",
 
+  "dietaryReportExport":"Export dietary records",
 
   "foodTableMainLabels": "{num, select, 0{Unit} 1{Energy(kcal)} 2{Protein(g)} 3{Fat(g)} 4{CHO(g)} 5{Micronutrient(mg)} other{Other} }",
   "@foodTableMainLabels": {
@@ -110,6 +122,11 @@
   "description": "表格展示营养素的主要栏位"
   },
 
+  "countLabels": "{num, select, 0{Total} 1{AVG} other{Other} }",
+  "@countLabels": {
+  "description": "总计平均等标签"
+  },
+
 
   "foodImport":"Import Food Json",
   "importFinished":"Data has been inserted into the database",
@@ -117,8 +134,51 @@
   "jsonFiles":"Json Files:",
   "foodLabelNote":"LTR: index - code - name - energy(kcal)",
 
+  "rangeLabels": "{num, select, 0{Yesterday} 1{Today} 2{Tomorrow} 3{LastWeek} 4{ThisWeek} other{Other} }",
+  "@rangeLabels": {
+  "description": "几个常见的时间范围"
+  },
+
+  "calorieLabels": "{num, select, 0{Calories Remaining} 1{Calories Consumed} 2{Calories} other{Other} }",
+  "@calorieLabels": {
+  "description": "饮食日记条目的头部说明"
+  },
+
   
+  "illustratedDesc": "{num, select, 0{The Proportion} 1{Main Nutrient Intake} 2{Calories} other{Other} }",
+  "@illustratedDesc": {
+  "description": "饮食日记条目的底部的图示说明"
+  },
  
+
+  "photoLabel":"Photo ({count})",
+
+  "dietaryAddTabs": "{num, select, 0{Recently Eaten} 1{Food List} 2{Size} 3{Unit} 4{New Unit?} 5{Meal}  other{Other} }",
+  "@dietaryAddTabs": {
+  "description": "饮食日记条目新增时的tab页面标题"
+  },
+
+  "dietaryReportTabs": "{num, select, 0{Calories} 1{Macros} 2{Nutrients} other{Other} }",
+  "@dietaryReportTabs": {
+  "description": "饮食报告页面的tab页面标题和表单栏位"
+  },
+
+  "intakeLabels": "{num, select, 0{Foods Eaten} 1{Macros Eaten} 2{Times Eaten} 3{Cals(kcal)} other{Other} }",
+  "@intakeLabels": {
+  "description": "饮食报告页面食物摄入相关栏位"
+  },
+
+
+  "goalAchieved":"{pct}% of goal",
+  "goalLabel":"Goal: {number}",
+
+  
+  "dietaryCalendar":"Dietary Calendar",
+
+ "dietaryCalendarLabels": "{num, select, 0{Month Intake} 1{Today Intake} 2{Detailed Intake} other{Other} }",
+  "@dietaryCalendarLabels": {
+  "description": "饮食日历表格统计的栏位标签"
+  },
 
   "diary":"Diary",
   "me":"Me",
@@ -155,6 +215,7 @@
   "backLabel":"Back",
   "saveLabel":"Save",
   "eidtLabel":"Edit {name}",
+  "updateLabel":"Update",
   "addLabel":"Add {name}",
   "deleteLabel":"Delete",
   "recordLabel":"Record",
@@ -163,7 +224,10 @@
   "searchLabel":"Search",
   "optionsLabel":"Options",
   "imageUploadLabel":"Image Upload",
+
   "tipLabel":"Notification",
+  "itemLabel":"{num} item(s)",
+
 
   "alertTitle": "Alert",
 
@@ -200,19 +264,15 @@
   "lightMode":"Light Mode",
   "settingLabels": "{ setting, select, 0{Basic Info} 1{Weight Trend} 2{Intake Goal} 3{Training Setting} 4{Backup & Restore} 5{More Settings} other{Unknown Setting} }",
   
+  "exportRangeNote":"Select export range",
+
   "importJsonError":"Import json file error",
   "importJsonErrorText":"Filename:\n{path}\n\nError:\n{msg}",
 
   "invalidFormErrorText":"Form validation failed",
   "uniqueErrorText":"{text} already exists",
   "noStorageErrorText":"The user has disabled access to internal storage and cannot import JSON files",
-  "requiredErrorText":"{text} required"
+  "requiredErrorText":"{text} required",
+  "numericErrorText":"{text} must be numeric"
 
-
-
-
-  
-
-  
- 
 }

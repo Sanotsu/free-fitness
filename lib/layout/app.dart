@@ -4,6 +4,7 @@ import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:free_fitness/layout/init_guide_page.dart';
 
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -41,10 +42,13 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
+            // form builder表单验证的多国语言
+            FormBuilderLocalizations.delegate,
           ],
           supportedLocales: const [
             Locale('zh', 'CH'),
             Locale('en', 'US'),
+            ...FormBuilderLocalizations.supportedLocales,
           ],
           // locale: null,
           // locale: const Locale('en'),

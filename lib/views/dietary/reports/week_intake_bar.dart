@@ -6,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 import '../../../common/global/constants.dart';
+import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 
 class WeekIntakeBar extends StatefulWidget {
@@ -56,7 +58,9 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
             List<double> toYList =
                 rod.rodStackItems.map((item) => item.toY).toList();
 
-            var unit = widget.type == CusChartType.calory ? "大卡" : "克";
+            var unit = widget.type == CusChartType.calory
+                ? CusAL.of(context).unitLabels('2')
+                : CusAL.of(context).unitLabels('0');
 
             String getNutrientString(String name, int index) {
               double nutrientAmount = toYList[index] - fromYList[index];
@@ -65,10 +69,14 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
             }
 
             if (widget.type == CusChartType.macro) {
-              String weekDay = weekdayStringMap[group.x + 1]?.cnLabel ?? "";
-              String choStr = getNutrientString('碳水', 0);
-              String fatStr = getNutrientString('脂肪', 1);
-              String proteinStr = getNutrientString('蛋白质', 2);
+              String weekDay =
+                  showCusLableMapLabel(context, weekdayStringMap[group.x + 1]);
+              String choStr =
+                  getNutrientString(CusAL.of(context).mainNutrients('4'), 0);
+              String fatStr =
+                  getNutrientString(CusAL.of(context).mainNutrients('3'), 1);
+              String proteinStr =
+                  getNutrientString(CusAL.of(context).mainNutrients('2'), 2);
 
               // 构建气泡框显示的内容
               return BarTooltipItem(
@@ -82,11 +90,16 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
                 ],
               );
             } else {
-              String weekDay = weekdayStringMap[group.x + 1]?.cnLabel ?? "";
-              String bfStr = getNutrientString('早餐', 0);
-              String lunchStr = getNutrientString('午餐', 1);
-              String dinnerStr = getNutrientString('晚餐', 2);
-              String otherStr = getNutrientString('小食', 3);
+              String weekDay =
+                  showCusLableMapLabel(context, weekdayStringMap[group.x + 1]);
+              String bfStr =
+                  getNutrientString(CusAL.of(context).mealLabels('0'), 0);
+              String lunchStr =
+                  getNutrientString(CusAL.of(context).mealLabels('1'), 1);
+              String dinnerStr =
+                  getNutrientString(CusAL.of(context).mealLabels('2'), 2);
+              String otherStr =
+                  getNutrientString(CusAL.of(context).mealLabels('3'), 3);
 
               // 构建气泡框显示的内容
               return BarTooltipItem(
@@ -163,13 +176,13 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
     );
   }
 
-  // 底部的标签(周一到周五)
+  // 底部的标签(周一到周日)
   Widget _bottomTitles(double value, TitleMeta meta) {
     return SideTitleWidget(
       axisSide: meta.axisSide,
       fitInside: SideTitleFitInsideData.disable(),
       child: Text(
-        weekdayStringMap[value.toInt() + 1]?.cnLabel ?? '',
+        showCusLableMapLabel(context, weekdayStringMap[value.toInt() + 1]),
         style: TextStyle(fontSize: 10.sp),
       ),
     );
@@ -180,7 +193,10 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
     if (value == meta.max) {
       return Container();
     }
-    var unit = widget.type == CusChartType.calory ? "大卡" : "克";
+    var unit = widget.type == CusChartType.calory
+        ? CusAL.of(context).unitLabels('2')
+        : CusAL.of(context).unitLabels('0');
+
     return SideTitleWidget(
       axisSide: meta.axisSide,
       child: Text(

@@ -10,6 +10,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 
 class SaveMealPhotos extends StatefulWidget {
@@ -71,7 +72,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
     // 最上面图片走马灯，下面餐次item信息，action是保存和取消/返回按钮
     return Scaffold(
       appBar: AppBar(
-        title: const Text('餐次照片'),
+        title: Text(CusAL.of(context).mealPhotos),
         actions: [
           if (!isEditing)
             TextButton(
@@ -80,9 +81,9 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                   isEditing = !isEditing;
                 });
               },
-              child: const Text(
-                "更新",
-                style: TextStyle(color: Colors.white),
+              child: Text(
+                CusAL.of(context).updateLabel,
+                style: TextStyle(color: Theme.of(context).canvasColor),
               ),
             ),
           if (isEditing)
@@ -144,7 +145,11 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                   } catch (e) {
                     // 将错误信息展示给用户
                     if (!mounted) return;
-                    commonExceptionDialog(context, "异常提醒", e.toString());
+                    commonExceptionDialog(
+                      context,
+                      CusAL.of(context).exceptionWarningTitle,
+                      e.toString(),
+                    );
 
                     setState(() {
                       isLoading = false;
@@ -156,9 +161,9 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                   }
                 }
               },
-              child: const Text(
-                "保存",
-                style: TextStyle(color: Colors.white),
+              child: Text(
+                CusAL.of(context).saveLabel,
+                style: TextStyle(color: Theme.of(context).canvasColor),
               ),
             )
         ],
@@ -174,40 +179,46 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
               key: _formKey,
               child: Column(
                 children: [
-                  FormBuilderFilePicker(
-                    name: 'images',
-                    initialValue: initImages,
-                    maxFiles: null,
-                    allowMultiple: true,
-                    previewImages: true,
-                    // onChanged: (val) =>
-                    //     debugPrint("onChanged ${val.toString()}"),
-                    // onSaved: (val) => debugPrint("onsave ${val.toString()}"),
-                    typeSelectors: const [
-                      TypeSelector(
-                        type: FileType.image,
-                        selector: Row(
-                          children: <Widget>[
-                            Icon(Icons.file_upload),
-                            Text('图片上传'),
-                          ],
-                        ),
-                      )
-                    ],
-                    customTypeViewerBuilder: (children) => Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: children,
+                  Padding(
+                    padding: EdgeInsets.all(20.sp),
+                    child: FormBuilderFilePicker(
+                      name: 'images',
+                      initialValue: initImages,
+                      maxFiles: null,
+                      allowMultiple: true,
+                      previewImages: true,
+                      // onChanged: (val) =>
+                      //     debugPrint("onChanged ${val.toString()}"),
+                      // onSaved: (val) => debugPrint("onsave ${val.toString()}"),
+                      typeSelectors: [
+                        TypeSelector(
+                          type: FileType.image,
+                          selector: Row(
+                            children: <Widget>[
+                              const Icon(Icons.file_upload),
+                              Text(CusAL.of(context).imageUploadLabel),
+                            ],
+                          ),
+                        )
+                      ],
+                      customTypeViewerBuilder: (children) => Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: children,
+                      ),
+                      // onFileLoading: (val) {
+                      //   debugPrint("onFileLoading ${val.toString()}");
+                      // },
                     ),
-                    // onFileLoading: (val) {
-                    //   debugPrint("onFileLoading ${val.toString()}");
-                    // },
                   ),
                 ],
               ),
             ),
           SizedBox(height: 10.sp),
 
-          Text(widget.mealtime.cnLabel, style: TextStyle(fontSize: 22.sp)),
+          Text(
+            showCusLableMapLabel(context, widget.mealtime),
+            style: TextStyle(fontSize: 22.sp),
+          ),
 
           // 预览已有的图片
           ListView.builder(
@@ -228,7 +239,9 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
 
                 return ListTile(
                   title: Text("${food.product} (${food.brand})"),
-                  subtitle: Text("$intake - $calories 卡路里"),
+                  subtitle: Text(
+                    "$intake - $calories ${CusAL.of(context).calorieLabels('2')}",
+                  ),
                 );
               }),
         ],

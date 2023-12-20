@@ -10,8 +10,10 @@ import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../reports/index.dart';
 import 'add_intake_item/index.dart';
+import 'format_tools.dart';
 import 'report_calendar_summary.dart';
 import 'save_meal_photo.dart';
 import 'add_intake_item/simple_food_detail.dart';
@@ -178,11 +180,11 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       var pickedDateStr = "${picked.year}${picked.month}${picked.day}";
 
       if (pickedDateStr == yesterdayStr) {
-        formatDate = "昨天";
+        formatDate = CusAL.of(context).rangeLabels('0');
       } else if (pickedDateStr == todayStr) {
-        formatDate = "今天";
+        formatDate = CusAL.of(context).rangeLabels('1');
       } else if (pickedDateStr == tomorrowStr) {
-        formatDate = "明天";
+        formatDate = CusAL.of(context).rangeLabels('2');
       }
 
       setState(() {
@@ -196,6 +198,13 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
   @override
   Widget build(BuildContext context) {
+    // 不能在init处理这个
+    if (showedDateStr == "今天") {
+      setState(() {
+        showedDateStr = CusAL.of(context).rangeLabels('1');
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         // 饮食记录首页的日期选择器是单日的，可以不用第三方库，简单showDatePicker就好
@@ -277,46 +286,52 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       ),
       body: isLoading
           ? buildLoader(isLoading)
-          : SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Center(
-                    child: SizedBox(
-                      height: 70.sp,
-                      child: buildDailyOverviewCard(),
+          : Column(
+              children: [
+                Center(
+                  child: SizedBox(
+                    height: 70.sp,
+                    child: buildDailyOverviewCard(),
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListView.builder(
+                          // 解决 NEEDS-PAINT ……的问题
+                          shrinkWrap: true,
+                          // 只有外部的 SingleChildScrollView 滚动，这个内部的listview不滚动
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: mealtimeList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final mealtime = mealtimeList[index];
+                            return Column(
+                              children: [
+                                buildMealCard(mealtime),
+                                SizedBox(height: 5.sp)
+                              ],
+                            );
+                          },
+                        ),
+
+                        /// 当日主要营养素占比(当日有饮食摄入条目才显示，否则不显示)
+                        SizedBox(height: 5.sp),
+                        if (dfiwfsList.isNotEmpty)
+                          buildNutrientProportionCard(),
+                        // const Card(
+                        //   child: ListTile(
+                        //     title: Text('其他选项功能区(暂留)'),
+                        //   ),
+                        // ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 5.sp),
-                  ListView.builder(
-                    // 解决 NEEDS-PAINT ……的问题
-                    shrinkWrap: true,
-                    // 只有外部的 SingleChildScrollView 滚动，这个内部的listview不滚动
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: mealtimeList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final mealtime = mealtimeList[index];
-                      return Column(
-                        children: [
-                          buildMealCard(mealtime),
-                          SizedBox(height: 5.sp)
-                        ],
-                      );
-                    },
-                  ),
-
-                  /// 当日主要营养素占比(当日有饮食摄入条目才显示，否则不显示)
-                  SizedBox(height: 5.sp),
-                  if (dfiwfsList.isNotEmpty) buildNutrientProportionCard(),
-                  // const Card(
-                  //   child: ListTile(
-                  //     title: Text('其他选项功能区(暂留)'),
-                  //   ),
-                  // ),
-                ],
-              ),
+                ),
+              ],
             ),
     );
   }
@@ -324,109 +339,16 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   /// 最上面的每日概述卡片
   Widget buildDailyOverviewCard() {
     // 两种形态：只显示卡路里的基本，显示主要营养素的详细
+    var tempList = formatIntakeItemListForMarker(context, dfiwfsList);
 
-    var tempEnergy = 0.0;
-    var tempProtein = 0.0;
-    var tempFat = 0.0;
-    var tempCHO = 0.0;
-    // 这几个在底部总计可能用到
-    var tempSodium = 0.0;
-    var tempCholesterol = 0.0;
-    var tempDietaryFiber = 0.0;
-    var tempPotassium = 0.0;
-    var tempSugar = 0.0;
-
-    for (var e in dfiwfsList) {
-      var foodIntakeSize = e.dailyFoodItem.foodIntakeSize;
-      var servingInfo = e.servingInfo;
-      tempEnergy += foodIntakeSize * servingInfo.energy;
-      tempProtein += foodIntakeSize * servingInfo.protein;
-      tempFat += foodIntakeSize * servingInfo.totalFat;
-      tempCHO += foodIntakeSize * servingInfo.totalCarbohydrate;
-      tempSodium += foodIntakeSize * servingInfo.sodium;
-      tempCholesterol += foodIntakeSize * (servingInfo.cholesterol ?? 0);
-      tempDietaryFiber += foodIntakeSize * (servingInfo.dietaryFiber ?? 0);
-      tempPotassium += foodIntakeSize * (servingInfo.potassium ?? 0);
-      tempSugar += foodIntakeSize * (servingInfo.sugar ?? 0);
-    }
-
-    // 当日已经摄入的卡路里数量
-    var tempCalories = tempEnergy / oneCalToKjRatio;
+    var totalCalorie = tempList.firstWhere((e) => e.label == "calorie").value;
+    var totalProtein = tempList.firstWhere((e) => e.label == "protein").value;
+    var totalFat = tempList.firstWhere((e) => e.label == "fat").value;
+    var totalCho = tempList.firstWhere((e) => e.label == "cho").value;
 
     setState(() {
       // 当日主要营养素表格数据
-      mainNutrientsChartData = [
-        CusNutrientInfo(
-          label: "calorie",
-          value: tempCalories,
-          color: cusNutrientColors[CusNutType.calorie]!,
-          name: '卡路里',
-          unit: '大卡',
-        ),
-        CusNutrientInfo(
-          label: "energy",
-          value: tempEnergy,
-          color: cusNutrientColors[CusNutType.energy]!,
-          name: '能量',
-          unit: '千焦',
-        ),
-        CusNutrientInfo(
-          label: "protein",
-          value: tempProtein,
-          color: cusNutrientColors[CusNutType.protein]!,
-          name: '蛋白质',
-          unit: '克',
-        ),
-        CusNutrientInfo(
-          label: "fat",
-          value: tempFat,
-          color: cusNutrientColors[CusNutType.totalFat]!,
-          name: '脂肪',
-          unit: '克',
-        ),
-        CusNutrientInfo(
-          label: "cho",
-          value: tempCHO,
-          color: cusNutrientColors[CusNutType.totalCHO]!,
-          name: '碳水',
-          unit: '克',
-        ),
-        CusNutrientInfo(
-          label: "dietaryFiber",
-          value: tempDietaryFiber,
-          color: cusNutrientColors[CusNutType.dietaryFiber]!,
-          name: '膳食纤维',
-          unit: '克',
-        ),
-        CusNutrientInfo(
-          label: "sugar",
-          value: tempSugar,
-          color: cusNutrientColors[CusNutType.sugar]!,
-          name: '糖',
-          unit: '克',
-        ),
-        CusNutrientInfo(
-          label: "sodium",
-          value: tempSodium,
-          color: cusNutrientColors[CusNutType.sodium]!,
-          name: '钠',
-          unit: '毫克',
-        ),
-        CusNutrientInfo(
-          label: "cholesterol",
-          value: tempCholesterol,
-          color: cusNutrientColors[CusNutType.cholesterol]!,
-          name: '胆固醇',
-          unit: '毫克',
-        ),
-        CusNutrientInfo(
-          label: "potassium",
-          value: tempPotassium,
-          color: cusNutrientColors[CusNutType.potassium]!,
-          name: '钾',
-          unit: '毫克',
-        ),
-      ];
+      mainNutrientsChartData = tempList;
     });
 
     // 最上方的是当日摄入的主要营养素总量，根据详细和概要展示不同内容
@@ -442,8 +364,8 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildListTileText("剩余的卡路里"),
-                      _buildListTileText("消耗的卡路里"),
+                      _buildListTileText(CusAL.of(context).calorieLabels('0')),
+                      _buildListTileText(CusAL.of(context).calorieLabels('1')),
                     ],
                   )
                 : Padding(
@@ -452,17 +374,25 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                       children: [
                         TableRow(
                           children: [
-                            _buildHeaderTableCell("碳水"),
-                            _buildHeaderTableCell("蛋白质"),
-                            _buildHeaderTableCell("脂肪"),
-                            _buildHeaderTableCell("RDA"),
+                            _buildHeaderTableCell(
+                              CusAL.of(context).mainNutrients('4'),
+                            ),
+                            _buildHeaderTableCell(
+                              CusAL.of(context).mainNutrients('2'),
+                            ),
+                            _buildHeaderTableCell(
+                              CusAL.of(context).mainNutrients('3'),
+                            ),
+                            _buildHeaderTableCell(
+                              CusAL.of(context).mainNutrients('5'),
+                            ),
                           ],
                         ),
                         _buildMainMutrientsValueTableRow(
-                          tempCHO,
-                          tempProtein,
-                          tempFat,
-                          tempCalories,
+                          totalCho,
+                          totalProtein,
+                          totalFat,
+                          totalCalorie,
                           fontSize: 14.sp,
                         ),
                       ],
@@ -486,7 +416,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                     padding: EdgeInsets.all(4.sp),
                     child: _buildListTileText(
                       (dataDisplayMode == "summary"
-                              ? (valueRDA - tempCalories)
+                              ? (valueRDA - totalCalorie)
                               : valueRDA)
                           .toStringAsFixed(0),
                       textAlign: TextAlign.right,
@@ -495,7 +425,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                   Padding(
                     padding: EdgeInsets.all(4.sp),
                     child: _buildListTileText(
-                      tempCalories.toStringAsFixed(0),
+                      totalCalorie.toStringAsFixed(0),
                       textAlign: TextAlign.right,
                     ),
                   ),
@@ -572,8 +502,13 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                 flex: 3,
                 child: ListTile(
                   leading: const Icon(Icons.food_bank_sharp),
-                  title: _buildListTileText(mealtime.cnLabel, fontSize: 16.sp),
-                  subtitle: _buildListTileText('${dfiwfsMealItems.length} 项'),
+                  title: _buildListTileText(
+                    showCusLableMapLabel(context, mealtime),
+                    fontSize: 16.sp,
+                  ),
+                  subtitle: _buildListTileText(
+                    CusAL.of(context).itemLabel(dfiwfsMealItems.length),
+                  ),
                   dense: true,
                 ),
               ),
@@ -586,7 +521,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                     fontSize: 16.sp,
                   ),
                   subtitle: _buildListTileText(
-                    "卡路里",
+                    CusAL.of(context).calorieLabels("2"),
                     textAlign: TextAlign.right,
                     fontSize: 12.sp,
                   ),
@@ -638,7 +573,9 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                   initiallyExpanded: isExpandedList[mealtime.enLabel]!,
                   // 如果是概要，展开的标题只显示餐次的食物数量；是详情，则展示该餐次各项食物的主要营养素之和
                   title: dataDisplayMode == "summary"
-                      ? Text('${dfiwfsMealItems.length} 项')
+                      ? Text(
+                          CusAL.of(context).itemLabel(dfiwfsMealItems.length),
+                        )
                       : Table(
                           children: [
                             _buildMainMutrientsValueTableRow(
@@ -690,7 +627,9 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                         });
                       },
                       icon: const Icon(Icons.photo),
-                      label: Text('照片 ${_getPhotoCount(mealtime)}'),
+                      label: Text(
+                        CusAL.of(context).photoLabel(_getPhotoCount(mealtime)),
+                      ),
                     ),
                   ]),
             ),
@@ -831,7 +770,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                         fontSize: 16,
                       ),
                       subtitle: _buildListTileText(
-                        '卡路里',
+                        CusAL.of(context).calorieLabels("2"),
                         textAlign: TextAlign.right,
                         fontSize: 12,
                       ),
@@ -934,11 +873,11 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       child: Padding(
         padding: EdgeInsets.all(10.sp),
         child: SizedBox(
-          height: 500.sp,
+          height: 450.sp,
           child: Column(
             children: [
               Text(
-                '当日三大营养素占比',
+                CusAL.of(context).illustratedDesc("0"),
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
@@ -964,7 +903,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
               ),
               Divider(height: 10.sp, thickness: 2.sp),
               Text(
-                '主要营养素摄入量',
+                CusAL.of(context).illustratedDesc("1"),
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
@@ -997,7 +936,8 @@ class _DietaryRecordsState extends State<DietaryRecords> {
             tempList.fold(0, (previous, current) => previous + current.value);
         String percentage = ((data.value / total) * 100).toStringAsFixed(1);
 
-        String tempStr = "${data.value.toStringAsFixed(2)} 克";
+        String tempStr =
+            "${cusDoubleTryToIntString(data.value)}${CusAL.of(context).unitLabels('0')}";
 
         return Container(
           padding: EdgeInsets.symmetric(vertical: 4.sp),

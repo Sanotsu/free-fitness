@@ -7,6 +7,7 @@ import '../../../../../common/global/constants.dart';
 import '../../../../../common/utils/db_dietary_helper.dart';
 import '../../../../../models/dietary_state.dart';
 import '../../../../common/utils/tools.dart';
+import '../../../../models/cus_app_localizations.dart';
 import '../../foods/detail_modify_serving_info.dart';
 
 /// 2023-12-04 这个是饮食条目选择食物的时候展示的食物列表，点击之后显示的食物详情；
@@ -230,12 +231,11 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           text: TextSpan(
             children: [
               TextSpan(
-                text: '食物信息概述\n',
+                text: '${CusAL.of(context).foodBasicInfo}\n',
                 style: TextStyle(fontSize: 18.sp),
               ),
               TextSpan(
-                text:
-                    "${widget.foodItem.food.product} (${widget.foodItem.food.brand})",
+                text: "${fsInfo.food.product} (${fsInfo.food.brand})",
                 style: TextStyle(fontSize: 12.sp),
               ),
             ],
@@ -272,10 +272,13 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           FormBuilderTextField(
             name: 'serving_value',
             initialValue: cusDoubleTryToIntString(inputServingValue),
-            decoration: const InputDecoration(labelText: '数量'),
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: CusAL.of(context).dietaryAddTabs('2'),
+            ),
+            keyboardType: TextInputType.number,
             validator: FormBuilderValidators.compose([
-              FormBuilderValidators.numeric(errorText: '数量只能为数字'),
+              FormBuilderValidators.numeric(),
+              FormBuilderValidators.required(),
             ]),
             onChanged: (value) {
               if (_formKey.currentState?.validate() != true) {
@@ -294,8 +297,8 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
                 flex: 3,
                 child: FormBuilderDropdown<dynamic>(
                   name: 'serving_unit',
-                  decoration: const InputDecoration(
-                    labelText: '单位',
+                  decoration: InputDecoration(
+                    labelText: CusAL.of(context).dietaryAddTabs('3'),
                   ),
                   initialValue: servingUnitOptions[0],
                   items: servingUnitOptions
@@ -322,7 +325,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
                 child: TextButton(
                   onPressed: addNewCusServingInfo,
                   // 2023-10-21 应该也是跳转到新增food的表单，但是可能是修改或新增已有的营养素子栏位，食物信息不变化
-                  child: const Text("添加新单位?"),
+                  child: Text(CusAL.of(context).dietaryAddTabs('4')),
                 ),
               )
             ],
@@ -330,15 +333,15 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           // 切换餐次
           FormBuilderDropdown<CusLabel>(
             name: 'new_mealtime',
-            decoration: const InputDecoration(
-              labelText: '餐次',
+            decoration: InputDecoration(
+              labelText: CusAL.of(context).dietaryAddTabs('5'),
             ),
             initialValue: inputMealtimeValue,
             items: mealtimeList
                 .map((unit) => DropdownMenuItem(
                       alignment: AlignmentDirectional.center,
                       value: unit,
-                      child: Text(unit.cnLabel),
+                      child: Text(showCusLableMapLabel(context, unit)),
                     ))
                 .toList(),
             onChanged: (val) {
@@ -365,7 +368,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
             flex: 4,
             child: ElevatedButton(
               onPressed: _removeDailyFoodItem,
-              child: const Text("移除"),
+              child: Text(CusAL.of(context).deleteLabel),
             ),
           ),
         // 两个按钮之间的占位空白
@@ -375,7 +378,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
             flex: 4,
             child: ElevatedButton(
               onPressed: _updateDailyFoodItem,
-              child: const Text("修改"),
+              child: Text(CusAL.of(context).updateLabel),
             ),
           ),
 
@@ -384,7 +387,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           Expanded(
             child: ElevatedButton(
               onPressed: _addDailyFoodItem,
-              child: const Text("添加"),
+              child: Text(CusAL.of(context).addLabel("")),
             ),
           ),
       ],
@@ -396,7 +399,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
     return Column(
       children: [
         Text(
-          "主要营养信息",
+          CusAL.of(context).mainNutrientLabel,
           style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
         ),
         DecoratedBox(
@@ -413,24 +416,24 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
               TableRow(
                 children: <Widget>[
                   _genEssentialNutrientsTableCell(
-                    "卡路里",
-                    '${cusDoubleToString(inputServingValue * nutrientsInfo.energy / oneCalToKjRatio)} 大卡',
+                    CusAL.of(context).mainNutrients('1'),
+                    '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.energy / oneCalToKjRatio)} ${CusAL.of(context).unitLabels('2')}',
                   ),
                   _genEssentialNutrientsTableCell(
-                    "碳水化合物",
-                    '${cusDoubleToString(inputServingValue * nutrientsInfo.totalCarbohydrate)} 克',
+                    CusAL.of(context).mainNutrients('4'),
+                    '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.totalCarbohydrate)} ${CusAL.of(context).unitLabels('0')}',
                   ),
                 ],
               ),
               TableRow(
                 children: <Widget>[
                   _genEssentialNutrientsTableCell(
-                    "脂肪",
-                    '${cusDoubleToString(inputServingValue * nutrientsInfo.totalFat)} 克',
+                    CusAL.of(context).mainNutrients('3'),
+                    '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.totalFat)} ${CusAL.of(context).unitLabels('0')}',
                   ),
                   _genEssentialNutrientsTableCell(
-                    "蛋白质",
-                    '${cusDoubleToString(inputServingValue * nutrientsInfo.protein)} 克',
+                    CusAL.of(context).mainNutrients('2'),
+                    '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.protein)} ${CusAL.of(context).unitLabels('0')}',
                   ),
                 ],
               ),
@@ -458,9 +461,10 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
                 TextSpan(
                   text: value,
                   style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold),
+                    color: Colors.black,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -476,7 +480,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
     return Column(
       children: [
         Text(
-          "全部营养信息",
+          CusAL.of(context).allNutrientLabel,
           style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
         ),
         Table(
@@ -489,86 +493,86 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           children: [
             _buildTableRow(
-              "食用量",
+              CusAL.of(context).eatableSize,
               '${cusDoubleTryToIntString(inputServingValue)} X $inputServingUnit',
             ),
             _buildTableRow(
-              "卡路里",
-              '${cusDoubleToString(inputServingValue * nutrientsInfo.energy / oneCalToKjRatio)} 大卡',
+              CusAL.of(context).mainNutrients('1'),
+              '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.energy / oneCalToKjRatio)} ${CusAL.of(context).unitLabels('2')}',
             ),
             _buildTableRow(
-              "能量",
-              '${cusDoubleToString(inputServingValue * nutrientsInfo.energy)} 千焦',
+              CusAL.of(context).mainNutrients('0'),
+              '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.energy)} ${CusAL.of(context).unitLabels('3')}',
               labelAligh: TextAlign.right,
               fontColor: Colors.grey,
             ),
             _buildTableRow(
-              "蛋白质",
-              '${cusDoubleToString(inputServingValue * nutrientsInfo.protein)} 克',
+              CusAL.of(context).mainNutrients('2'),
+              '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.protein)} ${CusAL.of(context).unitLabels('0')}',
             ),
             _buildTableRow(
-              "脂肪",
-              '${cusDoubleToString(inputServingValue * nutrientsInfo.totalFat)} 克',
+              CusAL.of(context).fatNutrients('0'),
+              '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.totalFat)} ${CusAL.of(context).unitLabels('0')}',
             ),
-            if (nutrientsInfo.transFat != null)
+            if (nutrientsInfo.saturatedFat != null)
               _buildTableRow(
-                "反式脂肪",
-                '${cusDoubleToString(inputServingValue * nutrientsInfo.transFat!)} 克',
+                CusAL.of(context).fatNutrients('1'),
+                '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.saturatedFat!)} ${CusAL.of(context).unitLabels('0')}',
                 labelAligh: TextAlign.right,
                 fontColor: Colors.grey,
               ),
-            if (nutrientsInfo.saturatedFat != null)
+            if (nutrientsInfo.transFat != null)
               _buildTableRow(
-                "饱和脂肪",
-                '${cusDoubleToString(inputServingValue * nutrientsInfo.saturatedFat!)} 克',
+                CusAL.of(context).fatNutrients('2'),
+                '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.transFat!)} ${CusAL.of(context).unitLabels('0')}',
                 labelAligh: TextAlign.right,
                 fontColor: Colors.grey,
               ),
             if (nutrientsInfo.polyunsaturatedFat != null)
               _buildTableRow(
-                "多不饱和脂肪",
-                '${cusDoubleToString(inputServingValue * nutrientsInfo.polyunsaturatedFat!)} 克',
+                CusAL.of(context).fatNutrients('3'),
+                '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.polyunsaturatedFat!)} ${CusAL.of(context).unitLabels('0')}',
                 labelAligh: TextAlign.right,
                 fontColor: Colors.grey,
               ),
             if (nutrientsInfo.monounsaturatedFat != null)
               _buildTableRow(
-                "单不饱和脂肪",
-                '${cusDoubleToString(inputServingValue * nutrientsInfo.monounsaturatedFat!)} 克',
+                CusAL.of(context).fatNutrients('4'),
+                '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.monounsaturatedFat!)} ${CusAL.of(context).unitLabels('0')}',
                 labelAligh: TextAlign.right,
                 fontColor: Colors.grey,
               ),
             _buildTableRow(
-              "碳水化合物",
-              '${cusDoubleToString(inputServingValue * nutrientsInfo.totalCarbohydrate)} 克',
+              CusAL.of(context).choNutrients('0'),
+              '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.totalCarbohydrate)} ${CusAL.of(context).unitLabels('0')}',
             ),
             if (nutrientsInfo.sugar != null)
               _buildTableRow(
-                "糖",
-                '${cusDoubleToString(inputServingValue * nutrientsInfo.sugar!)} 克',
+                CusAL.of(context).choNutrients('1'),
+                '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.sugar!)} ${CusAL.of(context).unitLabels('0')}',
                 labelAligh: TextAlign.right,
                 fontColor: Colors.grey,
               ),
             if (nutrientsInfo.dietaryFiber != null)
               _buildTableRow(
-                "纤维",
-                '${cusDoubleToString(inputServingValue * nutrientsInfo.dietaryFiber!)} 克',
+                CusAL.of(context).choNutrients('2'),
+                '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.dietaryFiber!)} ${CusAL.of(context).unitLabels('0')}',
                 labelAligh: TextAlign.right,
                 fontColor: Colors.grey,
               ),
             _buildTableRow(
-              "钠",
-              '${cusDoubleToString(inputServingValue * nutrientsInfo.sodium)} 毫克',
+              CusAL.of(context).microNutrients('0'),
+              '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.sodium)} ${CusAL.of(context).unitLabels('1')}',
             ),
             if (nutrientsInfo.cholesterol != null)
               _buildTableRow(
-                "胆固醇",
-                '${cusDoubleToString(inputServingValue * nutrientsInfo.cholesterol!)} 毫克',
+                CusAL.of(context).microNutrients('2'),
+                '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.cholesterol!)} ${CusAL.of(context).unitLabels('1')}',
               ),
             if (nutrientsInfo.potassium != null)
               _buildTableRow(
-                "钾",
-                '${cusDoubleToString(inputServingValue * nutrientsInfo.potassium!)} 毫克',
+                CusAL.of(context).microNutrients('1'),
+                '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.potassium!)} ${CusAL.of(context).unitLabels('1')}',
               ),
           ],
         ),

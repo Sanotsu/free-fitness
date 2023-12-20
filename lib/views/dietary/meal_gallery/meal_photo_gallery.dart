@@ -5,6 +5,8 @@ import 'package:free_fitness/common/global/constants.dart';
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 
 class MealPhotoGallery extends StatefulWidget {
@@ -77,7 +79,7 @@ class _MealPhotoGalleryState extends State<MealPhotoGallery> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('饮食相册'),
+        title: Text(CusAL.of(context).mealGallery),
       ),
       body: (photoItems.isNotEmpty)
           ? ListView.builder(
@@ -91,7 +93,7 @@ class _MealPhotoGalleryState extends State<MealPhotoGallery> {
               },
               controller: scrollController,
             )
-          : const Center(child: Text("暂未上传任何餐次食物照片")),
+          : Center(child: Text(CusAL.of(context).noRecordNote)),
     );
   }
 
@@ -100,15 +102,22 @@ class _MealPhotoGalleryState extends State<MealPhotoGallery> {
       return Container();
     }
 
-    var photoList = mp.photos.split(",");
+    List<String> photoList =
+        mp.photos.trim().isNotEmpty ? mp.photos.trim().split(",") : [];
+
+    // 数据库中存的餐次信息是英文标签，但显示时则需要按当前语言显示
+    // 理论上是一定找得到一个符合条件的
+
+    var temp = mealtimeList.firstWhere((e) => e.enLabel == mp.mealCategory);
+
     if (photoList.isNotEmpty) {
       return Card(
         elevation: 5,
         child: Column(
           children: [
             ListTile(
-              title: Text("${mp.date} "),
-              subtitle: Text("${mp.mealCategory} "),
+              title: Text(mp.date),
+              subtitle: Text(showCusLableMapLabel(context, temp)),
             ),
             buildImageCarouselSlider(photoList),
           ],

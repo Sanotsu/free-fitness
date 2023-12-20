@@ -7,6 +7,7 @@ import 'package:printing/printing.dart';
 import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../common/utils/tool_widgets.dart';
+import '../../../../models/cus_app_localizations.dart';
 import '../../../../models/dietary_state.dart';
 import 'report_pdf_export.dart';
 
@@ -74,7 +75,7 @@ class _ReportPdfViewerState extends State<ReportPdfViewer> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('饮食记录导出'),
+        title: Text(CusAL.of(context).dietaryReportExport),
       ),
       body: isLoading
           ? buildLoader(isLoading)
@@ -85,6 +86,7 @@ class _ReportPdfViewerState extends State<ReportPdfViewer> {
                 // 在pdf页首会显示查询数据的日期
                 widget.startDate.split(" ")[0],
                 widget.endDate.split(" ")[0],
+                lang: box.read('language'),
               ),
             ),
     );

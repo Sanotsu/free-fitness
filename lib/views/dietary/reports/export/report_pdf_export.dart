@@ -12,25 +12,63 @@ import '../../../../common/global/constants.dart';
 import '../../../../common/utils/tools.dart';
 import '../../../../models/dietary_state.dart';
 
+Map<String, CusLabel> _pdfLabelMap = {
+  "title": CusLabel(
+      enLabel: 'Export dietary records', cnLabel: "饮食日记条目导出", value: null),
+  "headerLeft":
+      CusLabel(enLabel: 'dietary records', cnLabel: "饮食条目记录", value: null),
+  "headerRight": CusLabel(
+      enLabel: 'exported by free-fitness',
+      cnLabel: "由free-fitness导出",
+      value: null),
+  "number": CusLabel(enLabel: 'Page', cnLabel: "第", value: null),
+  "page": CusLabel(enLabel: '', cnLabel: "页", value: null),
+  "enery":
+      CusLabel(enLabel: 'Energy\n(kcal)', cnLabel: "能量\n(大卡)", value: null),
+  "protein":
+      CusLabel(enLabel: 'Protein\n(g)', cnLabel: "蛋白质\n(克)", value: null),
+  "fat": CusLabel(enLabel: 'Fat\n(g)', cnLabel: "脂肪\n(克)", value: null),
+  "cho": CusLabel(enLabel: 'CHO\n(g)', cnLabel: "碳水\n(克)", value: null),
+  "sugar": CusLabel(enLabel: 'Sugar\n(g)', cnLabel: "糖\n(克)", value: null),
+  "dietary_fibre":
+      CusLabel(enLabel: 'DietaryFiber\n(g)', cnLabel: "膳食纤维\n(克)", value: null),
+  "sodium": CusLabel(enLabel: 'Sodium\n(mg)', cnLabel: "钠\n(毫克)", value: null),
+  "potassium":
+      CusLabel(enLabel: 'Potassium\n(mg)', cnLabel: "钾\n(毫克)", value: null),
+  "cholesterol":
+      CusLabel(enLabel: 'Cholesterol\n(mg)', cnLabel: "胆固醇\n(毫克)", value: null),
+  "subtotal": CusLabel(enLabel: 'Subtotal', cnLabel: "小计", value: null),
+  "total": CusLabel(enLabel: 'Total', cnLabel: "小计", value: null),
+};
+
+// 根据当前语言显示 CusLabel 的 中文或者英文
+String _showLabel(String lang, CusLabel cusLable) {
+  return lang == "en" ? cusLable.enLabel : cusLable.cnLabel;
+}
+
 Future<Uint8List> makeReportPdf(
   List<DailyFoodItemWithFoodServing> list,
   String startDate,
-  String endDate,
-) async {
+  String endDate, {
+  String lang = "cn",
+}) async {
   // 创建PDF文档
   final pdf = pw.Document(
-    title: "饮食日记条目导出",
+    title: _showLabel(lang, _pdfLabelMap['title']!),
     author: "free-fitness",
     pageMode: PdfPageMode.fullscreen,
-    theme: pw.ThemeData.withFont(
-      // 谷歌字体不一定能够访问
-      base: await PdfGoogleFonts.notoSerifHKRegular(),
-      bold: await PdfGoogleFonts.notoSerifHKBold(),
-      // 但是使用知道的本地字体，会增加app体积
-      // fontFallback: [
-      //   pw.Font.ttf(await rootBundle.load('assets/MiSans-Regular.ttf'))
-      // ],
-    ),
+    // 导出的不是中文就不用下载字体(但是正文中有中文还是无法显示)
+    theme: lang == "cn"
+        ? pw.ThemeData.withFont(
+            // 谷歌字体不一定能够访问
+            base: await PdfGoogleFonts.notoSerifHKRegular(),
+            bold: await PdfGoogleFonts.notoSerifHKBold(),
+            // 但是使用知道的本地字体，会增加app体积
+            // fontFallback: [
+            //   pw.Font.ttf(await rootBundle.load('assets/MiSans-Regular.ttf'))
+            // ],
+          )
+        : null,
   );
 
   // 1 先把条目按天分类，每天的所有餐次放到一致pdf中
@@ -68,6 +106,7 @@ Future<Uint8List> makeReportPdf(
         date,
         startDate,
         endDate,
+        lang,
       ));
     }
   }
@@ -82,6 +121,7 @@ _buildPdfPage(
   String date,
   String startDate,
   String endDate,
+  String lang,
 ) {
   var mealDate = DateTime.parse(date);
   return pw.Page(
@@ -100,8 +140,10 @@ _buildPdfPage(
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('饮食条目记录 $startDate ~ $endDate'),
-                pw.Text('exported by free-fitness'),
+                pw.Text(
+                  '${_showLabel(lang, _pdfLabelMap['headerLeft']!)} $startDate ~ $endDate',
+                ),
+                pw.Text(_showLabel(lang, _pdfLabelMap['headerRight']!)),
               ],
             ),
           ),
@@ -109,27 +151,27 @@ _buildPdfPage(
           pw.Padding(
             padding: pw.EdgeInsets.only(bottom: 10.sp),
             child: pw.Text(
-              DateFormat.yMMMMEEEEd('zh_CN').format(mealDate),
+              DateFormat.yMMMMEEEEd().format(mealDate),
               style: pw.TextStyle(fontSize: 12.sp),
               textAlign: pw.TextAlign.left,
             ),
           ),
           // 只有一行数据的表格当做标题
-          _buildMealHeaderTable(),
+          _buildMealHeaderTable(lang),
           // // 分割线
           // pw.Divider(height: 1, borderStyle: pw.BorderStyle.dashed),
           // 具体餐次的表格数据
-          ..._buildMealBodyTable(logGroupedByMeal),
+          ..._buildMealBodyTable(logGroupedByMeal, lang),
           // 当日总计的表格数据
           pw.Padding(
             padding: pw.EdgeInsets.symmetric(vertical: 10.sp),
-            child: _buildTotalCountSubBodyTable(logData),
+            child: _buildTotalCountSubBodyTable(logData, lang),
           ),
           // 页脚内容
           pw.Footer(
             margin: const pw.EdgeInsets.only(top: 0.5 * PdfPageFormat.cm),
             trailing: pw.Text(
-              '第${context.pageNumber}/${context.pagesCount}页',
+              '${_showLabel(lang, _pdfLabelMap['number']!)} ${context.pageNumber}/${context.pagesCount} ${_showLabel(lang, _pdfLabelMap['page']!)}',
               style: pw.TextStyle(fontSize: 12.sp),
               textAlign: pw.TextAlign.right,
             ),
@@ -141,7 +183,7 @@ _buildPdfPage(
 }
 
 // 构建pdf统计页面的标题部分(只有一行数据的表格当做标题)
-_buildMealHeaderTable() {
+_buildMealHeaderTable(String lang) {
   return pw.Table(
     // 表格的边框设置
     border: pw.TableBorder.all(color: PdfColors.black),
@@ -152,15 +194,15 @@ _buildMealHeaderTable() {
             flex: 3,
             child: pw.Text("", textAlign: pw.TextAlign.left),
           ),
-          expandedHeadText('能量\n(大卡)'),
-          expandedHeadText('蛋白质\n(克)'),
-          expandedHeadText('脂肪\n(克)'),
-          expandedHeadText('碳水\n(克)'),
-          expandedHeadText('糖\n(克)'),
-          expandedHeadText('膳食纤维\n(克)'),
-          expandedHeadText('钠\n(毫克)'),
-          expandedHeadText('钾\n(毫克)'),
-          expandedHeadText('胆固醇\n(毫克)'),
+          expandedHeadText(_showLabel(lang, _pdfLabelMap['enery']!)),
+          expandedHeadText(_showLabel(lang, _pdfLabelMap['protein']!)),
+          expandedHeadText(_showLabel(lang, _pdfLabelMap['fat']!)),
+          expandedHeadText(_showLabel(lang, _pdfLabelMap['cho']!)),
+          expandedHeadText(_showLabel(lang, _pdfLabelMap['sugar']!)),
+          expandedHeadText(_showLabel(lang, _pdfLabelMap['dietary_fibre']!)),
+          expandedHeadText(_showLabel(lang, _pdfLabelMap['sodium']!)),
+          expandedHeadText(_showLabel(lang, _pdfLabelMap['potassium']!)),
+          expandedHeadText(_showLabel(lang, _pdfLabelMap['cholesterol']!)),
         ],
       )
     ],
@@ -168,21 +210,26 @@ _buildMealHeaderTable() {
 }
 
 // 构建pdf统计页面的数据表格数据部分(每餐都算一个子表格，多个子表格组合当做数据表格部分)
-_buildMealBodyTable(Map<String, List<DailyFoodItemWithFoodServing>> mealMap) {
+_buildMealBodyTable(
+  Map<String, List<DailyFoodItemWithFoodServing>> mealMap,
+  String lang,
+) {
   List<pw.Widget> rows = [];
 
   // 数据部分要严格早中晚小食的顺序进行遍历
   var tempMealList = [
-    mealNameMap[CusMeals.breakfast]!.enLabel,
-    mealNameMap[CusMeals.lunch]!.enLabel,
-    mealNameMap[CusMeals.dinner]!.enLabel,
-    mealNameMap[CusMeals.other]!.enLabel,
+    MealLabels.enBreakfast,
+    MealLabels.enLunch,
+    MealLabels.enDinner,
+    MealLabels.enOther,
   ];
 
   for (var meal in tempMealList) {
     final mealData = mealMap[meal];
 
     if (mealData != null && mealData.isNotEmpty) {
+      var tempMeal = mealtimeList.firstWhere((e) => e.enLabel == meal);
+
       rows.add(
         pw.Column(
           mainAxisAlignment: pw.MainAxisAlignment.start,
@@ -192,12 +239,12 @@ _buildMealBodyTable(Map<String, List<DailyFoodItemWithFoodServing>> mealMap) {
               padding: pw.EdgeInsets.symmetric(vertical: 10.sp),
               child: pw.Text(
                 // 理论上这里一定找得到一日四餐对应的中文名称
-                mealtimeList.firstWhere((e) => e.enLabel == meal).cnLabel,
+                lang == "en" ? tempMeal.enLabel : tempMeal.cnLabel,
                 style: pw.TextStyle(fontSize: 14.sp),
                 textAlign: pw.TextAlign.left,
               ),
             ),
-            _buildMealSubBodyTable(mealData),
+            _buildMealSubBodyTable(mealData, lang),
           ],
         ),
       );
@@ -208,7 +255,10 @@ _buildMealBodyTable(Map<String, List<DailyFoodItemWithFoodServing>> mealMap) {
 }
 
 // 构建每餐的子表格数据部分
-_buildMealSubBodyTable(List<DailyFoodItemWithFoodServing> mealData) {
+_buildMealSubBodyTable(
+  List<DailyFoodItemWithFoodServing> mealData,
+  String lang,
+) {
   var tempEnergy = 0.0;
   var tempProtein = 0.0;
   var tempFat = 0.0;
@@ -298,7 +348,10 @@ _buildMealSubBodyTable(List<DailyFoodItemWithFoodServing> mealData) {
         children: [
           pw.Expanded(
             flex: 3,
-            child: pw.Text("小计", textAlign: pw.TextAlign.right),
+            child: pw.Text(
+              _showLabel(lang, _pdfLabelMap['subtotal']!),
+              textAlign: pw.TextAlign.right,
+            ),
           ),
           expandedSubCountText((tempEnergy / oneCalToKjRatio)),
           expandedSubCountText(tempProtein),
@@ -316,7 +369,10 @@ _buildMealSubBodyTable(List<DailyFoodItemWithFoodServing> mealData) {
 }
 
 // 构建当日总计的子表格数据部分
-_buildTotalCountSubBodyTable(List<DailyFoodItemWithFoodServing> logData) {
+_buildTotalCountSubBodyTable(
+  List<DailyFoodItemWithFoodServing> logData,
+  String lang,
+) {
   var tempCount = dailyFoodItemAccumulate(logData);
 
   return pw.Table(
@@ -328,7 +384,7 @@ _buildTotalCountSubBodyTable(List<DailyFoodItemWithFoodServing> logData) {
           pw.Expanded(
             flex: 3,
             child: pw.Text(
-              "合计",
+              _showLabel(lang, _pdfLabelMap['total']!),
               textAlign: pw.TextAlign.left,
               style: pw.TextStyle(
                 fontSize: 11.sp,
@@ -387,7 +443,7 @@ pw.Widget expandedSubCountText(
   final dynamic text, {
   final pw.TextAlign align = pw.TextAlign.center,
   bool? isDouble = true,
-  PdfColor? color = PdfColors.grey,
+  PdfColor? color = PdfColors.green,
 }) =>
     pw.Expanded(
       flex: 1,
