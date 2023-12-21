@@ -25,6 +25,11 @@
     "description": "各种单位"
     },
 
+    "boolLabels": "{num, select, 0{是} 1{否} 2{真} 3{假} other{其他} }",
+    "@boolLabels": {
+    "description": "是否真假各种标签"
+    },
+
     "averageGoal": "整体宏量素目标",
     "dailyGoal": "每日宏量素目标",
     "dailyGoalBars": "每日宏量素目标图示",
@@ -72,9 +77,30 @@
     "training": "运动",
     "trainingReports": "运动报告",
     "exercise": "动作",
+    "exerciseLabel": "基础活动",
     "exerciseSubtitle": "动作库管理模块",
     "exerciseDeleteAlert":"确认要删除该动作？删除后不可恢复！",
     "exerciseInUse":"该动作 {exerciseName} 有被训练或计划使用，暂不支持删除.",
+
+    "exerciseQuerys": "{num, select, 0{训练部位} 1{代号} 2{名称} 3{级别} 4{类型} 5{分类} 6{器械} 7{计量} other{其他} }",
+    "@exerciseQuerys": {
+    "description": "常用exercise查询用的标签"
+    },
+
+    "exerciseLabels": "{num, select, 0{发力} 1{标准动作耗时} 2{主要肌肉} 3{次要肌肉} 4{技术要点} 5{语音提示要点} 6{动作图片} 7{用户上传} other{其他} }",
+    "@exerciseLabels": {
+    "description": "除了上面查询的，其他的exercise的栏位标签"
+    },
+
+    "exerciseImport":"导入动作JSON数据",
+    "exerciseLabelNote":"从左到右依次为: 索引-编号-名称-级别",
+    "exerciseImagePath":"选择json中图片公共文件夹",
+
+    "exerciseDetail": "动作详情",
+
+
+
+
     "workout": "训练",
     "workoutSubtitle": "训练组管理模块",
     "plan": "计划",
@@ -132,7 +158,7 @@
 
     "foodImport":"导入食物JSON数据",
     "importFinished":"数据已经插入数据库",
-    "uploadingItem":"待上传的动作信息概述如下",
+    "uploadingItem":"待上传的{obj}信息概述如下",
     "jsonFiles":"json文件列表:",
     "foodLabelNote":"从左到右为: 索引-代号-名称-能量(大卡)",
 
@@ -210,6 +236,7 @@
     "resetLabel":"重置",
     "queryLabel":"查询",
     "moreLabel":"更多",
+    "moreDetail": "更多详情",
     "lessLabel":"收起",
     "enterLabel":"进入",
     "skipLabel":"下一步",
@@ -225,6 +252,8 @@
     "searchLabel":"搜索",
     "optionsLabel":"选项",
     "imageUploadLabel":"图片上传",
+    "detailLabel":"详情",
+    "modifiedSuccessLabel":"变更成功",
 
     "tipLabel":"提示",
     "itemLabel":"{num} 项",

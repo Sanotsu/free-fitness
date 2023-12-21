@@ -3,10 +3,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../models/cus_app_localizations.dart';
 
 class ExerciseQueryForm extends StatefulWidget {
   final Function(Map<String, dynamic>) onQuery; // 定义回调函数属性
@@ -64,8 +64,7 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
               child: cusFormBuilerDropdown(
                 "primary_muscles",
                 musclesOptions,
-                labelText: '锻炼部位',
-                hintText: "选择锻炼部位",
+                labelText: CusAL.of(context).exerciseQuerys("0"),
                 hintStyle: TextStyle(fontSize: 14.sp),
                 isOutline: true,
               ),
@@ -80,8 +79,8 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
                 },
                 child: Text(
                   _showAdvancedOptions
-                      ? AppLocalizations.of(context)!.lessLabel
-                      : AppLocalizations.of(context)!.moreLabel,
+                      ? CusAL.of(context).lessLabel
+                      : CusAL.of(context).moreLabel,
                   style: TextStyle(fontSize: 12.sp),
                 ),
               ),
@@ -101,9 +100,12 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
                     _formKey.currentState?.fields['category']?.didChange(null);
                     _formKey.currentState?.fields['equipment']?.didChange(null);
                   });
+
+                  // 失去焦点
+                  FocusScope.of(context).requestFocus(FocusNode());
                 },
                 child: Text(
-                  AppLocalizations.of(context)!.resetLabel,
+                  CusAL.of(context).resetLabel,
                   style: TextStyle(fontSize: 12.sp),
                 ),
               ),
@@ -119,7 +121,7 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
               flex: 3,
               child: ElevatedButton(
                 onPressed: _submitForm,
-                child: Text(AppLocalizations.of(context)!.queryLabel),
+                child: Text(CusAL.of(context).queryLabel),
               ),
             ),
           ],
@@ -144,18 +146,16 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const Text("代号"),
                 Flexible(
                   child: cusFormBuilerTextField(
                     "exercise_code",
-                    hintText: "输入代号",
+                    labelText: CusAL.of(context).exerciseQuerys("1"),
                   ),
                 ),
-                const Text("名称"),
                 Flexible(
                   child: cusFormBuilerTextField(
                     "exercise_name",
-                    hintText: "输入名称",
+                    labelText: CusAL.of(context).exerciseQuerys("2"),
                   ),
                 ),
               ],
@@ -164,20 +164,18 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const Text("级别"),
                 Flexible(
                   child: cusFormBuilerDropdown(
                     "level",
                     levelOptions,
-                    hintText: "选择级别",
+                    labelText: CusAL.of(context).exerciseQuerys("3"),
                   ),
                 ),
-                const Text("类型"),
                 Flexible(
                   child: cusFormBuilerDropdown(
                     "mechanic",
                     mechanicOptions,
-                    hintText: "选择类型",
+                    labelText: CusAL.of(context).exerciseQuerys("4"),
                   ),
                 ),
               ],
@@ -185,20 +183,18 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                const Text("分类"),
                 Flexible(
                   child: cusFormBuilerDropdown(
                     "category",
                     categoryOptions,
-                    hintText: "选择分类",
+                    labelText: CusAL.of(context).exerciseQuerys("5"),
                   ),
                 ),
-                const Text("器械"),
                 Flexible(
                   child: cusFormBuilerDropdown(
                     "equipment",
                     equipmentOptions,
-                    hintText: "选择器械",
+                    labelText: CusAL.of(context).exerciseQuerys("6"),
                   ),
                 ),
               ],
@@ -215,14 +211,14 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('提示'),
+          title: Text(CusAL.of(context).tipLabel),
           content: const Text('重置查询条件，如果选中高级选项后折叠，需要展开后再重置，否则高级条件值会保留。'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('确定'),
+              child: Text(CusAL.of(context).confirmLabel),
             ),
           ],
         );

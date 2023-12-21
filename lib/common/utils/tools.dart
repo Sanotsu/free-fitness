@@ -267,3 +267,7 @@ String showCusLableMapLabel(BuildContext context, CusLabel? cusLable) {
   String curLang = Localizations.localeOf(context).languageCode;
   return curLang == "zh" ? cusLable?.cnLabel ?? '' : cusLable?.enLabel ?? '';
 }
+
+String showCusLable(CusLabel cusLable) {
+  return box.read('language') == "en" ? cusLable.enLabel : cusLable.cnLabel;
+}

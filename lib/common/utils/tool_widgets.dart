@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import '../../models/cus_app_localizations.dart';
 import '../global/constants.dart';
+import 'tools.dart';
 
 //  hexadecimal color code 转为 material color
 MaterialColor buildMaterialColor(Color color) {
@@ -67,7 +68,10 @@ List<DropdownMenuItem<Object>> genDropdownMenuItems(
         (option) => DropdownMenuItem(
           alignment: AlignmentDirectional.centerStart,
           value: option.value,
-          child: Text(option.cnLabel, style: TextStyle(fontSize: textSize)),
+          child: Text(
+            showCusLable(option),
+            style: TextStyle(fontSize: textSize),
+          ),
         ),
       )
       .toList();
@@ -100,7 +104,14 @@ Widget cusFormBuilerTextField(
       readOnly: isReadOnly,
       style: TextStyle(fontSize: valueFontSize),
       // 2023-12-04 没有传默认使用name，原本默认的.text会弹安全键盘，可能无法输入中文
-      keyboardType: keyboardType ?? TextInputType.name,
+      // 2023-12-21 enableSuggestions 设为 true后键盘类型为text就正常了。
+      // 注意：如果有最大行超过1的话，默认启用多行的键盘类型
+      enableSuggestions: true,
+      keyboardType: keyboardType ??
+          ((maxLines != null && maxLines > 1)
+              ? TextInputType.multiline
+              : TextInputType.text),
+
       decoration: _buildInputDecoration(
         isOutline,
         isReadOnly,
@@ -108,26 +119,6 @@ Widget cusFormBuilerTextField(
         hintText,
         hintStyle,
       ),
-      // decoration: isOutline != null && isOutline
-      //     ? InputDecoration(
-      //         isDense: true, // 边框没有默认是紧凑型
-      //         labelText: labelText,
-      //         hintText: hintText,
-      //         // 调整内边距，使得下拉框更紧凑
-      //         contentPadding:
-      //             EdgeInsets.symmetric(horizontal: 5.sp, vertical: 15),
-      //         border: OutlineInputBorder(
-      //           borderRadius: BorderRadius.circular(10.0), // 设置圆弧半径
-      //         ),
-      //       )
-      //     : InputDecoration(
-      //         isDense: true, // 边框没有默认是紧凑型
-      //         labelText: labelText,
-      //         hintText: hintText,
-      //         // 调整内边距，使得下拉框更紧凑
-      //         contentPadding:
-      //             EdgeInsets.symmetric(horizontal: 5.sp, vertical: 5),
-      //       ),
       validator: validator,
       onChanged: onChanged,
     ),
@@ -162,27 +153,6 @@ Widget cusFormBuilerDropdown(
         hintStyle,
       ),
 
-      // decoration: isOutline != null && isOutline
-      //     ? InputDecoration(
-      //         isDense: true, // 边框没有默认是紧凑型
-      //         labelText: labelText,
-      //         hintText: hintText,
-      //         hintStyle: hintStyle,
-      //         // 调整内边距，使得下拉框更紧凑
-      //         contentPadding:
-      //             EdgeInsets.symmetric(horizontal: 5.sp, vertical: 15),
-      //         border: OutlineInputBorder(
-      //           borderRadius: BorderRadius.circular(10.0), // 设置圆弧半径
-      //         ),
-      //       )
-      //     : InputDecoration(
-      //         isDense: true, // 边框没有默认是紧凑型
-      //         labelText: labelText,
-      //         hintText: hintText,
-      //         // 调整内边距，使得下拉框更紧凑
-      //         contentPadding:
-      //             EdgeInsets.symmetric(horizontal: 5.sp, vertical: 5),
-      //       ),
       validator: validator,
       items: genDropdownMenuItems(options, textSize: optionFontSize),
       menuMaxHeight: 0.5.sh,

@@ -143,7 +143,10 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         decoration: InputDecoration(
           labelText: CusAL.of(context).userInfoLabels("0"),
         ),
-        keyboardType: TextInputType.name,
+        // 2023-12-21 enableSuggestions 设为 true后键盘类型为text就正常了。
+        enableSuggestions: true,
+        // 默认就是text
+        // keyboardType: TextInputType.text,
         validator: FormBuilderValidators.compose([
           FormBuilderValidators.required(
             errorText: CusAL.of(context).requiredErrorText(
@@ -157,7 +160,8 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         decoration: InputDecoration(
           labelText: CusAL.of(context).userInfoLabels("1"),
         ),
-        keyboardType: TextInputType.name,
+        // 2023-12-21 enableSuggestions 设为 true后键盘类型为text(默认就是)就正常了。
+        enableSuggestions: true,
       ),
       FormBuilderDropdown<CusLabel>(
         name: "gendar",
@@ -240,7 +244,9 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         decoration: InputDecoration(
           labelText: CusAL.of(context).userInfoLabels("6"),
         ),
-        keyboardType: TextInputType.name,
+        // 2023-12-21 enableSuggestions 设为 true后键盘类型为multitext(默认是text)就正常了。
+        enableSuggestions: true,
+        keyboardType: TextInputType.multiline,
       ),
     ];
   }

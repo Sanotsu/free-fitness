@@ -387,6 +387,7 @@ List<CusLabel> groupCategoryOptions = [
 
 List<CusLabel> equipmentOptions = [
   CusLabel(enLabel: 'body', cnLabel: "无器械", value: 'body'),
+  CusLabel(enLabel: 'body only', cnLabel: "仅身体", value: 'body only'),
   CusLabel(enLabel: 'barbell', cnLabel: "杠铃", value: 'barbell'),
   CusLabel(enLabel: 'dumbbell', cnLabel: "哑铃", value: 'dumbbell'),
   CusLabel(enLabel: 'cable', cnLabel: "缆绳", value: 'cable'),

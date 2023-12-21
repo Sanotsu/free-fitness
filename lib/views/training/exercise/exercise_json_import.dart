@@ -12,6 +12,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/custom_exercise.dart';
 import '../../../models/training_state.dart';
 
@@ -120,8 +121,8 @@ Ab_Roller.json:
 
           commonExceptionDialog(
             context,
-            "导入json文件出错",
-            '文件名称:\n${file.path}\n\n错误信息:\n$e',
+            CusAL.of(context).importJsonError,
+            CusAL.of(context).importJsonErrorText(file.path, e.toString()),
           );
 
           setState(() {
@@ -180,8 +181,8 @@ Ab_Roller.json:
 
             commonExceptionDialog(
               context,
-              "导入json文件出错",
-              '文件名称:\n${file.path}\n\n错误信息:\n$e',
+              CusAL.of(context).importJsonError,
+              CusAL.of(context).importJsonErrorText(file.path, e.toString()),
             );
 
             setState(() {
@@ -265,7 +266,11 @@ Ab_Roller.json:
         if (!mounted) return;
         // ？？？可以抽公共的错误处理和提示弹窗
 
-        commonExceptionDialog(context, "异常提醒", e.toString());
+        commonExceptionDialog(
+          context,
+          CusAL.of(context).exceptionWarningTitle,
+          e.toString(),
+        );
         setState(() {
           isLoading = false;
         });
@@ -288,14 +293,14 @@ Ab_Roller.json:
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('完成'),
-          content: const Text('数据已经插入数据库'),
+          title: Text(CusAL.of(context).tipLabel),
+          content: Text(CusAL.of(context).importFinished),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('确认'),
+              child: Text(CusAL.of(context).confirmLabel),
             ),
           ],
         );
@@ -307,18 +312,22 @@ Ab_Roller.json:
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('导入动作JSON数据'),
+        title: Text(CusAL.of(context).exerciseImport),
         actions: [
           TextButton.icon(
             onPressed: cusExercises.isNotEmpty ? _saveToDb : null,
             icon: Icon(
               Icons.save,
-              color: cusExercises.isNotEmpty ? Colors.white : Colors.grey,
+              color: cusExercises.isNotEmpty
+                  ? Theme.of(context).canvasColor
+                  : Theme.of(context).disabledColor,
             ),
             label: Text(
-              "保存",
+              CusAL.of(context).saveLabel,
               style: TextStyle(
-                color: cusExercises.isNotEmpty ? Colors.white : Colors.grey,
+                color: cusExercises.isNotEmpty
+                    ? Theme.of(context).canvasColor
+                    : Theme.of(context).disabledColor,
               ),
             ),
           ),
@@ -364,15 +373,18 @@ Ab_Roller.json:
                   icon: Icon(
                     Icons.drive_folder_upload,
                     size: 25.sp,
-                    color: Colors.blue,
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
               ),
               Expanded(
                 child: IconButton(
                   onPressed: _openJsonFiles,
-                  icon:
-                      Icon(Icons.file_upload, size: 25.sp, color: Colors.blue),
+                  icon: Icon(
+                    Icons.file_upload,
+                    size: 25.sp,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
               ),
               Expanded(
@@ -389,7 +401,9 @@ Ab_Roller.json:
                   icon: Icon(
                     Icons.clear,
                     size: 25.sp,
-                    color: cusExercises.isNotEmpty ? Colors.blue : Colors.grey,
+                    color: cusExercises.isNotEmpty
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).disabledColor,
                   ),
                 ),
               ),
@@ -400,14 +414,18 @@ Ab_Roller.json:
           ListTile(
             title: Row(
               children: [
-                const Text("选择json中图片公共文件夹"),
+                Text(CusAL.of(context).exerciseImagePath),
                 _buildHelpButton(),
               ],
             ),
             subtitle: Text(cusExerciseImagePerfix),
             trailing: IconButton(
               onPressed: _openExerciseImagesExplorer,
-              icon: Icon(Icons.folder, size: 25.sp, color: Colors.blue),
+              icon: Icon(
+                Icons.folder,
+                size: 25.sp,
+                color: Theme.of(context).primaryColor,
+              ),
             ),
           ),
         ],
@@ -457,7 +475,7 @@ Ab_Roller.json:
                     Expanded(
                       flex: 1,
                       child: TextButton(
-                        child: const Text('关闭'),
+                        child: Text(CusAL.of(context).closeLabel),
                         onPressed: () {
                           Navigator.of(context).pop();
                         },
@@ -478,7 +496,7 @@ Ab_Roller.json:
     /// 2023-11-30 数据用表格显示的话，就暂时不显示文件了，不好看
     return [
       Text(
-        "json文件列表:",
+        CusAL.of(context).jsonFiles,
         style: TextStyle(fontSize: 14.sp),
         textAlign: TextAlign.start,
       ),
@@ -489,7 +507,7 @@ Ab_Roller.json:
           itemCount: jsons.length,
           itemBuilder: (context, index) {
             return Text(
-              'PATH: ${jsons[index].path}',
+              jsons[index].path,
               style: TextStyle(fontSize: 12.sp),
               textAlign: TextAlign.start,
             );
@@ -507,14 +525,14 @@ Ab_Roller.json:
         text: TextSpan(
           children: [
             TextSpan(
-              text: "动作概述(共${cusExercises.length}条) ",
+              text: CusAL.of(context).itemCount(cusExercises.length),
               style: TextStyle(
                 fontSize: 14.sp,
                 color: Colors.black,
               ),
             ),
             TextSpan(
-              text: "从左到右依次为: 索引-编号-名称-级别",
+              text: "  ${CusAL.of(context).exerciseLabelNote}",
               style: TextStyle(
                 fontSize: 12.sp,
                 color: Colors.green,
@@ -584,7 +602,7 @@ Ab_Roller.json:
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "待上传的动作信息概述如下:",
+              CusAL.of(context).uploadingItem(CusAL.of(context).exerciseLabel),
               style: TextStyle(fontSize: 14.sp),
               textAlign: TextAlign.start,
             ),
@@ -623,11 +641,14 @@ Ab_Roller.json:
             headingRowHeight: 25, // 设置表头行高
             horizontalMargin: 10, // 设置水平边距
             columnSpacing: 5.sp, // 设置列间距
-            columns: const <DataColumn>[
-              DataColumn(label: Text('索引')),
-              DataColumn(label: Text('代号')),
-              DataColumn(label: Text('名称')),
-              DataColumn(label: Text('难度'), numeric: true),
+            columns: <DataColumn>[
+              DataColumn(label: Text(CusAL.of(context).serialLabel)),
+              DataColumn(label: Text(CusAL.of(context).exerciseQuerys('1'))),
+              DataColumn(label: Text(CusAL.of(context).exerciseQuerys('2'))),
+              DataColumn(
+                label: Text(CusAL.of(context).exerciseQuerys('3')),
+                numeric: true,
+              ),
             ],
             rows: List<DataRow>.generate(
               exerciseItemsNum,

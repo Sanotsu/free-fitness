@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:free_fitness/models/cus_app_localizations.dart';
 import 'package:free_fitness/models/training_state.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
@@ -134,6 +134,9 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     // 处理查询条件的值
     print(query); // 示例：打印查询条件的值
 
+    // 失焦
+    FocusScope.of(context).requestFocus(FocusNode());
+
     // 有变动查询条件，则重新开始查询
     setState(() {
       queryConditon = query;
@@ -169,7 +172,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
         _loadExerciseData();
       });
     } else {
-      showSnackMessage(context, "用户已禁止访问内部存储,无法进行json文件导入。");
+      showSnackMessage(context, CusAL.of(context).noStorageErrorText);
     }
   }
 
@@ -182,10 +185,10 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           text: TextSpan(
             children: [
               TextSpan(
-                  text: '${AppLocalizations.of(context)!.exercise}\n',
+                  text: '${CusAL.of(context).exercise}\n',
                   style: TextStyle(fontSize: 20.sp)),
               TextSpan(
-                text: AppLocalizations.of(context)!.itemCount(itemsCount),
+                text: CusAL.of(context).itemCount(itemsCount),
                 style: TextStyle(fontSize: 12.sp),
               ),
             ],
@@ -216,7 +219,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
 
               // 2023-11-05 这里的新增和下面的展开详情的修改之后返回列表页面，
               // 都可以考虑直接重新加载页面，不管子组件返回值
-              if (result != null) {
+              if (result != null && result) {
                 setState(() {
                   exerciseItems.clear();
                   // ？？？新增之后重新开始，修改的话有必要吗？
@@ -251,86 +254,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                     var exerciseItem = exerciseItems[index];
 
                     // 向左滑可删除指定行
-                    return Dismissible(
-                      key: Key(exerciseItem.exerciseCode),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        color: Colors.red,
-                        alignment: Alignment.centerLeft,
-                        padding: EdgeInsets.symmetric(horizontal: 20.0.sp),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-
-                      // 左滑显示删除确认弹窗，？？？删除时还要检查删除者是否为创建者，这里只是测试左滑删除卡片
-                      confirmDismiss: (DismissDirection direction) async {
-                        // 如果该基础活动有被使用，则不允许直接删除
-                        var list = await _dbHelper
-                            .isExerciseUsedByRawSQL(exerciseItem.exerciseId!);
-
-                        if (!mounted) return false;
-                        if (list.isNotEmpty) {
-                          commonExceptionDialog(
-                            context,
-                            AppLocalizations.of(context)!.exceptionWarningTitle,
-                            AppLocalizations.of(context)!
-                                .exerciseInUse(exerciseItem.exerciseName),
-                          );
-                          return false;
-                        }
-
-                        return await showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text(
-                                AppLocalizations.of(context)!.deleteConfirm,
-                              ),
-                              content: Text(
-                                AppLocalizations.of(context)!
-                                    .exerciseDeleteAlert,
-                              ),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () =>
-                                      Navigator.of(context).pop(true),
-                                  child: Text(
-                                    AppLocalizations.of(context)!.confirmLabel,
-                                  ),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () =>
-                                      Navigator.of(context).pop(false),
-                                  child: Text(
-                                    AppLocalizations.of(context)!.cancelLabel,
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      },
-                      // 确认删除时的操作
-                      onDismissed: (direction) {
-                        setState(() {
-                          // 确认要删除后，先从列表中移除，然后从数据库删除
-                          exerciseItems.removeAt(index);
-                          _removeExerciseById(exerciseItem.exerciseId!);
-                        });
-
-                        if (!mounted) return;
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              AppLocalizations.of(context)!.deletedInfo,
-                            ),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                      // 实际展示的基础活动列表
-                      child: _buildExerciseItemCard(index),
-                    );
+                    return _buildDismissible(exerciseItem, index);
                   }
                 },
               ),
@@ -338,6 +262,75 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           ],
         ),
       ),
+    );
+  }
+
+  _buildDismissible(Exercise exerciseItem, int index) {
+    return Dismissible(
+      key: Key(exerciseItem.exerciseCode),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        color: Colors.red,
+        alignment: Alignment.centerLeft,
+        padding: EdgeInsets.symmetric(horizontal: 20.0.sp),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+
+      // 左滑显示删除确认弹窗，？？？删除时还要检查删除者是否为创建者，这里只是测试左滑删除卡片
+      confirmDismiss: (DismissDirection direction) async {
+        // 如果该基础活动有被使用，则不允许直接删除
+        var list =
+            await _dbHelper.isExerciseUsedByRawSQL(exerciseItem.exerciseId!);
+
+        if (!mounted) return false;
+        if (list.isNotEmpty) {
+          commonExceptionDialog(
+            context,
+            CusAL.of(context).exceptionWarningTitle,
+            CusAL.of(context).exerciseInUse(exerciseItem.exerciseName),
+          );
+          return false;
+        }
+
+        return await showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(CusAL.of(context).deleteConfirm),
+              content: Text(CusAL.of(context).exerciseDeleteAlert),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text(CusAL.of(context).confirmLabel),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(CusAL.of(context).cancelLabel),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      // 确认删除时的操作
+      onDismissed: (direction) {
+        setState(() {
+          // 确认要删除后，先从列表中移除，然后从数据库删除
+          exerciseItems.removeAt(index);
+          _removeExerciseById(exerciseItem.exerciseId!);
+        });
+
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(CusAL.of(context).deletedInfo),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      },
+      // 实际展示的基础活动列表
+      child: _buildExerciseItemCard(index),
     );
   }
 
@@ -359,7 +352,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
             ),
           ).then((value) {
             // 修改exercise之后，重新加载列表
-            if (value != null) {
+            if (value != null && value) {
               setState(() {
                 exerciseItems.clear();
                 currentPage = 1;
@@ -391,15 +384,30 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
                       ),
                     ),
                   ),
-                  _propertyText("级别：", exerciseItem.level ?? "", levelOptions),
-                  _propertyText("类型：", exerciseItem.category, categoryOptions),
                   _propertyText(
-                      "器械：", exerciseItem.equipment ?? "", equipmentOptions),
+                    CusAL.of(context).exerciseQuerys('3'),
+                    exerciseItem.level ?? "",
+                    levelOptions,
+                  ),
                   _propertyText(
-                      "计量：", exerciseItem.countingMode, countingOptions),
+                    CusAL.of(context).exerciseQuerys('5'),
+                    exerciseItem.category,
+                    categoryOptions,
+                  ),
+                  _propertyText(
+                    CusAL.of(context).exerciseQuerys('6'),
+                    exerciseItem.equipment ?? "",
+                    equipmentOptions,
+                  ),
+                  _propertyText(
+                    CusAL.of(context).exerciseQuerys('7'),
+                    exerciseItem.countingMode,
+                    countingOptions,
+                  ),
                 ],
               ),
             ),
@@ -412,8 +420,6 @@ class _TrainingExerciseState extends State<TrainingExercise> {
   _propertyText(String prefix, String item, List<CusLabel> options) {
     String currentLanguage = Localizations.localeOf(context).languageCode;
 
-    print("currentLanguage----$currentLanguage");
-
     // 数据库存的是英文，这里找到对应的中文显示
     var op = options.firstWhere(
       (element) => element.value == item,
@@ -422,10 +428,28 @@ class _TrainingExerciseState extends State<TrainingExercise> {
 
     var label = currentLanguage == "cn" ? op.cnLabel : op.enLabel;
 
+    // return Expanded(
+    //   child: Padding(
+    //     padding: EdgeInsets.only(left: 10.sp),
+    //     child: Text(prefix + label, style: TextStyle(fontSize: 12.sp)),
+    //   ),
+    // );
+
     return Expanded(
       child: Padding(
         padding: EdgeInsets.only(left: 10.sp),
-        child: Text(prefix + label, style: TextStyle(fontSize: 12.sp)),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: Text('$prefix: ', style: TextStyle(fontSize: 12.sp)),
+            ),
+            Expanded(
+              flex: 2,
+              child: Text(label, style: TextStyle(fontSize: 13.sp)),
+            ),
+          ],
+        ),
       ),
     );
   }

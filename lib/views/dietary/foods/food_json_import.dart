@@ -472,7 +472,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              CusAL.of(context).uploadingItem,
+              CusAL.of(context).uploadingItem(CusAL.of(context).food),
               style: TextStyle(fontSize: 14.sp),
               textAlign: TextAlign.start,
             ),

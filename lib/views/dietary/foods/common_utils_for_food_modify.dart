@@ -49,13 +49,11 @@ buildServingModifyFormColumn(BuildContext context, CusLabel servingType) {
                   labelText: "*${CusAL.of(context).servingUnit}",
                 ),
                 // 2023-12-04 需要指定使用name，原本默认的.text会弹安全键盘，可能无法输入中文
-                keyboardType: TextInputType.name,
+                // keyboardType: TextInputType.name,
+                // 2023-12-21 enableSuggestions 设为 true后键盘类型为text就正常了。
+                enableSuggestions: true,
                 validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(
-                    errorText: CusAL.of(context).requiredErrorText(
-                      CusAL.of(context).servingUnit,
-                    ),
-                  ),
+                  FormBuilderValidators.required(),
                 ]),
               ),
             ),
@@ -71,7 +69,7 @@ buildServingModifyFormColumn(BuildContext context, CusLabel servingType) {
             ),
             Flexible(
               flex: 1,
-              child: _cusTextField(
+              child: _cusNumberTextField(
                 context,
                 "metric_serving_size",
                 "",
@@ -84,7 +82,7 @@ buildServingModifyFormColumn(BuildContext context, CusLabel servingType) {
       ],
 
       // 食物的品牌和产品名称(没有对应数据库，没法更人性化的筛选，都是用户输入)
-      _cusTextField(
+      _cusNumberTextField(
         context,
         "energy",
         "*${CusAL.of(context).mainNutrients('0')}",
@@ -93,7 +91,7 @@ buildServingModifyFormColumn(BuildContext context, CusLabel servingType) {
           CusAL.of(context).mainNutrients('0'),
         ),
       ),
-      _cusTextField(
+      _cusNumberTextField(
         context,
         "protein",
         "*${CusAL.of(context).mainNutrients('2')}",
@@ -101,7 +99,7 @@ buildServingModifyFormColumn(BuildContext context, CusLabel servingType) {
           CusAL.of(context).mainNutrients('2'),
         ),
       ),
-      _cusTextField(
+      _cusNumberTextField(
         context,
         "total_fat",
         "*${CusAL.of(context).mainNutrients('3')}",
@@ -129,7 +127,7 @@ buildServingModifyFormColumn(BuildContext context, CusLabel servingType) {
         "monounsaturated_fat",
         CusAL.of(context).fatNutrients('4'),
       ),
-      _cusTextField(
+      _cusNumberTextField(
         context,
         "total_carbohydrate",
         "*${CusAL.of(context).mainNutrients('4')}",
@@ -147,7 +145,7 @@ buildServingModifyFormColumn(BuildContext context, CusLabel servingType) {
         "dietary_fiber",
         CusAL.of(context).choNutrients('2'),
       ),
-      _cusTextField(
+      _cusNumberTextField(
         context,
         "sodium",
         "*${CusAL.of(context).microNutrients('0')}",
@@ -156,13 +154,13 @@ buildServingModifyFormColumn(BuildContext context, CusLabel servingType) {
           CusAL.of(context).microNutrients('0'),
         ),
       ),
-      _cusTextField(
+      _cusNumberTextField(
         context,
         "potassium",
         CusAL.of(context).microNutrients('1'),
         suffix: CusAL.of(context).unitLabels('1'),
       ),
-      _cusTextField(
+      _cusNumberTextField(
         context,
         "cholesterol",
         CusAL.of(context).microNutrients('2'),
@@ -193,14 +191,13 @@ _buildUnitDropdown(String name) {
 }
 
 // 这个修改的表单栏位，大部分都是文本输入框，且要求输入数字
-_cusTextField(
+_cusNumberTextField(
   BuildContext context,
   String name,
   String labelText, {
   String? suffix,
   String? errorText,
   String? initialValue,
-  TextInputType? keyboardType,
 }) {
   return FormBuilderTextField(
     name: name,
@@ -216,12 +213,11 @@ _cusTextField(
       )
     ],
     // 默认展示数字键盘，客制化单位时传入文本键盘
-    // 2023-12-04 没有传默认使用name，原本默认的.text会弹安全键盘，可能无法输入中文
-    keyboardType: keyboardType ?? TextInputType.number,
+    keyboardType: TextInputType.number,
     // 这里的验证都只是不为空而已，有传错误信息，说明才有验证不为空
     validator: errorText != null
         ? FormBuilderValidators.compose([
-            FormBuilderValidators.required(errorText: errorText),
+            FormBuilderValidators.required(),
           ])
         : null,
   );
@@ -234,7 +230,7 @@ _cusSubTextFieldRow(BuildContext context, String name, String labelText) {
       const Expanded(flex: 1, child: SizedBox()),
       Expanded(
         flex: 4,
-        child: _cusTextField(context, name, labelText),
+        child: _cusNumberTextField(context, name, labelText),
       ),
     ],
   );
@@ -250,18 +246,14 @@ buildFoodModifyFormColumns(BuildContext context,
       "product",
       labelText: '*${CusAL.of(context).foodLabels("0")}',
       validator: FormBuilderValidators.compose([
-        FormBuilderValidators.required(errorText: '名称不可为空'),
+        FormBuilderValidators.required(),
       ]),
     ),
     cusFormBuilerTextField(
       "brand",
       labelText: '*${CusAL.of(context).foodLabels("1")}',
       validator: FormBuilderValidators.compose([
-        FormBuilderValidators.required(
-          errorText: CusAL.of(context).requiredErrorText(
-            CusAL.of(context).foodLabels("1"),
-          ),
-        ),
+        FormBuilderValidators.required(),
       ]),
     ),
     cusFormBuilerTextField(

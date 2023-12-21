@@ -1,17 +1,15 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
-import 'package:sqflite/sqflite.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 
 /// 基础活动变更表单（希望新增、修改可通用）
@@ -33,12 +31,6 @@ class _ExerciseModifyState extends State<ExerciseModify> {
   final _multiPrimarySelectKey = GlobalKey<FormFieldState>();
   final _multiSecondarySelectKey = GlobalKey<FormFieldState>();
 
-  // 把预设的基础活动选项列表转化为 MultiSelectDialogField 支持的列表
-  final _muscleItems = musclesOptions
-      .map<MultiSelectItem<CusLabel>>(
-          (opt) => MultiSelectItem<CusLabel>(opt, opt.cnLabel))
-      .toList();
-
   // 被选中的主要、次要肌肉
   var selectedPrimaryMuscles = [];
   var selectedSecondaryMuscles = [];
@@ -53,8 +45,6 @@ class _ExerciseModifyState extends State<ExerciseModify> {
     super.initState();
 
     setState(() {
-      print("修改表单的item ${widget.item}");
-
       if (widget.item != null) {
         updateTarget = widget.item;
         // 有图片地址，显示图片
@@ -79,13 +69,12 @@ class _ExerciseModifyState extends State<ExerciseModify> {
 
   // 根据数据库拼接的字符串值转回对应选项
   List<CusLabel> _genSelectedMuscleOptions(String? muscleStr) {
-    if (muscleStr == null) {
+    // 如果为空或者空字符串，返回空列表
+    if (muscleStr == null || muscleStr.isEmpty || muscleStr.trim().isEmpty) {
       return [];
     }
 
-    print("muscleStr-------------$muscleStr");
     List<String> selectedValues = muscleStr.split(',');
-
     List<CusLabel> selectedLabels = [];
 
     for (String selectedValue in selectedValues) {
@@ -95,8 +84,6 @@ class _ExerciseModifyState extends State<ExerciseModify> {
         }
       }
     }
-
-    print("selectedLabels-------------$selectedLabels");
 
     return selectedLabels;
   }
@@ -157,47 +144,25 @@ class _ExerciseModifyState extends State<ExerciseModify> {
         exercise.gmtCreate = DateTime.now().millisecondsSinceEpoch.toString();
       }
 
-      print(
-          "==========进入修改1111exercise了 $selectedPrimaryMuscles $selectedSecondaryMuscles $exercise");
       try {
+        // 有旧基础活动信息就是修改；没有就是新增
         if (updateTarget != null) {
-          print("==========进入修改exercise了");
           await _dbHelper.updateExercise(exercise);
         } else {
           await _dbHelper.insertExercise(exercise);
         }
         if (mounted) {
-          var snackBar = SnackBar(
-            content: Text(updateTarget != null ? '修改成功 ' : '新增成功'),
-            duration: const Duration(seconds: 3),
-          );
-          ScaffoldMessenger.of(context).showSnackBar(snackBar);
-          Navigator.pop(context, 'exerciseModified');
+          // 2023-12-21 不报错就当作修改成功，直接返回
+          Navigator.pop(context, true);
         }
       } catch (e) {
-        // 或者显示一个SnackBar
-        var errorMessage = "数据插入数据库失败";
-        if (e is DatabaseException) {
-          // 这里可以直接去sqlite的结果代码 e.getResultCode()，
-          // 具体代码含义参看文档： https://www.sqlite.org/rescode.html
-
-          /// 它默认有判断是否是哪种错误，常见的唯一值重复还可以指定检查哪个栏位重复。
-          var prefix = "ff_exercise.";
-          if (e.isUniqueConstraintError("${prefix}exercise_code")) {
-            errorMessage = '【基础活动代号】已存在。';
-          } else if (e.isUniqueConstraintError("${prefix}exercise_name")) {
-            errorMessage = '【基础活动名称】已存在。';
-          }
-        }
-
-        // 在底部显示错误信息
-        var snackBar = SnackBar(
-          content: Text(errorMessage),
-          duration: const Duration(seconds: 3),
-          backgroundColor: Colors.red,
-        );
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        // 2023-12-21 插入失败上面弹窗显示
+        commonExceptionDialog(
+          context,
+          CusAL.of(context).exceptionWarningTitle,
+          e.toString(),
+        );
       }
     }
   }
@@ -207,13 +172,17 @@ class _ExerciseModifyState extends State<ExerciseModify> {
     // 只能接收一个子组件滚动组件
     return Scaffold(
       appBar: AppBar(
-        title: Text("${updateTarget != null ? '修改' : '新增'}基础活动"),
+        title: Text(
+            "${updateTarget != null ? CusAL.of(context).eidtLabel('') : CusAL.of(context).addLabel('')}${CusAL.of(context).exerciseLabel}"),
         elevation: 0,
         actions: [
           MaterialButton(
             color: Theme.of(context).colorScheme.secondary,
             onPressed: _saveNewExercise,
-            child: const Text('保存', style: TextStyle(color: Colors.white)),
+            child: Text(
+              CusAL.of(context).saveLabel,
+              style: TextStyle(color: Theme.of(context).canvasColor),
+            ),
           )
         ],
       ),
@@ -223,192 +192,176 @@ class _ExerciseModifyState extends State<ExerciseModify> {
           padding: EdgeInsets.all(10.sp),
           child: SingleChildScrollView(
             // 创建表单
-            child: FormBuilder(
-              key: _formKey,
-              child: Column(
-                children: [
-                  /// 代号和名称
-                  ///
-
-                  cusFormBuilerTextField(
-                    "exercise_name",
-                    labelText: '*名称',
-                    initialValue: updateTarget?.exerciseName,
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(errorText: '名称不可为空'),
-                    ]),
-                  ),
-                  cusFormBuilerTextField(
-                    "exercise_code",
-                    labelText: '*代号',
-                    initialValue: updateTarget?.exerciseCode,
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(errorText: '代号不可为空'),
-                    ]),
-                  ),
-
-                  /// 级别和类别（单选）
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Flexible(
-                        child: cusFormBuilerDropdown(
-                          "level",
-                          levelOptions,
-                          labelText: '*级别',
-                          initialValue: updateTarget?.level,
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(errorText: '级别不可为空')
-                          ]),
-                        ),
-                      ),
-                      Flexible(
-                        child: cusFormBuilerDropdown(
-                          "counting_mode",
-                          countingOptions,
-                          labelText: '*计数',
-                          initialValue: updateTarget?.countingMode,
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(errorText: '计数不可为空')
-                          ]),
-                        ),
-                      ),
-                      Flexible(
-                        child: cusFormBuilerDropdown(
-                          "force",
-                          forceOptions,
-                          labelText: '*发力',
-                          initialValue: updateTarget?.force,
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(errorText: '发力不可为空')
-                          ]),
-                        ),
-                      ),
-                    ],
-                  ),
-                  // 分类和类别
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Flexible(
-                        child: cusFormBuilerDropdown(
-                          "category",
-                          categoryOptions,
-                          labelText: '*分类',
-                          initialValue: updateTarget?.category,
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(errorText: '分类不可为空')
-                          ]),
-                        ),
-                      ),
-                      Flexible(
-                        child: cusFormBuilerDropdown(
-                          "mechanic",
-                          mechanicOptions,
-                          labelText: '*类别',
-                          initialValue: updateTarget?.mechanic,
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(errorText: '类别不可为空')
-                          ]),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Flexible(
-                        child: cusFormBuilerDropdown(
-                          "equipment",
-                          equipmentOptions,
-                          labelText: '器械',
-                          initialValue: updateTarget?.equipment,
-                        ),
-                      ),
-                      Flexible(
-                        child: cusFormBuilerDropdown(
-                          "standard_duration",
-                          standardDurationOptions,
-                          labelText: '标准动作耗时',
-                          initialValue: updateTarget?.standardDuration,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 10.sp),
-                  // 主要肌肉(多选)
-                  _buildModifyMultiSelectDialogField(
-                    key: _multiPrimarySelectKey,
-                    items: _muscleItems,
-                    initialValue: selectedPrimaryMuscles,
-                    labelText: "*主要肌肉",
-                    hintText: "选择主要肌肉",
-                    validator: (values) {
-                      if (values == null || values.isEmpty) {
-                        return "至少选择一个锻炼的主要肌肉";
-                      }
-                      return null;
-                    },
-                    onConfirm: (results) {
-                      selectedPrimaryMuscles = results;
-                    },
-                  ),
-
-                  // 次要肌肉(多选)
-                  SizedBox(height: 10.sp),
-                  _buildModifyMultiSelectDialogField(
-                    key: _multiSecondarySelectKey,
-                    items: _muscleItems,
-                    initialValue: selectedSecondaryMuscles,
-                    labelText: "次要肌肉",
-                    hintText: "选择次要肌肉",
-                    onConfirm: (results) {
-                      selectedSecondaryMuscles = results;
-                    },
-                  ),
-
-                  const SizedBox(height: 10),
-                  //  要点(简介这个动作步骤)
-                  cusFormBuilerTextField(
-                    "instructions",
-                    labelText: '*技术要点',
-                    initialValue: updateTarget?.instructions,
-                    maxLines: 5,
-                    isOutline: true,
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(errorText: '技术要点不可为空'),
-                    ]),
-                  ),
-
-                  const SizedBox(height: 10),
-                  // 语音提醒文本
-                  cusFormBuilerTextField(
-                    "tts_notes",
-                    labelText: '语音提示要点',
-                    initialValue: updateTarget?.ttsNotes,
-                    maxLines: 5,
-                    isOutline: true,
-                  ),
-
-                  const SizedBox(height: 10),
-                  // 上传活动示例图片（静态图或者gif）
-                  _buildFilePicker(
-                    'images',
-                    initialValue: exerciseImages,
-                    labelText: "演示图片",
-                    hintText: "图片上传",
-                  ),
-                ],
-              ),
-            ),
+            child: _buildFormBuilder(),
           ),
         ),
       ),
     );
   }
 
+  _buildFormBuilder() {
+    return FormBuilder(
+      key: _formKey,
+      child: Column(
+        children: [
+          /// 代号和名称
+          cusFormBuilerTextField(
+            "exercise_name",
+            labelText: '*${CusAL.of(context).exerciseQuerys('2')}',
+            initialValue: updateTarget?.exerciseName,
+            validator: FormBuilderValidators.required(),
+          ),
+          cusFormBuilerTextField(
+            "exercise_code",
+            labelText: '*${CusAL.of(context).exerciseQuerys('1')}',
+            initialValue: updateTarget?.exerciseCode,
+            validator: FormBuilderValidators.required(),
+          ),
+
+          /// 级别和类别（单选）
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Flexible(
+                child: cusFormBuilerDropdown(
+                  "level",
+                  levelOptions,
+                  labelText: '*${CusAL.of(context).exerciseQuerys('3')}',
+                  initialValue: updateTarget?.level,
+                  validator: FormBuilderValidators.required(),
+                ),
+              ),
+              Flexible(
+                child: cusFormBuilerDropdown(
+                  "counting_mode",
+                  countingOptions,
+                  labelText: '*${CusAL.of(context).exerciseQuerys('7')}',
+                  initialValue: updateTarget?.countingMode,
+                  validator: FormBuilderValidators.required(),
+                ),
+              ),
+              Flexible(
+                child: cusFormBuilerDropdown(
+                  "force",
+                  forceOptions,
+                  labelText: '*${CusAL.of(context).exerciseLabels('0')}',
+                  initialValue: updateTarget?.force,
+                  validator: FormBuilderValidators.required(),
+                ),
+              ),
+            ],
+          ),
+          // 分类和类别
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Flexible(
+                child: cusFormBuilerDropdown(
+                  "category",
+                  categoryOptions,
+                  labelText: '*${CusAL.of(context).exerciseQuerys('5')}',
+                  initialValue: updateTarget?.category,
+                  validator: FormBuilderValidators.required(),
+                ),
+              ),
+              Flexible(
+                child: cusFormBuilerDropdown(
+                  "mechanic",
+                  mechanicOptions,
+                  labelText: '*${CusAL.of(context).exerciseQuerys('4')}',
+                  initialValue: updateTarget?.mechanic,
+                  validator: FormBuilderValidators.required(),
+                ),
+              ),
+            ],
+          ),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Flexible(
+                child: cusFormBuilerDropdown(
+                  "equipment",
+                  equipmentOptions,
+                  labelText: CusAL.of(context).exerciseQuerys('6'),
+                  initialValue: updateTarget?.equipment,
+                ),
+              ),
+              Flexible(
+                child: cusFormBuilerDropdown(
+                  "standard_duration",
+                  standardDurationOptions,
+                  labelText: CusAL.of(context).exerciseLabels('1'),
+                  initialValue: updateTarget?.standardDuration.toString(),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 10.sp),
+          // 主要肌肉(多选)
+          _buildModifyMultiSelectDialogField(
+            key: _multiPrimarySelectKey,
+            items: musclesOptions,
+            initialValue: selectedPrimaryMuscles,
+            labelText: "*${CusAL.of(context).exerciseLabels('2')}",
+            validator: FormBuilderValidators.required(),
+            onConfirm: (results) {
+              selectedPrimaryMuscles = results;
+              // 从肌肉多选框弹窗回来不聚焦
+              FocusScope.of(context).requestFocus(FocusNode());
+            },
+          ),
+
+          // 次要肌肉(多选)
+          SizedBox(height: 10.sp),
+          _buildModifyMultiSelectDialogField(
+            key: _multiSecondarySelectKey,
+            items: musclesOptions,
+            initialValue: selectedSecondaryMuscles,
+            labelText: CusAL.of(context).exerciseLabels('3'),
+            onConfirm: (results) {
+              selectedSecondaryMuscles = results;
+              // 从肌肉多选框弹窗回来不聚焦
+              FocusScope.of(context).requestFocus(FocusNode());
+            },
+          ),
+
+          const SizedBox(height: 10),
+          //  要点(简介这个动作步骤)
+          cusFormBuilerTextField(
+            "instructions",
+            labelText: '*${CusAL.of(context).exerciseLabels('4')}',
+            initialValue: updateTarget?.instructions,
+            maxLines: 5,
+            isOutline: true,
+            validator: FormBuilderValidators.required(),
+          ),
+
+          const SizedBox(height: 10),
+          // 语音提醒文本
+          cusFormBuilerTextField(
+            "tts_notes",
+            labelText: CusAL.of(context).exerciseLabels('5'),
+            initialValue: updateTarget?.ttsNotes,
+            maxLines: 5,
+            isOutline: true,
+          ),
+
+          const SizedBox(height: 10),
+          // 上传活动示例图片（静态图或者gif）
+          _buildFilePicker(
+            'images',
+            initialValue: exerciseImages,
+            labelText: CusAL.of(context).exerciseLabels('6'),
+            hintText: CusAL.of(context).imageUploadLabel,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 图片文件选择器
   _buildFilePicker(
     String name, {
     List<PlatformFile>? initialValue,
@@ -442,10 +395,8 @@ class _ExerciseModifyState extends State<ExerciseModify> {
             ),
           )
         ],
-        customTypeViewerBuilder: (children) => Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: children,
-        ),
+        customTypeViewerBuilder: (children) =>
+            Row(mainAxisAlignment: MainAxisAlignment.end, children: children),
         onFileLoading: (val) {
           debugPrint(val.toString());
         },
@@ -455,7 +406,7 @@ class _ExerciseModifyState extends State<ExerciseModify> {
 
   // 构建下拉多选弹窗模块栏位(主要为了样式统一)
   _buildModifyMultiSelectDialogField({
-    required List<MultiSelectItem<dynamic>> items,
+    required List<CusLabel> items,
     GlobalKey<FormFieldState<dynamic>>? key,
     List<dynamic> initialValue = const [],
     String? labelText,
@@ -463,11 +414,17 @@ class _ExerciseModifyState extends State<ExerciseModify> {
     String? Function(List<dynamic>?)? validator,
     required void Function(List<dynamic>) onConfirm,
   }) {
+    // 把预设的基础活动选项列表转化为 MultiSelectDialogField 支持的列表
+    final muscleItems = musclesOptions
+        .map<MultiSelectItem<CusLabel>>((opt) => MultiSelectItem<CusLabel>(
+            opt, box.read("language") == 'en' ? opt.enLabel : opt.cnLabel))
+        .toList();
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.sp),
       child: MultiSelectDialogField(
         key: key,
-        items: items,
+        items: muscleItems,
         // ？？？？ 好像是不带validator用了这个初始值就会报错
         initialValue: initialValue,
         title: Text(hintText ?? ''),

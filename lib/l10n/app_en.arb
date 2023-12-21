@@ -23,6 +23,11 @@
   "description": "各种单位"
   },
 
+  "boolLabels": "{num, select, 0{Yes} 1{No} 2{True} 3{False} other{Other} }",
+  "@boolLabels": {
+  "description": "是否真假各种标签"
+  },
+
   "averageGoal": "Nutrient Goals",
   "dailyGoal": "Daily Goals",
   "dailyGoalBars": "Daily Goals Chart",
@@ -70,9 +75,28 @@
   "training": "Training",
   "trainingReports": "TrainingReports",
   "exercise": "Exercises",
+  "exerciseLabel": "Exercise",
   "exerciseSubtitle": "Exercise management",
   "exerciseDeleteAlert":"Confirmed to delete the exercise? Deletion is not recoverable!",
   "exerciseInUse":"Exercise {exerciseName} in use, deletion is not supported",
+ 
+ 
+  "exerciseQuerys": "{num, select, 0{Muscles} 1{Code} 2{Name} 3{Level} 4{Mechanic} 5{Category} 6{Equipment} 7{Counting} other{other} }",
+  "@exerciseQuerys": {
+  "description": "常用exercise查询用的标签"
+  },
+
+  "exerciseLabels": "{num, select, 0{Force} 1{Std. Duration} 2{Primary Muscles} 3{Secondary Muscles} 4{Instructions} 5{TTS Notes} 6{Exercise Images} 7{isCustom} other{其他} }",
+  "@exerciseLabels": {
+  "description": "除了上面查询的，其他的exercise的栏位标签"
+  },
+
+  "exerciseImport":"Import Exercise Json",
+  "exerciseLabelNote":"LTR: index - code - name - level",
+  "exerciseImagePath":"Select image public folder",
+
+  "exerciseDetail": "Exercise Detail",
+
   "workout": "Workouts",
   "workoutSubtitle": "Workout management",
   "plan": "Plans",
@@ -130,7 +154,7 @@
 
   "foodImport":"Import Food Json",
   "importFinished":"Data has been inserted into the database",
-  "uploadingItem":"An overview of the items:",
+  "uploadingItem":"An overview of the {obj} items:",
   "jsonFiles":"Json Files:",
   "foodLabelNote":"LTR: index - code - name - energy(kcal)",
 
@@ -208,8 +232,9 @@
   "cancelLabel":"Cancel",
   "resetLabel":"reset",
   "queryLabel":"query",
-  "moreLabel":"More",
-  "lessLabel":"Less",
+  "moreLabel":"more",
+  "moreDetail": "More Detail",
+  "lessLabel":"less",
   "enterLabel":"Enter",
   "skipLabel":"Next",
   "backLabel":"Back",
@@ -224,6 +249,8 @@
   "searchLabel":"Search",
   "optionsLabel":"Options",
   "imageUploadLabel":"Image Upload",
+  "detailLabel":"Detail",
+  "modifiedSuccessLabel":"Successfully Modified",
 
   "tipLabel":"Notification",
   "itemLabel":"{num} item(s)",
