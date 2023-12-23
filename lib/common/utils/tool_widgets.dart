@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:math' as math;
@@ -81,20 +82,19 @@ List<DropdownMenuItem<Object>> genDropdownMenuItems(
 /// form builder 库中文本栏位和下拉选择框组件的二次封装
 ///
 // 构建表单的文本输入框
-Widget cusFormBuilerTextField(
-  String name, {
-  String? initialValue,
-  double? valueFontSize,
-  int? maxLines,
-  String? hintText, // 可不传提示语
-  TextStyle? hintStyle,
-  String? labelText, // 可不传栏位标签，在输入框前面有就行
-  String? Function(Object?)? validator,
-  bool? isOutline = false, // 输入框是否有线条
-  bool isReadOnly = false, // 输入框是否有线条
-  TextInputType? keyboardType,
-  void Function(String?)? onChanged,
-}) {
+Widget cusFormBuilerTextField(String name,
+    {String? initialValue,
+    double? valueFontSize,
+    int? maxLines,
+    String? hintText, // 可不传提示语
+    TextStyle? hintStyle,
+    String? labelText, // 可不传栏位标签，在输入框前面有就行
+    String? Function(Object?)? validator,
+    bool? isOutline = false, // 输入框是否有线条
+    bool isReadOnly = false, // 输入框是否有线条
+    TextInputType? keyboardType,
+    void Function(String?)? onChanged,
+    List<TextInputFormatter>? inputFormatters}) {
   return Padding(
     padding: EdgeInsets.symmetric(horizontal: 10.sp),
     child: FormBuilderTextField(
@@ -121,6 +121,8 @@ Widget cusFormBuilerTextField(
       ),
       validator: validator,
       onChanged: onChanged,
+      // 输入的格式限制
+      inputFormatters: inputFormatters,
     ),
   );
 }

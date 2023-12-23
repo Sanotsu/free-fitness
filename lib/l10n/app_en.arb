@@ -129,7 +129,7 @@
   },
 
 
-  "workoutFollowLabel": "{num, select, 0{Follow Workout} 1{Ready} 2{Rest} 3{Next Action} 4{Congratulations} other{其他} }",
+  "workoutFollowLabel": "{num, select, 0{Follow Workout} 1{Ready} 2{Rest} 3{Next} 4{Congratulations} other{其他} }",
   "@workoutFollowLabel": {
   "description": "训练跟练页面相关栏位"
   },
@@ -150,6 +150,24 @@
 
   "plan": "Plans",
   "planSubtitle": "Plan management",
+
+  "planQuerys": "{num, select, 0{Name} 1{Category} 2{Level} other{Other} }",
+  "@planQuerys": {
+  "description": "常用 plan 查询用的标签"
+  },
+ 
+  "planDeleteAlert":"Are you sure you need to delete the plan: {planName}? Deletion is not recoverable!",
+  "planInUse":"Plan {planName} in use, deletion is not supported",
+ 
+  "modifyPlanLabels": "{num, select, 0{Plan Add} 1{Plan Modify} 2{Name} 3{Code} 4{Category} 5{Level} 6{Plan Period} 7{Description} other{Other} }",
+  "@modifyPlanLabels": {
+  "description": "修改或新建 plan 的标签"
+  },
+
+
+  "dayNumber":"Day {number}",
+  "incompleteLabel":"Never Completed",
+
 
   "itemCount": "{count} in total",
 

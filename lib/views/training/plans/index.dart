@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -8,6 +9,8 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import 'group_list.dart';
 
@@ -48,6 +51,9 @@ class _TrainingPlansState extends State<TrainingPlans> {
     // 如果已经在查询数据中，则忽略此次新的查询
     if (isLoading) return;
 
+    print(DateTime.now());
+    var a = DateTime.now().microsecondsSinceEpoch;
+
     // 如果没在查询中，设置状态为查询中
     setState(() {
       isLoading = true;
@@ -65,8 +71,6 @@ class _TrainingPlansState extends State<TrainingPlans> {
       );
     }
 
-    print("getPlanList---$temp");
-
     // 设置查询结果
     if (!mounted) return;
     setState(() {
@@ -74,7 +78,10 @@ class _TrainingPlansState extends State<TrainingPlans> {
       planList = temp;
       // 重置状态为查询完成
       isLoading = false;
-      print("groupList---$planList");
+
+      var b = DateTime.now().microsecondsSinceEpoch;
+      print(DateTime.now());
+      print('【plan】查询耗时，微秒: ${b - a}');
     });
   }
 
@@ -85,9 +92,12 @@ class _TrainingPlansState extends State<TrainingPlans> {
         title: RichText(
           text: TextSpan(
             children: [
-              TextSpan(text: '周期计划\n', style: TextStyle(fontSize: 20.sp)),
               TextSpan(
-                text: "共 ${planList.length} 个",
+                text: '${CusAL.of(context).plan}\n',
+                style: TextStyle(fontSize: 20.sp),
+              ),
+              TextSpan(
+                text: CusAL.of(context).itemCount(planList.length),
                 style: TextStyle(fontSize: 12.sp),
               ),
             ],
@@ -97,16 +107,23 @@ class _TrainingPlansState extends State<TrainingPlans> {
           /// 新增训练组基本信息
           IconButton(
             icon: Icon(Icons.add, size: 30.sp),
-            style: ButtonStyle(
-              foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-            ),
+            color: Theme.of(context).canvasColor,
             onPressed: _modifyPlanInfo,
           ),
         ],
       ),
       body: Column(
         children: [
-          _buildQueryArea(),
+          /// 查询条件区域
+          FormBuilder(
+            key: _queryFormKey,
+            child: Card(
+              elevation: 5.sp,
+              child: Column(
+                children: [_buildQueryArea(), SizedBox(height: 10.sp)],
+              ),
+            ),
+          ),
           isLoading
               ? buildLoader(isLoading)
               : Expanded(child: _buildPlanList()),
@@ -115,35 +132,26 @@ class _TrainingPlansState extends State<TrainingPlans> {
     );
   }
 
-  // 条件查询区域
+  // 条件查询区域(和action list一模一样)
   _buildQueryArea() {
-    return FormBuilder(
-      key: _queryFormKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Card(
-            elevation: 5.sp,
-            child: ListTile(
-              title: Row(
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            children: [
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    "名称",
-                    style: TextStyle(fontSize: 14.sp, color: Colors.black),
-                  ),
                   Flexible(
                     child: cusFormBuilerTextField(
                       "plan_name",
-                      hintText: "输入名称",
-                      hintStyle: TextStyle(fontSize: 14.sp),
-                      valueFontSize: 14.sp,
+                      labelText: CusAL.of(context).planQuerys('0'),
                     ),
                   ),
                   SizedBox(
-                    width: 40.sp,
-                    height: 36,
+                    width: 50.sp,
+                    height: 36.sp,
                     child: TextButton(
                       onPressed: () {
                         setState(() {
@@ -161,65 +169,55 @@ class _TrainingPlansState extends State<TrainingPlans> {
                         FocusScope.of(context).focusedChild?.unfocus();
                       },
                       child: Text(
-                        "重置",
-                        style: TextStyle(fontSize: 12.sp, color: Colors.blue),
+                        CusAL.of(context).resetLabel,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: Theme.of(context).primaryColor,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-              subtitle: Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Text(
-                    "分类",
-                    style: TextStyle(fontSize: 14.sp, color: Colors.black),
-                  ),
                   Flexible(
                     child: cusFormBuilerDropdown(
                       "plan_category",
                       categoryOptions,
-                      hintText: "选择分类",
-                      hintStyle: TextStyle(fontSize: 14.sp),
-                      optionFontSize: 14,
+                      labelText: CusAL.of(context).planQuerys('1'),
                     ),
-                  ),
-                  Text(
-                    "难度",
-                    style: TextStyle(fontSize: 14.sp, color: Colors.black),
                   ),
                   Flexible(
                     child: cusFormBuilerDropdown(
                       "plan_level",
                       levelOptions,
-                      hintText: "选择难度",
-                      hintStyle: TextStyle(fontSize: 14.sp),
-                      optionFontSize: 14,
+                      labelText: CusAL.of(context).planQuerys('2'),
                     ),
                   ),
                 ],
               ),
-              dense: true,
-              trailing: Container(
-                width: 24.sp,
-                alignment: Alignment.center,
-                child: IconButton(
-                  icon: const Icon(Icons.search, color: Colors.blue),
-                  onPressed: () {
-                    if (_queryFormKey.currentState!.saveAndValidate()) {
-                      setState(() {
-                        conditionMap = _queryFormKey.currentState!.value;
-                        getPlanList();
-                      });
-                    }
-                    FocusScope.of(context).focusedChild?.unfocus();
-                  },
-                ),
-              ),
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+        Container(
+          width: 50.sp,
+          alignment: Alignment.center,
+          child: IconButton(
+            icon: const Icon(Icons.search, color: Colors.blue),
+            onPressed: () {
+              if (_queryFormKey.currentState!.saveAndValidate()) {
+                setState(() {
+                  conditionMap = _queryFormKey.currentState!.value;
+                  getPlanList();
+                });
+              }
+              FocusScope.of(context).focusedChild?.unfocus();
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -244,18 +242,48 @@ class _TrainingPlansState extends State<TrainingPlans> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                subtitle: Text(
-                    "${planItem.plan.planCategory}-${planItem.plan.planLevel}-${planItem.groupDetailList.length}",
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w500,
-                    )),
+                subtitle: RichText(
+                  textAlign: TextAlign.left,
+                  maxLines: 2,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text:
+                            '${planItem.groupDetailList.length} ${CusAL.of(context).workouts} ',
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                      TextSpan(
+                        text: '${getCusLabelText(
+                          planItem.plan.planLevel,
+                          levelOptions,
+                        )}  ',
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          color: Colors.green[500],
+                        ),
+                      ),
+                      TextSpan(
+                        text: '${getCusLabelText(
+                          planItem.plan.planCategory,
+                          categoryOptions, // 可以不和exercise用同一个，但要单独列一个
+                        )}  ',
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ),
+
                 trailing: SizedBox(
                   width: 30.sp,
                   child: IconButton(
-                    icon: Icon(Icons.edit, size: 20.sp, color: Colors.blue),
+                    icon: Icon(
+                      Icons.edit,
+                      size: 20.sp,
+                      color: Theme.of(context).primaryColor,
+                    ),
                     onPressed: () {
-                      print("indexindexinde--------x=$index ${planItem.plan}");
                       _modifyPlanInfo(planItem: planItem.plan);
                     },
                   ),
@@ -284,28 +312,29 @@ class _TrainingPlansState extends State<TrainingPlans> {
                   if (list.isNotEmpty) {
                     commonExceptionDialog(
                       context,
-                      "异常提醒",
-                      "该计划 ${planItem.plan.planName} 存在跟练记录，暂不支持删除.",
+                      CusAL.of(context).exceptionWarningTitle,
+                      CusAL.of(context).planInUse(planItem.plan.planName),
                     );
                   } else {
                     showDialog(
                       context: context,
                       builder: (context) {
                         return AlertDialog(
-                          title: const Text('提示'),
-                          content: Text("是否删除: ${planItem.plan.planName}?"),
+                          title: Text(CusAL.of(context).deleteConfirm),
+                          content: Text(CusAL.of(context)
+                              .planDeleteAlert(planItem.plan.planName)),
                           actions: [
                             TextButton(
                               onPressed: () {
                                 Navigator.pop(context, false);
                               },
-                              child: const Text('取消'),
+                              child: Text(CusAL.of(context).cancelLabel),
                             ),
                             TextButton(
                               onPressed: () {
                                 Navigator.pop(context, true);
                               },
-                              child: const Text('确认'),
+                              child: Text(CusAL.of(context).confirmLabel),
                             ),
                           ],
                         );
@@ -319,7 +348,11 @@ class _TrainingPlansState extends State<TrainingPlans> {
                           getPlanList();
                         } catch (e) {
                           if (!mounted) return;
-                          commonExceptionDialog(context, "异常提醒", e.toString());
+                          commonExceptionDialog(
+                            context,
+                            CusAL.of(context).exceptionWarningTitle,
+                            e.toString(),
+                          );
                         }
                       }
                     });
@@ -340,151 +373,156 @@ class _TrainingPlansState extends State<TrainingPlans> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("${planItem != null ? '修改' : '新建'}计划"),
-          content: FormBuilder(
-            key: _addFormKey,
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  cusFormBuilerTextField(
-                    "plan_name",
-                    labelText: '*名称',
-                    hintText: "输入名称",
-                    hintStyle: TextStyle(fontSize: 14.sp),
-                    initialValue: planItem?.planName,
-                    validator: FormBuilderValidators.compose(
-                        [FormBuilderValidators.required(errorText: '名称不可为空')]),
-                  ),
-                  cusFormBuilerTextField(
-                    "plan_code",
-                    labelText: '*代号',
-                    hintText: "输入代号",
-                    hintStyle: TextStyle(fontSize: 14.sp),
-                    initialValue: planItem?.planCode,
-                    validator: FormBuilderValidators.compose(
-                        [FormBuilderValidators.required(errorText: '代号不可为空')]),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Flexible(
-                        child: cusFormBuilerDropdown(
-                          "plan_category",
-                          categoryOptions,
-                          labelText: '*分类',
-                          initialValue: planItem?.planCategory,
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(errorText: '分类不可为空')
-                          ]),
-                        ),
-                      ),
-                      Flexible(
-                        child: cusFormBuilerDropdown(
-                          "plan_level",
-                          levelOptions,
-                          labelText: '*级别',
-                          initialValue: planItem?.planLevel,
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(errorText: '级别不可为空')
-                          ]),
-                        ),
-                      ),
-                    ],
-                  ),
-                  cusFormBuilerTextField(
-                    "plan_period",
-                    labelText: '*训练周期',
-                    initialValue: planItem?.planPeriod.toString(),
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(errorText: '训练周期不可为空'),
-                      // FormBuilderValidators.numeric(),
-                    ]),
-                    keyboardType: TextInputType.number,
-                  ),
-                  cusFormBuilerTextField(
-                    "description",
-                    labelText: '*概述',
-                    initialValue: planItem?.description,
-                    maxLines: 3,
-                    validator: FormBuilderValidators.compose([
-                      FormBuilderValidators.required(errorText: '概述不可为空'),
-                    ]),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          title: Text(planItem != null
+              ? CusAL.of(context).modifyPlanLabels('1')
+              : CusAL.of(context).modifyPlanLabels('0')),
+          content: _buildPlanModifyForm(planItem),
           actions: <Widget>[
             TextButton(
-              child: const Text('取消'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
+              child: Text(CusAL.of(context).cancelLabel),
             ),
             ElevatedButton(
-              child: const Text('确认'),
-              onPressed: () async {
-                if (_addFormKey.currentState!.saveAndValidate()) {
-                  // 获取表单数值
-                  Map<String, dynamic> formData =
-                      _addFormKey.currentState!.value;
-                  // 处理数据提交逻辑
-                  print(formData);
-
-                  // 对周期进行类型转换
-                  var planPeriod = int.parse(formData['plan_period']);
-                  // 再放回去
-                  // 深拷贝表单数据的Map，修改拷贝后的(原始的那个好像是不可修改的，会报错)
-                  var copiedFormData = Map<String, dynamic>.from(formData);
-                  copiedFormData["plan_period"] = planPeriod;
-
-                  var temp = TrainingPlan.fromMap(copiedFormData);
-
-                  // 如果是新增
-                  if (planItem == null) {
-                    // ？？？这里应该验证是否新增成功
-                    var planId = await _dbHelper.insertTrainingPlan(temp);
-                    temp.planId = planId;
-
-                    if (!mounted) return;
-                    Navigator.of(context).pop();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => GroupList(
-                          planItem: temp,
-                        ),
-                      ),
-                    ).then((value) {
-                      print("新增计划，push到group list然后 返回的数据 $value");
-                      // ？？？暂时返回这个页面时都重新加载最新的计划列表数据
-
-                      setState(() {
-                        getPlanList();
-                      });
-                    });
-                  } else {
-                    // 如果是修改
-                    // ？？？这里应该验证是否修成功
-                    temp.planId = planItem.planId!;
-                    await _dbHelper.updateTrainingPlanById(
-                      planItem.planId!,
-                      temp,
-                    );
-
-                    // 如果是修改就返回训练组列表，而不是进入动作列表
-                    if (!mounted) return;
-                    Navigator.of(context).pop();
-                    setState(() {
-                      getPlanList();
-                    });
-                  }
-                }
+              onPressed: () {
+                _clickPlanModifyButton(planItem);
               },
+              child: Text(CusAL.of(context).confirmLabel),
             ),
           ],
         );
       },
     );
+  }
+
+  // 构建计划修改表单
+  _buildPlanModifyForm(TrainingPlan? planItem) {
+    return FormBuilder(
+      key: _addFormKey,
+      child: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            cusFormBuilerTextField(
+              "plan_name",
+              labelText: '*${CusAL.of(context).modifyPlanLabels('2')}',
+              initialValue: planItem?.planName,
+              validator: FormBuilderValidators.required(),
+            ),
+            cusFormBuilerTextField(
+              "plan_code",
+              labelText: '*${CusAL.of(context).modifyPlanLabels('3')}',
+              initialValue: planItem?.planCode,
+              validator: FormBuilderValidators.required(),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Flexible(
+                  child: cusFormBuilerDropdown(
+                    "plan_category",
+                    categoryOptions,
+                    labelText: '*${CusAL.of(context).modifyPlanLabels('4')}',
+                    initialValue: planItem?.planCategory,
+                    validator: FormBuilderValidators.required(),
+                  ),
+                ),
+                Flexible(
+                  child: cusFormBuilerDropdown(
+                    "plan_level",
+                    levelOptions,
+                    labelText: '*${CusAL.of(context).modifyPlanLabels('5')}',
+                    initialValue: planItem?.planLevel,
+                    validator: FormBuilderValidators.required(),
+                  ),
+                ),
+              ],
+            ),
+            cusFormBuilerTextField(
+              "plan_period",
+              labelText: '*${CusAL.of(context).modifyPlanLabels('6')}',
+              initialValue: planItem?.planPeriod.toString(),
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(),
+              ]),
+              // 正则来只允许输入数字
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+              keyboardType: TextInputType.number,
+            ),
+            cusFormBuilerTextField(
+              "description",
+              labelText: '*${CusAL.of(context).modifyPlanLabels('7')}',
+              initialValue: planItem?.description,
+              maxLines: 3,
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.required(),
+              ]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 构建确认编辑的回调
+  _clickPlanModifyButton(TrainingPlan? planItem) async {
+    if (_addFormKey.currentState!.saveAndValidate()) {
+      // 获取表单数值
+      Map<String, dynamic> formData = _addFormKey.currentState!.value;
+
+      // 对周期进行类型转换
+      var planPeriod = int.parse(formData['plan_period']);
+      // 再放回去
+      // 深拷贝表单数据的Map，修改拷贝后的(原始的那个好像是不可修改的，会报错)
+      var copiedFormData = Map<String, dynamic>.from(formData);
+      copiedFormData["plan_period"] = planPeriod;
+
+      var temp = TrainingPlan.fromMap(copiedFormData);
+
+      try {
+        // 如果是新增
+        if (planItem == null) {
+          var planId = await _dbHelper.insertTrainingPlan(temp);
+          temp.planId = planId;
+
+          if (!mounted) return;
+          Navigator.of(context).pop();
+
+          // 新增计划完成后弹窗关闭，同时进入其训练组列表页面让用户进行训练的添加
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GroupList(planItem: temp),
+            ),
+          ).then((value) {
+            // 新增plan基本信息后直接跳入训练列表，在其中完成新增训练操作之后该计划就会变；
+            // 暂时返回这个页面时都重新加载最新的计划列表数据
+            setState(() {
+              getPlanList();
+            });
+          });
+        } else {
+          // 如果是修改
+          temp.planId = planItem.planId!;
+          await _dbHelper.updateTrainingPlanById(planItem.planId!, temp);
+
+          // 如果是修改就返回训练组列表，而不是进入动作列表
+          if (!mounted) return;
+          Navigator.of(context).pop();
+          setState(() {
+            getPlanList();
+          });
+        }
+      } catch (e) {
+        if (!mounted) return;
+        commonExceptionDialog(
+          context,
+          CusAL.of(context).exceptionWarningTitle,
+          e.toString(),
+        );
+      }
+    }
   }
 }

@@ -265,16 +265,14 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: '${getCusLabelText(
-                      groupItem.group.groupLevel,
-                      levelOptions,
-                    )}  ',
+                    text:
+                        '${groupItem.actionDetailList.length} ${CusAL.of(context).exercise} ',
                     style: const TextStyle(color: Colors.black),
                   ),
                   TextSpan(
                     text: '${getCusLabelText(
-                      groupItem.group.groupCategory,
-                      groupCategoryOptions,
+                      groupItem.group.groupLevel,
+                      levelOptions,
                     )}  ',
                     style: TextStyle(
                       fontSize: 18.sp,
@@ -282,8 +280,10 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                     ),
                   ),
                   TextSpan(
-                    text: CusAL.of(context)
-                        .itemCount(groupItem.actionDetailList.length),
+                    text: '${getCusLabelText(
+                      groupItem.group.groupCategory,
+                      groupCategoryOptions,
+                    )}  ',
                     style: const TextStyle(color: Colors.black),
                   ),
                 ],

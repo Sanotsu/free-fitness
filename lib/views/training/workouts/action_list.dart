@@ -196,23 +196,26 @@ class _ActionListState extends State<ActionList> {
               }
             },
           ),
-          actions: <Widget>[
-            if (_isEditing)
-              IconButton(
-                icon: const Icon(Icons.cancel_outlined),
-                onPressed: () async {
-                  // 取消时数据恢复原本的内容
-                  await _getActionListByGroupId();
-                  setState(() {
-                    _isEditing = !_isEditing;
-                  });
-                },
-              ),
-            IconButton(
-              icon: Icon(_isEditing ? Icons.done : Icons.edit),
-              onPressed: _isEditing ? _onSavePressed : _onEditPressed,
-            ),
-          ],
+          // 2023-12-23 如果有planId，则从计划跳某一个训练日，再到这里，就不允许修改这个训练组，只能查看
+          actions: widget.planId != null
+              ? null
+              : <Widget>[
+                  if (_isEditing)
+                    IconButton(
+                      icon: const Icon(Icons.cancel_outlined),
+                      onPressed: () async {
+                        // 取消时数据恢复原本的内容
+                        await _getActionListByGroupId();
+                        setState(() {
+                          _isEditing = !_isEditing;
+                        });
+                      },
+                    ),
+                  IconButton(
+                    icon: Icon(_isEditing ? Icons.done : Icons.edit),
+                    onPressed: _isEditing ? _onSavePressed : _onEditPressed,
+                  ),
+                ],
         ),
         body: isLoading
             ? buildLoader(isLoading)

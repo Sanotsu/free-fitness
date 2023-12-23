@@ -490,13 +490,13 @@ class ExerciseUsageVO {
     );
   }
 
-  // @override
-  // String toString() {
-  //   return 'ExerciseUsageVO {actionId: $actionId, groupId: $groupId, planId: $planId, logId: $logId }';
-  // }
-
   @override
   String toString() {
-    return '配置编号:$actionId,训练编号:$groupId,计划编号:$planId,日志:$logId';
+    return 'ExerciseUsageVO {actionId: $actionId, groupId: $groupId, planId: $planId, logId: $logId }';
   }
+
+  // @override
+  // String toString() {
+  //   return '配置编号:$actionId,训练编号:$groupId,计划编号:$planId,日志:$logId';
+  // }
 }

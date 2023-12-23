@@ -132,7 +132,7 @@
     "description": "action list页面中，在action详情弹窗中显示的栏位和新增action时exercise 列表页面显示的栏位"
     },
 
-    "workoutFollowLabel": "{num, select, 0{开始锻炼} 1{预备开始} 2{休息} 3{下一个动作} 4{祝贺} other{其他} }",
+    "workoutFollowLabel": "{num, select, 0{开始锻炼} 1{预备开始} 2{休息} 3{下一个} 4{祝贺} other{其他} }",
     "@workoutFollowLabel": {
     "description": "训练跟练页面相关栏位"
     },
@@ -149,11 +149,27 @@
 
     "previewReport":"查看报告",
 
-
-
-
     "plan": "计划",
     "planSubtitle": "计划库管理模块",
+
+    "planQuerys": "{num, select, 0{名称} 1{分类} 2{难度} other{其他} }",
+    "@planQuerys": {
+    "description": "常用 plan 查询用的标签"
+    },
+    "planDeleteAlert":"确认要删除该训练计划:{planName}？删除后不可恢复！",
+    "planInUse":"该训练计划 {planName} 存在跟练记录，暂不支持删除",
+    
+    "modifyPlanLabels": "{num, select, 0{修改计划} 1{新建计划} 2{名称} 3{代号} 4{分类} 5{级别} 6{训练周期} 7{概述} other{其他} }",
+    "@modifyPlanLabels": {
+    "description": "修改或新建 plan 的标签"
+    },
+
+    "dayNumber":"第 {number} 天",
+    "incompleteLabel":"从未跟练",
+
+
+
+
 
     "itemCount": "共 {count} 条",
 
