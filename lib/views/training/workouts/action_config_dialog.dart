@@ -1,11 +1,11 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/global/constants.dart';
+import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import '../../../common/components/counter_widget.dart';
 
@@ -30,37 +30,33 @@ void showConfigDialog(
 
   // 底部的保存按钮区域(固定在底部靠上10)
   Widget genBottomArea() {
-    return Positioned(
-      left: 0,
-      right: 0,
-      bottom: 10.sp,
-      child: Center(
-        child: SizedBox(
-          width: 0.8.sw,
-          child: FloatingActionButton.extended(
-            onPressed: () {
-              // 点击保存按钮的逻辑
-              print("点击了底部的保存按钮……");
+    return Center(
+      child: SizedBox(
+        width: 0.8.sw,
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            // 点击保存按钮的逻辑
+            if (formKey.currentState!.saveAndValidate()) {
+              // 输入的是0或者0.0或者0.000类似物，这里转换完都是0
+              var tempWeight = double.tryParse(
+                formKey.currentState?.fields['equipment_weight']?.value,
+              );
 
-              if (formKey.currentState!.saveAndValidate()) {
-                var tempWeight = double.tryParse(
-                  formKey.currentState?.fields['equipment_weight']?.value,
-                );
+              // 是个对象，直接修改(直接复制的浅拷贝没意义)
+              ad.action.duration = timeInSeconds;
+              ad.action.frequency = count;
+              ad.action.equipmentWeight =
+                  (tempWeight == 0 || tempWeight == 0.0) ? null : tempWeight;
 
-                // 是个对象，直接修改(直接复制的浅拷贝没意义)
-                ad.action.duration = timeInSeconds;
-                ad.action.frequency = count;
-                ad.action.equipmentWeight = tempWeight;
+              Navigator.pop(context);
 
-                print("表单的ad数据：修改后--- ${ad.action} ");
-
-                Navigator.pop(context);
-
-                // 调用回调函数并传递数据
-                onConfigurationDialogClosed(index, ad);
-              }
-            },
-            label: Text('保存', style: TextStyle(fontSize: 20.sp)),
+              // 调用回调函数并传递数据
+              onConfigurationDialogClosed(index, ad);
+            }
+          },
+          label: Text(
+            CusAL.of(context).saveLabel,
+            style: TextStyle(fontSize: 20.sp),
           ),
         ),
       ),
@@ -74,7 +70,10 @@ void showConfigDialog(
       Positioned(
         left: 20,
         top: 10,
-        child: Text("动作配置弹窗", style: TextStyle(fontSize: 20.sp)),
+        child: Text(
+          CusAL.of(context).actionConfigLabel('0'),
+          style: TextStyle(fontSize: 20.sp),
+        ),
       ),
       Positioned(
         right: 0,
@@ -84,7 +83,7 @@ void showConfigDialog(
           icon: Icon(Icons.close, size: 36.sp, color: Colors.blue),
           onPressed: () {
             // 在此处添加关闭按钮的点击处理逻辑
-            print('关闭按钮被点击了');
+
             Navigator.of(context).pop();
           },
         ),
@@ -127,10 +126,9 @@ void showConfigDialog(
                   padding: EdgeInsets.only(right: 30.sp),
                   child: FormBuilderTextField(
                     name: 'equipment_weight',
-                    initialValue: equipmentWeight.toStringAsFixed(2),
+                    initialValue: cusDoubleTryToIntString(equipmentWeight),
                     decoration: InputDecoration(
-                      labelText: '器械重量(kg)',
-                      hintText: "无需器械则不填",
+                      labelText: CusAL.of(context).actionConfigLabel('1'),
                       border: OutlineInputBorder(
                         borderSide: BorderSide(
                           color: Colors.black,
@@ -161,84 +159,77 @@ void showConfigDialog(
 
 // 中间的配置区域和锻炼的概要介绍
   Widget genConfigBody() {
-    return Positioned(
-      left: 0,
-      right: 0,
-      top: 50,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            // 其他内容
-            Container(
-              padding: EdgeInsets.all(1.0.sp),
-              height: MediaQuery.of(context).size.height * 0.8,
-              child: ListView(
-                children: [
-                  Stack(
-                    children: [
-                      // 图片部分
-                      Container(
-                        height: 200.0,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage(placeholderImageUrl),
-                            // ？？？这个不好弄，暂时与屏幕宽度对其就好，不知道会不会变形或者超出
-                            fit: BoxFit.fitWidth,
-                          ),
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          // 其他内容
+          Container(
+            padding: EdgeInsets.all(1.0.sp),
+            height: MediaQuery.of(context).size.height * 0.8,
+            child: ListView(
+              children: [
+                Stack(
+                  children: [
+                    // 图片部分
+                    Container(
+                      height: 200.0,
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage(placeholderImageUrl),
+                          // ？？？这个不好弄，暂时与屏幕宽度对其就好，不知道会不会变形或者超出
+                          fit: BoxFit.fitWidth,
                         ),
                       ),
-                    ],
-                  ),
-                  // 其他内容
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(vertical: 10.sp),
-                        child: buildCountinfModeAre(),
-                      ),
-                      // 下半部分标题、子标题和正文
-                      Container(
-                        height: 300.sp,
-                        color: Colors.white,
-                        child: Padding(
-                          padding: EdgeInsets.all(10.sp),
-                          child: Container(
-                            padding: EdgeInsets.only(bottom: 20.sp),
-                            child: ListTile(
-                              title: Text(
-                                ad.exercise.exerciseName,
-                                // 限制只显示一行，多的用省略号
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                                style: TextStyle(fontSize: 20.sp),
-                              ),
-                              subtitle: SingleChildScrollView(
-                                scrollDirection: Axis.vertical,
-                                child: Text(
-                                  ad.exercise.instructions ?? "",
-                                  overflow: TextOverflow.clip, // 设置文字溢出时的处理方式
-                                ),
+                    ),
+                  ],
+                ),
+                // 其他内容
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10.sp),
+                      child: buildCountinfModeAre(),
+                    ),
+                    // 下半部分标题、子标题和正文
+                    Container(
+                      height: 300.sp,
+                      color: Colors.white,
+                      child: Padding(
+                        padding: EdgeInsets.all(10.sp),
+                        child: Container(
+                          padding: EdgeInsets.only(bottom: 20.sp),
+                          child: ListTile(
+                            title: Text(
+                              ad.exercise.exerciseName,
+                              // 限制只显示一行，多的用省略号
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: TextStyle(fontSize: 20.sp),
+                            ),
+                            subtitle: SingleChildScrollView(
+                              scrollDirection: Axis.vertical,
+                              child: Text(
+                                ad.exercise.instructions ?? "",
+                                overflow: TextOverflow.clip, // 设置文字溢出时的处理方式
                               ),
                             ),
                           ),
                         ),
                       ),
-                      // 预留空白避免被下方的保存按钮挡住说明文字，显示不全
-                      SizedBox(height: 60.sp)
-                    ],
-                  ),
-                ],
-              ),
-            ), // 此处添加一个高度以便滑动
-          ],
-        ),
+                    ),
+                    // 预留空白避免被下方的保存按钮挡住说明文字，显示不全
+                    SizedBox(height: 60.sp)
+                  ],
+                ),
+              ],
+            ),
+          ), // 此处添加一个高度以便滑动
+        ],
       ),
     );
   }
-
-  print("ad.exercise.countingMode ${ad.action}");
 
   // 绘制弹窗
   showModalBottomSheet(
@@ -254,12 +245,22 @@ void showConfigDialog(
           children: <Widget>[
             /// 关闭按钮和重置按钮固定在弹窗顶部左上角和右上角
             ...genTopArea(),
-            // 中间是配置的主体：图片、计数计时器、标题和描述
-            genConfigBody(),
-            // 底部的保存按钮
-            genBottomArea(),
+
+            /// 中间是配置的主体：图片、计数计时器、标题和描述
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 50,
+              child: genConfigBody(),
+            ),
 
             /// 保存按钮固定在屏幕底部
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 10.sp,
+              child: genBottomArea(),
+            ),
           ],
         ),
       );

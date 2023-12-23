@@ -297,7 +297,8 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text(CusAL.of(context).deleteConfirm),
-              content: Text(CusAL.of(context).exerciseDeleteAlert),
+              content: Text(CusAL.of(context)
+                  .exerciseDeleteAlert(exerciseItem.exerciseName)),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),

@@ -13,7 +13,10 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
+import '../../../common/utils/db_user_helper.dart';
+import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import '../reports/index.dart';
 
@@ -43,11 +46,14 @@ enum TtsState { playing, stopped, paused, continued }
 class _ActionFollowPracticeWithTTSState
     extends State<ActionFollowPracticeWithTTS> {
   final DBTrainingHelper _trainingHelper = DBTrainingHelper();
+  final DBUserHelper _userHelper = DBUserHelper();
 
-  // 一般的倒计时控制器
+  // 跟练时的倒计时组件控制器
   final _actionController = CountDownController();
-  // 倒计时组件控制器
+  // 休息时的倒计时组件控制器
   final _restController = CountDownController();
+  // 准备时的倒计时组件控制器
+  final _prepareController = CountDownController();
 
   /// 跟练的时候，可能是直接的某个训练；也可能是某个计划的某个训练日
   /// 理论上不会两者都有
@@ -138,6 +144,8 @@ class _ActionFollowPracticeWithTTSState
     // 进入跟练页面就保持不熄屏
     WakelockPlus.enable();
 
+    getUserConfig();
+
     setState(() {
       // 一定要传动作组数据
       actions = widget.actionList;
@@ -146,9 +154,6 @@ class _ActionFollowPracticeWithTTSState
       groupId = widget.groupId;
       // 进入此跟练页面自动开始
       startedMoment = DateTime.now();
-
-      print("[开始]时的各个编号-------------------");
-      print("planId $planId dayNumber $dayNumber groupId $groupId");
     });
 
     initTts();
@@ -160,6 +165,17 @@ class _ActionFollowPracticeWithTTSState
     flutterTts.stop();
     // 退出页面时恢复屏幕熄屏设置
     WakelockPlus.disable();
+  }
+
+  ///
+  /// 获取用户自定义的间隔耗时
+  ///
+  getUserConfig() async {
+    var tempUser = (await _userHelper.queryUser(userId: CacheUser.userId))!;
+
+    setState(() {
+      _cusRestTime = tempUser.actionRestTime ?? 10;
+    });
   }
 
   ///
@@ -202,12 +218,13 @@ class _ActionFollowPracticeWithTTSState
     // 如果是计时(第一个)
     if (cecm == countingOptions.first.value) {
       // 如果对应的exercise的计数模式是计时的话，那一定有这个值才对。
-      countString = "${curAd.action.duration ?? 10}秒";
+      countString =
+          "${curAd.action.duration ?? 10} ${CusAL.of(context).unitLabels('6')}";
     } else {
       // 如果是计次，次数*单个标准动作耗时
       var temp1 = curAd.action.frequency ?? 1;
       var temp2 = curAd.exercise.standardDuration;
-      countString = "$temp1 x $temp2秒";
+      countString = "$temp1 x $temp2 ${CusAL.of(context).unitLabels('6')}";
     }
 
     return countString;
@@ -334,25 +351,106 @@ class _ActionFollowPracticeWithTTSState
     // 完成之后，这里页面点返回按钮，应该和弹窗中跳到报告页面一样。
     // ？？？或者正式的时候，弹窗就直接改为跳到报告页面即可
     // 跟练中点击返回按钮是暂停，然后询问用户是否确定退出，还是继续等等
-    return Scaffold(
-      appBar: AppBar(title: const Text('跟练示例')),
-      body: Padding(
-        padding: EdgeInsets.all(10.sp),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 专门的一个预备开始的倒计时(只有当前索引为-1的时候触发)
-            if (_currentIndex < 0) ..._buildPrepareScreen(),
+    return PopScope(
+      // 跟练页面点击返回默认不返回，先暂停，然后弹窗提示是否退出；是就退出，否就继续
+      canPop: false,
 
-            // 跟练的时候，动作不能调整倒计时
-            if (!isRestTurn &&
-                _currentIndex >= 0 &&
-                _currentIndex <= actions.length - 1)
-              ..._buildFollowScreen(),
+      onPopInvoked: (didPop) async {
+        if (didPop) return;
 
-            // 休息的时候，可以增加休息时间，或者跳过休息时间
-            if (isRestTurn) ..._buildRestScreen(),
-          ],
+        /// 点击了返回按钮，就先暂停，并弹窗询问是否退出跟练
+        // 点击返回按钮时，可能处在准备、跟练、休息3种情况的任意一种。
+        // 只要是已经开始或者继续的状态，就暂停
+        if (_actionController.isResumed ||
+            _actionController.isStarted ||
+            _actionController.isRestarted) {
+          _actionController.pause();
+        }
+        if (_restController.isResumed ||
+            _restController.isStarted ||
+            _restController.isRestarted) {
+          _restController.pause();
+        }
+        if (_prepareController.isResumed ||
+            _prepareController.isStarted ||
+            _prepareController.isRestarted) {
+          _prepareController.pause();
+        }
+        setState(() {
+          pausedMoment = DateTime.now();
+          // 这个标志只是用于显示跟练画面的暂停和继续的文字，
+          // 所以基本在其他倒计时页面修改了，也不影响，也不用特别新增特定的标志。
+          isActionPause = true;
+        });
+
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text(CusAL.of(context).quitFollowNotes('0')),
+              content: Text(CusAL.of(context).quitFollowNotes('1')),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: Text(CusAL.of(context).cancelLabel),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: Text(CusAL.of(context).confirmLabel),
+                ),
+              ],
+            );
+          },
+        ).then((value) {
+          // 确定确定退出跟练，就直接中断所有内容进行退出，没有任何记录；否则就是继续
+          if (value != null && value) {
+            Navigator.pop(context);
+          } else {
+            // 关闭弹窗，不是退出就继续跟练。如果这些控制器是暂停的状态，就恢复
+            if (_actionController.isPaused) {
+              _actionController.resume();
+            }
+            if (_restController.isPaused) {
+              _restController.resume();
+            }
+            if (_prepareController.isPaused) {
+              _prepareController.resume();
+            }
+            setState(() {
+              // 点击继续时需要统计该次暂停的时间
+              totalPausedTimes += DateTime.now().millisecondsSinceEpoch -
+                  pausedMoment.millisecondsSinceEpoch;
+              // 统计完重置一下(也可能没必要)
+              pausedMoment = DateTime.now();
+              isActionPause = false;
+            });
+          }
+        });
+      },
+      child: Scaffold(
+        appBar: AppBar(title: Text(CusAL.of(context).workoutFollowLabel('0'))),
+        body: Padding(
+          padding: EdgeInsets.all(10.sp),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // 专门的一个预备开始的倒计时(只有当前索引为-1的时候触发)
+              if (_currentIndex < 0) ..._buildPrepareScreen(),
+
+              // 跟练的时候，动作不能调整倒计时
+              if (!isRestTurn &&
+                  _currentIndex >= 0 &&
+                  _currentIndex <= actions.length - 1)
+                ..._buildFollowScreen(),
+
+              // 休息的时候，可以增加休息时间，或者跳过休息时间
+              if (isRestTurn) ..._buildRestScreen(),
+            ],
+          ),
         ),
       ),
     );
@@ -376,7 +474,7 @@ class _ActionFollowPracticeWithTTSState
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: '预备开始\n', // 没有这个换行符两个会放到一行来
+                  text: "${CusAL.of(context).workoutFollowLabel('1')}\n",
                   style: TextStyle(
                     color: Colors.green,
                     fontSize: 24.sp,
@@ -409,6 +507,7 @@ class _ActionFollowPracticeWithTTSState
               child: CircularCountDownTimer(
                 duration: 10,
                 initialDuration: 0,
+                controller: _prepareController,
                 width: 0.3.sw,
                 height: 0.3.sw,
                 ringColor: Colors.grey[300]!,
@@ -420,9 +519,9 @@ class _ActionFollowPracticeWithTTSState
                 backgroundGradient: null,
                 strokeWidth: 10.0,
                 strokeCap: StrokeCap.round,
-                textStyle: const TextStyle(
-                  fontSize: 50.0,
-                  color: Colors.white,
+                textStyle: TextStyle(
+                  fontSize: 50.sp,
+                  color: Theme.of(context).canvasColor,
                   fontWeight: FontWeight.bold,
                 ),
                 textFormat: CountdownTextFormat.S,
@@ -432,16 +531,13 @@ class _ActionFollowPracticeWithTTSState
                 autoStart: true,
                 // 当进入预备倒计时时，开始语音提示.
                 onStart: () {
-                  // Here, do whatever you want
-                  debugPrint('Countdown Started');
                   var prepareText =
-                      "预备开始，下一个动作：${actions.first.exercise.exerciseName}";
+                      "${CusAL.of(context).followTtsLabel('0')} ${actions.first.exercise.exerciseName}";
                   _speak(prepareText);
                 },
                 onComplete: () {
-                  debugPrint('休息 Countdown Ended-- $_currentIndex');
                   setState(() {
-                    // 预备动作，下一个一定是跟练的第一个，所以设置索引加1,非休息状态。
+                    // 预备动作，下一个一定是跟练的第一个，所以设置索引加1(默认是-1开始的),非休息状态。
                     _currentIndex = 0;
                     isRestTurn = false;
                   });
@@ -469,24 +565,6 @@ class _ActionFollowPracticeWithTTSState
     ];
   }
 
-  // 倒计时的tts语言
-  void countdownTts(int seconds) {
-    if (seconds > 0) {
-      print('倒计时剩余时间：$seconds 秒');
-      // _pause();
-      // 倒计时非常快才有可能能不重复
-      // ？？？ 实测跟速度也没关系，就是倒计时的onChange时间的问题？
-      if (!isPlaying) {
-        _speak("$seconds");
-      }
-      Future.delayed(const Duration(milliseconds: 1000), () {
-        countdownTts(seconds - 1);
-      });
-    } else {
-      print('倒计时结束');
-    }
-  }
-
   /// 跟练时的主要部件
   _buildFollowScreen() {
     return [
@@ -502,7 +580,7 @@ class _ActionFollowPracticeWithTTSState
         height: 3,
         child: LinearProgressIndicator(
           backgroundColor: Colors.grey[200],
-          valueColor: const AlwaysStoppedAnimation(Colors.blue),
+          valueColor: AlwaysStoppedAnimation(Theme.of(context).primaryColor),
           value: (_currentIndex + 1) / actions.length,
         ),
       ),
@@ -525,18 +603,10 @@ class _ActionFollowPracticeWithTTSState
                         text: actions[_currentIndex].exercise.exerciseName,
                         style: TextStyle(
                           color: Colors.green,
-                          fontSize: 24.sp,
+                          fontSize: 20.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      // TextSpan(
-                      //   text: "\n${_currentIndex + 1}/${actions.length}",
-                      //   style: TextStyle(
-                      //     color: Colors.black,
-                      //     fontSize: 20.sp,
-                      //     fontWeight: FontWeight.w400,
-                      //   ),
-                      // ),
                     ],
                   ),
                 ),
@@ -560,18 +630,7 @@ class _ActionFollowPracticeWithTTSState
                     barrierDismissible: false,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text('动作技术要点'),
-                        // 设置弹窗宽度高度(好像有上限不能全屏，也好想这个sw、sh相对数值也没用)
-                        // content: SizedBox(
-                        //   width: 1.sw,
-                        //   height: 0.5.sh,
-                        //   child: SingleChildScrollView(
-                        //     child: Text(
-                        //       "${actions[_currentIndex].exercise.instructions}",
-                        //       style: TextStyle(fontSize: 14.sp),
-                        //     ),
-                        //   ),
-                        // ),
+                        title: Text(CusAL.of(context).exerciseLabels('4')),
                         content: SingleChildScrollView(
                           child: Text(
                             "${actions[_currentIndex].exercise.instructions}",
@@ -580,7 +639,7 @@ class _ActionFollowPracticeWithTTSState
                         ),
                         actions: [
                           TextButton(
-                            child: const Text('关闭'),
+                            child: Text(CusAL.of(context).closeLabel),
                             onPressed: () {
                               // 点击了帮助信息的关闭按钮，就默认是点击了继续，则要统计暂停事件，修改状态等
                               _actionController.resume();
@@ -615,9 +674,14 @@ class _ActionFollowPracticeWithTTSState
             Expanded(
               flex: 1,
               child: Text(
-                // ？？？理论是一定有的，这个也需要优化一下这个常量
-                '${countingOptions.firstWhere((e) => e.value == actions[_currentIndex].exercise.countingMode).cnLabel} ',
-                style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                getCusLabelText(
+                  actions[_currentIndex].exercise.countingMode,
+                  countingOptions,
+                ),
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: Theme.of(context).disabledColor,
+                ),
                 textAlign: TextAlign.start,
               ),
             ),
@@ -666,8 +730,9 @@ class _ActionFollowPracticeWithTTSState
                 // 如果这个时间不准的话，一半时间、语音提示等内容这里也放不出来了
                 if (duration.inSeconds ==
                     int.parse(
-                        (_getCurrentActionDuration() / 2).toStringAsFixed(0))) {
-                  _speak("一半时间了");
+                      (_getCurrentActionDuration() / 2).toStringAsFixed(0),
+                    )) {
+                  _speak(CusAL.of(context).followTtsLabel('1'));
                 }
 
                 // 倒计时不是从最大的数值开始的，+1才对得上
@@ -677,43 +742,11 @@ class _ActionFollowPracticeWithTTSState
                 );
               },
 
-              // onChange: (String timeStamp) {
-              //   print("跟练 ---- timeStamp----------$timeStamp");
-
-              //   print(
-              //       "在跟练中---_actionController ${_actionController.getTime()}");
-
-              //   var curCountTime =
-              //       convertToDuration(timeStamp, CountdownTextFormat.MM_SS);
-              //   // 跟练时间最后3秒，有语音倒计时
-
-              //   /// 2023-11-29 目前这个倒计时2时会重复触发，其他还没有
-              //   // ？？？这个change不是按秒变化的，那么这里可能会触发很多次，导致倒计时tts不准确。
-              //   if (curCountTime?.inSeconds == 3) {
-              //     print("跟练333 timeStamp----------$timeStamp");
-              //     countdownTts(3);
-              //     // _speak("3");
-              //   }
-
-              //   // if (curCountTime?.inSeconds == 1) {
-              //   //   print("跟练1111 timeStamp----------$timeStamp");
-              //   //   _speak("1");
-              //   // }
-              //   // 如果这个时间不准的话，一半时间、语音提示等内容这里也放不出来了
-              //   if (curCountTime?.inSeconds ==
-              //       int.parse(
-              //         (_getCurrentActionDuration() / 2).toStringAsFixed(0),
-              //       )) {
-              //     _speak("一半时间");
-              //   }
-              // },
               onStart: () {
                 // 进入开始倒计时，语音提示开始
-                _speak("开始");
+                _speak(CusAL.of(context).followTtsLabel('2'));
               },
               onComplete: () {
-                debugPrint('跟练 Countdown Ended-- $_currentIndex');
-
                 // 如果当前跟练动作还不是最后一个，则进行下一个
                 if (_currentIndex < actions.length - 1) {
                   // 检查组件是否仍然存在，避免在组件已被销毁时调用 setState
@@ -726,7 +759,7 @@ class _ActionFollowPracticeWithTTSState
                 } else {
                   // 如果已经是最后一个了，弹窗显示已结束
                   // 所有锻炼完成，显示弹窗
-                  _speak("祝贺，锻炼已结束");
+                  _speak(CusAL.of(context).followTtsLabel('3'));
                   _showFinishedDialog();
                 }
               },
@@ -766,7 +799,7 @@ class _ActionFollowPracticeWithTTSState
                             });
                           },
                           icon: const Icon(Icons.pause),
-                          label: const Text('暂停'),
+                          label: Text(CusAL.of(context).pauseLabel),
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -788,7 +821,7 @@ class _ActionFollowPracticeWithTTSState
                             });
                           },
                           icon: const Icon(Icons.play_arrow),
-                          label: const Text('继续'),
+                          label: Text(CusAL.of(context).resumeLabel),
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
@@ -806,11 +839,13 @@ class _ActionFollowPracticeWithTTSState
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             TextButton.icon(
-              label: const Text('上一个'),
+              label: Text(CusAL.of(context).prevLabel),
               icon: const Icon(Icons.skip_previous),
               // 按钮的文字，如果已经是第一个了就显示灰色
               style: ElevatedButton.styleFrom(
-                foregroundColor: _currentIndex <= 0 ? Colors.grey : Colors.blue,
+                foregroundColor: _currentIndex <= 0
+                    ? Theme.of(context).disabledColor
+                    : Theme.of(context).primaryColor,
               ),
               // 如果已经是第一个了，就不让点击了(实际能点击，只是没有任何操作而已)
               onPressed: _currentIndex <= 0
@@ -847,11 +882,14 @@ class _ActionFollowPracticeWithTTSState
             Container(
               padding: EdgeInsets.symmetric(horizontal: 20.sp),
               height: 20.sp,
-              child: VerticalDivider(thickness: 3.sp, color: Colors.blue),
+              child: VerticalDivider(
+                thickness: 3.sp,
+                color: Theme.of(context).primaryColor,
+              ),
             ),
             // 如果已经是最后一个了，就不让点击了(实际能点击，只是没有任何操作而已)
             TextButton.icon(
-              label: const Text('跳过'),
+              label: Text(CusAL.of(context).nextLabel),
               icon: const Icon(Icons.skip_next),
 
               // 如果已经是最后一个了，直接跳到结束弹窗？？？
@@ -861,7 +899,7 @@ class _ActionFollowPracticeWithTTSState
                       // 已经是最后一个的话，就重置？？？
                       _actionController.pause();
                       // 所有锻炼完成，语音提示
-                      _speak("祝贺，锻炼已结束");
+                      _speak(CusAL.of(context).followTtsLabel('3'));
                     }
                   : () {
                       // 点击跳过就直接到下一个休息去
@@ -894,7 +932,12 @@ class _ActionFollowPracticeWithTTSState
     return [
       Expanded(
         flex: 1,
-        child: Center(child: Text('休息', style: TextStyle(fontSize: 32.sp))),
+        child: Center(
+          child: Text(
+            CusAL.of(context).workoutFollowLabel('2'),
+            style: TextStyle(fontSize: 32.sp),
+          ),
+        ),
       ),
       Expanded(
         flex: 3,
@@ -909,9 +952,6 @@ class _ActionFollowPracticeWithTTSState
                   // 如果点击了+10s休息时间或者预设的休息时间，要做倒计时在完成时才累加。
                   //    注意：在休息已经进行了一段时间后再+10s，因为有restart，所以还要在+10s前累加已经休息的时间
                   setState(() {
-                    print(
-                        "+10s中累加的休息时间：------${_cusRestTime - (int.tryParse(_restController.getTime() ?? "0") ?? 0)}");
-
                     totalRestTimes += _cusRestTime -
                         (int.tryParse(_restController.getTime() ?? "0") ?? 0);
                   });
@@ -922,7 +962,6 @@ class _ActionFollowPracticeWithTTSState
                       (int.tryParse(_restController.getTime() ?? "0") ?? 0) +
                           10;
 
-                  print("点击了加10s，累加后的倒计时数值newtime $newtime ");
                   setState(() {
                     _cusRestTime = newtime;
 
@@ -934,8 +973,9 @@ class _ActionFollowPracticeWithTTSState
                   _restController.restart(duration: _cusRestTime);
                 },
                 style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.blue),
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                    Theme.of(context).primaryColor,
+                  ),
                 ),
                 child: const Text('+10s'),
               ),
@@ -960,7 +1000,7 @@ class _ActionFollowPracticeWithTTSState
                 strokeCap: StrokeCap.round,
                 textStyle: TextStyle(
                   fontSize: 30.sp,
-                  color: Colors.white,
+                  color: Theme.of(context).canvasColor,
                   fontWeight: FontWeight.bold,
                 ),
                 textFormat: CountdownTextFormat.S,
@@ -973,22 +1013,18 @@ class _ActionFollowPracticeWithTTSState
                 },
                 // 当进入休息倒计时时，开始语音提示下一个动作.
                 onStart: () {
-                  // Here, do whatever you want
-                  debugPrint('Countdown Started');
-
                   // 只有正常进入休息倒计时才发tts，点击了+10s后的restart不发语音
                   if (!isClickPlusRestTime) {
-                    var restText =
-                        "休息一下，下一个动作：${actions[_currentIndex].exercise.exerciseName}";
+                    var restText = "${CusAL.of(context).followTtsLabel(
+                      '4',
+                    )} ${actions[_currentIndex].exercise.exerciseName}";
+
                     _speak(restText);
                   }
                 },
 
                 onComplete: () {
-                  debugPrint('休息 Countdown Ended-- $_currentIndex');
                   setState(() {
-                    print(" 休息时间自动完成时累加的时间：------$_cusRestTime");
-
                     // 休息完之后，要累加此处休息的时间
                     totalRestTimes += _cusRestTime;
 
@@ -1014,9 +1050,6 @@ class _ActionFollowPracticeWithTTSState
                   //    注意：在休息已经进行了一段时间后再+10s，因为有restart，所以还要在+10s前累加已经休息的时间
                   // _controller.getTime() 如果是倒计时，就是剩下的时间；如果是正计时，就是已经运行的时间
 
-                  print(
-                      "跳过休息时累加的休息时间：------${_cusRestTime - (int.tryParse(_restController.getTime() ?? "0") ?? 0)}");
-
                   setState(() {
                     totalRestTimes += _cusRestTime -
                         (int.tryParse(_restController.getTime() ?? "0") ?? 0);
@@ -1036,10 +1069,11 @@ class _ActionFollowPracticeWithTTSState
                   isClickPlusRestTime = false;
                 },
                 style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(Colors.blue),
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                    Theme.of(context).primaryColor,
+                  ),
                 ),
-                child: const Text('跳过'),
+                child: Text(CusAL.of(context).nextLabel),
               ),
             ),
           ],
@@ -1060,7 +1094,7 @@ class _ActionFollowPracticeWithTTSState
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: '下一个动作',
+                      text: CusAL.of(context).workoutFollowLabel('3'),
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 20.sp,
@@ -1092,7 +1126,7 @@ class _ActionFollowPracticeWithTTSState
               flex: 1,
               child: Text(
                 '${_getActionCountString(_currentIndex)}',
-                style: const TextStyle(fontSize: 20),
+                style: TextStyle(fontSize: 20.sp),
                 textAlign: TextAlign.end,
               ),
             ),
@@ -1121,9 +1155,6 @@ class _ActionFollowPracticeWithTTSState
         (tempTime / 1000 - totalPausedTimes / 1000 - totalRestTimes)
             .toStringAsFixed(0);
 
-    print("保存时的各个编号-------------------");
-    print("planId $planId dayNumber $dayNumber groupId $groupId");
-
     // 训练日志
     var tempLog = TrainedLog(
       trainedDate: getCurrentDateTime(),
@@ -1147,55 +1178,76 @@ class _ActionFollowPracticeWithTTSState
       totalRestTime: int.tryParse(pausedTime) ?? 0, // 休息的总时间
     );
 
-    // ？？？这里应该有出错的处理
-    await _trainingHelper.insertTrainingLog(tempLog);
+    try {
+      // 插入训练日志
+      await _trainingHelper.insertTrainingLog(tempLog);
 
-    // 跟练结束后就可以停止禁止熄屏
-    WakelockPlus.disable();
+      // 跟练结束后就可以停止禁止熄屏
+      WakelockPlus.disable();
 
-    if (!mounted) return;
-    showDialog(
-      context: context,
-      barrierDismissible: false, // 禁止点击空白处隐藏弹窗
-      builder: (BuildContext context) => AlertDialog(
-        title: const Text('恭喜！'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('你已完成所有锻炼\n总耗时 $totolTime 秒，其中：'),
-            Text('  暂停耗时约 $pausedTime 秒'),
-            Text('  休息耗时约 $totalRestTimes 秒'),
-            Text('  锻炼耗时约 $workoutTime 秒'),
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false, // 禁止点击空白处隐藏弹窗
+        builder: (BuildContext context) => AlertDialog(
+          title: Text(CusAL.of(context).workoutFollowLabel('4')),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('你已完成所有锻炼\n总耗时 $totolTime 秒，其中：'),
+              Text('  暂停耗时约 $pausedTime 秒'),
+              Text('  休息耗时约 $totalRestTimes 秒'),
+              Text('  锻炼耗时约 $workoutTime 秒'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                _restartAllExercise();
+                Navigator.pop(context, true);
+              },
+              child: Text(CusAL.of(context).restartLabel),
+            ),
+            // 测试的
+            TextButton(
+              onPressed: () {
+                // 2023-12-23 先返回一个true，避免在then中的逻辑出错
+                Navigator.pop(context, true);
+
+                // ？？？这个pushReplacement 为什么跳到报告之后，点击返回还是回到这个跟练页面呢
+                // Navigator.of(context).pushReplacement(
+                //   MaterialPageRoute(builder: (_) => const TrainingReports()),
+                // );
+                // ？？？这样的 奇技淫巧先到最外层，再跳转到报告页面
+                // 要在workout和plan的index中，getGroupList()的setstate前先 if (!mounted) return; 否则会报错
+
+                Navigator.of(context).popUntil((route) => route.isFirst);
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const TrainingReports()),
+                );
+              },
+              child: Text(CusAL.of(context).previewReport),
+            ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _restartAllExercise();
-              Navigator.pop(context);
-            },
-            child: const Text('再来一次'),
-          ),
-          // 测试的
-          TextButton(
-            onPressed: () {
-              // ？？？这个pushReplacement 为什么跳到报告之后，点击返回还是回到这个跟练页面呢
-              // Navigator.of(context).pushReplacement(
-              //   MaterialPageRoute(builder: (_) => const TrainingReports()),
-              // );
-              // ？？？这样的 奇技淫巧先到最外层，再跳转到报告页面
-              // 要在workout和plan的index中，getGroupList()的setstate前先 if (!mounted) return; 否则会报错
-              Navigator.of(context).popUntil((route) => route.isFirst);
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const TrainingReports()),
-              );
-            },
-            child: const Text('查看报告'),
-          ),
-        ],
-      ),
-    );
+      ).then((value) {
+        // 点击弹窗中再来一次或者跳转报告页面按钮都会传一个true，而点击返回默认是null。
+        // 遇到null直接再pop一次回到上一页，而不是关闭弹窗而已
+        if (value == null || value == false) {
+          // Navigator.pop(context);
+          // 返回上一页还是直接到主页？跟练完之后没点击按钮直接返回主页更合理
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      commonExceptionDialog(
+        context,
+        CusAL.of(context).exceptionWarningTitle,
+        e.toString(),
+      );
+    }
   }
 }

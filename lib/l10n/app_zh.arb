@@ -20,7 +20,7 @@
     "description": "微量元素相关营养素标签"
     },
 
-    "unitLabels": "{num, select, 0{克} 1{毫克} 2{大卡} 3{千焦} 4{公分} 5{公斤} 6{秒} other{其他} }",
+    "unitLabels": "{num, select, 0{克} 1{毫克} 2{大卡} 3{千焦} 4{公分} 5{公斤} 6{秒} 7{次} other{其他} }",
     "@unitLabels": {
     "description": "各种单位"
     },
@@ -79,7 +79,7 @@
     "exercise": "动作",
     "exerciseLabel": "基础活动",
     "exerciseSubtitle": "动作库管理模块",
-    "exerciseDeleteAlert":"确认要删除该动作？删除后不可恢复！",
+    "exerciseDeleteAlert":"确认要删除该动作: {exerciseName}？删除后不可恢复！",
     "exerciseInUse":"该动作 {exerciseName} 有被训练或计划使用，暂不支持删除.",
 
     "exerciseQuerys": "{num, select, 0{训练部位} 1{代号} 2{名称} 3{级别} 4{类型} 5{分类} 6{器械} 7{计量} other{其他} }",
@@ -103,6 +103,55 @@
 
     "workout": "训练",
     "workoutSubtitle": "训练组管理模块",
+
+    "workouts": "训练组",
+    "workoutQuerys": "{num, select, 0{名称} 1{分类} 2{难度} 3{级别} 4{类型} 5{分类} 6{器械} 7{计量} other{其他} }",
+    "@workoutQuerys": {
+    "description": "常用workout查询用的标签"
+    },
+    "groupDeleteAlert":"确认要删除该训练动作组:{workoutName}？删除后不可恢复！",
+    "groupInUse":"该训练 {workoutName} 有被计划使用或者存在跟练记录，暂不支持删除",
+    
+    "modifyGroupLabels": "{num, select, 0{修改训练} 1{新建训练} 2{主要肌肉} 3{次要肌肉} 4{技术要点} 5{语音提示要点} 6{动作图片} 7{用户上传} other{其他} }",
+    "@modifyGroupLabels": {
+    "description": "修改或新建训练动作组的标签"
+    },
+
+    "actionLabel": "{num, select, 0{动作} 1{动作} other{其他} }",
+    "@actionLabel": {
+    "description": "常用action相关的标签"
+    },
+
+    "actionDetailLabel": "{num, select, 0{时长(秒)} 1{重复(次)} 2{器械(公斤)} other{其他} }",
+    "@actionDetailLabel": {
+    "description": "在action详情弹窗中显示的栏位"
+    },
+
+    "actionConfigLabel": "{num, select, 0{动作配置弹窗} 1{器械重量(公斤)} 2{点击选择指定动作} other{其他} }",
+    "@actionConfigLabel": {
+    "description": "action list页面中，在action详情弹窗中显示的栏位和新增action时exercise 列表页面显示的栏位"
+    },
+
+    "workoutFollowLabel": "{num, select, 0{开始锻炼} 1{预备开始} 2{休息} 3{下一个动作} 4{祝贺} other{其他} }",
+    "@workoutFollowLabel": {
+    "description": "训练跟练页面相关栏位"
+    },
+
+    "followTtsLabel": "{num, select, 0{预备开始，下一个动作：} 1{一半时间了} 2{开始} 3{祝贺，锻炼已结束} 4{休息一下，下一个动作：} other{其他} }",
+    "@followTtsLabel": {
+    "description": "训练跟练页面tts相关文字，不会显示，但语音会用到"
+    },
+
+    "quitFollowNotes": "{num, select, 0{跟练中止} 1{你确定要退出跟练吗？} other{其他} }",
+    "@quitFollowNotes": {
+    "description": "退出跟练页面是的弹窗标题和正文"
+    },
+
+    "previewReport":"查看报告",
+
+
+
+
     "plan": "计划",
     "planSubtitle": "计划库管理模块",
 
@@ -254,6 +303,13 @@
     "imageUploadLabel":"图片上传",
     "detailLabel":"详情",
     "modifiedSuccessLabel":"变更成功",
+    "startLabel":"开始",
+    "pauseLabel":"暂停",
+    "resumeLabel":"继续",
+    "restartLabel":"重新开始",
+    "prevLabel":"上一个",
+    "nextLabel":"下一个",
+    
 
     "tipLabel":"提示",
     "itemLabel":"{num} 项",

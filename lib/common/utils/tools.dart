@@ -268,6 +268,18 @@ String showCusLableMapLabel(BuildContext context, CusLabel? cusLable) {
   return curLang == "zh" ? cusLable?.cnLabel ?? '' : cusLable?.enLabel ?? '';
 }
 
+// 根据当前语言显示自定义标签的文字(上面那个不传context版本)
 String showCusLable(CusLabel cusLable) {
   return box.read('language') == "en" ? cusLable.enLabel : cusLable.cnLabel;
+}
+
+// 根据传入的值和对应的自定义标签列表，显示对应语言的标签
+getCusLabelText(String item, List<CusLabel> options) {
+  // 才根据数据库存的是英文，这里找到对应的中英文文显示
+  var op = options.firstWhere(
+    (element) => element.value == item,
+    orElse: () => CusLabel(cnLabel: '[无]', enLabel: 'No Data', value: ''),
+  );
+
+  return box.read('language') == "en" ? op.enLabel : op.cnLabel;
 }

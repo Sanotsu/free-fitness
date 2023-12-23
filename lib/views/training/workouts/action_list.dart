@@ -8,6 +8,8 @@ import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import 'action_config_dialog.dart';
 import 'action_detail.dart';
@@ -50,12 +52,7 @@ class _ActionListState extends State<ActionList> {
   void initState() {
     super.initState();
 
-    print("widget.groupItem initState---${widget.groupItem}");
-
-    // ？？？应该不需要放在setstate里面才对
-    setState(() {
-      _getActionListByGroupId();
-    });
+    _getActionListByGroupId();
   }
 
   // 查询指定训练中的动作列表
@@ -87,8 +84,6 @@ class _ActionListState extends State<ActionList> {
     // 必须要把原本的action id置为空，然后让数据库设定的自增生效，否则显示的结果默认以主键排序，和实际显示的结果可能不一致。
     List<TrainingAction> tempList =
         actionList.map((e) => e.action..actionId = null).toList();
-
-    log.i(tempList);
 
     await _dbHelper.renewGroupWithActionsList(
       widget.groupItem.groupId!,
@@ -129,14 +124,6 @@ class _ActionListState extends State<ActionList> {
     setState(() {
       actionList.removeAt(index);
     });
-  }
-
-  /// 当处于编辑状态时，点击动作卡片进入动作编辑弹窗
-  void _onConfigure(BuildContext context, ActionDetail adItem, int index) {
-    // 弹出配置弹窗的逻辑
-    print("预留点击进入action配置，使用弹窗 $index");
-
-    showConfigDialog(context, adItem, index, onConfiguClosed);
   }
 
   // 关闭动作弹窗时，根据其回调函数中的值，修改当前显示的动作配置为修改后的值
@@ -183,10 +170,11 @@ class _ActionListState extends State<ActionList> {
             text: TextSpan(
               children: [
                 TextSpan(
-                    text: '${widget.groupItem.groupName}\n',
+                    text: widget.groupItem.groupName,
                     style: TextStyle(fontSize: 20.sp)),
                 TextSpan(
-                  text: " 共 ${actionList.length} 个动作",
+                  text:
+                      "\n${CusAL.of(context).actionLabel('1')}: ${CusAL.of(context).itemCount(actionList.length)}",
                   style: TextStyle(fontSize: 12.sp),
                 ),
               ],
@@ -245,10 +233,7 @@ class _ActionListState extends State<ActionList> {
                 width: 0.6.sw,
                 child: ElevatedButton(
                   onPressed: () {
-                    // 【点击开始跟练
-
-                    // log.d("开始跟练的数据 $actionList");
-
+                    /// 点击开始跟练
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -264,18 +249,18 @@ class _ActionListState extends State<ActionList> {
                           actionList: actionList,
                         ),
                       ),
-                    ).then((value) {
-                      print("跟练完成之后，返回的数据---: $value");
-                      print("跟练完成之后，也可能直接push and replace到报告页面？？？");
-                    });
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.0), // 设置圆角
+                      borderRadius: BorderRadius.circular(20.sp), // 设置圆角
                     ),
                     backgroundColor: Colors.green,
                   ),
-                  child: Text('开始', style: TextStyle(fontSize: 20.sp)),
+                  child: Text(
+                    CusAL.of(context).startLabel,
+                    style: TextStyle(fontSize: 20.sp),
+                  ),
                 ),
               ),
         // 悬浮按钮位置
@@ -299,13 +284,15 @@ class _ActionListState extends State<ActionList> {
 
         // 显示次数、持续时间、器械重量
         String subTitle = "";
-        var frequency =
-            actionItem.frequency != null ? "${actionItem.frequency}次" : null;
-        var duration =
-            actionItem.duration != null ? "${actionItem.duration}秒" : null;
+        var frequency = actionItem.frequency != null
+            ? "${actionItem.frequency} ${CusAL.of(context).unitLabels('7')}"
+            : null;
+        var duration = actionItem.duration != null
+            ? "${actionItem.duration} ${CusAL.of(context).unitLabels('6')}"
+            : null;
         // 值是double类型，转2位小数的字符串
         var equipmentWeight = actionItem.equipmentWeight != null
-            ? "${actionItem.equipmentWeight!.toStringAsFixed(2)}公斤"
+            ? "${cusDoubleTryToIntString(actionItem.equipmentWeight!)} ${CusAL.of(context).unitLabels('5')}"
             : null;
         // 如果是计时的运动，子标题显示持续时间和器械重量(如果有的话)
         if (adItem.exercise.countingMode == countingOptions.first.value) {
@@ -324,27 +311,19 @@ class _ActionListState extends State<ActionList> {
           key: Key('$index'),
           child: InkWell(
             onTap: () {
+              /// 当处于编辑状态时，点击动作卡片进入动作编辑弹窗
               // 应该是上方点击了【编辑】之后，才能对列表进行调整、修改、删除、新增
               if (_isEditing) {
-                print("修改时点击了action 指定卡片 ${adItem.exercise.countingMode}");
-
-                _onConfigure(context, adItem, index);
+                showConfigDialog(context, adItem, index, onConfiguClosed);
               }
               if (!_isEditing) {
                 showModalBottomSheet(
                   context: context,
                   // 设置滚动控制为true，子部件设置dialog的高度才有效，不然固定在9/16左右无法更多。
                   isScrollControlled: true,
-                  builder: (BuildContext context) {
-                    return ActionDetailDialog(
-                      adItems: actionList,
-                      adIndex: index,
-                    );
-                  },
-                ).then((value) {
-                  print("-------打开action detail 弹窗后的返回 $value");
-                  // 修改exercise之后，重新加载列表
-                });
+                  builder: (BuildContext context) =>
+                      ActionDetailDialog(adItems: actionList, adIndex: index),
+                );
               }
             },
             // 由于ListTile的 trailing 无法自定义高度，这里就用Row来构建显示
@@ -354,9 +333,12 @@ class _ActionListState extends State<ActionList> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   if (_isEditing)
-                    const Expanded(
+                    Expanded(
                       flex: 2,
-                      child: Icon(Icons.menu, color: Colors.blue),
+                      child: Icon(
+                        Icons.menu,
+                        color: Theme.of(context).primaryColor,
+                      ),
                     ),
                   Expanded(
                     flex: 9,
@@ -368,8 +350,6 @@ class _ActionListState extends State<ActionList> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       subtitle: Text(subTitle),
-                      // 如果没有缩略图，就应该显示技术动作要点的文本
-                      // trailing: const Text("这里应该是缩略图"),
                     ),
                   ),
                   Expanded(
@@ -397,35 +377,27 @@ class _ActionListState extends State<ActionList> {
     );
   }
 
+  /// 动作列表中新增动作，会查询简单exercise列表，选中某个exercise之后带回本页面，加入到action list中
   _buildAddActionButton() {
     return FloatingActionButton(
       onPressed: () {
-        // 处理按钮点击事件
-        // 这里点击新增训练计划，一定是要新增一个 group和action，后续在对应action list中新增action，都需要带上这个group id（group_has_action多一条数据）
-
-        //  在训练计划中点击【新增】，此时没有group id，先跳转到
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SimpleExerciseList(
-              // 如果是已存在的训练计划新增，则会有group id；如果是全新的训练计划新增，则暂时还没有id
-              source: widget.groupItem.groupId.toString(),
-            ),
+            builder: (context) => const SimpleExerciseList(),
           ),
         ).then((value) {
-          print("simple exercise list 返回的数据: $value");
-
-          if (value["selectedExerciseItem"] != null) {
-            var selectedExerciseItem =
-                value["selectedExerciseItem"] as Exercise;
+          // 如果返回的不是null，也不是false，那就应该是被选中的exercise类
+          if (value != null && value != false) {
+            var selectedExercise = value as Exercise;
 
             var tempAction = TrainingAction(
-              exerciseId: selectedExerciseItem.exerciseId!,
+              exerciseId: selectedExercise.exerciseId!,
               groupId: widget.groupItem.groupId!,
             );
 
             var temp = ActionDetail(
-              exercise: selectedExerciseItem,
+              exercise: selectedExercise,
               action: tempAction,
             );
 
@@ -434,7 +406,6 @@ class _ActionListState extends State<ActionList> {
           }
         });
       },
-      // backgroundColor: Colors.yellow,
       child: const Icon(Icons.add),
     );
   }

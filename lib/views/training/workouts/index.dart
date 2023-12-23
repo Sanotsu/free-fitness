@@ -8,6 +8,8 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import 'action_list.dart';
 
@@ -56,6 +58,9 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
     // 如果已经在查询数据中，则忽略此次新的查询
     if (isLoading) return;
 
+    print(DateTime.now());
+    var a = DateTime.now().microsecondsSinceEpoch;
+
     // 如果没在查询中，设置状态为查询中
     setState(() {
       isLoading = true;
@@ -74,8 +79,6 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
       );
     }
 
-    print("getGroupList---$temp");
-
     if (!mounted) return;
     // 设置查询结果
     setState(() {
@@ -83,7 +86,10 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
       groupList = temp;
       // 重置状态为查询完成
       isLoading = false;
-      print("groupList---$groupList");
+
+      var b = DateTime.now().microsecondsSinceEpoch;
+      print(DateTime.now());
+      print('训练查询耗时，微秒: ${b - a}');
     });
   }
 
@@ -95,9 +101,12 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
         title: RichText(
           text: TextSpan(
             children: [
-              TextSpan(text: '训练组\n', style: TextStyle(fontSize: 20.sp)),
               TextSpan(
-                text: "共 ${groupList.length} 个",
+                text: CusAL.of(context).workouts,
+                style: TextStyle(fontSize: 20.sp),
+              ),
+              TextSpan(
+                text: "\n${CusAL.of(context).itemCount(groupList.length)}",
                 style: TextStyle(fontSize: 12.sp),
               ),
             ],
@@ -123,7 +132,15 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
       body: Column(
         children: [
           /// 查询条件区域
-          _buildQueryArea(),
+          FormBuilder(
+            key: _queryFormKey,
+            child: Card(
+              elevation: 5.sp,
+              child: Column(
+                children: [_buildQueryAreaRow(), SizedBox(height: 10.sp)],
+              ),
+            ),
+          ),
           isLoading ? buildLoader(isLoading) : Expanded(child: _buildList()),
         ],
       ),
@@ -131,34 +148,25 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
   }
 
   // 条件查询区域
-  _buildQueryArea() {
-    return FormBuilder(
-      key: _queryFormKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Card(
-            elevation: 5.sp,
-            child: ListTile(
-              title: Row(
+  _buildQueryAreaRow() {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            children: [
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    "名称",
-                    style: TextStyle(fontSize: 14.sp, color: Colors.black),
-                  ),
-                  Flexible(
+                  Expanded(
                     child: cusFormBuilerTextField(
                       "group_name",
-                      hintText: "输入名称",
-                      hintStyle: TextStyle(fontSize: 14.sp),
-                      valueFontSize: 14.sp,
+                      labelText: CusAL.of(context).workoutQuerys('0'),
                     ),
                   ),
                   SizedBox(
-                    width: 40.sp,
-                    height: 36,
+                    width: 50.sp,
+                    height: 36.sp,
                     child: TextButton(
                       onPressed: () {
                         setState(() {
@@ -175,80 +183,58 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                         FocusScope.of(context).focusedChild?.unfocus();
                       },
                       child: Text(
-                        "重置",
-                        style: TextStyle(fontSize: 12.sp, color: Colors.blue),
+                        CusAL.of(context).resetLabel,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: Theme.of(context).primaryColor,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-              subtitle: Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Text(
-                    "分类",
-                    style: TextStyle(fontSize: 14.sp, color: Colors.black),
-                  ),
-                  Flexible(
+                  Expanded(
                     child: cusFormBuilerDropdown(
                       "group_category",
                       groupCategoryOptions,
-                      hintText: "选择分类",
-                      hintStyle: TextStyle(fontSize: 14.sp),
-                      optionFontSize: 14,
+                      labelText: CusAL.of(context).workoutQuerys('1'),
+                      optionFontSize: 13.sp,
                     ),
                   ),
-                  Text(
-                    "难度",
-                    style: TextStyle(fontSize: 14.sp, color: Colors.black),
-                  ),
-                  Flexible(
+                  Expanded(
                     child: cusFormBuilerDropdown(
                       "group_level",
                       levelOptions,
-                      hintText: "选择难度",
-                      hintStyle: TextStyle(fontSize: 14.sp),
-                      optionFontSize: 14,
+                      labelText: CusAL.of(context).workoutQuerys('2'),
+                      optionFontSize: 13.sp,
                     ),
                   ),
-
-                  // SizedBox(
-                  //   width: 30.sp,
-                  //   child: IconButton(
-                  //     icon: const Icon(Icons.refresh, color: Colors.blue),
-                  //     onPressed: () {
-                  //       setState(() {
-                  //         _queryFormKey.currentState?.reset();
-                  //         conditionMap = {};
-                  //         getGroupList();
-                  //       });
-                  //     },
-                  //   ),
-                  // )
                 ],
               ),
-              dense: true,
-              trailing: Container(
-                width: 24.sp,
-                alignment: Alignment.center,
-                child: IconButton(
-                  icon: const Icon(Icons.search, color: Colors.blue),
-                  onPressed: () {
-                    if (_queryFormKey.currentState!.saveAndValidate()) {
-                      setState(() {
-                        conditionMap = _queryFormKey.currentState!.value;
-                        getGroupList();
-                      });
-                    }
-                    // 如果有键盘就收起键盘
-                    FocusScope.of(context).focusedChild?.unfocus();
-                  },
-                ),
-              ),
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+        Container(
+          width: 50.sp,
+          alignment: Alignment.center,
+          child: IconButton(
+            icon: Icon(Icons.search, color: Theme.of(context).primaryColor),
+            onPressed: () {
+              if (_queryFormKey.currentState!.saveAndValidate()) {
+                setState(() {
+                  conditionMap = _queryFormKey.currentState!.value;
+                  getGroupList();
+                });
+              }
+              // 如果有键盘就收起键盘
+              FocusScope.of(context).focusedChild?.unfocus();
+            },
+          ),
+        )
+      ],
     );
   }
 
@@ -267,30 +253,43 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
               groupItem.group.groupName,
               style: TextStyle(
                 fontSize: 20.sp,
-                fontWeight: FontWeight.w500,
+                // fontWeight: FontWeight.w500,
+                color: Theme.of(context).primaryColor,
               ),
             ),
-            // subtitle: Text(
-            //   "${groupItem.group.groupCategory}-${groupItem.group.groupLevel}-${groupItem.actionDetailList.length}",
-            //   style: TextStyle(
-            //     fontSize: 16.sp,
-            //     fontWeight: FontWeight.w500,
-            //   ),
-            // ),
-
-            subtitle: Row(
-              children: [
-                _propertyText(
-                  groupItem.group.groupCategory,
-                  options: groupCategoryOptions,
-                ),
-                _propertyText(
-                  groupItem.group.groupLevel,
-                  options: levelOptions,
-                ),
-                _propertyText("共${groupItem.actionDetailList.length}个动作"),
-              ],
+            subtitle: RichText(
+              textAlign: TextAlign.left,
+              maxLines: 2,
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '${getCusLabelText(
+                      groupItem.group.groupLevel,
+                      levelOptions,
+                    )}  ',
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                  TextSpan(
+                    text: '${getCusLabelText(
+                      groupItem.group.groupCategory,
+                      groupCategoryOptions,
+                    )}  ',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      color: Colors.green[500],
+                    ),
+                  ),
+                  TextSpan(
+                    text: CusAL.of(context)
+                        .itemCount(groupItem.actionDetailList.length),
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
             ),
+
             // 2023-11-23 如果是计划新增训练跳转来的,则不允许修改已有的训练或者新增训练，还是严格各自模块去完成各自的内容。
             // 如果说需要计划新增训练时可以再新增训练或者修改指定训练，则不做下面这个限制
             trailing: isPlanAddGroup
@@ -298,9 +297,12 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                 : SizedBox(
                     width: 30.sp,
                     child: IconButton(
-                      icon: Icon(Icons.edit, size: 20.sp, color: Colors.blue),
+                      icon: Icon(
+                        Icons.edit,
+                        size: 20.sp,
+                        color: Theme.of(context).primaryColor,
+                      ),
                       onPressed: () {
-                        print("indexindexindex=$index ${groupItem.group}");
                         _modifyGroupInfo(groupItem: groupItem.group);
                       },
                     ),
@@ -322,9 +324,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                     ),
                   ),
                 ).then((value) {
-                  print("action list 返回的数据 $value");
                   // ？？？暂时返回这个页面时都重新加载最新的训练列表数据
-
                   setState(() {
                     getGroupList();
                   });
@@ -341,28 +341,29 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
               if (list.isNotEmpty) {
                 commonExceptionDialog(
                   context,
-                  "异常提醒",
-                  "该训练 ${groupItem.group.groupName} 有被计划使用或者存在跟练记录，暂不支持删除.",
+                  CusAL.of(context).exceptionWarningTitle,
+                  CusAL.of(context).groupInUse(groupItem.group.groupName),
                 );
               } else {
                 showDialog(
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      title: const Text('提示'),
-                      content: Text("是否删除: ${groupItem.group.groupName}?"),
+                      title: Text(CusAL.of(context).deleteConfirm),
+                      content: Text(CusAL.of(context)
+                          .groupDeleteAlert(groupItem.group.groupName)),
                       actions: [
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context, false);
                           },
-                          child: const Text('取消'),
+                          child: Text(CusAL.of(context).cancelLabel),
                         ),
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context, true);
                           },
-                          child: const Text('确认'),
+                          child: Text(CusAL.of(context).confirmLabel),
                         ),
                       ],
                     );
@@ -376,7 +377,11 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                       getGroupList();
                     } catch (e) {
                       if (!mounted) return;
-                      commonExceptionDialog(context, "异常提醒", e.toString());
+                      commonExceptionDialog(
+                        context,
+                        CusAL.of(context).exceptionWarningTitle,
+                        e.toString(),
+                      );
                     }
                   }
                 });
@@ -394,50 +399,35 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("${groupItem != null ? '修改' : '新建'}训练"),
+          title: Text(
+            groupItem != null
+                ? CusAL.of(context).modifyGroupLabels('1')
+                : CusAL.of(context).modifyGroupLabels('0'),
+          ),
           content: FormBuilder(
             key: _groupFormKey,
             initialValue: groupItem != null ? groupItem.toMap() : {},
             // autovalidateMode: AutovalidateMode.always,
             child: SingleChildScrollView(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   cusFormBuilerTextField(
                     "group_name",
-                    labelText: '*名称',
-                    hintText: "输入名称",
-                    hintStyle: TextStyle(fontSize: 14.sp),
-                    validator: FormBuilderValidators.compose(
-                        [FormBuilderValidators.required(errorText: '名称不可为空')]),
+                    labelText: '*${CusAL.of(context).workoutQuerys('0')}',
+                    validator: FormBuilderValidators.required(),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Flexible(
-                        child: cusFormBuilerDropdown(
-                          "group_category",
-                          groupCategoryOptions,
-                          labelText: '*分类',
-                          hintText: "选择分类",
-                          hintStyle: TextStyle(fontSize: 14.sp),
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(errorText: '难度不可为空')
-                          ]),
-                        ),
-                      ),
-                      Flexible(
-                        child: cusFormBuilerDropdown(
-                          "group_level",
-                          levelOptions,
-                          labelText: '*难度',
-                          hintText: "选择难度",
-                          hintStyle: TextStyle(fontSize: 14.sp),
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(errorText: '难度不可为空')
-                          ]),
-                        ),
-                      )
-                    ],
+                  cusFormBuilerDropdown(
+                    "group_category",
+                    groupCategoryOptions,
+                    labelText: '*${CusAL.of(context).workoutQuerys('1')}',
+                    validator: FormBuilderValidators.required(),
+                  ),
+                  cusFormBuilerDropdown(
+                    "group_level",
+                    levelOptions,
+                    labelText: '*${CusAL.of(context).workoutQuerys('2')}',
+                    validator: FormBuilderValidators.required(),
                   ),
                 ],
               ),
@@ -445,13 +435,13 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('取消'),
+              child: Text(CusAL.of(context).cancelLabel),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: const Text('确认'),
+              child: Text(CusAL.of(context).confirmLabel),
               onPressed: () async {
                 if (_groupFormKey.currentState!.saveAndValidate()) {
                   // 获取表单数值
@@ -500,29 +490,6 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
           ],
         );
       },
-    );
-  }
-
-  _propertyText(String item, {List<CusLabel>? options}) {
-    // 有传对应列表，才根据数据库存的是英文，这里找到对应的中文显示；否则直接显示
-    var label = options
-            ?.firstWhere(
-              (element) => element.value == item,
-              orElse: () =>
-                  CusLabel(cnLabel: '[无]', enLabel: 'No Data', value: ''),
-            )
-            .cnLabel ??
-        item;
-
-    return Padding(
-      padding: EdgeInsets.only(right: 10.sp),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
     );
   }
 }

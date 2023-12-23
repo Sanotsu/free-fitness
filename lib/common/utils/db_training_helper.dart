@@ -481,7 +481,7 @@ class DBTrainingHelper {
           whereArgs: [action.exerciseId],
         );
 
-        print("exerciseRows----${exerciseRows.length}");
+        // print("exerciseRows----${exerciseRows.length}");
         // ？？？理论上这里只有查到1个exercise，且不应该差不多(暂不考虑异常情况)
         if (exerciseRows.isNotEmpty) {
           var ad = ActionDetail(
@@ -495,7 +495,6 @@ class DBTrainingHelper {
       list.add(GroupWithActions(group: group, actionDetailList: adList));
     }
 
-    // log.d("searchAllGroupWithActions---$list");
     return list;
   }
 
@@ -1059,12 +1058,11 @@ class DBTrainingHelper {
     // 如果对应的exercise编号关联查询的结果不为空，则说明有被使用，不允许删除
     var rows = await db.rawQuery(
       '''
-      SELECT a.action_id,g.group_id,p.plan_id,l.trained_log_id
+      SELECT a.action_id,g.group_id,phg.plan_id,l.trained_log_id
       FROM ${TrainingDdl.tableNameOfAction} a
       LEFT JOIN ${TrainingDdl.tableNameOfGroup}         g   ON g.group_id = a.group_id  
       LEFT JOIN ${TrainingDdl.tableNameOfPlanHasGroup}  phg ON phg.group_id = g.group_id
-      LEFT JOIN ${TrainingDdl.tableNameOfPlan}          p   ON phg.plan_id = p.plan_id
-      LEFT JOIN ${TrainingDdl.tableNameOfTrainedLog}    l   ON l.plan_id = p.plan_id OR l.group_id = g.group_id
+      LEFT JOIN ${TrainingDdl.tableNameOfTrainedLog}    l   ON l.plan_id = phg.plan_id OR l.group_id = phg.group_id
       WHERE a.exercise_id = $exerciseId;
       ''',
     );
@@ -1078,12 +1076,10 @@ class DBTrainingHelper {
     // 这个训练有日志或者训练所属的计划有日志都算，但没法区分group是直接跟练的训练还是计划的某一天
     var rows = await db.rawQuery(
       '''
-      SELECT DISTINCT g.group_id,p.plan_id,l.trained_log_id
-      FROM ${TrainingDdl.tableNameOfGroup} g 
-      LEFT JOIN ${TrainingDdl.tableNameOfPlanHasGroup} phg  ON phg.group_id = g.group_id
-      LEFT JOIN ${TrainingDdl.tableNameOfPlan}         p    ON phg.plan_id = p.plan_id
-      LEFT JOIN ${TrainingDdl.tableNameOfTrainedLog}   l    ON l.plan_id = p.plan_id OR l.group_id = g.group_id
-      WHERE g.group_id = $groupId;
+      SELECT phg.plan_id,l.trained_log_id
+      FROM ${TrainingDdl.tableNameOfPlanHasGroup} phg 
+      LEFT JOIN ${TrainingDdl.tableNameOfTrainedLog} l ON l.plan_id = phg.plan_id OR l.group_id = phg.group_id
+      WHERE phg.group_id = $groupId;
       ''',
     );
 

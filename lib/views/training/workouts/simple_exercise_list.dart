@@ -4,17 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/components/dialog_widgets.dart';
+import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 
+///
+/// 2023-12-22
+/// 只有 action list 新增动作会先跳到本页面，点击了某个exercise之后，把该exercise带回到action list页面进行添加。
+/// 所以本页面只需要简单显示exercise列表信息即可
+///
 class SimpleExerciseList extends StatefulWidget {
-  // 进此页面的来源有两个，返回的页面也会不一样
-  //    1 group list -> new group -> simple exercise list -> action config => new action list
-  //    2 action list -> add new item -> simple exercise list -> action config => origin action list
-  final String source;
-
-  const SimpleExerciseList({super.key, required this.source});
+  const SimpleExerciseList({super.key});
 
   @override
   State<SimpleExerciseList> createState() => _SimpleExerciseListState();
@@ -83,19 +86,9 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
 
     List<Exercise> newData = temp.data as List<Exercise>;
 
-    // 模拟加载耗时一秒，以明显看到加载圈（实际用删除）
-    // await Future.delayed(const Duration(milliseconds: 100));
-
-    // 如果没有更多数据，则在底部显示
+    // 如果没有更多数据，则在底部显示回弹一下
     if (newData.isEmpty) {
-      // 显示 "没有更多" 的信息
       if (!mounted) return;
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   const SnackBar(
-      //     content: Center(child: Text("没有更多")),
-      //     duration: Duration(seconds: 2),
-      //   ),
-      // );
       scrollController.animateTo(
         scrollController.position.pixels, // 回弹的距离
         duration: const Duration(milliseconds: 1000), // 动画持续300毫秒
@@ -131,7 +124,21 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('选择指定动作'),
+        title: RichText(
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          text: TextSpan(
+            children: [
+              TextSpan(
+                  text: CusAL.of(context).actionConfigLabel('2'),
+                  style: TextStyle(fontSize: 20.sp)),
+              TextSpan(
+                text: "\n${CusAL.of(context).itemCount(exerciseCount)}",
+                style: TextStyle(fontSize: 12.sp),
+              ),
+            ],
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -152,22 +159,23 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
             child: TextField(
               // 设置文本大小
               style: TextStyle(fontSize: 14.sp),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 // 四周带上边框
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
                 // 设置输入框大小
                 contentPadding: EdgeInsets.symmetric(
-                  vertical: 10,
-                  horizontal: 12,
+                  vertical: 10.sp,
+                  horizontal: 12.sp,
                 ),
                 // 占位符文本
-                hintText: '动作名称或代号关键字',
+                hintText: CusAL.of(context).queryKeywordHintText(
+                  CusAL.of(context).exercise,
+                ),
               ),
               controller: queryTextController,
             ),
           ),
         ),
-        Expanded(flex: 1, child: Center(child: Text('共$exerciseCount条'))),
         Expanded(
           flex: 1,
           child: Center(
@@ -194,23 +202,22 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
         if (index == exerciseItems.length) {
           return buildLoader(isLoading);
         } else {
-          // 示意图可以有多个，就取第一张好了
           var exerciseItem = exerciseItems[index];
-
           return Card(
             elevation: 10,
             child: GestureDetector(
               onTap: () {
                 // 在这里添加你想要执行的点击事件逻辑
-                print('Row clicked--widget.source ${widget.source}');
-
-                Navigator.pop(context, {"selectedExerciseItem": exerciseItem});
+                Navigator.pop(context, exerciseItem);
               },
               child: Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     flex: 2,
-                    child: Icon(Icons.add_circle_outline, color: Colors.grey),
+                    child: Icon(
+                      Icons.add_circle_outline,
+                      color: Theme.of(context).primaryColor,
+                    ),
                   ),
                   Expanded(
                     flex: 9,
@@ -222,7 +229,15 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
                         style: TextStyle(
                             fontSize: 16.sp, fontWeight: FontWeight.bold),
                       ),
-                      subtitle: Text(exerciseItem.countingMode),
+                      subtitle: Text(
+                        '${getCusLabelText(
+                          exerciseItem.countingMode,
+                          countingOptions,
+                        )} ${getCusLabelText(
+                          exerciseItem.level ?? '',
+                          levelOptions,
+                        )}',
+                      ),
                     ),
                   ),
                   Expanded(

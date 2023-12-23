@@ -18,7 +18,7 @@
   "description": "微量元素相关营养素标签"
   },
 
-  "unitLabels": "{num, select, 0{g} 1{mg} 2{kcal} 3{kj} 4{cm} 5{kg} 6{s} other{Other} }",
+  "unitLabels": "{num, select, 0{g} 1{mg} 2{kcal} 3{kj} 4{cm} 5{kg} 6{s} 7{time(s)} other{Other} }",
   "@unitLabels": {
   "description": "各种单位"
   },
@@ -77,7 +77,7 @@
   "exercise": "Exercises",
   "exerciseLabel": "Exercise",
   "exerciseSubtitle": "Exercise management",
-  "exerciseDeleteAlert":"Confirmed to delete the exercise? Deletion is not recoverable!",
+  "exerciseDeleteAlert":"Are you sure you need to delete this exercise: {exerciseName}? Deletion is not recoverable!",
   "exerciseInUse":"Exercise {exerciseName} in use, deletion is not supported",
  
  
@@ -99,6 +99,55 @@
 
   "workout": "Workouts",
   "workoutSubtitle": "Workout management",
+
+  "workouts": "Workouts",
+  "workoutQuerys": "{num, select, 0{Name} 1{Category} 2{Level} 3{级别} 4{类型} 5{分类} 6{器械} 7{计量} other{其他} }",
+  "@workoutQuerys": {
+  "description": "常用workout查询用的标签"
+  },
+  "groupDeleteAlert":"Are you sure you need to delete the workout: {workoutName}? Deletion is not recoverable!",
+  "groupInUse":"Workout {workoutName} in use, deletion is not supported",
+ 
+  "modifyGroupLabels": "{num, select, 0{Workout Add} 1{Workout Modify} 2{主要肌肉} 3{次要肌肉} 4{技术要点} 5{语音提示要点} 6{动作图片} 7{用户上传} other{其他} }",
+  "@modifyGroupLabels": {
+  "description": "修改或新建训练动作组的标签"
+  },
+
+ "actionLabel": "{num, select, 0{Action} 1{Actions} other{Other} }",
+  "@actionLabel": {
+  "description": "常用action相关的标签"
+  },
+
+  "actionDetailLabel": "{num, select, 0{Dur.(s)} 1{Rpt. (times)} 2{Eqpt. (kg)} other{其他} }",
+  "@actionDetailLabel": {
+  "description": "在action详情弹窗中显示的栏位"
+  },
+
+  "actionConfigLabel": "{num, select, 0{Action Configuration Dialog} 1{Eqpt.Wgt.(kg)} 2{Click to select exercise} other{其他} }",
+  "@actionConfigLabel": {
+  "description": "action list页面中，在action详情弹窗中显示的栏位和新增action时exercise 列表页面显示的栏位"
+  },
+
+
+  "workoutFollowLabel": "{num, select, 0{Follow Workout} 1{Ready} 2{Rest} 3{Next Action} 4{Congratulations} other{其他} }",
+  "@workoutFollowLabel": {
+  "description": "训练跟练页面相关栏位"
+  },
+
+
+  "followTtsLabel": "{num, select, 0{Ready, the next action is } 1{It's half the time.} 2{Start} 3{Congratulations,the workout is over.} 4{Take a break, the next action} other{其他} }",
+  "@followTtsLabel": {
+  "description": "训练跟练页面tts相关文字"
+  },
+
+
+  "quitFollowNotes": "{num, select, 0{Workout Pause } 1{Are you sure want to quit this workout?} other{其他} }",
+  "@quitFollowNotes": {
+  "description": "退出跟练页面是的弹窗标题和正文"
+  },
+
+  "previewReport":"Preview Report",
+
   "plan": "Plans",
   "planSubtitle": "Plan management",
 
@@ -251,6 +300,14 @@
   "imageUploadLabel":"Image Upload",
   "detailLabel":"Detail",
   "modifiedSuccessLabel":"Successfully Modified",
+  "startLabel":"Start",
+  "pauseLabel":"Pause",
+  "resumeLabel":"Resume",
+  "restartLabel":"Restart",
+  "prevLabel":"Prev",
+  "nextLabel":"Next",
+
+
 
   "tipLabel":"Notification",
   "itemLabel":"{num} item(s)",

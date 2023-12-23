@@ -5,6 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
+import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 
 class ActionDetailDialog extends StatefulWidget {
@@ -22,8 +24,6 @@ class ActionDetailDialog extends StatefulWidget {
 }
 
 class _ActionDetailDialogState extends State<ActionDetailDialog> {
-  String placeholderImageUrl = 'assets/images/no_image.png';
-
   int _currentIndex = 0;
   int _totalSize = 0;
   late ActionDetail _currentItem;
@@ -41,7 +41,6 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
     // exercise详情弹窗占屏幕高度的80%
     double screenHeight = MediaQuery.of(context).size.height;
     double desiredHeight = screenHeight * 0.8;
-    print("desiredHeight=====$screenHeight $desiredHeight $_totalSize");
 
     return SizedBox(
       height: desiredHeight,
@@ -54,7 +53,7 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
             flex: 2,
             child: buildImageArea(context, _currentItem.exercise),
           ),
-          Expanded(child: _buildCountArea()),
+          Expanded(flex: 1, child: _buildCountArea()),
           Expanded(
             flex: 3,
             child: buildTitleAndDescription(
@@ -80,34 +79,89 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
   }
 
   _buildCountArea() {
+    // 两行
+    // return Padding(
+    //   padding: EdgeInsets.only(left: 0.2.sw),
+    //   child: Column(
+    //     mainAxisSize: MainAxisSize.min,
+    //     crossAxisAlignment: CrossAxisAlignment.center,
+    //     children: [
+    //       Expanded(
+    //         child: Row(
+    //           children: [
+    //             Expanded(
+    //               child: Text(
+    //                 (_currentItem.exercise.countingMode ==
+    //                         countingOptions.first.value)
+    //                     ? CusAL.of(context).actionDetailLabel('0')
+    //                     : CusAL.of(context).actionDetailLabel('1'),
+    //                 style: TextStyle(fontSize: 20.sp),
+    //               ),
+    //             ),
+    //             Expanded(
+    //               child: Text(
+    //                 (_currentItem.exercise.countingMode ==
+    //                         countingOptions.first.value)
+    //                     ? '${_currentItem.action.duration}'
+    //                     : '${_currentItem.action.frequency}',
+    //                 style: TextStyle(fontSize: 20.sp),
+    //               ),
+    //             ),
+    //           ],
+    //         ),
+    //       ),
+    //       if (_currentItem.action.equipmentWeight != null)
+    //         Expanded(
+    //           child: Row(
+    //             children: [
+    //               Expanded(
+    //                 child: Text(
+    //                   CusAL.of(context).actionDetailLabel('2'),
+    //                   style: TextStyle(fontSize: 20.sp),
+    //                 ),
+    //               ),
+    //               Expanded(
+    //                 child: Text(
+    //                   cusDoubleTryToIntString(
+    //                       _currentItem.action.equipmentWeight!),
+    //                   style: TextStyle(fontSize: 20.sp),
+    //                 ),
+    //               ),
+    //             ],
+    //           ),
+    //         ),
+    //     ],
+    //   ),
+    // );
+
+    // 1行
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          color: Colors.white,
-          child: Align(
-            alignment: Alignment.center,
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: 10.sp),
             child: Text(
               (_currentItem.exercise.countingMode ==
                       countingOptions.first.value)
-                  ? '时长 ${_currentItem.action.duration} 秒'
-                  : '重复 ${_currentItem.action.frequency} 次',
-              style: TextStyle(fontSize: 24.sp),
+                  ? '${CusAL.of(context).actionDetailLabel('0')} ${_currentItem.action.duration}'
+                  : '${CusAL.of(context).actionDetailLabel('1')} ${_currentItem.action.frequency}',
+              style: TextStyle(fontSize: 20.sp),
+              textAlign: TextAlign.end,
             ),
           ),
         ),
-        _currentItem.action.equipmentWeight != null
-            ? Container(
-                color: Colors.white,
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    '器械 ${_currentItem.action.equipmentWeight!.toStringAsFixed(2)} kg',
-                    style: TextStyle(fontSize: 24.sp),
-                  ),
-                ),
-              )
-            : Container(),
+        if (_currentItem.action.equipmentWeight != null)
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(left: 10.sp),
+              child: Text(
+                '${CusAL.of(context).actionDetailLabel('2')} ${cusDoubleTryToIntString(_currentItem.action.equipmentWeight!)}',
+                style: TextStyle(fontSize: 20.sp),
+                textAlign: TextAlign.start,
+              ),
+            ),
+          ),
       ],
     );
   }
@@ -125,7 +179,7 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
               Icons.arrow_back,
               size: 30.sp,
               color: _currentIndex > 0
-                  ? Colors.blue
+                  ? Theme.of(context).primaryColor
                   : const Color.fromARGB(255, 128, 222, 204),
             ),
             onPressed: () {
@@ -137,14 +191,6 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
               });
             },
           ),
-          // 索引从0开始，显示从1开始
-          // Text(
-          //   '${_currentIndex + 1} / $_totalSize',
-          //   style: TextStyle(
-          //     fontSize: 24.sp,
-          //     fontWeight: FontWeight.w400,
-          //   ),
-          // ),
           RichText(
             text: TextSpan(
               style: TextStyle(
@@ -153,6 +199,7 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
                   fontWeight: FontWeight.w400),
               children: <TextSpan>[
                 TextSpan(
+                  // 索引从0开始，显示从1开始
                   text: '${_currentIndex + 1}',
                   style: TextStyle(
                     fontSize: 28.sp,
@@ -170,7 +217,7 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
               Icons.arrow_forward,
               size: 30.sp,
               color: _currentIndex < widget.adItems.length - 1
-                  ? Colors.blue
+                  ? Theme.of(context).primaryColor
                   : const Color.fromARGB(255, 128, 222, 204),
             ),
             onPressed: () {
