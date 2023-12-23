@@ -876,7 +876,7 @@ class _DietaryReportsState extends State<DietaryReports> {
                         .map<DropdownMenuEntry<CusLabel>>((CusLabel value) {
                       return DropdownMenuEntry<CusLabel>(
                         value: value,
-                        label: showCusLableMapLabel(context, value),
+                        label: showCusLable(value),
                       );
                     }).toList(),
                   ),

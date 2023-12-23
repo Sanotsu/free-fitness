@@ -7,6 +7,7 @@ import 'package:printing/printing.dart';
 import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_training_helper.dart';
 import '../../../../common/utils/tool_widgets.dart';
+import '../../../../models/cus_app_localizations.dart';
 import '../../../../models/training_state.dart';
 import 'report_pdf_export.dart';
 
@@ -73,7 +74,7 @@ class _TrainedReportPdfViewerState extends State<TrainedReportPdfViewer> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('训练日志导出'),
+        title: Text(CusAL.of(context).trainedReportExport),
       ),
       body: isLoading
           ? buildLoader(isLoading)

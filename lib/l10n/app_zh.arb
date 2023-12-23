@@ -20,7 +20,7 @@
     "description": "微量元素相关营养素标签"
     },
 
-    "unitLabels": "{num, select, 0{克} 1{毫克} 2{大卡} 3{千焦} 4{公分} 5{公斤} 6{秒} 7{次} other{其他} }",
+    "unitLabels": "{num, select, 0{克} 1{毫克} 2{大卡} 3{千焦} 4{公分} 5{公斤} 6{秒} 7{次} 8{分钟} other{其他} }",
     "@unitLabels": {
     "description": "各种单位"
     },
@@ -76,6 +76,22 @@
 
     "training": "运动",
     "trainingReports": "运动报告",
+
+    "trainedReportLabels": "{num, select, 0{总锻炼次数} 1{总锻炼时间} 2{总休息时间} 3{总暂停时间} 4{总时间(分钟)} 5{上次运动} 6{日期} 7{名称} 8{用时} other{其他} }",
+    "@trainedReportLabels": {
+    "description": "训练记录报告的标签"
+    },
+
+    "trainedCalendarLabels": "{num, select, 0{开始时间} 1{结束时间} 2{锻炼时长} 3{暂停时长} 4{休息时长} 5{锻炼时间} other{其他} }",
+    "@trainedCalendarLabels": {
+    "description": "训练记录报告日历展示的标签"
+    },
+
+    "trainedReportExport":"导出训练记录",
+
+
+
+    
     "exercise": "动作",
     "exerciseLabel": "基础活动",
     "exerciseSubtitle": "动作库管理模块",
@@ -150,6 +166,8 @@
     "previewReport":"查看报告",
 
     "plan": "计划",
+    "plans": "计划",
+
     "planSubtitle": "计划库管理模块",
 
     "planQuerys": "{num, select, 0{名称} 1{分类} 2{难度} other{其他} }",
@@ -202,7 +220,7 @@
     "allNutrientLabel":"全部营养信息",
     "eatableSize":"食用量",
 
-    "dietaryReportExport":"饮食记录导出",
+    "dietaryReportExport":"导出饮食记录",
 
 
 

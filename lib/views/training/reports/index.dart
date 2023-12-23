@@ -10,6 +10,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import 'export/report_pdf_viewer.dart';
 
@@ -170,20 +171,17 @@ class _TrainingReportsState extends State<TrainingReports> {
           bottom: const TabBar(
             tabs: [
               Tab(
-                // text: "总计",
                 icon: Icon(Icons.bar_chart),
               ),
               Tab(
-                // text: "日历",
                 icon: Icon(Icons.calendar_month),
               ),
               Tab(
-                // text: "最近",
                 icon: Icon(Icons.history),
               ),
             ],
           ),
-          title: const Text('运动报告'),
+          title: Text(CusAL.of(context).trainingReports),
           actions: [
             IconButton(
               onPressed: () async {
@@ -191,7 +189,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      title: const Text('选择日期范围'),
+                      title: Text(CusAL.of(context).exportRangeNote),
                       content: DropdownMenu<CusLabel>(
                         initialSelection: exportDateList.first,
                         onSelected: (CusLabel? value) {
@@ -203,7 +201,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                             .map<DropdownMenuEntry<CusLabel>>((CusLabel value) {
                           return DropdownMenuEntry<CusLabel>(
                             value: value,
-                            label: value.cnLabel,
+                            label: showCusLable(value),
                           );
                         }).toList(),
                       ),
@@ -212,13 +210,13 @@ class _TrainingReportsState extends State<TrainingReports> {
                           onPressed: () {
                             Navigator.pop(context, false);
                           },
-                          child: const Text('取消'),
+                          child: Text(CusAL.of(context).cancelLabel),
                         ),
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context, true);
                           },
-                          child: const Text('确认'),
+                          child: Text(CusAL.of(context).confirmLabel),
                         ),
                       ],
                     );
@@ -281,7 +279,10 @@ class _TrainingReportsState extends State<TrainingReports> {
             return Center(
               child: Padding(
                 padding: EdgeInsets.only(top: 100.sp),
-                child: Text("暂无训练记录", style: TextStyle(fontSize: 20.sp)),
+                child: Text(
+                  CusAL.of(context).noRecordNote,
+                  style: TextStyle(fontSize: 20.sp),
+                ),
               ),
             );
           }
@@ -295,127 +296,196 @@ class _TrainingReportsState extends State<TrainingReports> {
           int totalTrained = data.fold(
               0, (prevVal, tlwgb) => prevVal + tlwgb.log.trainedDuration);
 
-          return Card(
-            elevation: 5,
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      children: [
-                        Icon(Icons.flag, size: 24.sp),
-                        const Text("总锻炼次数"),
-                        Text(
-                          "${data.length} 次",
-                          style: TextStyle(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 10.sp),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    children: [
+                      Text(
+                        CusAL.of(context).trainedReportLabels('0'),
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
                         ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Icon(Icons.alarm, size: 24.sp),
-                        const Text("总锻炼时间"),
-                        Text(
-                          "${(totalTrained / 60).toStringAsFixed(0)} 分钟",
-                          style: TextStyle(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
+                      ),
+                      Icon(Icons.flag_outlined, size: 24.sp),
+                      Text(
+                        "${data.length}",
+                        style: TextStyle(
+                          fontSize: 24.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
                         ),
-                      ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.sp),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    CusAL.of(context).trainedReportLabels('4'),
+                    style: TextStyle(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
                     ),
-                  ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.sp),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Column(
+                    children: [
+                      Icon(Icons.alarm, size: 24.sp),
+                      Text(CusAL.of(context).trainedReportLabels('1')),
+                      Text(
+                        (totalTrained / 60).toStringAsFixed(0),
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Icon(Icons.alarm, size: 24.sp),
+                      Text(CusAL.of(context).trainedReportLabels('2')),
+                      Text(
+                        (totalRest / 60).toStringAsFixed(0),
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Icon(Icons.alarm, size: 24.sp),
+                      Text(CusAL.of(context).trainedReportLabels('3')),
+                      Text(
+                        (totolPaused / 60).toStringAsFixed(0),
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.sp),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    CusAL.of(context).trainedReportLabels('5'),
+                    style: TextStyle(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.sp),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 20.sp,
+                  vertical: 5.sp,
                 ),
-                SizedBox(height: 20.sp),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      children: [
-                        Icon(Icons.alarm, size: 24.sp),
-                        const Text("总休息时间"),
-                        Text(
-                          "${(totalRest / 60).toStringAsFixed(0)} 分钟",
-                          style: TextStyle(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Icon(Icons.alarm, size: 24.sp),
-                        const Text("总暂停时间"),
-                        Text(
-                          "${(totolPaused / 60).toStringAsFixed(0)} 分钟",
-                          style: TextStyle(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                SizedBox(height: 20.sp),
-                Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text("上次运动日期: "),
-                    Text(
-                      data.first.log.trainedDate,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w300,
-                        color: Colors.green,
+                    Expanded(
+                      flex: 1,
+                      child: Text(CusAL.of(context).trainedReportLabels('6')),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        data.first.log.trainedDate,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                Row(
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 20.sp,
+                  vertical: 5.sp,
+                ),
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text("上次训练名称: "),
-                    Text(
-                      (data.first.plan != null)
-                          ? "${data.first.plan?.planName} 的第${data.first.log.dayNumber}个训练日"
-                          : data.first.group?.groupName ?? "",
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w300,
-                        color: Colors.green,
+                    Expanded(
+                      flex: 1,
+                      child: Text(CusAL.of(context).trainedReportLabels('7')),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        (data.first.plan != null)
+                            ? "${data.first.plan?.planName} - ${CusAL.of(context).dayNumber(data.first.log.dayNumber ?? 0)}"
+                            : data.first.group?.groupName ?? "",
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                Row(
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 20.sp,
+                  vertical: 5.sp,
+                ),
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text("上次运动用时: "),
-                    Text(
-                      "${(data.first.log.trainedDuration / 60).toStringAsFixed(1)} 分钟",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w300,
-                        color: Colors.green,
+                    Expanded(
+                      flex: 1,
+                      child: Text(CusAL.of(context).trainedReportLabels('8')),
+                    ),
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        "${cusDoubleTryToIntString(data.first.log.trainedDuration / 60)} ${CusAL.of(context).unitLabels('8')}",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 20.sp),
-              ],
-            ),
+              ),
+            ],
           );
         } else if (snapshot.hasError) {
           /// 如果请求数据有错，显示错误信息
@@ -431,13 +501,16 @@ class _TrainingReportsState extends State<TrainingReports> {
     );
   }
 
+  ///
+  /// 绘制训练历史日历表格tab
+  ///
   buildHistoryView() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TableCalendar(
-          locale: 'zh_CN',
+          locale: box.read('language') == "en" ? "en_US" : 'zh_CN',
           firstDay: kFirstDay,
           lastDay: kLastDay,
           focusedDay: _focusedDay,
@@ -454,10 +527,10 @@ class _TrainingReportsState extends State<TrainingReports> {
             // 不是当月的日期不显示
             outsideDaysVisible: false,
           ),
-          availableCalendarFormats: const {
-            CalendarFormat.month: '展示整月',
-            CalendarFormat.twoWeeks: '展示两周',
-            CalendarFormat.week: '展示一周',
+          availableCalendarFormats: {
+            CalendarFormat.month: CusAL.of(context).calenderLables("0"),
+            CalendarFormat.twoWeeks: CusAL.of(context).calenderLables("1"),
+            CalendarFormat.week: CusAL.of(context).calenderLables("2"),
           },
           // 自定义修改日历的样式
           calendarBuilders: CalendarBuilders(
@@ -468,8 +541,8 @@ class _TrainingReportsState extends State<TrainingReports> {
               return Align(
                 alignment: Alignment.bottomRight,
                 child: Container(
-                  width: 15,
-                  height: 15,
+                  width: 15.sp,
+                  height: 15.sp,
                   color: list.length < 3 ? Colors.green : Colors.yellow,
                   child: Center(
                     child: Text(
@@ -498,7 +571,7 @@ class _TrainingReportsState extends State<TrainingReports> {
             _focusedDay = focusedDay;
           },
         ),
-        const SizedBox(height: 8.0),
+        SizedBox(height: 8.sp),
         // 日历某些操作改变后，显示对应的手记内容列表
         ValueListenableBuilder<List<TrainedLogWithGroupBasic>>(
           valueListenable: _selectedEvents,
@@ -511,49 +584,14 @@ class _TrainingReportsState extends State<TrainingReports> {
               itemCount: value.length,
               itemBuilder: (context, index) {
                 var log = value[index];
-                var name = "";
 
-                var planName = log.plan?.planName;
-                if (planName != null) {
-                  name =
-                      "计划 $planName 的第 ${log.log.dayNumber} 天 ${log.group?.groupName}";
-                } else {
-                  name = '训练 ${log.group?.groupName ?? "<无名>"}';
-                }
-
-                return Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12.0,
-                    vertical: 4.0,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(),
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text("开始时间: ${log.log.trainedStartTime}"),
-                      Text("结束时间: ${log.log.trainedEndTime}"),
-                      Text(
-                        "锻炼时长: ${formatSeconds(log.log.trainedDuration.toDouble())}",
-                      ),
-                      Text(
-                        "暂停时长: ${formatSeconds(log.log.totolPausedTime.toDouble())}",
-                      ),
-                      Text(
-                        "休息时长: ${formatSeconds(log.log.totalRestTime.toDouble())}",
-                      ),
-                    ],
+                return Card(
+                  elevation: 5,
+                  margin:
+                      EdgeInsets.symmetric(horizontal: 12.sp, vertical: 4.sp),
+                  child: Padding(
+                    padding: EdgeInsets.all(10.sp),
+                    child: _buildTrainedLogListTile(log),
                   ),
                 );
               },
@@ -564,6 +602,9 @@ class _TrainingReportsState extends State<TrainingReports> {
     );
   }
 
+  ///
+  /// 绘制最近锻炼日志tab
+  ///
   buildRecentView() {
     var [start, end] = getStartEndDateString(30);
 
@@ -583,7 +624,10 @@ class _TrainingReportsState extends State<TrainingReports> {
             return Center(
               child: Padding(
                 padding: EdgeInsets.only(top: 100.sp),
-                child: Text("最近30天暂无训练记录", style: TextStyle(fontSize: 20.sp)),
+                child: Text(
+                  '${CusAL.of(context).lastDayLabels(30)} ${CusAL.of(context).noRecordNote}',
+                  style: TextStyle(fontSize: 20.sp),
+                ),
               ),
             );
           }
@@ -618,10 +662,27 @@ class _TrainingReportsState extends State<TrainingReports> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.fromLTRB(10.sp, 10.sp, 10, 10.sp),
+                    padding: EdgeInsets.fromLTRB(10.sp, 0, 10.sp, 10.sp),
                     child: Card(
                       elevation: 5,
-                      child: _buildRecentLogListView(value),
+                      child: ListView.builder(
+                        // 和外层的滚动只保留一个
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: value.length,
+                        itemBuilder: (context, index) {
+                          var log = value[index];
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (index != 0)
+                                Divider(height: 5.sp, thickness: 3.sp),
+                              _buildTrainedLogListTile(log),
+                            ],
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ],
@@ -631,9 +692,13 @@ class _TrainingReportsState extends State<TrainingReports> {
 
           return Column(
             children: [
+              SizedBox(height: 10.sp),
               Text(
-                "最近30天",
-                style: TextStyle(fontSize: 20.sp),
+                CusAL.of(context).lastDayLabels(30),
+                style: TextStyle(
+                  fontSize: 24.sp,
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
               ...rst,
             ],
@@ -652,92 +717,102 @@ class _TrainingReportsState extends State<TrainingReports> {
     );
   }
 
-  _buildRecentLogListView(List<TrainedLogWithGroupBasic> items) {
-    return ListView.builder(
-      // 和外层的滚动只保留一个
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        var log = items[index];
-        var name = "";
+  // 日历表格和最近30天记录的tab都可复用
+  _buildTrainedLogListTile(TrainedLogWithGroupBasic log) {
+    return ListTile(
+      title: _buildWorkoutNameText(log),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(height: 10.sp),
+          _buildTileRow(
+            CusAL.of(context).trainedCalendarLabels('5'),
+            '${log.log.trainedStartTime.split(" ")[1]} ~ ${log.log.trainedEndTime.split(" ")[1]}',
+          ),
+          _buildTileRow(
+            CusAL.of(context).trainedCalendarLabels('2'),
+            formatSeconds(log.log.trainedDuration.toDouble()),
+          ),
+          _buildTileRow(
+            CusAL.of(context).trainedCalendarLabels('3'),
+            formatSeconds(log.log.totolPausedTime.toDouble()),
+          ),
+          _buildTileRow(
+            CusAL.of(context).trainedCalendarLabels('4'),
+            formatSeconds(log.log.totalRestTime.toDouble()),
+          ),
+        ],
+      ),
+    );
+  }
 
-        var planName = log.plan?.planName;
-        if (planName != null) {
-          name =
-              "计划 $planName 的第 ${log.log.dayNumber} 天 ${log.group?.groupName}";
-        } else {
-          name = '训练 ${log.group?.groupName ?? "<无名>"}';
-        }
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (index != 0) Divider(height: 5.sp, thickness: 3.sp),
-            ListTile(
-              title: Text(
-                name,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
+  _buildWorkoutNameText(TrainedLogWithGroupBasic log) {
+    var planName = log.plan?.planName;
+    return planName != null
+        ? RichText(
+            textAlign: TextAlign.left,
+            maxLines: 2,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: "${CusAL.of(context).plan} ",
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "锻炼时间: ${log.log.trainedStartTime.split(" ")[1]} ~ ${log.log.trainedEndTime.split(" ")[1]}",
+                TextSpan(
+                  text: "  $planName \n",
+                  style: TextStyle(fontSize: 18.sp, color: Colors.green),
+                ),
+                TextSpan(
+                  text: CusAL.of(context).dayNumber(log.log.dayNumber ?? 0),
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Text(
-                    "锻炼时长: ${formatSeconds(log.log.trainedDuration.toDouble())}",
-                  ),
-                  Text(
-                    "暂停时长: ${formatSeconds(log.log.totolPausedTime.toDouble())}",
-                  ),
-                  Text(
-                    "休息时长: ${formatSeconds(log.log.totalRestTime.toDouble())}",
-                  ),
-                ],
-              ),
+                ),
+                TextSpan(
+                  text: '  ${log.group?.groupName}',
+                  style: TextStyle(fontSize: 18.sp, color: Colors.green),
+                ),
+              ],
             ),
-          ],
-        );
+          )
+        : RichText(
+            textAlign: TextAlign.left,
+            maxLines: 2,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: CusAL.of(context).workout,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text: '  ${log.group?.groupName}',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    color: Colors.green[500],
+                  ),
+                ),
+              ],
+            ),
+          );
+  }
 
-        // return Container(
-        //   margin: EdgeInsets.symmetric(horizontal: 12.sp, vertical: 4.sp),
-        //   decoration: BoxDecoration(
-        //     border: Border.all(),
-        //     borderRadius: BorderRadius.circular(12.0),
-        //   ),
-        //   child: Column(
-        //     crossAxisAlignment: CrossAxisAlignment.start,
-        //     children: [
-        //       Text(
-        //         name,
-        //         maxLines: 2,
-        //         overflow: TextOverflow.ellipsis,
-        //         style: TextStyle(
-        //           fontSize: 16.sp,
-        //           fontWeight: FontWeight.bold,
-        //         ),
-        //       ),
-        //       Text("开始时间: ${log.log.trainedStartTime}"),
-        //       Text("结束时间: ${log.log.trainedEndTime}"),
-        //       Text(
-        //         "锻炼时长: ${formatSeconds(log.log.trainedDuration.toDouble())}",
-        //       ),
-        //       Text(
-        //         "暂停时长: ${formatSeconds(log.log.totolPausedTime.toDouble())}",
-        //       ),
-        //       Text(
-        //         "休息时长: ${formatSeconds(log.log.totalRestTime.toDouble())}",
-        //       ),
-        //     ],
-        //   ),
-        // );
-      },
+  _buildTileRow(String label, String value) {
+    return Row(
+      children: [
+        Expanded(flex: 2, child: Text(label)),
+        Expanded(flex: 3, child: Text(value)),
+      ],
     );
   }
 }

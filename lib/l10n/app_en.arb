@@ -18,7 +18,7 @@
   "description": "微量元素相关营养素标签"
   },
 
-  "unitLabels": "{num, select, 0{g} 1{mg} 2{kcal} 3{kj} 4{cm} 5{kg} 6{s} 7{time(s)} other{Other} }",
+  "unitLabels": "{num, select, 0{g} 1{mg} 2{kcal} 3{kj} 4{cm} 5{kg} 6{s} 7{time(s)} 8{minutes} other{Other} }",
   "@unitLabels": {
   "description": "各种单位"
   },
@@ -74,6 +74,20 @@
 
   "training": "Training",
   "trainingReports": "TrainingReports",
+
+  "trainedReportLabels": "{num, select, 0{Total Workouts} 1{Trained Time} 2{Rest Time} 3{Paused Time} 4{Total (minutes)} 5{LastTrained} 6{Date} 7{Name} 8{Duration} other{其他} }",
+  "@trainedReportLabels": {
+  "description": "训练记录报告的标签"
+  },
+
+  "trainedCalendarLabels": "{num, select, 0{Start Time} 1{End Time} 2{Trained Duration} 3{Paused Duration} 4{Rest Duration} 5{Start & End Time} other{其他} }",
+  "@trainedCalendarLabels": {
+  "description": "训练记录报告日历展示的标签"
+  },
+
+  "trainedReportExport":"Export trained records",
+
+
   "exercise": "Exercises",
   "exerciseLabel": "Exercise",
   "exerciseSubtitle": "Exercise management",
@@ -97,7 +111,7 @@
 
   "exerciseDetail": "Exercise Detail",
 
-  "workout": "Workouts",
+  "workout": "Workout",
   "workoutSubtitle": "Workout management",
 
   "workouts": "Workouts",
@@ -148,7 +162,8 @@
 
   "previewReport":"Preview Report",
 
-  "plan": "Plans",
+  "plans": "Plans",
+  "plan": "Plan",
   "planSubtitle": "Plan management",
 
   "planQuerys": "{num, select, 0{Name} 1{Category} 2{Level} other{Other} }",

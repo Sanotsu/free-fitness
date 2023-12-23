@@ -93,7 +93,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
           text: TextSpan(
             children: [
               TextSpan(
-                text: '${CusAL.of(context).plan}\n',
+                text: '${CusAL.of(context).plans}\n',
                 style: TextStyle(fontSize: 20.sp),
               ),
               TextSpan(

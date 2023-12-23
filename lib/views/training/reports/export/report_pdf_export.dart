@@ -85,7 +85,7 @@ _buildPdfPage(
           pw.Padding(
             padding: pw.EdgeInsets.only(bottom: 10.sp),
             child: pw.Text(
-              DateFormat.yMMMMEEEEd('zh_CN').format(trainedDate),
+              DateFormat.yMMMMEEEEd().format(trainedDate),
               style: pw.TextStyle(fontSize: 12.sp),
               textAlign: pw.TextAlign.left,
             ),
