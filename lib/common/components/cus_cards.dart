@@ -13,7 +13,7 @@ buildSmallCoverCard(
     clipBehavior: Clip.hardEdge,
     elevation: 5,
     child: InkWell(
-      splashColor: Colors.lightBlue.withAlpha(30),
+      splashColor: Theme.of(context).splashColor,
       onTap: () {
         if (routeName != null) {
           // 这里需要使用pushName 带上指定的路由名称，后续跨层级popUntil的时候才能指定路由名称进行传参
@@ -26,15 +26,38 @@ buildSmallCoverCard(
           );
         }
       },
-      child: Container(
-        color: Colors.lightBlue[50],
-        child: Center(
-          child: Text(
-            title,
-            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Icon(
+            Icons.bar_chart,
+            size: 72.sp,
           ),
-        ),
+          Center(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+          ),
+        ],
       ),
+      // child: Container(
+      //   color: Theme.of(context).secondaryHeaderColor,
+      //   child: Center(
+      //     child: Text(
+      //       title,
+      //       style: TextStyle(
+      //         fontSize: 20.sp,
+      //         fontWeight: FontWeight.bold,
+      //         color: Theme.of(context).primaryColor,
+      //       ),
+      //     ),
+      //   ),
+      // ),
     ),
   );
 }
@@ -52,39 +75,45 @@ buildCoverCard(
   return Card(
     clipBehavior: Clip.hardEdge,
     elevation: 5,
-    child: Center(
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Padding(
-              padding: EdgeInsets.all(5.sp),
-              child: Image.asset(imageUrl, fit: BoxFit.scaleDown),
+    child: InkWell(
+      onTap: () {
+        if (routeName != null) {
+          // 这里需要使用pushName 带上指定的路由名称，后续跨层级popUntil的时候才能指定路由名称进行传参
+          Navigator.pushNamed(context, routeName);
+        } else {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext ctx) => widget,
             ),
-          ),
-          Expanded(
-            flex: 3,
-            child: ListTile(
-              title: Text(
-                title,
-                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+          );
+        }
+      },
+      child: Center(
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: EdgeInsets.all(5.sp),
+                child: Image.asset(imageUrl, fit: BoxFit.scaleDown),
               ),
-              subtitle: Text(subtitle),
-              onTap: () {
-                if (routeName != null) {
-                  // 这里需要使用pushName 带上指定的路由名称，后续跨层级popUntil的时候才能指定路由名称进行传参
-                  Navigator.pushNamed(context, routeName);
-                } else {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (BuildContext ctx) => widget,
-                    ),
-                  );
-                }
-              },
             ),
-          ),
-        ],
+            Expanded(
+              flex: 3,
+              child: ListTile(
+                title: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+                subtitle: Text(subtitle),
+              ),
+            ),
+          ],
+        ),
       ),
     ),
   );

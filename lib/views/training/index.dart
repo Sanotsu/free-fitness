@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../common/components/cus_cards.dart';
 import '../../common/global/constants.dart';
+import '../../models/cus_app_localizations.dart';
 import 'exercise/index.dart';
 import 'plans/index.dart';
 import 'reports/index.dart';
@@ -19,19 +19,6 @@ class Training extends StatefulWidget {
 }
 
 class _TrainingState extends State<Training> {
-  // 查看和请求存储权限
-  // _requestPermission() async {
-  //   // 获取权限
-  //   Map<Permission, PermissionStatus> statuses = await [
-  //     Permission.accessMediaLocation,
-  //     Permission.storage,
-  //   ].request();
-
-  //   print("------------statuses $statuses");
-  //   final info = statuses[Permission.storage].toString();
-  //   print("获取存取权限--------------$info");
-  // }
-
   @override
   void initState() {
     // 进入运动模块就获取存储授权(应该是启动app就需要这个请求)
@@ -59,7 +46,7 @@ class _TrainingState extends State<Training> {
       // 避免搜索时弹出键盘，让底部的minibar位置移动到tab顶部导致溢出的问题
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.training),
+        title: Text(CusAL.of(context).training),
       ),
       body: buildFixedBody(screenHeight),
     );
@@ -71,12 +58,22 @@ class _TrainingState extends State<Training> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // SizedBox(
+          //   height: screenHeight / 4,
+          //   child: buildSmallCoverCard(
+          //     context,
+          //     const TrainingReports(),
+          //     CusAL.of(context).report,
+          //   ),
+          // ),
           SizedBox(
             height: screenHeight / 4,
-            child: buildSmallCoverCard(
+            child: buildCoverCard(
               context,
               const TrainingReports(),
-              AppLocalizations.of(context)!.trainingReports,
+              CusAL.of(context).trainingReports,
+              CusAL.of(context).trainingReportsSubtitle,
+              reportImageUrl,
             ),
           ),
           SizedBox(
@@ -84,8 +81,8 @@ class _TrainingState extends State<Training> {
             child: buildCoverCard(
               context,
               const TrainingExercise(),
-              AppLocalizations.of(context)!.exercise,
-              AppLocalizations.of(context)!.exerciseSubtitle,
+              CusAL.of(context).exerciseLabel,
+              CusAL.of(context).exerciseSubtitle,
               workoutWomanImageUrl,
             ),
           ),
@@ -94,8 +91,8 @@ class _TrainingState extends State<Training> {
             child: buildCoverCard(
               context,
               const TrainingWorkouts(),
-              AppLocalizations.of(context)!.workout,
-              AppLocalizations.of(context)!.workoutSubtitle,
+              CusAL.of(context).workout,
+              CusAL.of(context).workoutSubtitle,
               workoutManImageUrl,
             ),
           ),
@@ -104,8 +101,8 @@ class _TrainingState extends State<Training> {
             child: buildCoverCard(
               context,
               const TrainingPlans(),
-              AppLocalizations.of(context)!.plan,
-              AppLocalizations.of(context)!.planSubtitle,
+              CusAL.of(context).plan,
+              CusAL.of(context).planSubtitle,
               workoutCalendarImageUrl,
             ),
           ),

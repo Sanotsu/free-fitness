@@ -23,6 +23,7 @@ const String dietaryMealImageUrl = 'assets/covers/dietary-meal-food.jpg';
 const String workoutManImageUrl = 'assets/covers/workout-man.jpg';
 const String workoutWomanImageUrl = 'assets/covers/workout-woman.jpg';
 const String workoutCalendarImageUrl = 'assets/covers/workout-calendar.jpg';
+const String reportImageUrl = 'assets/covers/report-cover.jpg';
 const String defaultAvatarImageUrl = 'assets/profile_icons/Avatar.png';
 
 /// 导入的图片默认的地址前缀

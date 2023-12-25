@@ -4,9 +4,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/widgets.dart';
 
-// import 'package:flutter/services.dart' show rootBundle;
-import 'package:printing/printing.dart';
+import 'package:flutter/services.dart' show rootBundle;
+// import 'package:printing/printing.dart';
 
 import '../../../../common/global/constants.dart';
 import '../../../../common/utils/tools.dart';
@@ -58,17 +59,17 @@ Future<Uint8List> makeReportPdf(
     author: "free-fitness",
     pageMode: PdfPageMode.fullscreen,
     // 导出的不是中文就不用下载字体(但是正文中有中文还是无法显示)
-    theme: lang == "cn"
-        ? pw.ThemeData.withFont(
-            // 谷歌字体不一定能够访问
-            base: await PdfGoogleFonts.notoSerifHKRegular(),
-            bold: await PdfGoogleFonts.notoSerifHKBold(),
-            // 但是使用知道的本地字体，会增加app体积
-            // fontFallback: [
-            //   pw.Font.ttf(await rootBundle.load('assets/MiSans-Regular.ttf'))
-            // ],
-          )
-        : null,
+    theme: pw.ThemeData.withFont(
+      // 谷歌字体不一定能够访问,但肯定是联网下载，且存在内存中，下一次导出会需要重新下载
+      // https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
+      // base: await PdfGoogleFonts.notoSerifHKRegular(),
+      // bold: await PdfGoogleFonts.notoSerifHKBold(),
+      // 但是使用知道的本地字体，会增加app体积
+      base: Font.ttf(await rootBundle.load("assets/MiSans-Regular.ttf")),
+      // fontFallback: [
+      //   pw.Font.ttf(await rootBundle.load('assets/MiSans-Regular.ttf'))
+      // ],
+    ),
   );
 
   // 1 先把条目按天分类，每天的所有餐次放到一致pdf中

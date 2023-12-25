@@ -85,6 +85,7 @@ class _TrainedReportPdfViewerState extends State<TrainedReportPdfViewer> {
                 // 在pdf页首会显示查询数据的日期
                 widget.startDate.split(" ")[0],
                 widget.endDate.split(" ")[0],
+                lang: box.read('language'),
               ),
             ),
     );

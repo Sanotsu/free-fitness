@@ -1,6 +1,8 @@
 {
   "appTitle": "Free Fitness",
 
+  "report": "Reports",
+
   "mainNutrients": "{num, select, 0{Energy} 1{Calorie} 2{Protein} 3{Fat} 4{CHO} 5{RDI} other{Other} }",
   "@mainNutrients": {
   "description": "主要营养素标签"
@@ -73,7 +75,8 @@
   },
 
   "training": "Training",
-  "trainingReports": "TrainingReports",
+  "trainingReports": "Training Reports",
+  "trainingReportsSubtitle":"Reports management",
 
   "trainedReportLabels": "{num, select, 0{Total Workouts} 1{Trained Time} 2{Rest Time} 3{Paused Time} 4{Total (minutes)} 5{LastTrained} 6{Date} 7{Name} 8{Duration} other{其他} }",
   "@trainedReportLabels": {
@@ -188,6 +191,8 @@
 
   "dietary":"Dietary",
   "dietaryReports":"Dietary Reports",
+  "dietaryReportsSubtitle":"Reports management",
+  
   "foodCompo":"Food Composition",
   "foodCompoSubtitle": "Nutritional composition",
   "dietaryRecords":"Dietary Records",

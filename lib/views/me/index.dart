@@ -223,35 +223,32 @@ class _UserAndSettingsState extends State<UserAndSettings> {
       ),
       body: isLoading
           ? buildLoader(isLoading)
-          : Container(
-              color: Colors.white54,
-              child: ListView(
-                children: [
-                  /// 用户基本信息展示区域(固定高度10+120+120=250)
-                  ..._buildBaseUserInfoArea(userInfo),
+          : ListView(
+              children: [
+                /// 用户基本信息展示区域(固定高度10+120+120=250)
+                ..._buildBaseUserInfoArea(userInfo),
 
-                  /// 功能区，参看别的app大概留几个
-                  /// 功能区的占位就是除去状态栏、标题、底部按钮、头像区域个人信息外的高度进行等分
-                  /// 底部还预留20sp
-                  // 基本信息和体重趋势
-                  SizedBox(
-                    height: (screenBodyHeight - 250 - 20) / 3,
-                    child: _buildInfoAndWeightChangeRow(),
-                  ),
+                /// 功能区，参看别的app大概留几个
+                /// 功能区的占位就是除去状态栏、标题、底部按钮、头像区域个人信息外的高度进行等分
+                /// 底部还预留20sp
+                // 基本信息和体重趋势
+                SizedBox(
+                  height: (screenBodyHeight - 250 - 20) / 3,
+                  child: _buildInfoAndWeightChangeRow(),
+                ),
 
-                  // 摄入目标和运动设置
-                  SizedBox(
-                    height: (screenBodyHeight - 250 - 20) / 3,
-                    child: _buildIntakeGoalAndRestTimeRow(),
-                  ),
+                // 摄入目标和运动设置
+                SizedBox(
+                  height: (screenBodyHeight - 250 - 20) / 3,
+                  child: _buildIntakeGoalAndRestTimeRow(),
+                ),
 
-                  // 备份还原和更多设置
-                  SizedBox(
-                    height: (screenBodyHeight - 250 - 20) / 3,
-                    child: _buildBakAndRestoreAndMoreSettingRow(),
-                  ),
-                ],
-              ),
+                // 备份还原和更多设置
+                SizedBox(
+                  height: (screenBodyHeight - 250 - 20) / 3,
+                  child: _buildBakAndRestoreAndMoreSettingRow(),
+                ),
+              ],
             ),
     );
   }
@@ -269,10 +266,14 @@ class _UserAndSettingsState extends State<UserAndSettings> {
               maxRadius: 60.sp,
               backgroundColor: Colors.transparent,
               backgroundImage: const AssetImage(defaultAvatarImageUrl),
+              // y圆形头像的边框线
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey, width: 2.sp),
+                  border: Border.all(
+                    color: Theme.of(context).primaryColor,
+                    width: 2.sp,
+                  ),
                 ),
               ),
             ),
@@ -352,7 +353,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             ListTile(
               title: Text(
                 userInfo.userName,
-                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 26.sp),
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24.sp),
                 textAlign: TextAlign.center,
                 softWrap: true,
                 maxLines: 1,
@@ -369,7 +370,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
 
             // 用户简介 description
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.sp),
+              padding: EdgeInsets.symmetric(horizontal: 18.sp),
               child: Text(
                 "${userInfo.description ?? 'no description'} ",
                 textAlign: TextAlign.center,
@@ -549,7 +550,6 @@ class NewCusSettingCard extends StatelessWidget {
       padding: EdgeInsets.all(2.sp),
       child: Card(
         elevation: 5,
-        color: Colors.white70,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.sp),
         ),
@@ -557,7 +557,11 @@ class NewCusSettingCard extends StatelessWidget {
           leading: Icon(leadingIcon),
           title: Text(
             title,
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
           ),
           onTap: onTap,
         ),

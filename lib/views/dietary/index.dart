@@ -45,12 +45,22 @@ class _DietaryState extends State<Dietary> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // SizedBox(
+          //   height: screenHeight / 4,
+          //   child: buildSmallCoverCard(
+          //     context,
+          //     const DietaryReports(),
+          //     CusAL.of(context).dietaryReports,
+          //   ),
+          // ),
           SizedBox(
             height: screenHeight / 4,
-            child: buildSmallCoverCard(
+            child: buildCoverCard(
               context,
               const DietaryReports(),
               CusAL.of(context).dietaryReports,
+              CusAL.of(context).dietaryReportsSubtitle,
+              reportImageUrl,
             ),
           ),
           SizedBox(
