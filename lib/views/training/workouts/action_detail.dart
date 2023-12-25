@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 
@@ -65,7 +66,10 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
                   maxLines: 1,
                   //设置文字溢出时的处理方式，多的用省略号
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 20.sp),
+                  style: TextStyle(
+                    fontSize: CusFontSizes.pageTitle,
+                    fontWeight: FontWeight.bold,
+                  ),
                   textAlign: TextAlign.left,
                 ),
               ),
@@ -146,7 +150,7 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
                       countingOptions.first.value)
                   ? '${CusAL.of(context).actionDetailLabel('0')} ${_currentItem.action.duration}'
                   : '${CusAL.of(context).actionDetailLabel('1')} ${_currentItem.action.frequency}',
-              style: TextStyle(fontSize: 20.sp),
+              style: TextStyle(fontSize: CusFontSizes.flagMedium),
               textAlign: TextAlign.end,
             ),
           ),
@@ -157,7 +161,7 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
               padding: EdgeInsets.only(left: 10.sp),
               child: Text(
                 '${CusAL.of(context).actionDetailLabel('2')} ${cusDoubleTryToIntString(_currentItem.action.equipmentWeight!)}',
-                style: TextStyle(fontSize: 20.sp),
+                style: TextStyle(fontSize: CusFontSizes.flagMedium),
                 textAlign: TextAlign.start,
               ),
             ),
@@ -170,17 +174,17 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
 // 因为有状态改变，估计要回调函数之类的，暂时不知道怎么抽出来复用
   _buildPageButton() {
     return Container(
-      color: const Color.fromARGB(255, 1, 191, 155),
+      color: CusColors.pageChangeBg,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
             icon: Icon(
               Icons.arrow_back,
-              size: 30.sp,
+              size: CusIconSizes.iconBig,
               color: _currentIndex > 0
                   ? Theme.of(context).primaryColor
-                  : const Color.fromARGB(255, 128, 222, 204),
+                  : Theme.of(context).disabledColor,
             ),
             onPressed: () {
               setState(() {
@@ -194,15 +198,16 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
           RichText(
             text: TextSpan(
               style: TextStyle(
-                  fontSize: 20.0.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400),
+                fontSize: CusFontSizes.pageTitle,
+                color: Theme.of(context).shadowColor,
+                fontWeight: FontWeight.bold,
+              ),
               children: <TextSpan>[
                 TextSpan(
                   // 索引从0开始，显示从1开始
                   text: '${_currentIndex + 1}',
                   style: TextStyle(
-                    fontSize: 28.sp,
+                    fontSize: CusFontSizes.flagBig,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -215,10 +220,10 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
           IconButton(
             icon: Icon(
               Icons.arrow_forward,
-              size: 30.sp,
+              size: CusIconSizes.iconBig,
               color: _currentIndex < widget.adItems.length - 1
                   ? Theme.of(context).primaryColor
-                  : const Color.fromARGB(255, 128, 222, 204),
+                  : Theme.of(context).disabledColor,
             ),
             onPressed: () {
               setState(() {

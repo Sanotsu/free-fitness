@@ -8,6 +8,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 
@@ -130,11 +131,12 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
           text: TextSpan(
             children: [
               TextSpan(
-                  text: CusAL.of(context).actionConfigLabel('2'),
-                  style: TextStyle(fontSize: 20.sp)),
+                text: CusAL.of(context).actionConfigLabel('2'),
+                style: TextStyle(fontSize: CusFontSizes.pageTitle),
+              ),
               TextSpan(
                 text: "\n${CusAL.of(context).itemCount(exerciseCount)}",
-                style: TextStyle(fontSize: 12.sp),
+                style: TextStyle(fontSize: CusFontSizes.pageAppendix),
               ),
             ],
           ),
@@ -155,18 +157,15 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
         Expanded(
           flex: 3,
           child: Padding(
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(10.sp),
             child: TextField(
               // 设置文本大小
-              style: TextStyle(fontSize: 14.sp),
+              style: TextStyle(fontSize: CusFontSizes.searchInputMedium),
               decoration: InputDecoration(
                 // 四周带上边框
                 border: const OutlineInputBorder(),
                 // 设置输入框大小
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: 10.sp,
-                  horizontal: 12.sp,
-                ),
+                contentPadding: EdgeInsets.all(10.sp),
                 // 占位符文本
                 hintText: CusAL.of(context).queryKeywordHintText(
                   CusAL.of(context).exercise,
@@ -227,7 +226,9 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,
                         style: TextStyle(
-                            fontSize: 16.sp, fontWeight: FontWeight.bold),
+                          fontSize: CusFontSizes.itemTitle,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       subtitle: Text(
                         '${getCusLabelText(

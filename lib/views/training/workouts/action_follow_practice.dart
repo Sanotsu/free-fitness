@@ -16,6 +16,7 @@ import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import '../reports/index.dart';
@@ -477,15 +478,14 @@ class _ActionFollowPracticeWithTTSState
                   text: "${CusAL.of(context).workoutFollowLabel('1')}\n",
                   style: TextStyle(
                     color: Colors.green,
-                    fontSize: 24.sp,
+                    fontSize: CusFontSizes.flagBig,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 TextSpan(
                   text: actions[_currentIndex + 1].exercise.exerciseName,
                   style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 20.sp,
+                    fontSize: CusFontSizes.flagMedium,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -515,13 +515,12 @@ class _ActionFollowPracticeWithTTSState
                 fillColor: Colors.lightBlue,
                 fillGradient: null,
                 // backgroundColor: const Color.fromARGB(255, 27, 23, 27),
-                backgroundColor: Colors.black38,
                 backgroundGradient: null,
-                strokeWidth: 10.0,
+                strokeWidth: 10.sp,
                 strokeCap: StrokeCap.round,
                 textStyle: TextStyle(
-                  fontSize: 50.sp,
-                  color: Theme.of(context).canvasColor,
+                  fontSize: CusFontSizes.flagVeryLarge,
+                  // color: Theme.of(context).canvasColor,
                   fontWeight: FontWeight.bold,
                 ),
                 textFormat: CountdownTextFormat.S,
@@ -603,7 +602,7 @@ class _ActionFollowPracticeWithTTSState
                         text: actions[_currentIndex].exercise.exerciseName,
                         style: TextStyle(
                           color: Colors.green,
-                          fontSize: 20.sp,
+                          fontSize: CusFontSizes.flagMedium,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -634,7 +633,9 @@ class _ActionFollowPracticeWithTTSState
                         content: SingleChildScrollView(
                           child: Text(
                             "${actions[_currentIndex].exercise.instructions}",
-                            style: TextStyle(fontSize: 14.sp),
+                            style: TextStyle(
+                              fontSize: CusFontSizes.pageSubContent,
+                            ),
                           ),
                         ),
                         actions: [
@@ -679,7 +680,7 @@ class _ActionFollowPracticeWithTTSState
                   countingOptions,
                 ),
                 style: TextStyle(
-                  fontSize: 16.sp,
+                  fontSize: CusFontSizes.flagSmall,
                   color: Theme.of(context).disabledColor,
                 ),
                 textAlign: TextAlign.start,
@@ -698,8 +699,8 @@ class _ActionFollowPracticeWithTTSState
               strokeWidth: 5.0,
               strokeCap: StrokeCap.round,
               textStyle: TextStyle(
-                fontSize: 36.sp,
-                color: Colors.black,
+                fontSize: CusFontSizes.flagLarge,
+                // color: Colors.black,
                 fontWeight: FontWeight.bold,
               ),
               textFormat: CountdownTextFormat.MM_SS,
@@ -768,7 +769,10 @@ class _ActionFollowPracticeWithTTSState
               flex: 1,
               child: Text(
                 '${_getActionCountString(_currentIndex)}',
-                style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                style: TextStyle(
+                  fontSize: CusFontSizes.flagSmall,
+                  color: Theme.of(context).disabledColor,
+                ),
                 textAlign: TextAlign.end,
               ),
             ),
@@ -935,7 +939,7 @@ class _ActionFollowPracticeWithTTSState
         child: Center(
           child: Text(
             CusAL.of(context).workoutFollowLabel('2'),
-            style: TextStyle(fontSize: 32.sp),
+            style: TextStyle(fontSize: CusFontSizes.flagVeryBig),
           ),
         ),
       ),
@@ -994,13 +998,12 @@ class _ActionFollowPracticeWithTTSState
                 fillColor: Colors.green,
                 fillGradient: null,
                 // backgroundColor: const Color.fromARGB(255, 144, 126, 148),
-                backgroundColor: Colors.black38,
                 backgroundGradient: null,
                 strokeWidth: 10.0,
                 strokeCap: StrokeCap.round,
                 textStyle: TextStyle(
-                  fontSize: 30.sp,
-                  color: Theme.of(context).canvasColor,
+                  fontSize: CusFontSizes.flagLarge,
+                  // color: Theme.of(context).canvasColor,
                   fontWeight: FontWeight.bold,
                 ),
                 textFormat: CountdownTextFormat.S,
@@ -1096,8 +1099,8 @@ class _ActionFollowPracticeWithTTSState
                     TextSpan(
                       text: CusAL.of(context).workoutFollowLabel('3'),
                       style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20.sp,
+                        color: Theme.of(context).primaryColor,
+                        fontSize: CusFontSizes.flagMedium,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -1106,7 +1109,7 @@ class _ActionFollowPracticeWithTTSState
                       text: '  ${_currentIndex + 1}/${actions.length}',
                       style: TextStyle(
                         color: Colors.green,
-                        fontSize: 20.sp,
+                        fontSize: CusFontSizes.flagMedium,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1114,7 +1117,7 @@ class _ActionFollowPracticeWithTTSState
                       text: '\n${actions[_currentIndex].exercise.exerciseName}',
                       style: TextStyle(
                         color: Colors.green,
-                        fontSize: 24.sp,
+                        fontSize: CusFontSizes.flagBig,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1126,7 +1129,10 @@ class _ActionFollowPracticeWithTTSState
               flex: 1,
               child: Text(
                 '${_getActionCountString(_currentIndex)}',
-                style: TextStyle(fontSize: 20.sp),
+                style: TextStyle(
+                  fontSize: CusFontSizes.flagMedium,
+                  color: Theme.of(context).disabledColor,
+                ),
                 textAlign: TextAlign.end,
               ),
             ),

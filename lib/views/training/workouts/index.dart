@@ -9,6 +9,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import 'action_list.dart';
@@ -103,11 +104,11 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
             children: [
               TextSpan(
                 text: CusAL.of(context).workouts,
-                style: TextStyle(fontSize: 20.sp),
+                style: TextStyle(fontSize: CusFontSizes.pageTitle),
               ),
               TextSpan(
                 text: "\n${CusAL.of(context).itemCount(groupList.length)}",
-                style: TextStyle(fontSize: 12.sp),
+                style: TextStyle(fontSize: CusFontSizes.pageAppendix),
               ),
             ],
           ),
@@ -120,11 +121,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
             : [
                 /// 新增训练组基本信息
                 IconButton(
-                  icon: Icon(Icons.add, size: 30.sp),
-                  style: ButtonStyle(
-                    foregroundColor:
-                        MaterialStateProperty.all<Color>(Colors.white),
-                  ),
+                  icon: const Icon(Icons.add),
                   onPressed: _modifyGroupInfo,
                 ),
               ],
@@ -185,7 +182,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                       child: Text(
                         CusAL.of(context).resetLabel,
                         style: TextStyle(
-                          fontSize: 12.sp,
+                          fontSize: CusFontSizes.pageAppendix,
                           color: Theme.of(context).primaryColor,
                         ),
                       ),
@@ -201,7 +198,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                       "group_category",
                       groupCategoryOptions,
                       labelText: CusAL.of(context).workoutQuerys('1'),
-                      optionFontSize: 13.sp,
+                      optionFontSize: CusFontSizes.itemContent,
                     ),
                   ),
                   Expanded(
@@ -209,7 +206,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                       "group_level",
                       levelOptions,
                       labelText: CusAL.of(context).workoutQuerys('2'),
-                      optionFontSize: 13.sp,
+                      optionFontSize: CusFontSizes.itemContent,
                     ),
                   ),
                 ],
@@ -248,12 +245,11 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
         return Card(
           elevation: 5.sp,
           child: ListTile(
-            leading: Icon(Icons.alarm_on, size: 36.sp),
+            leading: Icon(Icons.alarm_on, size: CusIconSizes.iconLarge),
             title: Text(
               groupItem.group.groupName,
               style: TextStyle(
-                fontSize: 20.sp,
-                // fontWeight: FontWeight.w500,
+                fontSize: CusFontSizes.itemTitle,
                 color: Theme.of(context).primaryColor,
               ),
             ),
@@ -267,7 +263,9 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                   TextSpan(
                     text:
                         '${groupItem.actionDetailList.length} ${CusAL.of(context).exercise} ',
-                    style: const TextStyle(color: Colors.black),
+                    style: TextStyle(
+                      color: Theme.of(context).shadowColor,
+                    ),
                   ),
                   TextSpan(
                     text: '${getCusLabelText(
@@ -275,7 +273,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                       levelOptions,
                     )}  ',
                     style: TextStyle(
-                      fontSize: 18.sp,
+                      fontSize: CusFontSizes.itemTitle,
                       color: Colors.green[500],
                     ),
                   ),
@@ -284,7 +282,9 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                       groupItem.group.groupCategory,
                       groupCategoryOptions,
                     )}  ',
-                    style: const TextStyle(color: Colors.black),
+                    style: TextStyle(
+                      color: Theme.of(context).shadowColor,
+                    ),
                   ),
                 ],
               ),
@@ -299,7 +299,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                     child: IconButton(
                       icon: Icon(
                         Icons.edit,
-                        size: 20.sp,
+                        size: CusIconSizes.iconNormal,
                         color: Theme.of(context).primaryColor,
                       ),
                       onPressed: () {

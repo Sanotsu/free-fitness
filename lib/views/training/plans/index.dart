@@ -10,6 +10,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import 'group_list.dart';
@@ -94,11 +95,11 @@ class _TrainingPlansState extends State<TrainingPlans> {
             children: [
               TextSpan(
                 text: '${CusAL.of(context).plans}\n',
-                style: TextStyle(fontSize: 20.sp),
+                style: TextStyle(fontSize: CusFontSizes.pageTitle),
               ),
               TextSpan(
                 text: CusAL.of(context).itemCount(planList.length),
-                style: TextStyle(fontSize: 12.sp),
+                style: TextStyle(fontSize: CusFontSizes.pageAppendix),
               ),
             ],
           ),
@@ -106,8 +107,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
         actions: [
           /// 新增训练组基本信息
           IconButton(
-            icon: Icon(Icons.add, size: 30.sp),
-            color: Theme.of(context).canvasColor,
+            icon: const Icon(Icons.add),
             onPressed: _modifyPlanInfo,
           ),
         ],
@@ -171,7 +171,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
                       child: Text(
                         CusAL.of(context).resetLabel,
                         style: TextStyle(
-                          fontSize: 12.sp,
+                          fontSize: CusFontSizes.pageAppendix,
                           color: Theme.of(context).primaryColor,
                         ),
                       ),
@@ -205,7 +205,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
           width: 50.sp,
           alignment: Alignment.center,
           child: IconButton(
-            icon: const Icon(Icons.search, color: Colors.blue),
+            icon: Icon(Icons.search, color: Theme.of(context).primaryColor),
             onPressed: () {
               if (_queryFormKey.currentState!.saveAndValidate()) {
                 setState(() {
@@ -234,11 +234,11 @@ class _TrainingPlansState extends State<TrainingPlans> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               ListTile(
-                leading: Icon(Icons.alarm_on, size: 36.sp),
+                leading: Icon(Icons.alarm_on, size: CusIconSizes.iconLarge),
                 title: Text(
                   planItem.plan.planName,
                   style: TextStyle(
-                    fontSize: 24.sp,
+                    fontSize: CusFontSizes.itemTitle,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -252,24 +252,21 @@ class _TrainingPlansState extends State<TrainingPlans> {
                       TextSpan(
                         text:
                             '${planItem.groupDetailList.length} ${CusAL.of(context).workouts} ',
-                        style: const TextStyle(color: Colors.black),
+                        style: TextStyle(color: Theme.of(context).shadowColor),
                       ),
                       TextSpan(
                         text: '${getCusLabelText(
                           planItem.plan.planLevel,
                           levelOptions,
                         )}  ',
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          color: Colors.green[500],
-                        ),
+                        style: TextStyle(color: Colors.green[500]),
                       ),
                       TextSpan(
                         text: '${getCusLabelText(
                           planItem.plan.planCategory,
                           categoryOptions, // 可以不和exercise用同一个，但要单独列一个
                         )}  ',
-                        style: const TextStyle(color: Colors.black),
+                        style: TextStyle(color: Theme.of(context).shadowColor),
                       ),
                     ],
                   ),
@@ -280,7 +277,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
                   child: IconButton(
                     icon: Icon(
                       Icons.edit,
-                      size: 20.sp,
+                      size: CusIconSizes.iconNormal,
                       color: Theme.of(context).primaryColor,
                     ),
                     onPressed: () {

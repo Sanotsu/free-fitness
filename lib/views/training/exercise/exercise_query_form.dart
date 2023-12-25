@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 
 class ExerciseQueryForm extends StatefulWidget {
@@ -65,29 +66,74 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
                 "primary_muscles",
                 musclesOptions,
                 labelText: CusAL.of(context).exerciseQuerys("0"),
-                hintStyle: TextStyle(fontSize: 14.sp),
+                hintStyle: TextStyle(fontSize: CusFontSizes.searchInputMedium),
                 isOutline: true,
               ),
             ),
             Expanded(
-              flex: 2,
-              child: TextButton(
+              flex: 1,
+              child: IconButton(
+                onPressed: _showHintDialog,
+                icon: Icon(
+                  Icons.warning,
+                  size: CusIconSizes.iconSmall,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: 1,
+              child: IconButton(
                 onPressed: () {
                   setState(() {
                     _showAdvancedOptions = !_showAdvancedOptions;
                   });
                 },
-                child: Text(
-                  _showAdvancedOptions
-                      ? CusAL.of(context).lessLabel
-                      : CusAL.of(context).moreLabel,
-                  style: TextStyle(fontSize: 12.sp),
+                icon: Icon(
+                  _showAdvancedOptions ? Icons.expand_less : Icons.expand_more,
+                  size: CusIconSizes.iconSmall,
+                  color: Theme.of(context).primaryColor,
                 ),
               ),
+
+              //     TextButton(
+              //   onPressed: () {
+              //     setState(() {
+              //       _showAdvancedOptions = !_showAdvancedOptions;
+              //     });
+              //   },
+              //   child: Text(
+              //     _showAdvancedOptions
+              //         ? CusAL.of(context).lessLabel
+              //         : CusAL.of(context).moreLabel,
+              //     style: TextStyle(fontSize: 12.sp),
+              //   ),
+              // ),
             ),
             Expanded(
               flex: 2,
-              child: TextButton(
+              child:
+                  // IconButton(
+                  //   onPressed: () {
+                  //     // todo 如果有高级查询条件被选择，但是被折叠了，点击重置是不会清除的。
+                  //     setState(() {
+                  //       _formKey.currentState!.reset();
+                  //       // 2023-12-12 不知道为什么，reset对下拉选中的没有效，所以手动清除
+                  //       _formKey.currentState?.fields['primary_muscles']
+                  //           ?.didChange(null);
+                  //       _formKey.currentState?.fields['level']?.didChange(null);
+                  //       _formKey.currentState?.fields['mechanic']?.didChange(null);
+                  //       _formKey.currentState?.fields['category']?.didChange(null);
+                  //       _formKey.currentState?.fields['equipment']?.didChange(null);
+                  //     });
+
+                  //     // 失去焦点
+                  //     FocusScope.of(context).requestFocus(FocusNode());
+                  //   },
+                  //   icon: Icon(Icons.settings_backup_restore, size: 16.sp),
+                  // ),
+
+                  TextButton(
                 onPressed: () {
                   // todo 如果有高级查询条件被选择，但是被折叠了，点击重置是不会清除的。
                   setState(() {
@@ -106,23 +152,32 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
                 },
                 child: Text(
                   CusAL.of(context).resetLabel,
-                  style: TextStyle(fontSize: 12.sp),
+                  style: TextStyle(
+                    fontSize: CusFontSizes.itemContent,
+                    color: Theme.of(context).primaryColor,
+                  ),
                 ),
               ),
             ),
             Expanded(
               flex: 2,
-              child: IconButton(
-                onPressed: _showHintDialog,
-                icon: Icon(Icons.warning, size: 16.sp, color: Colors.black),
-              ),
-            ),
-            Expanded(
-              flex: 3,
               child: ElevatedButton(
                 onPressed: _submitForm,
-                child: Text(CusAL.of(context).queryLabel),
+                child: const Icon(Icons.search),
               ),
+              // IconButton(
+              //   onPressed: _submitForm,
+              //   icon: Icon(
+              //     Icons.search,
+              //     size: 32.sp,
+              //     color: Theme.of(context).primaryColor,
+              //   ),
+              // ),
+
+              // ElevatedButton(
+              //   onPressed: _submitForm,
+              //   child: Text(CusAL.of(context).queryLabel),
+              // ),
             ),
           ],
         ),

@@ -69,13 +69,16 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
           //   ),
           // ),
 
-          // // 默认使用浅色主题，预览一个深色主题使用的预设值
-          // darkTheme: FlexThemeData.dark(scheme: FlexScheme.mandyRed),
-          // themeMode: ThemeMode.light,
+          // 默认使用浅色主题，预设一个深色主题使用的预设值
+          // 跟随系统的默认深色是一个material主题
+          darkTheme: FlexThemeData.dark(scheme: FlexScheme.material),
 
           /// 根据系统设置使用深色或浅色主题(当有完善的深色模式之后再启用)
+          /// 默认的主题(即theme:null)不是很好看，就只要不是暗色都浅色主题，
+          /// 跟随系统的浅色和深色和手动选择的一样
           theme: box.read('mode') == 'system'
-              ? null
+              // 跟随系统的默认浅色是一个绿色主题
+              ? FlexThemeData.light(scheme: FlexScheme.greenM3)
               : box.read('mode') == 'dark'
                   ? FlexThemeData.dark(scheme: FlexScheme.mandyRed)
                   : FlexThemeData.light(scheme: FlexScheme.aquaBlue),

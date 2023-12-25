@@ -10,6 +10,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import 'export/report_pdf_viewer.dart';
@@ -281,7 +282,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                 padding: EdgeInsets.only(top: 100.sp),
                 child: Text(
                   CusAL.of(context).noRecordNote,
-                  style: TextStyle(fontSize: 20.sp),
+                  style: TextStyle(fontSize: CusFontSizes.flagMedium),
                 ),
               ),
             );
@@ -308,16 +309,16 @@ class _TrainingReportsState extends State<TrainingReports> {
                       Text(
                         CusAL.of(context).trainedReportLabels('0'),
                         style: TextStyle(
-                          fontSize: 20.sp,
+                          fontSize: CusFontSizes.flagMedium,
                           fontWeight: FontWeight.bold,
                           color: Theme.of(context).primaryColor,
                         ),
                       ),
-                      Icon(Icons.flag_outlined, size: 24.sp),
+                      Icon(Icons.flag_outlined, size: CusIconSizes.iconMedium),
                       Text(
                         "${data.length}",
                         style: TextStyle(
-                          fontSize: 24.sp,
+                          fontSize: CusFontSizes.flagMediumBig,
                           fontWeight: FontWeight.bold,
                           color: Colors.green,
                         ),
@@ -333,7 +334,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                   Text(
                     CusAL.of(context).trainedReportLabels('4'),
                     style: TextStyle(
-                      fontSize: 20.sp,
+                      fontSize: CusFontSizes.flagMedium,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).primaryColor,
                     ),
@@ -346,12 +347,12 @@ class _TrainingReportsState extends State<TrainingReports> {
                 children: [
                   Column(
                     children: [
-                      Icon(Icons.alarm, size: 24.sp),
+                      Icon(Icons.alarm, size: CusIconSizes.iconMedium),
                       Text(CusAL.of(context).trainedReportLabels('1')),
                       Text(
                         (totalTrained / 60).toStringAsFixed(0),
                         style: TextStyle(
-                          fontSize: 20.sp,
+                          fontSize: CusFontSizes.flagMedium,
                           fontWeight: FontWeight.bold,
                           color: Colors.green,
                         ),
@@ -360,12 +361,12 @@ class _TrainingReportsState extends State<TrainingReports> {
                   ),
                   Column(
                     children: [
-                      Icon(Icons.alarm, size: 24.sp),
+                      Icon(Icons.alarm, size: CusIconSizes.iconMedium),
                       Text(CusAL.of(context).trainedReportLabels('2')),
                       Text(
                         (totalRest / 60).toStringAsFixed(0),
                         style: TextStyle(
-                          fontSize: 20.sp,
+                          fontSize: CusFontSizes.flagMedium,
                           fontWeight: FontWeight.bold,
                           color: Colors.green,
                         ),
@@ -374,12 +375,12 @@ class _TrainingReportsState extends State<TrainingReports> {
                   ),
                   Column(
                     children: [
-                      Icon(Icons.alarm, size: 24.sp),
+                      Icon(Icons.alarm, size: CusIconSizes.iconMedium),
                       Text(CusAL.of(context).trainedReportLabels('3')),
                       Text(
                         (totolPaused / 60).toStringAsFixed(0),
                         style: TextStyle(
-                          fontSize: 20.sp,
+                          fontSize: CusFontSizes.flagMedium,
                           fontWeight: FontWeight.bold,
                           color: Colors.green,
                         ),
@@ -395,7 +396,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                   Text(
                     CusAL.of(context).trainedReportLabels('5'),
                     style: TextStyle(
-                      fontSize: 20.sp,
+                      fontSize: CusFontSizes.flagMedium,
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).primaryColor,
                     ),
@@ -549,7 +550,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                       "${list.length}",
                       style: TextStyle(
                         color: list.length < 3 ? Colors.white : Colors.black,
-                        fontSize: 10.sp,
+                        fontSize: CusFontSizes.flagTiny,
                       ),
                     ),
                   ),
@@ -626,7 +627,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                 padding: EdgeInsets.only(top: 100.sp),
                 child: Text(
                   '${CusAL.of(context).lastDayLabels(30)} ${CusAL.of(context).noRecordNote}',
-                  style: TextStyle(fontSize: 20.sp),
+                  style: TextStyle(fontSize: CusFontSizes.flagMedium),
                 ),
               ),
             );
@@ -655,9 +656,9 @@ class _TrainingReportsState extends State<TrainingReports> {
                     child: Text(
                       key,
                       style: TextStyle(
-                        fontSize: 18.sp,
+                        fontSize: CusFontSizes.itemTitle,
                         fontWeight: FontWeight.w500,
-                        color: Colors.grey[700]!,
+                        color: Theme.of(context).disabledColor,
                       ),
                     ),
                   ),
@@ -696,7 +697,7 @@ class _TrainingReportsState extends State<TrainingReports> {
               Text(
                 CusAL.of(context).lastDayLabels(30),
                 style: TextStyle(
-                  fontSize: 24.sp,
+                  fontSize: CusFontSizes.flagMediumBig,
                   color: Theme.of(context).primaryColor,
                 ),
               ),
@@ -758,25 +759,31 @@ class _TrainingReportsState extends State<TrainingReports> {
               children: [
                 TextSpan(
                   text: "${CusAL.of(context).plan} ",
-                  style: const TextStyle(
-                    color: Colors.black,
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 TextSpan(
                   text: "  $planName \n",
-                  style: TextStyle(fontSize: 18.sp, color: Colors.green),
+                  style: TextStyle(
+                    fontSize: CusFontSizes.itemTitle,
+                    color: Colors.green,
+                  ),
                 ),
                 TextSpan(
                   text: CusAL.of(context).dayNumber(log.log.dayNumber ?? 0),
-                  style: const TextStyle(
-                    color: Colors.black,
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 TextSpan(
                   text: '  ${log.group?.groupName}',
-                  style: TextStyle(fontSize: 18.sp, color: Colors.green),
+                  style: TextStyle(
+                    fontSize: CusFontSizes.itemTitle,
+                    color: Colors.green,
+                  ),
                 ),
               ],
             ),
@@ -790,15 +797,15 @@ class _TrainingReportsState extends State<TrainingReports> {
               children: [
                 TextSpan(
                   text: CusAL.of(context).workout,
-                  style: const TextStyle(
-                    color: Colors.black,
+                  style: TextStyle(
+                    color: Theme.of(context).primaryColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 TextSpan(
                   text: '  ${log.group?.groupName}',
                   style: TextStyle(
-                    fontSize: 18.sp,
+                    fontSize: CusFontSizes.itemTitle,
                     color: Colors.green[500],
                   ),
                 ),

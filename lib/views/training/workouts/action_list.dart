@@ -9,6 +9,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import 'action_config_dialog.dart';
@@ -171,11 +172,11 @@ class _ActionListState extends State<ActionList> {
               children: [
                 TextSpan(
                     text: widget.groupItem.groupName,
-                    style: TextStyle(fontSize: 20.sp)),
+                    style: TextStyle(fontSize: CusFontSizes.pageTitle)),
                 TextSpan(
                   text:
                       "\n${CusAL.of(context).actionLabel('1')}: ${CusAL.of(context).itemCount(actionList.length)}",
-                  style: TextStyle(fontSize: 12.sp),
+                  style: TextStyle(fontSize: CusFontSizes.pageAppendix),
                 ),
               ],
             ),
@@ -262,7 +263,7 @@ class _ActionListState extends State<ActionList> {
                   ),
                   child: Text(
                     CusAL.of(context).startLabel,
-                    style: TextStyle(fontSize: 20.sp),
+                    style: TextStyle(fontSize: CusFontSizes.pageTitle),
                   ),
                 ),
               ),
@@ -351,6 +352,10 @@ class _ActionListState extends State<ActionList> {
                         "${index + 1} ${adItem.exercise.exerciseName}",
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: CusFontSizes.itemTitle,
+                          color: Theme.of(context).primaryColor,
+                        ),
                       ),
                       subtitle: Text(subTitle),
                     ),
@@ -366,7 +371,10 @@ class _ActionListState extends State<ActionList> {
                     Expanded(
                       flex: 2,
                       child: IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.blue),
+                        icon: Icon(
+                          Icons.delete,
+                          color: Theme.of(context).primaryColor,
+                        ),
                         onPressed: () => _onDelete(index),
                       ),
                     ),

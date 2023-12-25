@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 
@@ -81,7 +82,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
               padding: EdgeInsets.all(16.0.sp),
               child: Text(
                 CusAL.of(context).moreDetail,
-                style: TextStyle(fontSize: 16.0.sp),
+                style: TextStyle(fontSize: CusFontSizes.itemTitle),
               ),
             ),
 
@@ -180,14 +181,20 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
           padding: EdgeInsets.symmetric(horizontal: 10.sp),
           child: Text(
             label,
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: CusFontSizes.pageContent,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 10.sp),
           child: Text(
             value,
-            style: TextStyle(fontSize: 14.0.sp, color: Colors.black87),
+            style: TextStyle(
+              fontSize: CusFontSizes.pageSubContent,
+              color: Theme.of(context).disabledColor,
+            ),
             textAlign: TextAlign.left,
           ),
         ),

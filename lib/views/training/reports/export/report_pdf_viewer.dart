@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
@@ -61,8 +59,6 @@ class _TrainedReportPdfViewerState extends State<TrainedReportPdfViewer> {
       endDate: widget.endDate,
       gmtCreateSort: "desc",
     );
-
-    print("导出pdf查询到的 训练日志 数据数量${temp.length}");
 
     setState(() {
       tlwgbList = temp;

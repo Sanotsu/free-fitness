@@ -12,6 +12,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/custom_exercise.dart';
 import '../../../models/training_state.dart';
@@ -312,25 +313,37 @@ Ab_Roller.json:
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(CusAL.of(context).exerciseImport),
+        title: Text(
+          CusAL.of(context).exerciseImport,
+          style: TextStyle(fontSize: CusFontSizes.pageTitle),
+        ),
         actions: [
-          TextButton.icon(
+          IconButton(
             onPressed: cusExercises.isNotEmpty ? _saveToDb : null,
             icon: Icon(
               Icons.save,
               color: cusExercises.isNotEmpty
-                  ? Theme.of(context).canvasColor
+                  ? null
                   : Theme.of(context).disabledColor,
             ),
-            label: Text(
-              CusAL.of(context).saveLabel,
-              style: TextStyle(
-                color: cusExercises.isNotEmpty
-                    ? Theme.of(context).canvasColor
-                    : Theme.of(context).disabledColor,
-              ),
-            ),
           ),
+          // TextButton.icon(
+          //   onPressed: cusExercises.isNotEmpty ? _saveToDb : null,
+          //   icon: Icon(
+          //     Icons.save,
+          //     color: cusExercises.isNotEmpty
+          //         ? null
+          //         : Theme.of(context).disabledColor,
+          //   ),
+          //   label: Text(
+          //     CusAL.of(context).saveLabel,
+          //     style: TextStyle(
+          //       color: cusExercises.isNotEmpty
+          //           ? null
+          //           : Theme.of(context).disabledColor,
+          //     ),
+          //   ),
+          // ),
         ],
       ),
       body: isLoading
@@ -372,7 +385,7 @@ Ab_Roller.json:
                   onPressed: _openFileExplorer,
                   icon: Icon(
                     Icons.drive_folder_upload,
-                    size: 25.sp,
+                    size: CusIconSizes.iconMedium,
                     color: Theme.of(context).primaryColor,
                   ),
                 ),
@@ -382,7 +395,7 @@ Ab_Roller.json:
                   onPressed: _openJsonFiles,
                   icon: Icon(
                     Icons.file_upload,
-                    size: 25.sp,
+                    size: CusIconSizes.iconMedium,
                     color: Theme.of(context).primaryColor,
                   ),
                 ),
@@ -400,7 +413,7 @@ Ab_Roller.json:
                   },
                   icon: Icon(
                     Icons.clear,
-                    size: 25.sp,
+                    size: CusIconSizes.iconMedium,
                     color: cusExercises.isNotEmpty
                         ? Theme.of(context).primaryColor
                         : Theme.of(context).disabledColor,
@@ -423,7 +436,7 @@ Ab_Roller.json:
               onPressed: _openExerciseImagesExplorer,
               icon: Icon(
                 Icons.folder,
-                size: 25.sp,
+                size: CusIconSizes.iconMedium,
                 color: Theme.of(context).primaryColor,
               ),
             ),
@@ -459,7 +472,7 @@ Ab_Roller.json:
                       child: Center(
                         child: Text(
                           '导入动作关联图片事宜',
-                          style: TextStyle(fontSize: 20.sp),
+                          style: TextStyle(fontSize: CusFontSizes.pageTitle),
                         ),
                       ),
                     ),
@@ -468,7 +481,7 @@ Ab_Roller.json:
                       child: SingleChildScrollView(
                         child: Text(
                           importNote,
-                          style: TextStyle(fontSize: 12.sp),
+                          style: TextStyle(fontSize: CusFontSizes.itemContent),
                         ),
                       ),
                     ),
@@ -497,7 +510,7 @@ Ab_Roller.json:
     return [
       Text(
         CusAL.of(context).jsonFiles,
-        style: TextStyle(fontSize: 14.sp),
+        style: TextStyle(fontSize: CusFontSizes.pageSubContent),
         textAlign: TextAlign.start,
       ),
       SizedBox(
@@ -508,7 +521,7 @@ Ab_Roller.json:
           itemBuilder: (context, index) {
             return Text(
               jsons[index].path,
-              style: TextStyle(fontSize: 12.sp),
+              style: TextStyle(fontSize: CusFontSizes.itemContent),
               textAlign: TextAlign.start,
             );
           },
@@ -527,14 +540,14 @@ Ab_Roller.json:
             TextSpan(
               text: CusAL.of(context).itemCount(cusExercises.length),
               style: TextStyle(
-                fontSize: 14.sp,
-                color: Colors.black,
+                fontSize: CusFontSizes.itemSubTitle,
+                color: Colors.blue,
               ),
             ),
             TextSpan(
               text: "  ${CusAL.of(context).exerciseLabelNote}",
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: CusFontSizes.itemContent,
                 color: Colors.green,
               ),
             ),
@@ -557,28 +570,28 @@ Ab_Roller.json:
                         TextSpan(
                           text: '${index + 1}  ',
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: CusFontSizes.itemContent,
                             color: Colors.green,
                           ),
                         ),
                         TextSpan(
                           text: "${cusExercises[index].id}  ",
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: CusFontSizes.itemContent,
                             color: Colors.grey,
                           ),
                         ),
                         TextSpan(
                           text: "${cusExercises[index].name}  ",
                           style: TextStyle(
-                            fontSize: 12.sp,
-                            color: Colors.black,
+                            fontSize: CusFontSizes.itemContent,
+                            color: Colors.red,
                           ),
                         ),
                         TextSpan(
                           text: "${cusExercises[index].level}",
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: CusFontSizes.itemContent,
                             color: Colors.lightBlue,
                           ),
                         ),
@@ -602,8 +615,8 @@ Ab_Roller.json:
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              CusAL.of(context).uploadingItem(CusAL.of(context).exerciseLabel),
-              style: TextStyle(fontSize: 14.sp),
+              CusAL.of(context).uploadingItem(''),
+              style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
               textAlign: TextAlign.start,
             ),
             TextButton(
@@ -628,7 +641,10 @@ Ab_Roller.json:
                   );
                 });
               },
-              child: Text("移除选中动作", style: TextStyle(fontSize: 14.sp)),
+              child: Text(
+                CusAL.of(context).removeSelected,
+                style: TextStyle(fontSize: CusFontSizes.itemContent),
+              ),
             ),
           ],
         ),
@@ -674,7 +690,7 @@ Ab_Roller.json:
                       width: 25.sp,
                       child: Text(
                         '${index + 1} ',
-                        style: TextStyle(fontSize: 12.sp),
+                        style: TextStyle(fontSize: CusFontSizes.itemContent),
                       ),
                     ),
                   ),
@@ -683,7 +699,7 @@ Ab_Roller.json:
                       width: 100.sp,
                       child: Text(
                         '${cusExercises[index].id}',
-                        style: TextStyle(fontSize: 12.sp),
+                        style: TextStyle(fontSize: CusFontSizes.itemContent),
                       ),
                     ),
                   ),
@@ -692,7 +708,7 @@ Ab_Roller.json:
                       children: [
                         Text(
                           '${cusExercises[index].name}',
-                          style: TextStyle(fontSize: 12.sp),
+                          style: TextStyle(fontSize: CusFontSizes.itemContent),
                         ),
                       ],
                     ),
@@ -702,7 +718,7 @@ Ab_Roller.json:
                       width: 70.sp,
                       child: Text(
                         '${cusExercises[index].level}',
-                        style: TextStyle(fontSize: 12.sp),
+                        style: TextStyle(fontSize: CusFontSizes.itemContent),
                         textAlign: TextAlign.right,
                       ),
                     ),

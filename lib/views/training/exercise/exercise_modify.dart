@@ -9,6 +9,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 
@@ -173,17 +174,21 @@ class _ExerciseModifyState extends State<ExerciseModify> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            "${updateTarget != null ? CusAL.of(context).eidtLabel('') : CusAL.of(context).addLabel('')}${CusAL.of(context).exerciseLabel}"),
+          "${updateTarget != null ? CusAL.of(context).eidtLabel('') : CusAL.of(context).addLabel('')}${CusAL.of(context).exerciseLabel}",
+          style: TextStyle(fontSize: CusFontSizes.pageTitle),
+        ),
         elevation: 0,
         actions: [
-          MaterialButton(
-            color: Theme.of(context).colorScheme.secondary,
-            onPressed: _saveNewExercise,
-            child: Text(
-              CusAL.of(context).saveLabel,
-              style: TextStyle(color: Theme.of(context).canvasColor),
-            ),
-          )
+          IconButton(onPressed: _saveNewExercise, icon: const Icon(Icons.save))
+          // TextButton(
+          //   onPressed: _saveNewExercise,
+          //   child: Text(
+          //     CusAL.of(context).saveLabel,
+          //     style: TextStyle(
+          //       color: Theme.of(context).primaryColor,
+          //     ),
+          //   ),
+          // )
         ],
       ),
       body: Card(
@@ -374,7 +379,7 @@ class _ExerciseModifyState extends State<ExerciseModify> {
         name: name,
         decoration: InputDecoration(
           labelText: labelText,
-          labelStyle: TextStyle(fontSize: 16.sp),
+          labelStyle: TextStyle(fontSize: CusFontSizes.flagSmall),
         ),
         initialValue: initialValue,
         maxFiles: null,
@@ -389,7 +394,7 @@ class _ExerciseModifyState extends State<ExerciseModify> {
                 const Icon(Icons.file_upload),
                 Text(
                   hintText ?? '',
-                  style: TextStyle(fontSize: 16.sp),
+                  style: TextStyle(fontSize: CusFontSizes.flagSmall),
                 ),
               ],
             ),
@@ -428,16 +433,23 @@ class _ExerciseModifyState extends State<ExerciseModify> {
         // ？？？？ 好像是不带validator用了这个初始值就会报错
         initialValue: initialValue,
         title: Text(hintText ?? ''),
-        selectedColor: Colors.blue,
+        // selectedColor: Colors.blue,
         decoration: BoxDecoration(
-          color: Colors.blue.withOpacity(0.1),
-          borderRadius: const BorderRadius.all(Radius.circular(5)),
-          border: Border.all(color: Colors.blue, width: 2),
+          // color: Colors.blue.withOpacity(0.1),
+          borderRadius: BorderRadius.all(Radius.circular(5.sp)),
+          border: Border.all(
+            width: 2.sp,
+            color: Theme.of(context).disabledColor,
+          ),
         ),
-        buttonIcon: const Icon(Icons.fitness_center, color: Colors.blue),
+        // buttonIcon: const Icon(Icons.fitness_center, color: Colors.blue),
+        buttonIcon: const Icon(Icons.fitness_center),
         buttonText: Text(
           labelText ?? "",
-          style: TextStyle(color: Colors.blue[800], fontSize: 16),
+          style: TextStyle(
+            // color: Colors.blue[800],
+            fontSize: CusFontSizes.pageContent,
+          ),
         ),
         searchable: true,
         validator: validator,

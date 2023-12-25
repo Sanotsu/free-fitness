@@ -11,6 +11,8 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 
+import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import 'exercise_detail.dart';
 import 'exercise_json_import.dart';
 import 'exercise_modify.dart';
@@ -185,11 +187,14 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           text: TextSpan(
             children: [
               TextSpan(
-                  text: '${CusAL.of(context).exercise}\n',
-                  style: TextStyle(fontSize: 20.sp)),
+                text: '${CusAL.of(context).exercise}\n',
+                style: TextStyle(
+                  fontSize: CusFontSizes.pageTitle,
+                ),
+              ),
               TextSpan(
                 text: CusAL.of(context).itemCount(itemsCount),
-                style: TextStyle(fontSize: 12.sp),
+                style: TextStyle(fontSize: CusFontSizes.pageAppendix),
               ),
             ],
           ),
@@ -199,16 +204,10 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           IconButton(
             icon: const Icon(Icons.import_export),
             onPressed: clickExerciseImport,
-            style: ButtonStyle(
-              foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-            ),
           ),
           // 新增单个动作
           IconButton(
             icon: const Icon(Icons.add),
-            style: ButtonStyle(
-              foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
-            ),
             onPressed: () async {
               if (!mounted) return;
               final result = await Navigator.of(context).push(
@@ -273,7 +272,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
         color: Colors.red,
         alignment: Alignment.centerLeft,
         padding: EdgeInsets.symmetric(horizontal: 20.0.sp),
-        child: const Icon(Icons.delete, color: Colors.white),
+        child: const Icon(Icons.delete),
       ),
 
       // 左滑显示删除确认弹窗，？？？删除时还要检查删除者是否为创建者，这里只是测试左滑删除卡片
@@ -383,7 +382,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       style: TextStyle(
-                        fontSize: 16.sp,
+                        fontSize: CusFontSizes.itemTitle,
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).primaryColor,
                       ),
@@ -419,22 +418,8 @@ class _TrainingExerciseState extends State<TrainingExercise> {
   }
 
   _propertyText(String prefix, String item, List<CusLabel> options) {
-    String currentLanguage = Localizations.localeOf(context).languageCode;
-
-    // 数据库存的是英文，这里找到对应的中文显示
-    var op = options.firstWhere(
-      (element) => element.value == item,
-      orElse: () => CusLabel(cnLabel: '[无]', enLabel: 'No Data', value: ''),
-    );
-
-    var label = currentLanguage == "cn" ? op.cnLabel : op.enLabel;
-
-    // return Expanded(
-    //   child: Padding(
-    //     padding: EdgeInsets.only(left: 10.sp),
-    //     child: Text(prefix + label, style: TextStyle(fontSize: 12.sp)),
-    //   ),
-    // );
+    // 数据库存的是英文值，这里找到对应的中文或者英文标签进行显示
+    var label = getCusLabelText(item, options);
 
     return Expanded(
       child: Padding(
@@ -443,11 +428,17 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           children: [
             Expanded(
               flex: 1,
-              child: Text('$prefix: ', style: TextStyle(fontSize: 12.sp)),
+              child: Text(
+                '$prefix: ',
+                style: TextStyle(fontSize: CusFontSizes.itemContent),
+              ),
             ),
             Expanded(
               flex: 2,
-              child: Text(label, style: TextStyle(fontSize: 13.sp)),
+              child: Text(
+                label,
+                style: TextStyle(fontSize: CusFontSizes.itemContent),
+              ),
             ),
           ],
         ),

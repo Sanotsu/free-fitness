@@ -8,6 +8,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import '../workouts/index.dart';
@@ -171,11 +172,11 @@ class _GroupListState extends State<GroupList> {
               children: [
                 TextSpan(
                   text: widget.planItem.planName,
-                  style: TextStyle(fontSize: 20.sp),
+                  style: TextStyle(fontSize: CusFontSizes.pageTitle),
                 ),
                 TextSpan(
                   text: "\n${groupList.length} ${CusAL.of(context).workouts}",
-                  style: TextStyle(fontSize: 12.sp),
+                  style: TextStyle(fontSize: CusFontSizes.pageAppendix),
                 ),
               ],
             ),
@@ -266,7 +267,6 @@ class _GroupListState extends State<GroupList> {
                     });
                   });
                 },
-                backgroundColor: Colors.lightBlue,
                 child: const Icon(Icons.add),
               )
             : null,
@@ -301,7 +301,10 @@ class _GroupListState extends State<GroupList> {
       // 不存在action name，就是exercise name就好
       title: Text(
         "${CusAL.of(context).dayNumber(index + 1)} ${groupItem.groupName}",
-        style: TextStyle(fontSize: 20.sp),
+        style: TextStyle(
+          fontSize: CusFontSizes.itemTitle,
+          color: Theme.of(context).primaryColor,
+        ),
         maxLines: 2,
         overflow: TextOverflow.ellipsis,
       ),
@@ -315,24 +318,21 @@ class _GroupListState extends State<GroupList> {
             TextSpan(
               text:
                   '${gwaItem.actionDetailList.length} ${CusAL.of(context).exercise} ',
-              style: const TextStyle(color: Colors.black),
+              style: TextStyle(color: Theme.of(context).shadowColor),
             ),
             TextSpan(
               text: '${getCusLabelText(
                 groupItem.groupLevel,
                 levelOptions,
               )}  ',
-              style: TextStyle(
-                fontSize: 18.sp,
-                color: Colors.green[500],
-              ),
+              style: TextStyle(color: Colors.green[500]),
             ),
             TextSpan(
               text: '\n${getCusLabelText(
                 groupItem.groupCategory,
                 groupCategoryOptions,
               )}',
-              style: const TextStyle(color: Colors.black),
+              style: TextStyle(color: Theme.of(context).shadowColor),
             ),
           ],
         ),
@@ -394,7 +394,7 @@ class _GroupListState extends State<GroupList> {
                     logMap[index + 1]?.trainedDate ??
                         CusAL.of(context).incompleteLabel,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12.sp),
+                    style: TextStyle(fontSize: CusFontSizes.itemContent),
                   ),
                 ],
               ),

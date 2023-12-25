@@ -4,6 +4,7 @@ import 'package:free_fitness/views/training/exercise/exercise_modify.dart';
 
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/utils/db_training_helper.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import 'exercise_detail_more.dart';
@@ -94,21 +95,21 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
       child: Row(
         children: [
           Expanded(
-            flex: 9,
+            flex: 10,
             child: Text(
               '${_currentIndex + 1} ${_currentItem.exerciseName}',
               // 限制只显示一行，多的用省略号
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
-              style: TextStyle(fontSize: 18.sp),
+              style: TextStyle(fontSize: CusFontSizes.itemTitle),
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 3,
             child: TextButton(
               child: Text(
                 CusAL.of(context).detailLabel,
-                style: TextStyle(fontSize: 12.sp),
+                style: TextStyle(fontSize: CusFontSizes.itemContent),
               ),
               onPressed: () {
                 // 可以考虑不关详情弹窗
@@ -130,7 +131,7 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
             child: TextButton(
               child: Text(
                 CusAL.of(context).eidtLabel(""),
-                style: TextStyle(fontSize: 12.sp),
+                style: TextStyle(fontSize: CusFontSizes.itemContent),
               ),
               onPressed: () async {
                 // 跳转到修改表单
@@ -164,7 +165,7 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
   // 分页按钮行
   _buildPageButton() {
     return Container(
-      color: const Color.fromARGB(255, 1, 191, 155),
+      color: CusColors.pageChangeBg,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.sp),
         child: Row(
@@ -173,10 +174,10 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
             IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                size: 30.sp,
+                size: CusIconSizes.iconBig,
                 color: _currentIndex > 0
-                    ? Colors.blue
-                    : const Color.fromARGB(255, 128, 222, 204),
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).disabledColor,
               ),
               onPressed: () {
                 setState(() {
@@ -190,16 +191,16 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
             RichText(
               text: TextSpan(
                 style: TextStyle(
-                  fontSize: 20.0.sp,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w400,
+                  fontSize: CusFontSizes.pageTitle,
+                  color: Theme.of(context).shadowColor,
+                  fontWeight: FontWeight.bold,
                 ),
                 children: <TextSpan>[
                   // 索引是从0开始，显示从1开始
                   TextSpan(
                     text: '${_currentIndex + 1}',
                     style: TextStyle(
-                      fontSize: 28.sp,
+                      fontSize: CusFontSizes.flagBig,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -212,10 +213,10 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
             IconButton(
               icon: Icon(
                 Icons.arrow_forward,
-                size: 30.sp,
+                size: CusIconSizes.iconBig,
                 color: _currentIndex < _currentItems.length - 1
-                    ? Colors.blue
-                    : const Color.fromARGB(255, 128, 222, 204),
+                    ? Theme.of(context).primaryColor
+                    : Theme.of(context).disabledColor,
               ),
               onPressed: () {
                 setState(() {

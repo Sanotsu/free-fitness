@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import '../../../common/components/counter_widget.dart';
@@ -56,7 +57,10 @@ void showConfigDialog(
           },
           label: Text(
             CusAL.of(context).saveLabel,
-            style: TextStyle(fontSize: 20.sp),
+            style: TextStyle(
+              fontSize: CusFontSizes.buttonMedium,
+              color: Theme.of(context).primaryColor,
+            ),
           ),
         ),
       ),
@@ -72,7 +76,7 @@ void showConfigDialog(
         top: 10,
         child: Text(
           CusAL.of(context).actionConfigLabel('0'),
-          style: TextStyle(fontSize: 20.sp),
+          style: TextStyle(fontSize: CusFontSizes.pageTitle),
         ),
       ),
       Positioned(
@@ -80,10 +84,13 @@ void showConfigDialog(
         top: 0,
         // 不要重置按钮了，就关闭再打开就好
         child: IconButton(
-          icon: Icon(Icons.close, size: 36.sp, color: Colors.blue),
+          icon: Icon(
+            Icons.close,
+            size: CusIconSizes.iconBig,
+            color: Theme.of(context).primaryColor,
+          ),
           onPressed: () {
             // 在此处添加关闭按钮的点击处理逻辑
-
             Navigator.of(context).pop();
           },
         ),
@@ -131,7 +138,7 @@ void showConfigDialog(
                       labelText: CusAL.of(context).actionConfigLabel('1'),
                       border: OutlineInputBorder(
                         borderSide: BorderSide(
-                          color: Colors.black,
+                          color: Theme.of(context).shadowColor,
                           width: 1.0.sp,
                         ),
                       ),
@@ -193,9 +200,8 @@ void showConfigDialog(
                       child: buildCountinfModeAre(),
                     ),
                     // 下半部分标题、子标题和正文
-                    Container(
+                    SizedBox(
                       height: 300.sp,
-                      color: Colors.white,
                       child: Padding(
                         padding: EdgeInsets.all(10.sp),
                         child: Container(
@@ -206,7 +212,10 @@ void showConfigDialog(
                               // 限制只显示一行，多的用省略号
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
-                              style: TextStyle(fontSize: 20.sp),
+                              style: TextStyle(
+                                fontSize: CusFontSizes.pageTitle,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             subtitle: SingleChildScrollView(
                               scrollDirection: Axis.vertical,
