@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -7,6 +5,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/user_state.dart';
 
@@ -57,8 +56,6 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
       ),
       gmtCreateSort: 'DESC',
     );
-
-    print("tempList---${tempList.length}");
 
     setState(() {
       weightTrends.clear();
@@ -128,7 +125,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
         children: [
           Text(
             CusAL.of(context).allRecords,
-            style: TextStyle(fontSize: 14.sp),
+            style: TextStyle(fontSize: CusFontSizes.itemContent),
             textAlign: TextAlign.start,
           ),
           TextButton(
@@ -195,7 +192,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
             },
             child: Text(
               CusAL.of(context).removeSelected,
-              style: TextStyle(fontSize: 14.sp),
+              style: TextStyle(fontSize: CusFontSizes.buttonTiny),
             ),
           ),
         ],
@@ -209,8 +206,8 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
         child: DataTable(
           dataRowMinHeight: 20.sp, // 设置行高范围
           // dataRowMaxHeight: 80.sp,
-          headingRowHeight: 25, // 设置表头行高
-          horizontalMargin: 10, // 设置水平边距
+          headingRowHeight: 25.sp, // 设置表头行高
+          horizontalMargin: 10.sp, // 设置水平边距
           columnSpacing: 5.sp, // 设置列间距
           columns: <DataColumn>[
             // DataColumn(label: Text('索引')),
@@ -263,7 +260,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
                     width: 25.sp,
                     child: Text(
                       '${weightTrends[index].weightTrendId} ',
-                      style: TextStyle(fontSize: 14.sp),
+                      style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                       textAlign: TextAlign.end,
                     ),
                   ),
@@ -273,7 +270,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
                     children: [
                       Text(
                         '${weightTrends[index].gmtCreate} ',
-                        style: TextStyle(fontSize: 14.sp),
+                        style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                         textAlign: TextAlign.end,
                       ),
                     ],
@@ -284,7 +281,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
                     width: 60.sp,
                     child: Text(
                       cusDoubleTryToIntString(weightTrends[index].weight),
-                      style: TextStyle(fontSize: 14.sp),
+                      style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                       textAlign: TextAlign.end,
                     ),
                   ),
@@ -293,8 +290,8 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
                   SizedBox(
                     width: 60.sp,
                     child: Text(
-                      weightTrends[index].bmi.toStringAsFixed(2),
-                      style: TextStyle(fontSize: 14.sp),
+                      cusDoubleTryToIntString(weightTrends[index].bmi),
+                      style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                       textAlign: TextAlign.right,
                     ),
                   ),

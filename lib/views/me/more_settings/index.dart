@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../layout/app.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 
 class MoreSettings extends StatefulWidget {
@@ -77,6 +78,32 @@ class _MoreSettingsState extends State<MoreSettings> {
                 'light',
               ),
             ],
+          ),
+          SizedBox(height: 10.sp),
+          ListTile(
+            leading: const Icon(Icons.description),
+            title: Text(
+              "${CusAL.of(context).userGuide}(todo)",
+              style: TextStyle(
+                fontSize: CusFontSizes.pageSubTitle,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            onTap: null,
+          ),
+          SizedBox(height: 10.sp),
+          ListTile(
+            leading: const Icon(Icons.question_answer),
+            title: Text(
+              "${CusAL.of(context).questionAndAnswer}(todo)",
+              style: TextStyle(
+                fontSize: CusFontSizes.pageSubTitle,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            onTap: null,
           ),
         ],
       ),

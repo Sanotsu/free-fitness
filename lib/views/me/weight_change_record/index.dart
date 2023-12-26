@@ -1,12 +1,12 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:numberpicker/numberpicker.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_user_helper.dart';
+import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/user_state.dart';
 import 'weight_change_line_chart.dart';
@@ -63,8 +63,9 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                     Text(
                       CusAL.of(context).weightLabel(''),
                       style: TextStyle(
-                        fontSize: 24.sp,
+                        fontSize: CusFontSizes.flagMedium,
                         fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
                       ),
                     ),
                     Row(
@@ -72,7 +73,6 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                         ElevatedButton(
                           onPressed: () {
                             // 这里只显示修改体重
-                            print("点击管理可以删除一些体重数据");
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -150,9 +150,9 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                             TextSpan(
                               text: "BMI",
                               style: TextStyle(
-                                fontSize: 24.sp,
+                                fontSize: CusFontSizes.flagMedium,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                                color: Theme.of(context).primaryColor,
                               ),
                             ),
                             const TextSpan(
@@ -195,18 +195,18 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
           ),
 
           /// 占位的
-          SizedBox(
-            height: 30,
-            child: Row(
-              children: [
-                Expanded(child: Container(color: Colors.grey)),
-                Expanded(child: Container(color: Colors.green)),
-                Expanded(child: Container(color: Colors.blue)),
-                Expanded(child: Container(color: Colors.yellow)),
-                Expanded(child: Container(color: Colors.red)),
-              ],
-            ),
-          ),
+          // SizedBox(
+          //   height: 30,
+          //   child: Row(
+          //     children: [
+          //       Expanded(child: Container(color: Colors.grey)),
+          //       Expanded(child: Container(color: Colors.green)),
+          //       Expanded(child: Container(color: Colors.blue)),
+          //       Expanded(child: Container(color: Colors.yellow)),
+          //       Expanded(child: Container(color: Colors.red)),
+          //     ],
+          //   ),
+          // ),
           SizedBox(height: 20.sp),
         ],
       ),
@@ -243,7 +243,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
             children: [
               Text(
                 bmi.toStringAsFixed(2),
-                style: TextStyle(fontSize: 20.sp),
+                style: TextStyle(fontSize: CusFontSizes.flagMedium),
               ),
               buildWeightBmiText(bmi, context),
             ],
@@ -256,7 +256,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                       ? 300
                       : ((bmi - 15) / (40 - 15) * 300.sp),
             ),
-            child: Icon(Icons.arrow_downward, size: 20.sp),
+            child: Icon(Icons.arrow_downward, size: CusIconSizes.iconNormal),
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.sp),
@@ -359,7 +359,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                       children: [
                         Text(
                           CusAL.of(context).weightLabel('(kg)'),
-                          style: TextStyle(fontSize: 20.sp),
+                          style: TextStyle(fontSize: CusFontSizes.flagMedium),
                         ),
                         DecimalNumberPicker(
                           value: _currentWeight,
@@ -379,7 +379,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                         children: [
                           Text(
                             CusAL.of(context).weightLabel('(cm)'),
-                            style: TextStyle(fontSize: 20.sp),
+                            style: TextStyle(fontSize: CusFontSizes.flagMedium),
                           ),
                           DecimalNumberPicker(
                             value: _currentHeight,
@@ -419,11 +419,18 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                         gmtCreate: getCurrentDateTime(),
                       );
 
-                      // ？？？这里应该判断是否新增成功
-                      await _userHelper.insertWeightTrendList([temp]);
-
-                      if (!mounted) return;
-                      Navigator.of(context).pop();
+                      try {
+                        await _userHelper.insertWeightTrendList([temp]);
+                        if (!mounted) return;
+                        Navigator.of(context).pop(true);
+                      } catch (e) {
+                        if (!mounted) return;
+                        commonExceptionDialog(
+                          context,
+                          CusAL.of(context).exceptionWarningTitle,
+                          e.toString(),
+                        );
+                      }
                     },
                     child: Text(CusAL.of(context).saveLabel),
                   ),
@@ -441,27 +448,27 @@ buildWeightBmiText(double bmi, BuildContext context) {
   if (bmi < 18.4) {
     return Text(
       CusAL.of(context).bmiLabels("0"),
-      style: TextStyle(color: Colors.grey, fontSize: 20.sp),
+      style: TextStyle(color: Colors.grey, fontSize: CusFontSizes.itemTitle),
     );
   } else if (bmi < 23.9) {
     return Text(
       CusAL.of(context).bmiLabels("1"),
-      style: TextStyle(color: Colors.green, fontSize: 20.sp),
+      style: TextStyle(color: Colors.green, fontSize: CusFontSizes.itemTitle),
     );
   } else if (bmi < 28) {
     return Text(
       CusAL.of(context).bmiLabels("2"),
-      style: TextStyle(color: Colors.blue, fontSize: 20.sp),
+      style: TextStyle(color: Colors.blue, fontSize: CusFontSizes.itemTitle),
     );
   } else if (bmi < 35) {
     return Text(
       CusAL.of(context).bmiLabels("3"),
-      style: TextStyle(color: Colors.yellow, fontSize: 20.sp),
+      style: TextStyle(color: Colors.yellow, fontSize: CusFontSizes.itemTitle),
     );
   } else {
     return Text(
       CusAL.of(context).bmiLabels("4"),
-      style: TextStyle(color: Colors.red, fontSize: 20.sp),
+      style: TextStyle(color: Colors.red, fontSize: CusFontSizes.itemTitle),
     );
   }
 }

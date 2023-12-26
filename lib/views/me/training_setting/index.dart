@@ -1,6 +1,5 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/user_state.dart';
 import 'package:numberpicker/numberpicker.dart';
 
@@ -80,8 +79,8 @@ class _TrainingSettingState extends State<TrainingSetting> {
                 // itemWidth: 40,
                 // axis: Axis.horizontal,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.black26),
+                  borderRadius: BorderRadius.circular(16.sp),
+                  border: Border.all(color: Theme.of(context).primaryColor),
                 ),
                 onChanged: (value) => setState(() => _currentNumber = value),
               );

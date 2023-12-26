@@ -8,7 +8,6 @@ import 'package:path/path.dart' as p;
 import 'package:archive/archive_io.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -18,11 +17,15 @@ import '../../../common/utils/db_training_helper.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/diary_state.dart';
 import '../../../models/dietary_state.dart';
 import '../../../models/user_state.dart';
 
+///
+/// 2023-12-26 备份恢复还可以优化，就暂时不做
+///
 class BackupAndRestore extends StatefulWidget {
   const BackupAndRestore({super.key});
 
@@ -44,7 +47,7 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
     // 用户没有授权，简单提示一下
     if (!mounted) return;
     if (!status.isGranted) {
-      showSnackMessage(context, "用户已禁止访问内部存储,无法进行备份。");
+      showSnackMessage(context, CusAL.of(context).noStorageErrorText);
       return;
     }
 
@@ -266,8 +269,8 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
 
           commonExceptionDialog(
             context,
-            "导入json文件出错",
-            '文件名称:\n${file.path}\n\n错误信息:\n$e',
+            CusAL.of(context).importJsonError,
+            CusAL.of(context).importJsonErrorText(file.path, e.toString()),
           );
 
           setState(() {
@@ -393,7 +396,7 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
             icon: const Icon(Icons.backup),
             label: Text(
               CusAL.of(context).bakLabels("1"),
-              style: TextStyle(fontSize: 20.sp),
+              style: TextStyle(fontSize: CusFontSizes.flagMedium),
             ),
           ),
           TextButton.icon(
@@ -401,7 +404,7 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
             icon: const Icon(Icons.restore),
             label: Text(
               CusAL.of(context).bakLabels("2"),
-              style: TextStyle(fontSize: 20.sp),
+              style: TextStyle(fontSize: CusFontSizes.flagMedium),
             ),
           ),
         ],

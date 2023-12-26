@@ -350,6 +350,13 @@
     "restartLabel":"重新开始",
     "prevLabel":"上一个",
     "nextLabel":"下一个",
+    "doneLabel":"完成",
+
+    "switchUser":"切换用户",
+    "userGuide":"用户手册",
+    "questionAndAnswer":"常见问题",
+
+
     
 
     "tipLabel":"提示",
@@ -358,6 +365,7 @@
     "alertTitle": "提示",
 
     "noRecordNote": "暂无数据.",
+    "noOtherUser": " 没有任何用户信息",
 
     "lastDayLabels": "最近{count}天",
     "@lastDayLabels": {

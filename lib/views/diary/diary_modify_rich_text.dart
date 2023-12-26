@@ -431,6 +431,9 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                       borderRadius: BorderRadius.circular(10.0),
                     )
                   : InputBorder.none,
+              // 设置透明底色
+              filled: true,
+              fillColor: Colors.transparent,
             ),
             onChanged: (value) {
               setState(() {

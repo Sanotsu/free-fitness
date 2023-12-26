@@ -67,6 +67,16 @@ class _DietaryState extends State<Dietary> {
             height: screenHeight / 4,
             child: buildCoverCard(
               context,
+              const MealPhotoGallery(),
+              CusAL.of(context).mealGallery,
+              CusAL.of(context).mealGallerySubtitle,
+              dietaryMealImageUrl,
+            ),
+          ),
+          SizedBox(
+            height: screenHeight / 4,
+            child: buildCoverCard(
+              context,
               const DietaryFoods(),
               CusAL.of(context).foodCompo,
               CusAL.of(context).foodCompoSubtitle,
@@ -81,16 +91,6 @@ class _DietaryState extends State<Dietary> {
               CusAL.of(context).dietaryRecords,
               CusAL.of(context).dietaryRecordsSubtitle,
               dietaryLogCoverImageUrl,
-            ),
-          ),
-          SizedBox(
-            height: screenHeight / 4,
-            child: buildCoverCard(
-              context,
-              const MealPhotoGallery(),
-              CusAL.of(context).mealGallery,
-              CusAL.of(context).mealGallerySubtitle,
-              dietaryMealImageUrl,
             ),
           ),
         ],

@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -44,8 +42,6 @@ class _UserInfoState extends State<UserInfo> {
     // 查询登录用户的信息一定会有的
     var tempUser = (await _userHelper.queryUser(userId: CacheUser.userId))!;
 
-    print("_queryLoginedUserInfo---tempUser: $tempUser");
-
     setState(() {
       user = tempUser;
       if (tempUser.avatar != null) {
@@ -70,15 +66,10 @@ class _UserInfoState extends State<UserInfo> {
                   ),
                 ).then((value) {
                   // 确认新增成功后重新加载当前日期的条目数据
-
-                  print("我的设置返回带过来的结果==========$value");
                   _queryLoginedUserInfo();
                 });
               },
-              child: Text(
-                CusAL.of(context).eidtLabel(""),
-                style: const TextStyle(color: Colors.white),
-              ))
+              child: Text(CusAL.of(context).eidtLabel("")))
         ],
       ),
       body: isLoading

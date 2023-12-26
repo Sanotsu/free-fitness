@@ -56,7 +56,7 @@
   "resSuccessNote": "The original data has been deleted, and the backup data has been restored.",
 
   "restIntervals":"Rest time between follow-up exercises (s)",
-  "chooseSeconds":"Choose a time interval (s)",
+  "chooseSeconds":"Choose a duration(s)",
 
   "bmiLabels": "{ num, select, 0{UWT} 1{NWT} 2{OWT} 3{Fat} 4{Obesity} other{Other} }",
   "@bmiLabels": {
@@ -344,16 +344,22 @@
   "restartLabel":"Restart",
   "prevLabel":"Prev",
   "nextLabel":"Next",
+  "doneLabel":"Done",
 
-
+  "switchUser":"Switch User",
 
   "tipLabel":"Notification",
   "itemLabel":"{num} item(s)",
 
+  "userGuide":"User Guide",
+  "questionAndAnswer":"Q&A",
+
+  
 
   "alertTitle": "Alert",
 
   "noRecordNote": "No data yet.",
+  "noOtherUser": " No other users",
 
 
   "lastDayLabels": "last {count} days",

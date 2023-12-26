@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 
 class WeekIntakeBarChart extends StatefulWidget {
@@ -24,7 +25,8 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
     return AspectRatio(
       aspectRatio: 1.5,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        // 这个边框是为了手指放到柱状图时，最两侧显示的tooltip能不被遮挡
+        padding: EdgeInsets.only(left: 8.sp, right: 28.sp),
         child: BarChart(mainBarData()),
       ),
     );
@@ -43,7 +45,7 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
           // 提示框的最大宽度(默认120)
           maxContentWidth: 0.5.sw,
           // 提示框举例条状图顶部的距离(正数就是往上空，负数就是向下移动)
-          tooltipMargin: -100,
+          // tooltipMargin: -100,
           getTooltipItem: (group, groupIndex, rod, rodIndex) {
             // 点击时展示主要营养素的含量，但需要先取到值
             List<double> fromYList =
@@ -78,7 +80,7 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
             // 构建气泡框显示的内容
             return BarTooltipItem(
               '$weekDay\n',
-              TextStyle(fontSize: 12.sp),
+              TextStyle(fontSize: CusFontSizes.flagTiny),
               textAlign: TextAlign.left,
               children: <TextSpan>[
                 TextSpan(text: "$choStr\n"),
@@ -128,7 +130,7 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
       axisSide: meta.axisSide,
       child: Text(
         showCusLableMapLabel(context, weekdayStringMap[value.toInt() + 1]),
-        style: TextStyle(fontSize: 12.sp),
+        style: TextStyle(fontSize: CusFontSizes.flagTiny),
       ),
     );
   }
@@ -143,7 +145,7 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
       axisSide: meta.axisSide,
       child: Text(
         "${meta.formattedValue} ${CusAL.of(context).unitLabels('0')}",
-        style: TextStyle(fontSize: 12.sp),
+        style: TextStyle(fontSize: CusFontSizes.flagTiny),
       ),
     );
   }
@@ -172,7 +174,11 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
     // 依次为碳水、脂肪、蛋白质的数值
     List<double> nums = [cusMacro.carbs, cusMacro.fat, cusMacro.protein];
     // 依次为碳水、脂肪、蛋白质的柱子颜色
-    List<Color> colors = [Colors.grey, Colors.red, Colors.green];
+    List<Color> colors = [
+      cusNutrientColors[CusNutType.totalCHO]!,
+      cusNutrientColors[CusNutType.totalFat]!,
+      cusNutrientColors[CusNutType.protein]!,
+    ];
 
     // 指定这个条状图每组数据的长度范围和指定颜色，依次为碳水、脂肪、蛋白质
     for (int i = 0; i < nums.length; i++) {

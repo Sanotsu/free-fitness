@@ -142,6 +142,9 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         name: "user_name",
         decoration: InputDecoration(
           labelText: CusAL.of(context).userInfoLabels("0"),
+          // 设置透明底色
+          filled: true,
+          fillColor: Colors.transparent,
         ),
         // 2023-12-21 enableSuggestions 设为 true后键盘类型为text就正常了。
         enableSuggestions: true,
@@ -159,6 +162,9 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         name: "user_code",
         decoration: InputDecoration(
           labelText: CusAL.of(context).userInfoLabels("1"),
+          // 设置透明底色
+          filled: true,
+          fillColor: Colors.transparent,
         ),
         // 2023-12-21 enableSuggestions 设为 true后键盘类型为text(默认就是)就正常了。
         enableSuggestions: true,
@@ -173,6 +179,9 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
               ),
         decoration: InputDecoration(
           labelText: CusAL.of(context).userInfoLabels("2"),
+          // 设置透明底色
+          filled: true,
+          fillColor: Colors.transparent,
         ),
         items: genderOptions
             .map((unit) => DropdownMenuItem(
@@ -192,6 +201,9 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         inputType: InputType.date,
         decoration: InputDecoration(
           labelText: CusAL.of(context).userInfoLabels("3"),
+          // 设置透明底色
+          filled: true,
+          fillColor: Colors.transparent,
           suffixIcon: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () {
@@ -243,6 +255,9 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         maxLines: 3,
         decoration: InputDecoration(
           labelText: CusAL.of(context).userInfoLabels("6"),
+          // 设置透明底色
+          filled: true,
+          fillColor: Colors.transparent,
         ),
         // 2023-12-21 enableSuggestions 设为 true后键盘类型为multitext(默认是text)就正常了。
         enableSuggestions: true,
@@ -256,6 +271,9 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
     return FormBuilderTextField(
       name: name,
       decoration: InputDecoration(
+        // 设置透明底色
+        filled: true,
+        fillColor: Colors.transparent,
         labelText: labelText,
         suffixText: suffixText,
       ),

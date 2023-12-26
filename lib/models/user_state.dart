@@ -1,4 +1,5 @@
 import '../common/global/constants.dart';
+import '../common/utils/tools.dart';
 
 /// 用户基础信息和用户设置相关的表
 
@@ -68,15 +69,15 @@ class User {
       "password": password,
       "description": description,
       "date_of_birth": DateTime.tryParse(dateOfBirth ?? unknownDateString),
-      "height": height?.toString(),
+      "height": cusDoubleTryToIntString(height ?? 0),
       "height_unit": heightUnit?.toString(),
-      "current_weight": currentWeight?.toString(),
-      "target_weight": targetWeight?.toString(),
+      "current_weight": cusDoubleTryToIntString(currentWeight ?? 0),
+      "target_weight": cusDoubleTryToIntString(targetWeight ?? 0),
       "weight_unit": weightUnit?.toString(),
       "rda_goal": rdaGoal?.toString(),
-      "protein_goal": proteinGoal?.toString(),
-      "fat_goal": fatGoal?.toString(),
-      "cho_goal": choGoal?.toString(),
+      "protein_goal": cusDoubleTryToIntString(proteinGoal ?? 0),
+      "fat_goal": cusDoubleTryToIntString(fatGoal ?? 0),
+      "cho_goal": cusDoubleTryToIntString(choGoal ?? 0),
       "action_rest_time": actionRestTime?.toString(),
     };
   }

@@ -12,8 +12,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 
 import '../../../common/utils/db_user_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/user_state.dart';
 
@@ -134,7 +134,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
       axisSide: meta.axisSide,
       child: Text(
         "${meta.formattedValue}$unit",
-        style: TextStyle(fontSize: 12.sp),
+        style: TextStyle(fontSize: CusFontSizes.flagTiny),
       ),
     );
   }
@@ -167,17 +167,17 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
       child: Text(
         text,
         // "$text\n${temp.split(" ")[1]}",
-        style: TextStyle(fontSize: 12.sp),
+        style: TextStyle(fontSize: CusFontSizes.flagTiny),
       ),
     );
   }
 
-  // ？？？找了很多问题，分析可能是Android9及之下，无法保存。
+  // 找了很多问题，是Android9及之下，无法保存。
   // 权限什么的都已经给了的，还是存不了，有时间找个Android10及其之上的设备试一下
   _saveChartImage() async {
     RenderRepaintBoundary boundary =
         _chartKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-    ui.Image image = await boundary.toImage(pixelRatio: 2.0);
+    ui.Image image = await boundary.toImage(pixelRatio: 2.sp);
 
     ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
@@ -215,7 +215,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
         : Column(
             children: [
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   TextButton(
                     onPressed: () {
@@ -244,9 +244,12 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   if (isShowSaveButton)
-                    TextButton(
+                    IconButton(
                       onPressed: _saveChartImage,
-                      child: Text(CusAL.of(context).saveLabel),
+                      icon: Icon(
+                        Icons.download,
+                        color: Theme.of(context).primaryColor,
+                      ),
                     ),
                   IconButton(
                     onPressed: () {
@@ -261,8 +264,9 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
                     },
                     icon: Icon(
                       Icons.zoom_out,
-                      size: 24.sp,
-                      color: spotWidth <= 20.sp ? Colors.grey : Colors.blue,
+                      color: spotWidth <= 20.sp
+                          ? Theme.of(context).disabledColor
+                          : Theme.of(context).primaryColor,
                     ),
                   ),
                   IconButton(
@@ -276,13 +280,20 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
                     },
                     icon: Icon(
                       Icons.zoom_in,
-                      size: 24.sp,
-                      color: spotWidth >= 120.sp ? Colors.grey : Colors.blue,
+                      color: spotWidth >= 120.sp
+                          ? Theme.of(context).disabledColor
+                          : Theme.of(context).primaryColor,
                     ),
                   ),
                 ],
               ),
-              isLoading ? buildLoader(isLoading) : _buildLineChart(),
+              isLoading
+                  ? Center(
+                      child: SizedBox(
+                      height: 300.sp,
+                      child: const CircularProgressIndicator(),
+                    ))
+                  : _buildLineChart(),
             ],
           );
   }
@@ -427,7 +438,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
                         // 工具提示框中的数据可能太长，只取两位小数
                         lineBarSpot.y.toStringAsFixed(2),
                         TextStyle(
-                          fontSize: 12.sp,
+                          fontSize: CusFontSizes.itemSubContent,
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),

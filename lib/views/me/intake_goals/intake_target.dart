@@ -9,6 +9,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import 'week_intake_bar_chart.dart';
 
@@ -80,7 +81,9 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
 
   // 格式化已经存在的每日卡路里和营养素目标
   formatDailyIntakeMap() async {
-    var temp = await _userHelper.queryUserWithIntakeDailyGoal();
+    var temp = await _userHelper.queryUserWithIntakeDailyGoal(
+      userId: CacheUser.userId,
+    );
 
     // 如果没有每周设定的值，就使用总体平均值；如果后者都没有，则是显示推荐值(中国居民膳食指南18岁~。)
     // ？？？具体细节再考虑
@@ -169,7 +172,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
               CusAL.of(context).dailyGoalBars,
               textAlign: TextAlign.left,
               style: TextStyle(
-                fontSize: 24.sp,
+                fontSize: CusFontSizes.flagMedium,
                 fontWeight: FontWeight.w400,
                 color: Colors.green,
               ),
@@ -178,15 +181,27 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(width: 16.sp, height: 16.sp, color: Colors.grey),
+                Container(
+                  width: 16.sp,
+                  height: 16.sp,
+                  color: cusNutrientColors[CusNutType.totalCHO]!,
+                ),
                 SizedBox(width: 8.sp),
                 Text(CusAL.of(context).mainNutrients('4')),
                 SizedBox(width: 8.sp),
-                Container(width: 16.sp, height: 16.sp, color: Colors.red),
+                Container(
+                  width: 16.sp,
+                  height: 16.sp,
+                  color: cusNutrientColors[CusNutType.totalFat]!,
+                ),
                 SizedBox(width: 8.sp),
                 Text(CusAL.of(context).mainNutrients('3')),
                 SizedBox(width: 8.sp),
-                Container(width: 16.sp, height: 16.sp, color: Colors.green),
+                Container(
+                  width: 16.sp,
+                  height: 16.sp,
+                  color: cusNutrientColors[CusNutType.protein]!,
+                ),
                 SizedBox(width: 8.sp),
                 Text(CusAL.of(context).mainNutrients('2'))
               ],
@@ -212,11 +227,11 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
             Row(
               children: [
                 Expanded(
-                  flex: 3,
+                  flex: 5,
                   child: Text(
                     CusAL.of(context).averageGoal,
                     style: TextStyle(
-                      fontSize: 24.sp,
+                      fontSize: CusFontSizes.flagMedium,
                       fontWeight: FontWeight.w400,
                       color: Colors.green,
                     ),
@@ -225,7 +240,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                 // 如果是编辑状态，可以点取消
                 if (_isEditing)
                   Expanded(
-                    flex: 1,
+                    flex: 2,
                     child: TextButton(
                       onPressed: () async {
                         setState(() {
@@ -236,7 +251,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                     ),
                   ),
                 Expanded(
-                  flex: 1,
+                  flex: 2,
                   child: TextButton(
                     onPressed: () async {
                       // 先保存到数据库，然后再显示非修改画面
@@ -275,7 +290,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                 ),
               ],
             ),
-            Divider(height: 5.sp, thickness: 3),
+            Divider(height: 5.sp, thickness: 3.sp),
             SingleChildScrollView(
               child: FormBuilder(
                 key: _macrosFormKey,
@@ -296,8 +311,8 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Text(
-                          "$equivalentKJdata ${CusAL.of(context).unitLabels('3')}",
-                          style: TextStyle(fontSize: 14.sp),
+                          "$equivalentKJdata ${CusAL.of(context).unitLabels('3')}    ",
+                          style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                         )
                       ],
                     ),
@@ -343,6 +358,9 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
       decoration: InputDecoration(
         labelText: labelText,
         suffixText: suffixText,
+        // 透明背景色
+        filled: true,
+        fillColor: Colors.transparent,
         // 只读的时候移除下划线，编辑时显示下划线
         border: !editFlag
             ? InputBorder.none
@@ -380,14 +398,14 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
               CusAL.of(context).dailyGoal,
               textAlign: TextAlign.left,
               style: TextStyle(
-                fontSize: 24.sp,
+                fontSize: CusFontSizes.flagMedium,
                 fontWeight: FontWeight.w400,
                 color: Colors.green,
               ),
             ),
             // 上方是横向列表，用于切换周一到周日
             _buildWeekTab(),
-            Divider(height: 5.sp, thickness: 3),
+            Divider(height: 5.sp, thickness: 3.sp),
             // 下方根据选择的周几显示对应当日的主要营养素信息和修改按钮
             _buildWeekTabView(),
           ],
@@ -422,7 +440,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
             },
             child: Text(
               showCusLableMapLabel(context, weekdayStringMap[index + 1]),
-              style: TextStyle(fontSize: 14.sp, color: Colors.black),
+              style: TextStyle(fontSize: CusFontSizes.buttonTiny),
             ),
           ),
         );
@@ -444,7 +462,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
             Row(
               children: [
                 Expanded(
-                  flex: 3,
+                  flex: 5,
                   child: Text(
                     showCusLableMapLabel(
                       context,
@@ -455,7 +473,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                 // 如果是编辑状态，可以点取消
                 if (_isWeekdayEditing)
                   Expanded(
-                    flex: 1,
+                    flex: 2,
                     child: TextButton(
                       onPressed: () async {
                         setState(() {
@@ -466,7 +484,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                     ),
                   ),
                 Expanded(
-                  flex: 1,
+                  flex: 2,
                   child: TextButton(
                     onPressed: _updateWeekMacroData,
                     child: Text(
@@ -487,7 +505,12 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
             // 显示大卡对应千焦数据(靠右显示)
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children: [Text(weekKJdata, style: TextStyle(fontSize: 14.sp))],
+              children: [
+                Text(
+                  '$weekKJdata ${CusAL.of(context).unitLabels('3')}    ',
+                  style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
+                )
+              ],
             ),
             _buildFormTextField(
               _isWeekdayEditing,

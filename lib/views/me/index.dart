@@ -5,9 +5,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:photo_view/photo_view.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../common/global/constants.dart';
 import '../../common/utils/db_user_helper.dart';
+import '../../layout/themes/cus_font_size.dart';
 import '../../models/cus_app_localizations.dart';
 import '../../models/user_state.dart';
 import '_feature_mock_data/index.dart';
@@ -63,8 +65,6 @@ class _UserAndSettingsState extends State<UserAndSettings> {
     // 查询登录用户的信息一定会有的
     var tempUser = (await _userHelper.queryUser(userId: currentUserId))!;
 
-    print("_queryLoginedUserInfo---tempUser: $tempUser");
-
     setState(() {
       userInfo = tempUser;
       if (tempUser.avatar != null) {
@@ -81,23 +81,21 @@ class _UserAndSettingsState extends State<UserAndSettings> {
   _switchUser() async {
     var userList = await _userHelper.queryUserList();
 
-    print("userList---$userList");
-
     if (!mounted) return;
     if (userList != null && userList.isEmpty) {
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('提示'),
-            content: const Text("无额外的用户信息"),
+            title: Text(CusAL.of(context).tipLabel),
+            content: Text(CusAL.of(context).noOtherUser),
             actions: [
               TextButton(
                 onPressed: () {
                   if (!mounted) return;
                   Navigator.pop(context, true);
                 },
-                child: const Text('确认'),
+                child: Text(CusAL.of(context).confirmLabel),
               ),
             ],
           );
@@ -108,9 +106,14 @@ class _UserAndSettingsState extends State<UserAndSettings> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('切换用户'),
+            title: Text(CusAL.of(context).switchUser),
             content: DropdownButtonFormField<User>(
               value: userList.firstWhere((e) => e.userId == currentUserId),
+              decoration: const InputDecoration(
+                // 设置透明底色
+                filled: true,
+                fillColor: Colors.transparent,
+              ),
               items: userList.map((User user) {
                 return DropdownMenuItem<User>(
                   value: user,
@@ -127,16 +130,23 @@ class _UserAndSettingsState extends State<UserAndSettings> {
               TextButton(
                 onPressed: () {
                   if (!mounted) return;
+                  Navigator.pop(context, false);
+                },
+                child: Text(CusAL.of(context).cancelLabel),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (!mounted) return;
                   Navigator.pop(context, true);
                 },
-                child: const Text('确认'),
+                child: Text(CusAL.of(context).confirmLabel),
               ),
             ],
           );
         },
       ).then((value) async {
         // 如果有返回值且为true，
-        if (value != null && value) {
+        if (value != null && value == true) {
           // 修改缓存的用户编号
           CacheUser.updateUserId(selectedUser!.userId!);
           CacheUser.updateUserName(selectedUser!.userName);
@@ -278,26 +288,55 @@ class _UserAndSettingsState extends State<UserAndSettings> {
               ),
             ),
           if (_avatarPath.isNotEmpty)
-            CircleAvatar(
-              maxRadius: 60.sp,
-              backgroundImage: FileImage(File(_avatarPath)),
+            GestureDetector(
+              onTap: () {
+                // 这个直接弹窗显示图片可以缩放
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Dialog(
+                      backgroundColor: Colors.transparent, // 设置背景透明
+                      child: PhotoView(
+                        imageProvider: FileImage(File(_avatarPath)),
+                        // 设置图片背景为透明
+                        backgroundDecoration: const BoxDecoration(
+                          color: Colors.transparent,
+                        ),
+                        // 可以旋转
+                        // enableRotation: true,
+                        // 缩放的最大最小限制
+                        minScale: PhotoViewComputedScale.contained * 0.8,
+                        maxScale: PhotoViewComputedScale.covered * 2,
+                      ),
+                    );
+                  },
+                );
+              },
+              child: CircleAvatar(
+                maxRadius: 60.sp,
+                backgroundImage: FileImage(File(_avatarPath)),
+              ),
             ),
           Positioned(
             top: 90.sp,
             right: 0.5.sw - 70.sp,
-            child: Icon(
-              userInfo.gender == "male"
-                  ? Icons.male
-                  : (userInfo.gender == "female"
-                      ? Icons.female
-                      : Icons.circle_outlined),
-              size: 30.sp,
-              color: userInfo.gender == "male"
-                  ? Colors.red
-                  : userInfo.gender == "female"
-                      ? Colors.green
-                      : Colors.black,
-            ),
+            child: userInfo.gender == "male"
+                ? Icon(
+                    Icons.male,
+                    size: CusIconSizes.iconBig,
+                    color: Colors.red,
+                  )
+                : userInfo.gender == "female"
+                    ? Icon(
+                        Icons.female,
+                        size: CusIconSizes.iconBig,
+                        color: Colors.green,
+                      )
+                    : Icon(
+                        Icons.circle_outlined,
+                        size: CusIconSizes.iconNormal,
+                        color: Theme.of(context).disabledColor,
+                      ),
           ),
           Positioned(
             top: 0.sp,
@@ -337,7 +376,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
               },
               child: Text(
                 CusAL.of(context).changeAvatarLabels('0'),
-                style: TextStyle(fontSize: 12.sp),
+                style: TextStyle(fontSize: CusFontSizes.flagTiny),
               ),
             ),
           ),
@@ -353,7 +392,10 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             ListTile(
               title: Text(
                 userInfo.userName,
-                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 24.sp),
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: CusFontSizes.flagMediumBig,
+                ),
                 textAlign: TextAlign.center,
                 softWrap: true,
                 maxLines: 1,
@@ -377,7 +419,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
                 softWrap: true,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(fontSize: CusFontSizes.pageContent),
               ),
             ),
           ],
@@ -395,7 +437,6 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             title: CusAL.of(context).settingLabels('0'),
             onTap: () {
               // 处理相应的点击事件
-
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -414,7 +455,6 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             title: CusAL.of(context).settingLabels('1'),
             onTap: () {
               // 处理相应的点击事件
-              print("(点击进入体重趋势页面)……");
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -422,9 +462,9 @@ class _UserAndSettingsState extends State<UserAndSettings> {
                 ),
               ).then((value) {
                 // 确认新增成功后重新加载当前日期的条目数据
-
-                print("运动设置返回带过来的结果$value");
-                _queryLoginedUserInfo();
+                if (value != null && value == true) {
+                  _queryLoginedUserInfo();
+                }
               });
             },
           ),
@@ -442,7 +482,6 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             title: CusAL.of(context).settingLabels('2'),
             onTap: () {
               // 处理相应的点击事件
-              print("(点击进入摄入目标页面)……");
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -450,8 +489,6 @@ class _UserAndSettingsState extends State<UserAndSettings> {
                 ),
               ).then((value) {
                 // 确认新增成功后重新加载当前日期的条目数据
-
-                print("我的设置返回带过来的结果$value");
                 _queryLoginedUserInfo();
               });
             },
@@ -463,7 +500,6 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             title: CusAL.of(context).settingLabels('3'),
             onTap: () {
               // 处理相应的点击事件
-              print("(点击进入运动设置页面)……");
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -471,8 +507,6 @@ class _UserAndSettingsState extends State<UserAndSettings> {
                 ),
               ).then((value) {
                 // 确认新增成功后重新加载当前日期的条目数据
-
-                print("运动设置返回带过来的结果$value");
                 _queryLoginedUserInfo();
               });
             },
@@ -491,7 +525,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             title: CusAL.of(context).settingLabels('4'),
             onTap: () {
               // 处理相应的点击事件
-              print("(点击进入备份恢复页面)……");
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -507,7 +541,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             title: CusAL.of(context).settingLabels('5'),
             onTap: () {
               // 处理相应的点击事件
-              print("(点击进入更多设置页面)……");
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -558,7 +592,7 @@ class NewCusSettingCard extends StatelessWidget {
           title: Text(
             title,
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: CusFontSizes.pageSubTitle,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).primaryColor,
             ),
