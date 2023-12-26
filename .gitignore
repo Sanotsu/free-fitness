@@ -59,3 +59,6 @@ ios
 
 # 本地测试的组件页面等
 **/_tests
+
+# 统计行插件自己生成的文件夹
+.VSCodeCounter

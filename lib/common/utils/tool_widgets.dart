@@ -276,10 +276,11 @@ buildTinyButtonTag(
       child: Text(
         labelText,
         style: TextStyle(
-            // 传入大于12的字体，修正为12；不传则默认12
-            fontSize: (labelTextSize != null && labelTextSize > 10.sp)
-                ? 10.sp
-                : labelTextSize ?? 10.sp),
+          // 传入大于10的字体，修正为10；不传则默认10
+          fontSize: (labelTextSize != null && labelTextSize > 10.sp)
+              ? 10.sp
+              : labelTextSize ?? 10.sp,
+        ),
       ),
     ),
   );

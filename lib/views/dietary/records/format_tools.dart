@@ -77,8 +77,8 @@ List<CusNutrientInfo> formatIntakeItemListForMarker(
       label: "dietaryFiber",
       value: tempDietaryFiber,
       color: cusNutrientColors[CusNutType.dietaryFiber]!,
-      name: CusAL.of(context).mainNutrients('4'),
-      unit: CusAL.of(context).choNutrients('2'),
+      name: CusAL.of(context).choNutrients('2'),
+      unit: CusAL.of(context).unitLabels('0'),
     ),
     CusNutrientInfo(
       label: "sugar",

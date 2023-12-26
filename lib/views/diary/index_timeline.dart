@@ -8,6 +8,7 @@ import 'package:timeline_tile/timeline_tile.dart';
 import '../../common/global/constants.dart';
 import '../../common/utils/db_diary_helper.dart';
 import '../../common/utils/tool_widgets.dart';
+import '../../layout/themes/cus_font_size.dart';
 import '../../models/cus_app_localizations.dart';
 import '../../models/diary_state.dart';
 import 'diary_modify_rich_text.dart';
@@ -132,11 +133,11 @@ class _IndexTimelineState extends State<IndexTimeline> {
             children: [
               TextSpan(
                 text: CusAL.of(context).diaryLables("1"),
-                style: TextStyle(fontSize: 18.sp),
+                style: TextStyle(fontSize: CusFontSizes.pageTitle),
               ),
               TextSpan(
                 text: "\n${CusAL.of(context).itemCount(diaryCount)}",
-                style: TextStyle(fontSize: 12.sp),
+                style: TextStyle(fontSize: CusFontSizes.pageAppendix),
               ),
             ],
           ),
@@ -190,6 +191,9 @@ class _IndexTimelineState extends State<IndexTimeline> {
                 hintText: CusAL.of(context).queryKeywordHintText(
                   CusAL.of(context).diary,
                 ),
+                // 设置透明底色
+                filled: true,
+                fillColor: Colors.transparent,
               ),
             ),
           ),
@@ -224,7 +228,8 @@ class _IndexTimelineState extends State<IndexTimeline> {
               height: 40,
               indicator: _CusIndicator(
                 category: '${diaryItem.category}',
-                borderColor: borderColor,
+                // borderColor: borderColor,
+                borderColor: Theme.of(context).disabledColor,
               ),
               // 连接线是否画在图标的后面(默认是false，表示线没有画在图标后面)
               drawGap: true,
@@ -256,11 +261,11 @@ class _IndexTimelineState extends State<IndexTimeline> {
         children: [
           Text(
             diaryItem.date,
-            style: TextStyle(fontSize: 14.sp),
+            style: TextStyle(fontSize: CusFontSizes.pageSubContent),
           ),
           Text(
             createTime,
-            style: TextStyle(fontSize: 16.sp),
+            style: TextStyle(fontSize: CusFontSizes.pageContent),
           ),
         ],
       ),
@@ -294,16 +299,18 @@ class _IndexTimelineState extends State<IndexTimeline> {
                       flex: 4,
                       child: Text(
                         diaryItem.title,
+                        maxLines: 2,
+                        softWrap: true,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.bold,
+                          fontSize: CusFontSizes.itemTitle,
                         ),
                       )),
                   Expanded(
                     flex: 1,
                     child: Icon(
                       Icons.arrow_forward,
-                      size: 16.sp,
                       color: Theme.of(context).primaryColor,
                     ),
                   ),
@@ -318,6 +325,13 @@ class _IndexTimelineState extends State<IndexTimeline> {
                 // 排布方向
                 alignment: WrapAlignment.start,
                 children: [
+                  // 分类放在连接指示器中了
+                  // if (diaryItem.category != null)
+                  //   buildTinyButtonTag(
+                  //     diaryItem.category!,
+                  //     bgColor: CusColors.cateTinyTagBg,
+                  //     labelTextSize: CusFontSizes.flagTiny,
+                  //   ),
                   // 先排除原本就是空字符串之后再分割
                   ...((diaryItem.mood != null &&
                               diaryItem.mood!.trim().isNotEmpty)
@@ -326,8 +340,8 @@ class _IndexTimelineState extends State<IndexTimeline> {
                       .map((mood) {
                     return buildTinyButtonTag(
                       mood,
-                      bgColor: Colors.limeAccent,
-                      labelTextSize: 8.sp,
+                      bgColor: CusColors.moodTinyTagBg,
+                      labelTextSize: CusFontSizes.flagMinute,
                     );
                   }).toList(),
                   ...((diaryItem.tags != null &&
@@ -337,8 +351,8 @@ class _IndexTimelineState extends State<IndexTimeline> {
                       .map((tag) {
                     return buildTinyButtonTag(
                       tag,
-                      bgColor: Colors.lightGreen,
-                      labelTextSize: 8.sp,
+                      bgColor: CusColors.tagTinyTagBg,
+                      labelTextSize: CusFontSizes.flagMinute,
                     );
                   }).toList(),
                 ],
@@ -441,14 +455,12 @@ class _CusIndicator extends StatelessWidget {
         borderRadius: BorderRadius.all(Radius.circular(20.sp)),
       ),
       child: Center(
-        // child: buildSmallButtonTag(
-        //   number,
-        //   bgColor: Colors.lightGreen,
-        //   labelTextSize: 12.sp,
-        // ),
         child: Text(
           category,
-          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: CusFontSizes.pageSubContent,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );

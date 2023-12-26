@@ -12,6 +12,7 @@ import '../../common/global/constants.dart';
 import '../../common/utils/db_diary_helper.dart';
 import '../../common/utils/tool_widgets.dart';
 import '../../common/utils/tools.dart';
+import '../../layout/themes/cus_font_size.dart';
 import '../../models/cus_app_localizations.dart';
 
 ///
@@ -291,12 +292,12 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                       : isEditing
                           ? CusAL.of(context).eidtLabel(CusAL.of(context).diary)
                           : CusAL.of(context).diary,
-                  style: TextStyle(fontSize: 20.sp),
+                  style: TextStyle(fontSize: CusFontSizes.pageTitle),
                 ),
                 if (lastSavedTime != null)
                   TextSpan(
                     text: "\n${CusAL.of(context).lastModified}: $lastSavedTime",
-                    style: TextStyle(fontSize: 12.sp),
+                    style: TextStyle(fontSize: CusFontSizes.pageAppendix),
                   ),
               ],
             ),
@@ -365,7 +366,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                 FocusScope.of(context).unfocus();
               },
               child: Padding(
-                padding: EdgeInsets.fromLTRB(5, 5, 10, 5.sp),
+                padding: EdgeInsets.fromLTRB(5.sp, 5.sp, 10.sp, 5.sp),
                 child: Column(
                   children: [
                     _buildTitleAndTags(),
@@ -388,7 +389,8 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
         title: buildTitleArea(),
         tilePadding: EdgeInsets.symmetric(horizontal: 5.sp),
         childrenPadding: EdgeInsets.zero,
-        backgroundColor: Colors.white,
+        // 2023-12-26 固定白色，在深色主题就看不到字了
+        // backgroundColor: Colors.white,
         // 如果是编辑状态，默认展开；否则预览时不展开
         // initiallyExpanded: isEditing ? true : false, // 是否默认展开
         initiallyExpanded: true,
@@ -454,21 +456,21 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             ...initTags.map((tag) {
               return buildSmallButtonTag(
                 tag,
-                bgColor: Colors.lightGreen,
-                labelTextSize: 12.sp,
+                bgColor: CusColors.tagTinyTagBg,
+                labelTextSize: CusFontSizes.flagTiny,
               );
             }).toList(),
-            ...initMoods.map((cate) {
+            ...initMoods.map((mood) {
               return buildSmallButtonTag(
-                cate,
-                bgColor: Colors.limeAccent,
-                labelTextSize: 12.sp,
+                mood,
+                bgColor: CusColors.moodTinyTagBg,
+                labelTextSize: CusFontSizes.flagTiny,
               );
             }).toList(),
             buildSmallButtonTag(
               initCategory,
-              bgColor: Colors.lightBlue,
-              labelTextSize: 12.sp,
+              bgColor: CusColors.cateTinyTagBg,
+              labelTextSize: CusFontSizes.flagTiny,
             ),
           ],
         ),
@@ -545,7 +547,8 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                   child: ExpansionTile(
                     title: Text(CusAL.of(context).richTextToolNote),
                     leading: const Icon(Icons.tag, color: Colors.green),
-                    backgroundColor: Colors.white,
+                    // 2023-12-26 固定白色，在深色主题就看不到字了
+                    // backgroundColor: Colors.white,
                     initiallyExpanded: isQuillToolbarExpanded, // 是否默认展开
                     onExpansionChanged: (isExpanded) {
                       setState(() {
@@ -570,13 +573,14 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                 child: Padding(
                   padding: EdgeInsets.all(5.sp),
                   child: DecoratedBox(
-                    // 边框在编辑时显示灰色，预览时显示白色(假装没有)
+                    // 边框在编辑时显示灰色，预览时显示透明(假装没有)
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: isEditing ? Colors.grey : Colors.white,
+                        color: isEditing ? Colors.grey : Colors.transparent,
                       ),
-                      borderRadius: BorderRadius.circular(8.0),
-                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.sp),
+                      // 2023-12-26 固定白色，在深色主题就看不到字了
+                      // color: Colors.white,
                     ),
                     child: QuillEditor.basic(
                       focusNode: quillFocusNode,
@@ -632,7 +636,11 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
         Expanded(
           child: FormBuilderFilterChip(
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            // decoration: const InputDecoration(labelText: '这里可以多选:'),
+            decoration: const InputDecoration(
+              // 设置透明底色
+              filled: true,
+              fillColor: Colors.transparent,
+            ),
             name: name,
             initialValue: initialValue,
             // 选项列表
@@ -640,12 +648,15 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             // 标签被选中时的颜色
             selectedColor: Colors.blue,
             // 选项列表中文字样式
-            labelStyle: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w500),
+            labelStyle: TextStyle(
+              fontSize: CusFontSizes.flagTiny,
+              fontWeight: FontWeight.w500,
+            ),
             // 标签的内边距
             labelPadding: EdgeInsets.all(1.sp),
             // // 设置标签的形状样式(四个圆角为5的方形,默认是圆形)
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(1.0),
+              borderRadius: BorderRadius.circular(1.sp),
               // 边框是宽度为1的灰色
               // side: BorderSide(color: Colors.grey, width: 1.sp),
             ),
@@ -672,7 +683,11 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
         Expanded(
           child: FormBuilderChoiceChip(
             autovalidateMode: AutovalidateMode.onUserInteraction,
-            // decoration: const InputDecoration(labelText: '这里只能单选:'),
+            decoration: const InputDecoration(
+              // 设置透明底色
+              filled: true,
+              fillColor: Colors.transparent,
+            ),
             name: name,
             initialValue: initialValue,
             // 选项列表
@@ -680,7 +695,10 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             // 标签被选中时的颜色
             selectedColor: Colors.blue,
             // 选项列表中文字样式
-            labelStyle: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w500),
+            labelStyle: TextStyle(
+              fontSize: CusFontSizes.flagTiny,
+              fontWeight: FontWeight.w500,
+            ),
             // 标签的内边距
             labelPadding: EdgeInsets.all(1.sp),
             // 设置标签的形状样式(四个圆角为5的方形,默认是圆形)
@@ -711,11 +729,15 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             controller: _tagTextController,
             readOnly: !isEditing,
             decoration: InputDecoration(
-                hintText: CusAL.of(context).diaryTagsNote,
-                contentPadding: EdgeInsets.symmetric(vertical: 2.sp),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                )),
+              hintText: CusAL.of(context).diaryTagsNote,
+              contentPadding: EdgeInsets.symmetric(vertical: 2.sp),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              // 设置透明底色
+              filled: true,
+              fillColor: Colors.transparent,
+            ),
             onChanged: (value) {
               for (var symbol in endingSymbols) {
                 // 如果输入标签分隔符，自动添加标签。
@@ -735,7 +757,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
           ),
         ),
         Wrap(
-          spacing: 8,
+          spacing: 8.sp,
           children: initTags.map((tag) {
             return Chip(
               label: Text(tag),

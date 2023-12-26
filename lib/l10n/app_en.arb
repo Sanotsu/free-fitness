@@ -298,7 +298,7 @@
 
   "userInfo":"User Info",
 
-  "diaryLables": "{num, select, 0{Diary Calendar} 1{Timeline Mode} 2{Title} 3{Content} other{Other} }",
+  "diaryLables": "{num, select, 0{Diary Calendar} 1{Timeline} 2{Title} 3{Content} other{Other} }",
   "@diaryLables": {
   "description": "手记显示模式"
   },

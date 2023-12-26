@@ -9,6 +9,7 @@ import '../../common/global/constants.dart';
 import '../../common/utils/db_diary_helper.dart';
 import '../../common/utils/tool_widgets.dart';
 import '../../common/utils/tools.dart';
+import '../../layout/themes/cus_font_size.dart';
 import '../../models/cus_app_localizations.dart';
 import '../../models/diary_state.dart';
 import 'diary_modify_rich_text.dart';
@@ -247,15 +248,15 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
           return Align(
             alignment: Alignment.bottomRight,
             child: Container(
-              width: 15,
-              height: 15,
+              width: 15.sp,
+              height: 15.sp,
               color: list.length < 3 ? Colors.green : Colors.yellow,
               child: Center(
                 child: Text(
                   "${list.length}",
                   style: TextStyle(
                     color: list.length < 3 ? Colors.white : Colors.black,
-                    fontSize: 10.sp,
+                    fontSize: CusFontSizes.flagTiny,
                   ),
                 ),
               ),
@@ -316,16 +317,16 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                   ...[
                     buildSmallButtonTag(
                       initCategory,
-                      bgColor: Colors.lightBlue,
-                      labelTextSize: 10.sp,
+                      bgColor: CusColors.cateTinyTagBg,
+                      labelTextSize: CusFontSizes.flagTiny,
                     ),
                     // 如果标签很多，只显示2个，然后整体剩下的用一个数字代替
                     ...initMoods
-                        .map((cate) {
+                        .map((mood) {
                           return buildSmallButtonTag(
-                            cate,
-                            bgColor: Colors.limeAccent,
-                            labelTextSize: 10.sp,
+                            mood,
+                            bgColor: CusColors.moodTinyTagBg,
+                            labelTextSize: CusFontSizes.flagTiny,
                           );
                         })
                         .toList()
@@ -337,8 +338,8 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                         .map((tag) {
                           return buildSmallButtonTag(
                             tag,
-                            bgColor: Colors.lightGreen,
-                            labelTextSize: 10.sp,
+                            bgColor: CusColors.tagTinyTagBg,
+                            labelTextSize: CusFontSizes.flagTiny,
                           );
                         })
                         .toList()
@@ -350,8 +351,8 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                   if (chipLength > 3)
                     buildSmallButtonTag(
                       '+${chipLength - 3}',
-                      bgColor: Colors.white,
-                      labelTextSize: 10.sp,
+                      bgColor: CusColors.moreTinyTagBg,
+                      labelTextSize: CusFontSizes.flagTiny,
                     ),
                 ],
               ),
@@ -363,7 +364,6 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                 ),
                 trailing: Icon(
                   Icons.arrow_forward,
-                  size: 16.sp,
                   color: Theme.of(context).primaryColor,
                 ),
                 onTap: () {
