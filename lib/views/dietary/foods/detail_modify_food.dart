@@ -169,7 +169,7 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
                 flex: 4,
                 child: ElevatedButton(
                   onPressed: _updateFoodInfo,
-                  child: Text(CusAL.of(context).confirmLabel),
+                  child: Text(CusAL.of(context).saveLabel),
                 ),
               ),
             ],

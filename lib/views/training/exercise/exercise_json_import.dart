@@ -510,7 +510,7 @@ Ab_Roller.json:
     return [
       Text(
         CusAL.of(context).jsonFiles,
-        style: TextStyle(fontSize: CusFontSizes.pageSubContent),
+        style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
         textAlign: TextAlign.start,
       ),
       SizedBox(
@@ -643,7 +643,7 @@ Ab_Roller.json:
               },
               child: Text(
                 CusAL.of(context).removeSelected,
-                style: TextStyle(fontSize: CusFontSizes.itemContent),
+                style: TextStyle(fontSize: CusFontSizes.buttonTiny),
               ),
             ),
           ],

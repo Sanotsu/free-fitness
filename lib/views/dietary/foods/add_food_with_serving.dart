@@ -85,11 +85,15 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
           isLoading = false;
         });
         // 父组件应该重新加载(传参到父组件中重新加载)
-        Navigator.pop(context, {"isFoodAdded": true});
+        Navigator.pop(context, true);
       } catch (e) {
         // 将错误信息展示给用户
         if (!mounted) return;
-        commonExceptionDialog(context, "异常提醒", e.toString());
+        commonExceptionDialog(
+          context,
+          CusAL.of(context).exceptionWarningTitle,
+          e.toString(),
+        );
 
         setState(() {
           isLoading = false;
@@ -181,7 +185,7 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
                 flex: 4,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context, {"isFoodModified": false});
+                    Navigator.pop(context, false);
                   },
                   child: Text(CusAL.of(context).backLabel),
                 ),
@@ -205,13 +209,19 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
   // 构建单份营养素的类型单选框
   _buildServingTypeRadio() {
     return FormBuilderRadioGroup(
-      decoration: InputDecoration(labelText: CusAL.of(context).nutrientLabel),
+      decoration: InputDecoration(
+        labelText: CusAL.of(context).nutrientLabel,
+        // 设置透明底色
+        filled: true,
+        fillColor: Colors.transparent,
+      ),
       name: 'serving_info_type',
       validator: FormBuilderValidators.required(),
       options: servingTypeList
           .map(
             (servingType) => FormBuilderFieldOption(
               value: showCusLableMapLabel(context, servingType),
+
               // 当点击被选中的单选框的文本时，弹出的营养素表单才带有之前返回的数据
               // 单选框值变化后的弹窗，则是全新的表单
               child: GestureDetector(

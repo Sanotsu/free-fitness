@@ -12,6 +12,7 @@ import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/dietary_state.dart';
 import 'export/report_pdf_viewer.dart';
 import 'week_intake_bar.dart';
@@ -217,7 +218,11 @@ class _DietaryReportsState extends State<DietaryReports> {
       length: 3, // 选项卡的数量
       child: Scaffold(
         appBar: AppBar(
-          title: Text(CusAL.of(context).dietaryReports),
+          title: Text(
+            // CusAL.of(context).dietaryReports,
+            'Dietary Reports',
+            style: TextStyle(fontSize: CusFontSizes.pageTitle),
+          ),
           bottom: TabBar(
             tabs: [
               Tab(text: CusAL.of(context).dietaryReportTabs('0')),
@@ -298,13 +303,13 @@ class _DietaryReportsState extends State<DietaryReports> {
           children: <TextSpan>[
             TextSpan(
               text: '${CusAL.of(context).dietaryReportTabs('0')}\n',
-              style: TextStyle(fontSize: 16.sp, color: Colors.black),
+              style: TextStyle(fontSize: CusFontSizes.flagSmall),
             ),
             TextSpan(
               text: cusDoubleTryToIntString(fntVO.calorie),
               style: TextStyle(
                 color: Colors.red,
-                fontSize: 24.sp,
+                fontSize: CusFontSizes.flagMediumBig,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -374,7 +379,8 @@ class _DietaryReportsState extends State<DietaryReports> {
     for (var entry in properties) {
       if (entry.value != 0) {
         rows.add(
-            _buildDataRow(entry.key, cusDoubleTryToIntString(entry.value)));
+          _buildDataRow(entry.key, cusDoubleTryToIntString(entry.value)),
+        );
       }
     }
 
@@ -400,12 +406,18 @@ class _DietaryReportsState extends State<DietaryReports> {
   }
 
   DataRow _buildDataRow(String attribute, String value) {
-    var temp = nutrientList.where((e) => e.enLabel == attribute).toList();
+    // 2023-12-26 这个属性是驼峰命名的，需要改为snake模式字符串，才能和预设的nutrientList的value进行匹配。
+    // 注意 totalCHO会被处理成 total_c_h_o ，所以找不到对应的标签,暂时不想改，所以魔法值的强制匹配
+    var temp = nutrientList
+        .where((e) =>
+            e.value ==
+            (getPropName(attribute) != 'total_c_h_o'
+                ? getPropName(attribute)
+                : 'total_cho'))
+        .toList();
 
     return DataRow(cells: [
-      DataCell(Text(temp.isNotEmpty
-          ? showCusLableMapLabel(context, temp.first)
-          : attribute)),
+      DataCell(Text(temp.isNotEmpty ? showCusLable(temp.first) : attribute)),
       DataCell(Text(value)),
       // 示例占位
       // const DataCell(Text("1000")),
@@ -417,7 +429,7 @@ class _DietaryReportsState extends State<DietaryReports> {
   /// 绘制卡路里摄入或宏量素摄入的【饼图卡片】(包含图例legend和图chart两部分)
   _buildPieChartCard(FoodNutrientTotals fntVO, CusChartType type) {
     return Card(
-      elevation: 10,
+      elevation: 10.sp,
       child: SizedBox(
         height: 200.sp,
         child: Column(
@@ -458,28 +470,28 @@ class _DietaryReportsState extends State<DietaryReports> {
 
       legendItems = [
         _buildLegendItem(
-          Colors.grey,
+          cusNutrientColors[CusNutType.bfCalorie]!,
           CusAL.of(context).mealLabels('0'),
           fntVO.bfCalorie,
           total,
           CusAL.of(context).unitLabels('2'),
         ),
         _buildLegendItem(
-          Colors.red,
+          cusNutrientColors[CusNutType.lunchCalorie]!,
           CusAL.of(context).mealLabels('1'),
           fntVO.lunchCalorie,
           total,
           CusAL.of(context).unitLabels('2'),
         ),
         _buildLegendItem(
-          Colors.green,
+          cusNutrientColors[CusNutType.dinnerCalorie]!,
           CusAL.of(context).mealLabels('2'),
           fntVO.dinnerCalorie,
           total,
           CusAL.of(context).unitLabels('2'),
         ),
         _buildLegendItem(
-          Colors.blue,
+          cusNutrientColors[CusNutType.otherCalorie]!,
           CusAL.of(context).mealLabels('3'),
           fntVO.otherCalorie,
           total,
@@ -492,21 +504,21 @@ class _DietaryReportsState extends State<DietaryReports> {
 
       legendItems = [
         _buildLegendItem(
-          Colors.grey,
+          cusNutrientColors[CusNutType.totalCHO]!,
           CusAL.of(context).mainNutrients('4'),
           fntVO.totalCHO,
           total,
           CusAL.of(context).unitLabels('0'),
         ),
         _buildLegendItem(
-          Colors.red,
+          cusNutrientColors[CusNutType.totalFat]!,
           CusAL.of(context).mainNutrients('3'),
           fntVO.totalFat,
           total,
           CusAL.of(context).unitLabels('0'),
         ),
         _buildLegendItem(
-          Colors.green,
+          cusNutrientColors[CusNutType.protein]!,
           CusAL.of(context).mainNutrients('2'),
           fntVO.protein,
           total,
@@ -552,26 +564,44 @@ class _DietaryReportsState extends State<DietaryReports> {
       sections = [
         PieChartSectionData(
           value: fntVO.bfCalorie,
-          color: Colors.grey,
+          color: cusNutrientColors[CusNutType.bfCalorie]!,
           // title: '${percentage.toStringAsFixed(1)}%', // 将百分比显示在标题中
           // 没给指定title就默认是其value，所以有图例了就不显示标题
           showTitle: false,
         ),
         PieChartSectionData(
-            value: fntVO.lunchCalorie, color: Colors.red, showTitle: false),
+          value: fntVO.lunchCalorie,
+          color: cusNutrientColors[CusNutType.lunchCalorie]!,
+          showTitle: false,
+        ),
         PieChartSectionData(
-            value: fntVO.dinnerCalorie, color: Colors.green, showTitle: false),
+          value: fntVO.dinnerCalorie,
+          color: cusNutrientColors[CusNutType.dinnerCalorie]!,
+          showTitle: false,
+        ),
         PieChartSectionData(
-            value: fntVO.otherCalorie, color: Colors.blue, showTitle: false)
+          value: fntVO.otherCalorie,
+          color: cusNutrientColors[CusNutType.otherCalorie]!,
+          showTitle: false,
+        )
       ];
     } else {
       sections = [
         PieChartSectionData(
-            value: fntVO.totalCHO, color: Colors.grey, showTitle: false),
+          value: fntVO.totalCHO,
+          color: cusNutrientColors[CusNutType.totalCHO]!,
+          showTitle: false,
+        ),
         PieChartSectionData(
-            value: fntVO.totalFat, color: Colors.red, showTitle: false),
+          value: fntVO.totalFat,
+          color: cusNutrientColors[CusNutType.totalFat]!,
+          showTitle: false,
+        ),
         PieChartSectionData(
-            value: fntVO.protein, color: Colors.green, showTitle: false),
+          value: fntVO.protein,
+          color: cusNutrientColors[CusNutType.protein]!,
+          showTitle: false,
+        ),
       ];
     }
 
@@ -822,17 +852,20 @@ class _DietaryReportsState extends State<DietaryReports> {
   /// -----------------点击下拉切换报告日期范围
   buildDropdownButton() {
     return DropdownButton(
-      borderRadius: const BorderRadius.all(Radius.circular(10)),
+      borderRadius: BorderRadius.all(Radius.circular(10.sp)),
       // 默认背景是白色，但我需要字体默认是白色，和appbar中其他保持一致，那么背景色改为灰色
-      dropdownColor: const Color.fromARGB(255, 124, 96, 96),
+      dropdownColor: CusColors.dropdownColor,
       isDense: true,
       items: dietaryReportDisplayModeList
           .map<DropdownMenuItem<CusLabel>>(
             (CusLabel value) => DropdownMenuItem<CusLabel>(
               value: value,
               child: Text(
-                showCusLableMapLabel(context, value),
-                style: TextStyle(color: Colors.white, fontSize: 15.sp),
+                showCusLable(value),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: CusFontSizes.pageSubContent,
+                ),
                 textAlign: TextAlign.end,
               ),
             ),
@@ -866,6 +899,7 @@ class _DietaryReportsState extends State<DietaryReports> {
                 height: 60.sp,
                 child: Center(
                   child: DropdownMenu<CusLabel>(
+                    width: 0.6.sw,
                     initialSelection: exportDateList.first,
                     onSelected: (CusLabel? value) {
                       setState(() {

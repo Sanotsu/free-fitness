@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 
 import '../../layout/themes/cus_font_size.dart';
 import '../../models/training_state.dart';
@@ -163,6 +165,7 @@ buildExerciseImageCarouselSlider(Exercise exercise) {
 buildImageCarouselSlider(
   List<String> imageList, {
   bool isNoImage = false, // 是否不显示图片，默认就算无图片也显示占位图片
+  int type = 3, // 轮播图是否可以点击预览图片，预设为3(具体类型参看下方实现方法)
 }) {
   return CarouselSlider(
     options: CarouselOptions(
@@ -181,23 +184,234 @@ buildImageCarouselSlider(
             : imageList.map((imageUrl) {
                 return Builder(
                   builder: (BuildContext context) {
-                    return Container(
-                      width: MediaQuery.of(context).size.width,
-                      margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                      decoration: const BoxDecoration(
-                        color: Colors.grey,
-                      ),
-                      child: Image.file(
-                        File(imageUrl),
-                        errorBuilder: (BuildContext context, Object exception,
-                            StackTrace? stackTrace) {
-                          return Image.asset(placeholderImageUrl,
-                              fit: BoxFit.scaleDown);
-                        },
-                      ),
+                    return _buildImageCarouselSliderType(
+                      type,
+                      context,
+                      imageUrl,
+                      imageList,
                     );
                   },
                 );
               }).toList(),
   );
+}
+
+/// 2023-12-26
+/// 现在设计轮播图3种形态:
+///   1 点击某张图片，可以弹窗显示该图片并进行缩放预览
+///   2 点击某张图片，可以跳转新页面对该图片并进行缩放预览
+///   3 点击某张图片，可以弹窗对该图片所在整个列表进行缩放预览(默认选项)
+///   default 单纯的轮播展示,点击图片无动作
+_buildImageCarouselSliderType(
+  int type,
+  BuildContext context,
+  String imageUrl,
+  List<String> imageList,
+) {
+  buildChildImage() => Image.file(
+        File(imageUrl),
+        errorBuilder:
+            (BuildContext context, Object exception, StackTrace? stackTrace) =>
+                Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown),
+      );
+
+  buildCommonImageWidget(Function() onTap) =>
+      GestureDetector(onTap: onTap, child: buildChildImage());
+
+  switch (type) {
+    // 这个直接弹窗显示图片可以缩放
+    case 1:
+      return buildCommonImageWidget(() {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return Dialog(
+              backgroundColor: Colors.transparent, // 设置背景透明
+              child: PhotoView(
+                imageProvider: FileImage(File(imageUrl)),
+                // 设置图片背景为透明
+                backgroundDecoration: const BoxDecoration(
+                  color: Colors.transparent,
+                ),
+                // 可以旋转
+                enableRotation: true,
+                // 缩放的最大最小限制
+                minScale: PhotoViewComputedScale.contained * 0.8,
+                maxScale: PhotoViewComputedScale.covered * 2,
+              ),
+            );
+          },
+        );
+      });
+    case 2:
+      return buildCommonImageWidget(() {
+        // 这个是跳转到新的页面去
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PhotoView(
+              imageProvider: FileImage(File(imageUrl)),
+              enableRotation: true,
+            ),
+          ),
+        );
+      });
+    case 3:
+      return buildCommonImageWidget(() {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            // 这个弹窗默认是无法全屏的，上下左右会留点空，点击这些空隙可以关闭弹窗
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              child: PhotoViewGallery.builder(
+                itemCount: imageList.length,
+                builder: (BuildContext context, int index) {
+                  return PhotoViewGalleryPageOptions(
+                    imageProvider: FileImage(File(imageList[index])),
+                  );
+                },
+                enableRotation: true,
+                scrollPhysics: const BouncingScrollPhysics(),
+                backgroundDecoration: const BoxDecoration(
+                  color: Colors.transparent,
+                ),
+                loadingBuilder: (BuildContext context, ImageChunkEvent? event) {
+                  return const Center(child: CircularProgressIndicator());
+                },
+              ),
+            );
+          },
+        );
+      });
+    default:
+      return Container(
+        width: MediaQuery.of(context).size.width,
+        margin: const EdgeInsets.symmetric(horizontal: 5.0),
+        decoration: const BoxDecoration(color: Colors.grey),
+        child: buildChildImage(),
+      );
+  }
+}
+
+buildImageCarouselSliderTypeOld(
+  int type,
+  BuildContext context,
+  String imageUrl,
+  List<String> imageList,
+) {
+  if (type == 1) {
+    return GestureDetector(
+      onTap: () {
+        // 这个直接弹窗显示图片可以缩放
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return Dialog(
+              backgroundColor: Colors.transparent, // 设置背景透明
+              child: PhotoView(
+                imageProvider: FileImage(File(imageUrl)),
+                // 设置图片背景为透明
+                backgroundDecoration: const BoxDecoration(
+                  color: Colors.transparent,
+                ),
+                // 可以旋转
+                enableRotation: true,
+                // 缩放的最大最小限制
+                minScale: PhotoViewComputedScale.contained * 0.8,
+                maxScale: PhotoViewComputedScale.covered * 2,
+              ),
+            );
+          },
+        );
+      },
+      child: Image.file(
+        File(imageUrl),
+        errorBuilder:
+            (BuildContext context, Object exception, StackTrace? stackTrace) {
+          return Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown);
+        },
+      ),
+    );
+  } else if (type == 2) {
+    return GestureDetector(
+      onTap: () {
+        // 这个是跳转到新的页面去
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PhotoView(
+              imageProvider: FileImage(File(imageUrl)),
+            ),
+          ),
+        );
+      },
+      child: Image.file(
+        File(imageUrl),
+        errorBuilder:
+            (BuildContext context, Object exception, StackTrace? stackTrace) {
+          return Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown);
+        },
+      ),
+    );
+  } else if (type == 3) {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            // 这个弹窗默认是无法全屏的，上下左右会留点空，点击这些空隙可以关闭弹窗
+            return Dialog(
+              backgroundColor: Colors.transparent, // 设置背景透明
+              child: PhotoViewGallery.builder(
+                itemCount: imageList.length,
+                builder: (BuildContext context, int index) {
+                  return PhotoViewGalleryPageOptions(
+                    imageProvider: FileImage(
+                      File(imageList[index]),
+                    ),
+                  );
+                },
+                enableRotation: true,
+                scrollPhysics: const BouncingScrollPhysics(),
+                backgroundDecoration: const BoxDecoration(
+                  color: Colors.transparent,
+                ),
+                loadingBuilder: (BuildContext context, ImageChunkEvent? event) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
+      child: Image.file(
+        File(imageUrl),
+        errorBuilder:
+            (BuildContext context, Object exception, StackTrace? stackTrace) {
+          return Image.asset(
+            placeholderImageUrl,
+            fit: BoxFit.scaleDown,
+          );
+        },
+      ),
+    );
+  } else {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      margin: const EdgeInsets.symmetric(horizontal: 5.0),
+      decoration: const BoxDecoration(
+        color: Colors.grey,
+      ),
+      child: Image.file(
+        File(imageUrl),
+        errorBuilder:
+            (BuildContext context, Object exception, StackTrace? stackTrace) {
+          return Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown);
+        },
+      ),
+    );
+  }
 }

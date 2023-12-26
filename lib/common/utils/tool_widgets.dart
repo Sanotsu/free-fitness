@@ -189,6 +189,9 @@ InputDecoration _buildInputDecoration(
         : isReadOnly
             ? InputBorder.none
             : null,
+    // 设置透明底色
+    filled: true,
+    fillColor: Colors.transparent,
   );
 }
 

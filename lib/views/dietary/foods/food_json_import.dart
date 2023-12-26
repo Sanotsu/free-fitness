@@ -11,6 +11,7 @@ import 'package:free_fitness/models/dietary_state.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/food_composition.dart';
 
@@ -265,23 +266,17 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(CusAL.of(context).foodImport),
+        title: Text(
+          CusAL.of(context).foodImport,
+          style: TextStyle(fontSize: CusFontSizes.pageTitle),
+        ),
         actions: [
-          TextButton.icon(
+          IconButton(
             onPressed: foodComps.isNotEmpty ? _saveToDb : null,
             icon: Icon(
               Icons.save,
-              color: foodComps.isNotEmpty
-                  ? Theme.of(context).canvasColor
-                  : Theme.of(context).disabledColor,
-            ),
-            label: Text(
-              CusAL.of(context).saveLabel,
-              style: TextStyle(
-                color: foodComps.isNotEmpty
-                    ? Theme.of(context).canvasColor
-                    : Theme.of(context).disabledColor,
-              ),
+              color:
+                  foodComps.isNotEmpty ? null : Theme.of(context).disabledColor,
             ),
           ),
         ],
@@ -321,7 +316,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
               onPressed: _openFileExplorer,
               icon: Icon(
                 Icons.drive_folder_upload,
-                size: 30.sp,
+                size: CusIconSizes.iconMedium,
                 color: Theme.of(context).primaryColor,
               ),
             ),
@@ -331,7 +326,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
               onPressed: _openJsonFiles,
               icon: Icon(
                 Icons.file_upload,
-                size: 30.sp,
+                size: CusIconSizes.iconMedium,
                 color: Theme.of(context).primaryColor,
               ),
             ),
@@ -349,9 +344,9 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
               },
               icon: Icon(
                 Icons.clear,
-                size: 30.sp,
+                size: CusIconSizes.iconMedium,
                 color: foodComps.isNotEmpty
-                    ? Theme.of(context).canvasColor
+                    ? Theme.of(context).primaryColor
                     : Theme.of(context).disabledColor,
               ),
             ),
@@ -366,7 +361,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
     return [
       Text(
         CusAL.of(context).jsonFiles,
-        style: TextStyle(fontSize: 14.sp),
+        style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
         textAlign: TextAlign.start,
       ),
       SizedBox(
@@ -377,7 +372,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
           itemBuilder: (context, index) {
             return Text(
               jsons[index].path,
-              style: TextStyle(fontSize: 12.sp),
+              style: TextStyle(fontSize: CusFontSizes.itemContent),
               textAlign: TextAlign.start,
             );
           },
@@ -396,14 +391,14 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
             TextSpan(
               text: CusAL.of(context).itemCount(foodComps.length),
               style: TextStyle(
-                fontSize: 14.sp,
-                color: Colors.black,
+                fontSize: CusFontSizes.itemSubTitle,
+                color: Colors.blue,
               ),
             ),
             TextSpan(
               text: "  ${CusAL.of(context).foodLabelNote}",
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: CusFontSizes.itemSubTitle,
                 color: Colors.green,
               ),
             ),
@@ -426,28 +421,28 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
                         TextSpan(
                           text: '${index + 1} - ',
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: CusFontSizes.itemSubTitle,
                             color: Colors.green,
                           ),
                         ),
                         TextSpan(
                           text: "${foodComps[index].foodCode} - ",
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: CusFontSizes.itemSubTitle,
                             color: Colors.grey,
                           ),
                         ),
                         TextSpan(
                           text: "${foodComps[index].foodName} - ",
                           style: TextStyle(
-                            fontSize: 12.sp,
-                            color: Colors.black,
+                            fontSize: CusFontSizes.itemSubTitle,
+                            color: Colors.red,
                           ),
                         ),
                         TextSpan(
                           text: "${foodComps[index].energyKCal}",
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: CusFontSizes.itemSubTitle,
                             color: Colors.lightBlue,
                           ),
                         ),
@@ -472,8 +467,8 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              CusAL.of(context).uploadingItem(CusAL.of(context).food),
-              style: TextStyle(fontSize: 14.sp),
+              CusAL.of(context).uploadingItem(''),
+              style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
               textAlign: TextAlign.start,
             ),
             TextButton(
@@ -500,7 +495,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
               },
               child: Text(
                 CusAL.of(context).removeSelected,
-                style: TextStyle(fontSize: 14.sp),
+                style: TextStyle(fontSize: CusFontSizes.buttonTiny),
               ),
             ),
           ],
@@ -515,29 +510,11 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
             horizontalMargin: 10, // 设置水平边距
             columnSpacing: 5.sp, // 设置列间距
             columns: <DataColumn>[
+              DataColumn(label: Text(CusAL.of(context).serialLabel)),
+              DataColumn(label: Text(CusAL.of(context).foodLabels('6'))),
+              DataColumn(label: Text(CusAL.of(context).foodLabels('2'))),
               DataColumn(
-                label: Text(
-                  CusAL.of(context).serialLabel,
-                  style: TextStyle(fontSize: 13.sp),
-                ),
-              ),
-              DataColumn(
-                label: Text(
-                  CusAL.of(context).foodLabels('6'),
-                  style: TextStyle(fontSize: 13.sp),
-                ),
-              ),
-              DataColumn(
-                label: Text(
-                  CusAL.of(context).foodLabels('2'),
-                  style: TextStyle(fontSize: 13.sp),
-                ),
-              ),
-              DataColumn(
-                label: Text(
-                  CusAL.of(context).foodTableMainLabels('1'),
-                  style: TextStyle(fontSize: 13.sp),
-                ),
+                label: Text(CusAL.of(context).foodTableMainLabels('1')),
                 numeric: true,
               ),
             ],
@@ -565,7 +542,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
                       width: 25.sp,
                       child: Text(
                         '${index + 1} ',
-                        style: TextStyle(fontSize: 12.sp),
+                        style: TextStyle(fontSize: CusFontSizes.itemContent),
                       ),
                     ),
                   ),
@@ -574,7 +551,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
                       width: 100.sp,
                       child: Text(
                         '${foodComps[index].foodCode}',
-                        style: TextStyle(fontSize: 12.sp),
+                        style: TextStyle(fontSize: CusFontSizes.itemContent),
                       ),
                     ),
                   ),
@@ -583,7 +560,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
                       children: [
                         Text(
                           '${foodComps[index].foodName}',
-                          style: TextStyle(fontSize: 12.sp),
+                          style: TextStyle(fontSize: CusFontSizes.itemContent),
                         ),
                       ],
                     ),
@@ -593,7 +570,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
                       width: 50.sp,
                       child: Text(
                         '${foodComps[index].energyKCal}',
-                        style: TextStyle(fontSize: 12.sp),
+                        style: TextStyle(fontSize: CusFontSizes.itemContent),
                         textAlign: TextAlign.right,
                       ),
                     ),

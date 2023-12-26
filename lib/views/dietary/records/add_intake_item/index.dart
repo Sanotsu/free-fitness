@@ -8,6 +8,7 @@ import '../../../../common/utils/tool_widgets.dart';
 
 import '../../../../common/utils/tools.dart';
 
+import '../../../../layout/themes/cus_font_size.dart';
 import '../../../../models/cus_app_localizations.dart';
 import '../../../../models/dietary_state.dart';
 import '../../foods/add_food_with_serving.dart';
@@ -322,7 +323,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
                 value: value,
                 child: Text(
                   showCusLableMapLabel(context, value),
-                  style: TextStyle(fontSize: 15.sp),
+                  style: TextStyle(fontSize: CusFontSizes.itemTitle),
                 ),
               );
             },
@@ -331,7 +332,10 @@ class _AddIntakeItemState extends State<AddIntakeItem>
           icon: null, // 将图标设置为null
         ),
       ),
-      subtitle: Text(currentDate, style: TextStyle(fontSize: 14.sp)),
+      subtitle: Text(currentDate,
+          style: TextStyle(
+            fontSize: CusFontSizes.itemSubTitle,
+          )),
     );
   }
 
@@ -342,13 +346,18 @@ class _AddIntakeItemState extends State<AddIntakeItem>
     return [
       /// 当tab是最近饮食记录且有选中摄入条目，才显示添加按钮
       if (_tabController.index == 0 && selectedIndexes.isNotEmpty)
-        TextButton(
+        // 使用 TextButton 的话，虽然canvasColor在浅色主题时能看到文字，但在深色主题就看不到了。
+        IconButton(
           onPressed: _saveSelectedRecentListToDb,
-          child: Text(
-            CusAL.of(context).addLabel(""),
-            style: TextStyle(color: Theme.of(context).canvasColor),
-          ),
+          icon: const Icon(Icons.save),
         ),
+      // TextButton(
+      //   onPressed: _saveSelectedRecentListToDb,
+      //   child: Text(
+      //     CusAL.of(context).addLabel(""),
+      //     style: TextStyle(color: Theme.of(context).canvasColor),
+      //   ),
+      // ),
 
       /// 当tab是食物列表时，才显示增加食物的按钮
       if (isShowAddButton)
@@ -407,11 +416,17 @@ class _AddIntakeItemState extends State<AddIntakeItem>
                 children: [
                   TextSpan(
                     text: "$tempIntake * ${e.servingInfo.servingUnit} - ",
-                    style: TextStyle(fontSize: 15.sp, color: Colors.black),
+                    style: TextStyle(
+                      fontSize: CusFontSizes.itemSubTitle,
+                      color: Colors.blue,
+                    ),
                   ),
                   TextSpan(
                     text: "$tempCalories ${CusAL.of(context).unitLabels('2')}",
-                    style: TextStyle(fontSize: 15.sp, color: Colors.green),
+                    style: TextStyle(
+                      fontSize: CusFontSizes.itemSubTitle,
+                      color: Colors.green,
+                    ),
                   ),
                 ],
               ),
@@ -508,7 +523,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
         // 食物名称
         title: Text(
           foodName,
-          // style: TextStyle(fontSize: 14.sp),
+          softWrap: true,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
@@ -545,7 +560,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
               Navigator.of(context).pop(tempStr.enLabel);
             }
           },
-          icon: const Icon(Icons.add, color: Colors.blue),
+          icon: Icon(Icons.add, color: Theme.of(context).primaryColor),
         ),
         onTap: () {
           Navigator.push(

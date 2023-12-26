@@ -47,14 +47,15 @@ buildServingModifyFormColumn(BuildContext context, CusLabel servingType) {
                 name: "serving_unit",
                 decoration: InputDecoration(
                   labelText: "*${CusAL.of(context).servingUnit}",
+                  // 设置透明底色
+                  filled: true,
+                  fillColor: Colors.transparent,
                 ),
                 // 2023-12-04 需要指定使用name，原本默认的.text会弹安全键盘，可能无法输入中文
                 // keyboardType: TextInputType.name,
                 // 2023-12-21 enableSuggestions 设为 true后键盘类型为text就正常了。
                 enableSuggestions: true,
-                validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(),
-                ]),
+                validator: FormBuilderValidators.required(),
               ),
             ),
           ],
@@ -185,6 +186,11 @@ _buildUnitDropdown(String name) {
                   child: Text(unit),
                 ))
             .toList(),
+        decoration: const InputDecoration(
+          // 设置透明底色
+          filled: true,
+          fillColor: Colors.transparent,
+        ),
       ),
     ),
   );
@@ -205,20 +211,19 @@ _cusNumberTextField(
     decoration: InputDecoration(
       labelText: labelText,
       suffixText: suffix ?? CusAL.of(context).unitLabels('0'),
+      // 设置透明底色
+      filled: true,
+      fillColor: Colors.transparent,
     ),
     // 正则来只允许输入数字和小数点
     inputFormatters: [
-      FilteringTextInputFormatter.allow(
-        RegExp(r'^\d*\.?\d*$'),
-      )
+      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
     ],
     // 默认展示数字键盘，客制化单位时传入文本键盘
     keyboardType: TextInputType.number,
     // 这里的验证都只是不为空而已，有传错误信息，说明才有验证不为空
     validator: errorText != null
-        ? FormBuilderValidators.compose([
-            FormBuilderValidators.required(),
-          ])
+        ? FormBuilderValidators.required(errorText: errorText)
         : null,
   );
 }
@@ -238,23 +243,21 @@ _cusSubTextFieldRow(BuildContext context, String name, String labelText) {
 
 /// 修改食物基本信息时表单所需栏位
 /// 新增的时候还有标准单份和客制化单份单选框等其他内容，所以这里只是column的值
-buildFoodModifyFormColumns(BuildContext context,
-    {List<PlatformFile>? initImages}) {
+buildFoodModifyFormColumns(
+  BuildContext context, {
+  List<PlatformFile>? initImages,
+}) {
   return [
     // 食物的品牌和产品名称(没有对应数据库，没法更人性化的筛选，都是用户输入)
     cusFormBuilerTextField(
       "product",
       labelText: '*${CusAL.of(context).foodLabels("0")}',
-      validator: FormBuilderValidators.compose([
-        FormBuilderValidators.required(),
-      ]),
+      validator: FormBuilderValidators.required(),
     ),
     cusFormBuilerTextField(
       "brand",
       labelText: '*${CusAL.of(context).foodLabels("1")}',
-      validator: FormBuilderValidators.compose([
-        FormBuilderValidators.required(),
-      ]),
+      validator: FormBuilderValidators.required(),
     ),
     cusFormBuilerTextField(
       "tags",
@@ -274,7 +277,12 @@ buildFoodModifyFormColumns(BuildContext context,
     // 上传活动示例图片（静态图或者gif）
     FormBuilderFilePicker(
       name: 'images',
-      decoration: InputDecoration(labelText: CusAL.of(context).foodLabels("5")),
+      decoration: InputDecoration(
+        labelText: CusAL.of(context).foodLabels("5"),
+        // 设置透明底色
+        filled: true,
+        fillColor: Colors.transparent,
+      ),
       initialValue: initImages,
       maxFiles: null,
       allowMultiple: true,

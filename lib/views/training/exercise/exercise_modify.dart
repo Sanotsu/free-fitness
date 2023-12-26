@@ -380,6 +380,9 @@ class _ExerciseModifyState extends State<ExerciseModify> {
         decoration: InputDecoration(
           labelText: labelText,
           labelStyle: TextStyle(fontSize: CusFontSizes.flagSmall),
+          // 设置透明底色
+          filled: true,
+          fillColor: Colors.transparent,
         ),
         initialValue: initialValue,
         maxFiles: null,

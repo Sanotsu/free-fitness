@@ -10,6 +10,7 @@ import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../reports/index.dart';
 import 'add_intake_item/index.dart';
@@ -235,11 +236,6 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           IconButton(
             icon: const Icon(Icons.report),
             onPressed: () {
-              // 跳过去就是新的模块，返回时就不用再返回这里而是直接回到主页面
-              // Navigator.of(context).pushReplacement(
-              //   MaterialPageRoute(builder: (_) => const DietaryReports()),
-              // );
-
               /// 还是要返回当前页面
               Navigator.push(
                 context,
@@ -369,7 +365,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                     ],
                   )
                 : Padding(
-                    padding: EdgeInsets.only(left: 20.sp, bottom: 8.sp),
+                    padding: EdgeInsets.only(left: 24.sp, bottom: 8.sp),
                     child: Table(
                       children: [
                         TableRow(
@@ -393,7 +389,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                           totalProtein,
                           totalFat,
                           totalCalorie,
-                          fontSize: 14.sp,
+                          fontSize: CusFontSizes.itemSubTitle,
                         ),
                       ],
                     ),
@@ -440,9 +436,10 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
   Widget _buildHeaderTableCell(
     String label, {
-    double fontSize = 14,
+    double? fontSize,
     textAlign = TextAlign.right,
   }) {
+    fontSize ??= CusFontSizes.itemSubTitle;
     return TableCell(
       child: Text(
         label,
@@ -490,7 +487,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     return Card(
       elevation: 5, // 设置阴影的程度
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0), // 设置圆角的大小
+        borderRadius: BorderRadius.circular(10.sp), // 设置圆角的大小
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -501,13 +498,16 @@ class _DietaryRecordsState extends State<DietaryRecords> {
               Expanded(
                 flex: 3,
                 child: ListTile(
+                  // 设置leading的最小宽度
+                  minLeadingWidth: 24.sp,
                   leading: const Icon(Icons.food_bank_sharp),
                   title: _buildListTileText(
                     showCusLableMapLabel(context, mealtime),
-                    fontSize: 16.sp,
+                    fontSize: CusFontSizes.pageSubTitle,
                   ),
                   subtitle: _buildListTileText(
                     CusAL.of(context).itemLabel(dfiwfsMealItems.length),
+                    fontSize: CusFontSizes.itemContent,
                   ),
                   dense: true,
                 ),
@@ -518,12 +518,12 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                   title: _buildListTileText(
                     tempCalories.toStringAsFixed(0),
                     textAlign: TextAlign.right,
-                    fontSize: 16.sp,
+                    fontSize: CusFontSizes.pageSubTitle,
                   ),
                   subtitle: _buildListTileText(
                     CusAL.of(context).calorieLabels("2"),
                     textAlign: TextAlign.right,
-                    fontSize: 12.sp,
+                    fontSize: CusFontSizes.itemContent,
                   ),
                 ),
               ),
@@ -549,7 +549,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                       }
                     });
                   },
-                  icon: const Icon(Icons.add, color: Colors.blue),
+                  icon: Icon(Icons.add, color: Theme.of(context).primaryColor),
                 ),
               ),
             ],
@@ -558,16 +558,16 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           /// 折叠tile展开灰色，展开后白色
           if (showExpansionTile)
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 // borderRadius: BorderRadius.circular(10.0), // 设置所有圆角的大小
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(0.0), // 保持上左角为直角
-                  topRight: Radius.circular(0.0), // 保持上右角为直角
-                  bottomLeft: Radius.circular(10.0), // 设置下左角为圆角
-                  bottomRight: Radius.circular(10.0), // 设置下右角为圆角
+                  topLeft: Radius.circular(0.sp), // 保持上左角为直角
+                  topRight: Radius.circular(0.sp), // 保持上右角为直角
+                  bottomLeft: Radius.circular(10.sp), // 设置下左角为圆角
+                  bottomRight: Radius.circular(10.sp), // 设置下右角为圆角
                 ),
-                // 设置展开前的背景色
-                color: Color.fromARGB(255, 195, 198, 201),
+                // 折叠栏设置展开前的背景色
+                color: Theme.of(context).focusColor,
               ),
               child: ExpansionTile(
                   initiallyExpanded: isExpandedList[mealtime.enLabel]!,
@@ -586,7 +586,8 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                             ),
                           ],
                         ),
-                  backgroundColor: const Color.fromARGB(255, 235, 227, 227),
+                  // 折叠栏展开后的背景色
+                  // backgroundColor: Theme.of(context).focusColor,
                   trailing: SizedBox(
                     // 设置的这个宽度让餐次中的表格数据和顶部保持差不多样子(7分之1)
                     width: 0.142.sw,
@@ -820,10 +821,11 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     double proteinValue,
     double fatValue,
     double caloriesValue, {
-    double fontSize = 14,
+    double? fontSize,
     TextAlign textAlign = TextAlign.end,
     bool isHeader = false, // 如果是标题，则还要显示第五个单元格
   }) {
+    fontSize ??= CusFontSizes.itemSubTitle;
     return TableRow(
       children: [
         TableCell(
@@ -881,7 +883,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 18.sp,
+                  fontSize: CusFontSizes.itemTitle,
                 ),
               ),
               Expanded(
@@ -907,7 +909,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
-                  fontSize: 18.sp,
+                  fontSize: CusFontSizes.itemTitle,
                 ),
               ),
 
@@ -949,7 +951,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
               Expanded(
                   child: Text(
                 '${data.name}: $tempStr - $percentage%',
-                style: TextStyle(fontSize: 14.sp),
+                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
               )),
             ],
           ),
@@ -997,7 +999,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
               Expanded(
                 child: Text(
                   '${data.name}: $tempStr',
-                  style: TextStyle(fontSize: 14.sp),
+                  style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                 ),
               ),
             ],

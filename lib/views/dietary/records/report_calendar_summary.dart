@@ -9,6 +9,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 import 'format_tools.dart';
@@ -223,8 +224,8 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
           return Align(
             alignment: Alignment.bottomCenter,
             child: Container(
-              width: 36,
-              height: 16,
+              width: 36.sp,
+              height: 16.sp,
               color: tempCalories < 2250 ? Colors.green : Colors.yellow,
               child: Center(
                 child: Text(
@@ -233,7 +234,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
                   overflow: TextOverflow.clip,
                   style: TextStyle(
                     color: tempCalories < 3 ? Colors.white : Colors.black,
-                    fontSize: 12.sp,
+                    fontSize: CusFontSizes.flagTiny,
                   ),
                 ),
               ),
@@ -274,7 +275,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
           Text(
             CusAL.of(context).dietaryCalendarLabels('0'),
             style: TextStyle(
-              fontSize: 20.sp,
+              fontSize: CusFontSizes.flagMedium,
               fontWeight: FontWeight.bold,
               color: Colors.green,
             ),
@@ -300,7 +301,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
                       DataCell(
                         Text(
                           CusAL.of(context).countLabels('0'),
-                          style: TextStyle(fontSize: 14.sp),
+                          style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                         ),
                       ),
                       _buildDataCell(totalCalorie),
@@ -314,7 +315,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
                       DataCell(
                         Text(
                           CusAL.of(context).countLabels('1'),
-                          style: TextStyle(fontSize: 14.sp),
+                          style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                         ),
                       ),
                       _buildDataCell(totalCalorie / days),
@@ -342,7 +343,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
     return DataCell(
       Text(
         cusDoubleTryToIntString(number),
-        style: TextStyle(fontSize: 14.sp),
+        style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
       ),
     );
   }
@@ -360,7 +361,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
         Text(
           CusAL.of(context).dietaryCalendarLabels('1'),
           style: TextStyle(
-            fontSize: 20.sp,
+            fontSize: CusFontSizes.flagMedium,
             fontWeight: FontWeight.bold,
             color: Colors.green,
           ),
@@ -372,7 +373,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
         Text(
           CusAL.of(context).dietaryCalendarLabels('2'),
           style: TextStyle(
-            fontSize: 20.sp,
+            fontSize: CusFontSizes.flagMedium,
             fontWeight: FontWeight.bold,
             color: Colors.green,
           ),
@@ -386,23 +387,36 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
             var intakeSize = value[index].dailyFoodItem.foodIntakeSize;
             var servingUnit = value[index].servingInfo.servingUnit;
 
-            return Container(
-              margin: const EdgeInsets.symmetric(
-                horizontal: 12.0,
-                vertical: 4.0,
-              ),
-              decoration: BoxDecoration(
-                border: Border.all(),
-                borderRadius: BorderRadius.circular(12.0),
-              ),
+            // return Container(
+            //   margin: const EdgeInsets.symmetric(
+            //     horizontal: 12.0,
+            //     vertical: 4.0,
+            //   ),
+            //   decoration: BoxDecoration(
+            //     border: Border.all(),
+            //     borderRadius: BorderRadius.circular(12.sp),
+            //   ),
+            //   child: ListTile(
+            //     title: Text(
+            //       '${CusAL.of(context).foodName}: ${food.product} (${food.brand})',
+            //       style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
+            //     ),
+            //     subtitle: Text(
+            //       '${CusAL.of(context).eatableSize}: ${cusDoubleTryToIntString(intakeSize)} x $servingUnit',
+            //       style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
+            //     ),
+            //   ),
+            // );
+            return Card(
+              elevation: 5.sp,
               child: ListTile(
                 title: Text(
                   '${CusAL.of(context).foodName}: ${food.product} (${food.brand})',
-                  style: TextStyle(fontSize: 15.sp),
+                  style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                 ),
                 subtitle: Text(
                   '${CusAL.of(context).eatableSize}: ${cusDoubleTryToIntString(intakeSize)} x $servingUnit',
-                  style: TextStyle(fontSize: 15.sp),
+                  style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                 ),
               ),
             );
@@ -429,8 +443,8 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
     return DataTable(
         dataRowMinHeight: 40.sp, // 设置行高范围
         dataRowMaxHeight: 50.sp,
-        headingRowHeight: 40, // 设置表头行高
-        horizontalMargin: 10, // 设置水平边距
+        headingRowHeight: 40.sp, // 设置表头行高
+        horizontalMargin: 10.sp, // 设置水平边距
         columnSpacing: 20.sp, // 设置列间距
         columns: [
           _buildDataColumn(1),
@@ -441,10 +455,22 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
         rows: [
           DataRow(
             cells: [
-              DataCell(Text(calorie, style: TextStyle(fontSize: 14.sp))),
-              DataCell(Text(protein, style: TextStyle(fontSize: 14.sp))),
-              DataCell(Text(fat, style: TextStyle(fontSize: 14.sp))),
-              DataCell(Text(cho, style: TextStyle(fontSize: 14.sp))),
+              DataCell(Text(
+                calorie,
+                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
+              )),
+              DataCell(Text(
+                protein,
+                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
+              )),
+              DataCell(Text(
+                fat,
+                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
+              )),
+              DataCell(Text(
+                cho,
+                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
+              )),
             ],
           )
         ]);

@@ -9,6 +9,7 @@ import '../../../common/components/dialog_widgets.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import 'detail_modify_food.dart';
 import 'detail_modify_serving_info.dart';
@@ -95,14 +96,6 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
         // 返回上一页时，返回是否被修改标识，用于父组件判断是否需要重新查询
         Navigator.pop(context, isModified);
       },
-
-      // WillPopScope(
-      //   onWillPop: () async {
-      //     // 在这里执行返回按钮被点击时的逻辑
-      //     // 比如执行 Navigator.pop() 返回前一个页面并携带数据
-      //     Navigator.pop(context, {"refreshData": true});
-      //     return true; // 返回true表示允许退出当前页面
-      //   },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         appBar: AppBar(
@@ -123,7 +116,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
                   }
                 });
               },
-              icon: Icon(Icons.edit, size: 20.sp),
+              icon: const Icon(Icons.edit),
             ),
           ],
         ),
@@ -136,7 +129,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
             Text(
               CusAL.of(context).foodNutrientInfo,
               style: TextStyle(
-                fontSize: 20.sp,
+                fontSize: CusFontSizes.pageTitle,
                 fontWeight: FontWeight.bold,
                 color: Colors.green,
               ),
@@ -149,7 +142,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // 2023-12-05 暂时不提供修改，以新增+删除代替修改
+                  // 2023-12-05 暂时不提供修改，以新增+删除代替修改(已有修改)
                   if (servingSelectedList.where((e) => e == true).length == 1)
                     TextButton(
                       onPressed: clickServingInfoModify,
@@ -295,6 +288,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           title: Text(CusAL.of(ctx).optionsLabel),
           content: DropdownMenu<CusLabel>(
             initialSelection: servingTypeList.first,
+            width: 0.6.sw,
             onSelected: (CusLabel? value) {
               setState(() {
                 dropdownValue = value!;
@@ -304,9 +298,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
                 .map<DropdownMenuEntry<CusLabel>>((CusLabel value) {
               return DropdownMenuEntry<CusLabel>(
                 value: value,
-                label: showCusLableMapLabel(context, value),
+                label: showCusLable(value),
               );
             }).toList(),
+            textStyle: TextStyle(fontSize: CusFontSizes.itemContent),
           ),
           actions: [
             TextButton(
@@ -363,7 +358,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
       Text(
         CusAL.of(context).foodBasicInfo,
         style: TextStyle(
-          fontSize: 20.sp,
+          fontSize: CusFontSizes.flagMedium,
           fontWeight: FontWeight.bold,
           color: Colors.green,
         ),
@@ -372,7 +367,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
       Padding(
         padding: EdgeInsets.all(10.sp),
         child: Table(
-          border: TableBorder.all(), // 设置表格边框
+          // 设置表格边框
+          border: TableBorder.all(
+            color: Theme.of(context).disabledColor,
+          ),
           // 设置每列的宽度占比
           columnWidths: const {
             0: FlexColumnWidth(4),
@@ -416,7 +414,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           padding: EdgeInsets.symmetric(horizontal: 10.sp),
           child: Text(
             label,
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              fontSize: CusFontSizes.itemSubTitle,
+              fontWeight: FontWeight.bold,
+            ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -424,7 +425,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           padding: EdgeInsets.symmetric(horizontal: 10.sp),
           child: Text(
             value,
-            style: TextStyle(fontSize: 14.0.sp, color: Colors.grey[700]!),
+            style: TextStyle(
+              fontSize: CusFontSizes.itemSubTitle,
+              color: Theme.of(context).disabledColor,
+            ),
             textAlign: TextAlign.left,
           ),
         ),
@@ -504,7 +508,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     return DataColumn(
       label: Text(
         text,
-        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          fontSize: CusFontSizes.itemSubTitle,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -512,7 +519,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   // 构建单个值的单元格
   _buildDataCell(String text) {
     return DataCell(
-      Text(text, style: TextStyle(fontSize: 14.sp)),
+      Text(text, style: TextStyle(fontSize: CusFontSizes.itemSubTitle)),
     );
   }
 
@@ -534,9 +541,12 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
             children: [
               Text(
                 '${CusAL.of(context).fatNutrients("0")}  ',
-                style: TextStyle(fontSize: 14.sp),
+                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
               ),
-              Text(totalFat, style: TextStyle(fontSize: 14.sp)),
+              Text(
+                totalFat,
+                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
+              ),
             ],
           ),
           if (saturatedFat.isNotEmpty)
@@ -574,9 +584,12 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
             children: [
               Text(
                 '${CusAL.of(context).choNutrients("0")}  ',
-                style: TextStyle(fontSize: 14.sp),
+                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
               ),
-              Text(totalCho, style: TextStyle(fontSize: 14.sp)),
+              Text(
+                totalCho,
+                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
+              ),
             ],
           ),
           if (sugar.isNotEmpty)
@@ -608,9 +621,12 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
             children: [
               Text(
                 '${CusAL.of(context).microNutrients("0")}  ',
-                style: TextStyle(fontSize: 14.sp),
+                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
               ),
-              Text(sodium, style: TextStyle(fontSize: 14.sp)),
+              Text(
+                sodium,
+                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
+              ),
             ],
           ),
           if (potassium.isNotEmpty)
@@ -619,9 +635,12 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
               children: [
                 Text(
                   '${CusAL.of(context).microNutrients("1")}  ',
-                  style: TextStyle(fontSize: 14.sp),
+                  style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                 ),
-                Text(potassium, style: TextStyle(fontSize: 14.sp)),
+                Text(
+                  potassium,
+                  style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
+                ),
               ],
             ),
           if (cholesterol.isNotEmpty)
@@ -630,9 +649,12 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
               children: [
                 Text(
                   '${CusAL.of(context).microNutrients("2")}  ',
-                  style: TextStyle(fontSize: 14.sp),
+                  style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                 ),
-                Text(cholesterol, style: TextStyle(fontSize: 14.sp)),
+                Text(
+                  cholesterol,
+                  style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
+                ),
               ],
             ),
         ],
@@ -647,11 +669,17 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]!),
+          style: TextStyle(
+            fontSize: CusFontSizes.itemContent,
+            color: Colors.grey[600]!,
+          ),
         ),
         Text(
           value,
-          style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]!),
+          style: TextStyle(
+            fontSize: CusFontSizes.itemContent,
+            color: Colors.grey[600]!,
+          ),
         ),
       ],
     );

@@ -10,6 +10,7 @@ import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 
@@ -75,19 +76,16 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
         title: Text(CusAL.of(context).mealPhotos),
         actions: [
           if (!isEditing)
-            TextButton(
+            IconButton(
               onPressed: () {
                 setState(() {
                   isEditing = !isEditing;
                 });
               },
-              child: Text(
-                CusAL.of(context).updateLabel,
-                style: TextStyle(color: Theme.of(context).canvasColor),
-              ),
+              icon: const Icon(Icons.edit),
             ),
           if (isEditing)
-            TextButton(
+            IconButton(
               onPressed: () async {
                 if (isLoading) return;
                 setState(() {
@@ -161,10 +159,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                   }
                 }
               },
-              child: Text(
-                CusAL.of(context).saveLabel,
-                style: TextStyle(color: Theme.of(context).canvasColor),
-              ),
+              icon: const Icon(Icons.save),
             )
         ],
       ),
@@ -217,7 +212,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
 
           Text(
             showCusLableMapLabel(context, widget.mealtime),
-            style: TextStyle(fontSize: 22.sp),
+            style: TextStyle(fontSize: CusFontSizes.flagMedium),
           ),
 
           // 预览已有的图片

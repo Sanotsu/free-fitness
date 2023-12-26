@@ -71,6 +71,59 @@ class _DetailModifyServingInfoState extends State<DetailModifyServingInfo> {
     });
   }
 
+  _modifyServingInfo() async {
+    if (_servingInfoformKey.currentState!.saveAndValidate()) {
+      // 营养素表单保存验证通过后，要先格式化成指定类型数据，再才能保持到db
+      var servingList = parseServingInfo(
+        _servingInfoformKey.currentState!.value,
+        // 2023-12-19 修改都当做是非标准
+        widget.servingType.value,
+        foodId: widget.food.foodId,
+        servingInfoId: (widget.currentServingInfo != null)
+            ? widget.currentServingInfo!.servingInfoId!
+            : null,
+      );
+
+      try {
+        if (isLoading) return;
+
+        setState(() {
+          isLoading = true;
+        });
+
+        // 有传单份详情是修改，没有则是新增
+        if (widget.currentServingInfo != null) {
+          // 处理用户的输入表单的列表，如果是修改单份营养素信息，其列表第一个就是修改后的。
+          var temp = servingList[0];
+          temp.servingInfoId = widget.currentServingInfo!.servingInfoId!;
+          _dietaryHelper.updateSingleServingInfo(temp);
+        } else {
+          await _dietaryHelper.insertFoodWithServingInfoList(
+            servingInfoList: servingList,
+          );
+        }
+        if (!mounted) return;
+        setState(() {
+          isLoading = false;
+        });
+        Navigator.pop(context, true);
+      } on Exception catch (e) {
+        // 将错误信息展示给用户
+        if (!mounted) return;
+        commonExceptionDialog(
+          context,
+          CusAL.of(context).exceptionWarningTitle,
+          e.toString(),
+        );
+
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,68 +151,22 @@ class _DetailModifyServingInfoState extends State<DetailModifyServingInfo> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context, false);
-                  },
-                  child: Text(CusAL.of(context).cancelLabel),
+                Expanded(
+                  flex: 4,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context, false);
+                    },
+                    child: Text(CusAL.of(context).cancelLabel),
+                  ),
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_servingInfoformKey.currentState!.saveAndValidate()) {
-                      // 营养素表单保存验证通过后，要先格式化成指定类型数据，再才能保持到db
-                      var servingList = parseServingInfo(
-                        _servingInfoformKey.currentState!.value,
-                        // 2023-12-19 修改都当做是非标准
-                        widget.servingType.value,
-                        foodId: widget.food.foodId,
-                        servingInfoId: (widget.currentServingInfo != null)
-                            ? widget.currentServingInfo!.servingInfoId!
-                            : null,
-                      );
-
-                      try {
-                        if (isLoading) return;
-
-                        setState(() {
-                          isLoading = true;
-                        });
-
-                        // 有传单份详情是修改，没有则是新增
-                        if (widget.currentServingInfo != null) {
-                          // ？？？表单返回的是列表 servingList，而里面的单份是写死了的，不知道实际修改后的值是什么。
-                          var temp = servingList[0];
-                          temp.servingInfoId =
-                              widget.currentServingInfo!.servingInfoId!;
-                          _dietaryHelper.updateSingleServingInfo(temp);
-                        } else {
-                          await _dietaryHelper.insertFoodWithServingInfoList(
-                            servingInfoList: servingList,
-                          );
-                        }
-                      } on Exception catch (e) {
-                        // 将错误信息展示给用户
-                        if (!mounted) return;
-                        commonExceptionDialog(
-                          context,
-                          CusAL.of(context).exceptionWarningTitle,
-                          e.toString(),
-                        );
-
-                        setState(() {
-                          isLoading = false;
-                        });
-                        return;
-                      }
-
-                      if (!mounted) return;
-                      setState(() {
-                        isLoading = false;
-                      });
-                      Navigator.pop(context, true);
-                    }
-                  },
-                  child: Text(CusAL.of(context).addLabel("")),
+                const Expanded(flex: 1, child: SizedBox()),
+                Expanded(
+                  flex: 4,
+                  child: ElevatedButton(
+                    onPressed: _modifyServingInfo,
+                    child: Text(CusAL.of(context).saveLabel),
+                  ),
                 ),
               ],
             ),

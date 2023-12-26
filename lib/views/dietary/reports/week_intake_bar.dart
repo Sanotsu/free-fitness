@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 
@@ -45,7 +46,10 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
           tooltipBgColor: Colors.blueGrey,
           // 太宽了的话最两边还是超出了屏幕
           tooltipHorizontalAlignment: FLHorizontalAlignment.center,
-          tooltipPadding: EdgeInsets.symmetric(horizontal: 5.sp, vertical: 8),
+          tooltipPadding: EdgeInsets.symmetric(
+            horizontal: 5.sp,
+            vertical: 8.sp,
+          ),
           // 提示框的最大宽度(默认120)
           maxContentWidth: 0.4.sw,
           // 提示框举例条状图顶部的距离(正数就是往上空，负数就是向下移动)
@@ -81,7 +85,7 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
               // 构建气泡框显示的内容
               return BarTooltipItem(
                 '$weekDay\n',
-                TextStyle(fontSize: 10.sp),
+                TextStyle(fontSize: CusFontSizes.flagTiny),
                 textAlign: TextAlign.left,
                 children: <TextSpan>[
                   TextSpan(text: "$choStr\n"),
@@ -104,7 +108,7 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
               // 构建气泡框显示的内容
               return BarTooltipItem(
                 '$weekDay\n',
-                TextStyle(fontSize: 10.sp),
+                TextStyle(fontSize: CusFontSizes.flagTiny),
                 textAlign: TextAlign.left,
                 children: <TextSpan>[
                   TextSpan(text: "$bfStr\n"),
@@ -183,7 +187,7 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
       fitInside: SideTitleFitInsideData.disable(),
       child: Text(
         showCusLableMapLabel(context, weekdayStringMap[value.toInt() + 1]),
-        style: TextStyle(fontSize: 10.sp),
+        style: TextStyle(fontSize: CusFontSizes.flagTiny),
       ),
     );
   }
@@ -201,7 +205,7 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
       axisSide: meta.axisSide,
       child: Text(
         "${meta.formattedValue}$unit",
-        style: TextStyle(fontSize: 10.sp),
+        style: TextStyle(fontSize: CusFontSizes.flagTiny),
       ),
     );
   }

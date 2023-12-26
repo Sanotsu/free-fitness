@@ -7,6 +7,7 @@ import '../../../../../common/global/constants.dart';
 import '../../../../../common/utils/db_dietary_helper.dart';
 import '../../../../../models/dietary_state.dart';
 import '../../../../common/utils/tools.dart';
+import '../../../../layout/themes/cus_font_size.dart';
 import '../../../../models/cus_app_localizations.dart';
 import '../../foods/detail_modify_serving_info.dart';
 
@@ -232,11 +233,11 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
             children: [
               TextSpan(
                 text: '${CusAL.of(context).foodBasicInfo}\n',
-                style: TextStyle(fontSize: 18.sp),
+                style: TextStyle(fontSize: CusFontSizes.pageTitle),
               ),
               TextSpan(
                 text: "${fsInfo.food.product} (${fsInfo.food.brand})",
-                style: TextStyle(fontSize: 12.sp),
+                style: TextStyle(fontSize: CusFontSizes.pageAppendix),
               ),
             ],
           ),
@@ -400,11 +401,19 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
       children: [
         Text(
           CusAL.of(context).mainNutrientLabel,
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: CusFontSizes.flagMedium,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         DecoratedBox(
           // 设置背景色
-          decoration: BoxDecoration(color: Colors.grey[300]),
+          decoration: BoxDecoration(
+            color: Theme.of(context).disabledColor,
+            border: Border.all(
+              color: Theme.of(context).colorScheme.tertiaryContainer,
+            ),
+          ),
           child: Table(
             border: TableBorder.all(),
             columnWidths: const <int, TableColumnWidth>{
@@ -455,14 +464,17 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: '$title\n', // 没有这个换行符两个会放到一行来
-                  style: const TextStyle(color: Colors.black),
+                  text: '$title\n',
+                  style: TextStyle(
+                    // color: Theme.of(context).primaryColor,
+                    fontSize: CusFontSizes.itemContent,
+                  ),
                 ),
                 TextSpan(
                   text: value,
                   style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 16.sp,
+                    // color: Theme.of(context).primaryColor,
+                    fontSize: CusFontSizes.itemTitle,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -481,10 +493,14 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
       children: [
         Text(
           CusAL.of(context).allNutrientLabel,
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: CusFontSizes.flagMedium,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Table(
-          border: TableBorder.all(), // 设置表格边框
+          // 设置表格边框
+          border: TableBorder.all(color: Theme.of(context).primaryColor),
           // 设置每列的宽度占比
           columnWidths: const {
             0: FlexColumnWidth(2),
@@ -504,7 +520,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
               CusAL.of(context).mainNutrients('0'),
               '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.energy)} ${CusAL.of(context).unitLabels('3')}',
               labelAligh: TextAlign.right,
-              fontColor: Colors.grey,
+              fontColor: Theme.of(context).disabledColor,
             ),
             _buildTableRow(
               CusAL.of(context).mainNutrients('2'),
@@ -519,28 +535,28 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
                 CusAL.of(context).fatNutrients('1'),
                 '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.saturatedFat!)} ${CusAL.of(context).unitLabels('0')}',
                 labelAligh: TextAlign.right,
-                fontColor: Colors.grey,
+                fontColor: Theme.of(context).disabledColor,
               ),
             if (nutrientsInfo.transFat != null)
               _buildTableRow(
                 CusAL.of(context).fatNutrients('2'),
                 '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.transFat!)} ${CusAL.of(context).unitLabels('0')}',
                 labelAligh: TextAlign.right,
-                fontColor: Colors.grey,
+                fontColor: Theme.of(context).disabledColor,
               ),
             if (nutrientsInfo.polyunsaturatedFat != null)
               _buildTableRow(
                 CusAL.of(context).fatNutrients('3'),
                 '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.polyunsaturatedFat!)} ${CusAL.of(context).unitLabels('0')}',
                 labelAligh: TextAlign.right,
-                fontColor: Colors.grey,
+                fontColor: Theme.of(context).disabledColor,
               ),
             if (nutrientsInfo.monounsaturatedFat != null)
               _buildTableRow(
                 CusAL.of(context).fatNutrients('4'),
                 '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.monounsaturatedFat!)} ${CusAL.of(context).unitLabels('0')}',
                 labelAligh: TextAlign.right,
-                fontColor: Colors.grey,
+                fontColor: Theme.of(context).disabledColor,
               ),
             _buildTableRow(
               CusAL.of(context).choNutrients('0'),
@@ -551,14 +567,14 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
                 CusAL.of(context).choNutrients('1'),
                 '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.sugar!)} ${CusAL.of(context).unitLabels('0')}',
                 labelAligh: TextAlign.right,
-                fontColor: Colors.grey,
+                fontColor: Theme.of(context).disabledColor,
               ),
             if (nutrientsInfo.dietaryFiber != null)
               _buildTableRow(
                 CusAL.of(context).choNutrients('2'),
                 '${cusDoubleTryToIntString(inputServingValue * nutrientsInfo.dietaryFiber!)} ${CusAL.of(context).unitLabels('0')}',
                 labelAligh: TextAlign.right,
-                fontColor: Colors.grey,
+                fontColor: Theme.of(context).disabledColor,
               ),
             _buildTableRow(
               CusAL.of(context).microNutrients('0'),
@@ -593,7 +609,10 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           padding: EdgeInsets.symmetric(horizontal: 10.sp),
           child: Text(
             label,
-            style: TextStyle(fontSize: 16.sp, color: fontColor),
+            style: TextStyle(
+              fontSize: CusFontSizes.pageContent,
+              color: fontColor,
+            ),
             textAlign: labelAligh,
           ),
         ),
@@ -601,7 +620,10 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           padding: EdgeInsets.symmetric(horizontal: 10.sp),
           child: Text(
             value,
-            style: TextStyle(fontSize: 14.0.sp, color: fontColor),
+            style: TextStyle(
+              fontSize: CusFontSizes.pageContent,
+              color: fontColor,
+            ),
             textAlign: TextAlign.right,
           ),
         ),

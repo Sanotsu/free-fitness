@@ -7,6 +7,7 @@ import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
 import '../../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
+import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import 'food_json_import.dart';
 import 'add_food_with_serving.dart';
@@ -130,11 +131,11 @@ class _DietaryFoodsState extends State<DietaryFoods> {
             children: [
               TextSpan(
                 text: "${CusAL.of(context).food}\n",
-                style: TextStyle(fontSize: 20.sp),
+                style: TextStyle(fontSize: CusFontSizes.pageTitle),
               ),
               TextSpan(
                 text: CusAL.of(context).itemCount(itemsCount),
-                style: TextStyle(fontSize: 12.sp),
+                style: TextStyle(fontSize: CusFontSizes.pageAppendix),
               ),
             ],
           ),
@@ -166,38 +167,58 @@ class _DietaryFoodsState extends State<DietaryFoods> {
             onPressed: clickFoodImport,
           ),
           // 新增
-          Row(
-            children: [
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AddfoodWithServing()),
-                  ).then((value) {
-                    // 不管是否新增成功，这里都重新加载；因为没有清空查询条件，所以新增的食物关键字不包含查询条件中，不会显示
-                    if (value != null) {
-                      setState(() {
-                        foodItems.clear();
-                        currentPage = 1;
-                      });
-                      _loadFoodData();
-                    }
-                  });
-                },
-                child: Text(
-                  CusAL.of(context).notFound,
-                  style: TextStyle(fontSize: 14.sp, color: Colors.white),
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AddfoodWithServing(),
                 ),
-              ),
-            ],
+              ).then((value) {
+                // 不管是否新增成功，这里都重新加载；因为没有清空查询条件，所以新增的食物关键字不包含查询条件中，不会显示
+                if (value != null) {
+                  setState(() {
+                    foodItems.clear();
+                    currentPage = 1;
+                  });
+                  _loadFoodData();
+                }
+              });
+            },
           ),
+          // Row(
+          //   children: [
+          //     TextButton(
+          //       onPressed: () {
+          //         Navigator.push(
+          //           context,
+          //           MaterialPageRoute(
+          //               builder: (context) => const AddfoodWithServing()),
+          //         ).then((value) {
+          //           // 不管是否新增成功，这里都重新加载；因为没有清空查询条件，所以新增的食物关键字不包含查询条件中，不会显示
+          //           if (value != null) {
+          //             setState(() {
+          //               foodItems.clear();
+          //               currentPage = 1;
+          //             });
+          //             _loadFoodData();
+          //           }
+          //         });
+          //       },
+          //       child: Text(
+          //         CusAL.of(context).notFound,
+          //         style: TextStyle(fontSize: 14.sp, color: Colors.white),
+          //       ),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(8.sp),
             child: Row(
               children: [
                 Expanded(
@@ -207,6 +228,9 @@ class _DietaryFoodsState extends State<DietaryFoods> {
                       hintText: CusAL.of(context).queryKeywordHintText(
                         CusAL.of(context).food,
                       ),
+                      // 设置透明底色
+                      filled: true,
+                      fillColor: Colors.transparent,
                     ),
                   ),
                 ),
@@ -268,12 +292,15 @@ class _DietaryFoodsState extends State<DietaryFoods> {
           maxLines: 2,
           softWrap: true,
           overflow: TextOverflow.ellipsis,
-          style: TextStyle(color: Theme.of(context).primaryColor),
+          style: TextStyle(
+            fontSize: CusFontSizes.itemTitle,
+            color: Theme.of(context).primaryColor,
+          ),
         ),
         // 单份食物营养素
         subtitle: Text(
           "$text1\n$text2 , $text3 , $text4",
-          style: TextStyle(fontSize: 14.sp),
+          style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
           maxLines: 2,
           softWrap: true,
           overflow: TextOverflow.ellipsis,
@@ -380,14 +407,10 @@ class _DietaryFoodsState extends State<DietaryFoods> {
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
                     children: [
-                      // TextSpan(
-                      //   text: "${CusAL.of(context).foodName} ",
-                      //   style: TextStyle(fontSize: 14.sp, color: Colors.black),
-                      // ),
                       TextSpan(
                         text: foodName,
                         style: TextStyle(
-                          fontSize: 16.sp,
+                          fontSize: CusFontSizes.itemTitle,
                           color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.bold,
                         ),
@@ -401,44 +424,43 @@ class _DietaryFoodsState extends State<DietaryFoods> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
-              // dataRowHeight: 10.sp,
               dataRowMinHeight: 20.sp, // 设置行高范围
               dataRowMaxHeight: 30.sp,
-              headingRowHeight: 25, // 设置表头行高为 40 像素
-              horizontalMargin: 10, // 设置水平边距为 10 像素
-              columnSpacing: 10.sp, // 设置列间距为 10 像素
+              headingRowHeight: 25.sp, // 设置表头行高
+              horizontalMargin: 10.sp, // 设置水平边距
+              columnSpacing: 10.sp, // 设置列间距
               columns: [
                 DataColumn(
                   label: Text(
                     CusAL.of(context).foodTableMainLabels("0"),
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                   ),
                 ),
                 DataColumn(
                   label: Text(
                     CusAL.of(context).foodTableMainLabels("1"),
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                   ),
                   numeric: true,
                 ),
                 DataColumn(
                   label: Text(
                     CusAL.of(context).foodTableMainLabels("2"),
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                   ),
                   numeric: true,
                 ),
                 DataColumn(
                   label: Text(
                     CusAL.of(context).foodTableMainLabels("3"),
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                   ),
                   numeric: true,
                 ),
                 DataColumn(
                   label: Text(
                     CusAL.of(context).foodTableMainLabels("4"),
-                    style: TextStyle(fontSize: 14.sp),
+                    style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                   ),
                   numeric: true,
                 ),
@@ -469,7 +491,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
     return DataCell(
       Text(
         text,
-        style: TextStyle(fontSize: 14.sp),
+        style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
       ),
     );
   }

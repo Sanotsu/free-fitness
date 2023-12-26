@@ -10,6 +10,7 @@ class CusFontSizes {
   static double itemTitle = 18.sp;
   static double itemSubTitle = 14.sp;
   static double itemContent = 12.sp;
+  static double itemSubContent = 10.sp;
 
   // 一般的页面的标题、子标题、正文、附录等大学
   static double pageTitle = 20.sp;
@@ -61,4 +62,7 @@ class CusColors {
 
   // 一些弹窗中需要上下翻页的背景色
   static Color pageChangeBg = const Color.fromARGB(255, 1, 191, 155);
+
+  // appbar的下拉框的背景色，深色/浅色主题下，背景都是灰色的话白色文字就看得见
+  static Color dropdownColor = const Color.fromARGB(255, 124, 96, 96);
 }
