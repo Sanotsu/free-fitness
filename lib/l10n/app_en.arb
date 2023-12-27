@@ -89,7 +89,7 @@
   },
 
   "trainedReportExport":"Export trained records",
-  "trainedDoneNote":"Completed. Duration {totolTime}(s):",
+  "trainedDoneNote":"Completed. Duration {totolTime} s:",
 
 
   "exercise": "Exercises",

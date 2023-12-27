@@ -98,7 +98,8 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
       Padding(
         padding: EdgeInsets.all(10.sp),
         child: Table(
-          border: TableBorder.all(), // 设置表格边框
+          // 设置表格边框
+          border: TableBorder.all(color: Theme.of(context).primaryColor),
           // 设置每列的宽度占比
           columnWidths: const {
             0: FlexColumnWidth(1),

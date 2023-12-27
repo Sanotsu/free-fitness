@@ -252,6 +252,10 @@ class _TrainingPlansState extends State<TrainingPlans> {
                       TextSpan(
                         text:
                             '${planItem.groupDetailList.length} ${CusAL.of(context).workouts}  ',
+                        // 这里只是取text的默认颜色，避免浅主题时文字不显示(好像默认是白色，反正看不到)
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
                       ),
                       TextSpan(
                         text:
@@ -262,6 +266,9 @@ class _TrainingPlansState extends State<TrainingPlans> {
                         // 可以不和exercise用同一个分类，但要单独列一个
                         text:
                             '  ${getCusLabelText(planItem.plan.planCategory, categoryOptions)}',
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyMedium?.color,
+                        ),
                       ),
                     ],
                   ),

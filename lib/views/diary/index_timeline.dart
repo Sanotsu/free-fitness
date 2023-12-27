@@ -311,6 +311,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
                     flex: 1,
                     child: Icon(
                       Icons.arrow_forward,
+                      size: CusIconSizes.iconSmall,
                       color: Theme.of(context).primaryColor,
                     ),
                   ),
