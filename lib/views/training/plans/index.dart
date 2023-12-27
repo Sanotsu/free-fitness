@@ -251,22 +251,17 @@ class _TrainingPlansState extends State<TrainingPlans> {
                     children: [
                       TextSpan(
                         text:
-                            '${planItem.groupDetailList.length} ${CusAL.of(context).workouts} ',
-                        style: TextStyle(color: Theme.of(context).shadowColor),
+                            '${planItem.groupDetailList.length} ${CusAL.of(context).workouts}  ',
                       ),
                       TextSpan(
-                        text: '${getCusLabelText(
-                          planItem.plan.planLevel,
-                          levelOptions,
-                        )}  ',
+                        text:
+                            '${getCusLabelText(planItem.plan.planLevel, levelOptions)}',
                         style: TextStyle(color: Colors.green[500]),
                       ),
                       TextSpan(
-                        text: '${getCusLabelText(
-                          planItem.plan.planCategory,
-                          categoryOptions, // 可以不和exercise用同一个，但要单独列一个
-                        )}  ',
-                        style: TextStyle(color: Theme.of(context).shadowColor),
+                        // 可以不和exercise用同一个分类，但要单独列一个
+                        text:
+                            '  ${getCusLabelText(planItem.plan.planCategory, categoryOptions)}',
                       ),
                     ],
                   ),
@@ -289,9 +284,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => GroupList(
-                        planItem: planItem.plan,
-                      ),
+                      builder: (context) => GroupList(planItem: planItem.plan),
                     ),
                   ).then((value) {
                     setState(() {

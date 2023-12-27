@@ -284,12 +284,10 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           ? buildLoader(isLoading)
           : Column(
               children: [
-                Center(
-                  child: SizedBox(
-                    height: 70.sp,
-                    child: buildDailyOverviewCard(),
-                  ),
-                ),
+                /// 顶部的每日概述卡片，点击切换表格或概述模式
+                buildDailyOverviewCard(),
+
+                /// 饮食日记条目列表
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
@@ -334,6 +332,26 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
   /// 最上面的每日概述卡片
   Widget buildDailyOverviewCard() {
+    return Card(
+      elevation: 4,
+      color: Theme.of(context).secondaryHeaderColor,
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            dataDisplayMode =
+                dataDisplayMode == "detailed" ? "summary" : "detailed";
+          });
+        },
+        child: SizedBox(
+          height: 70.sp,
+          child: _buildDailyOverviewListTile(),
+        ),
+      ),
+    );
+  }
+
+  /// 最上面的每日概述卡片的文本
+  Widget _buildDailyOverviewListTile() {
     // 两种形态：只显示卡路里的基本，显示主要营养素的详细
     var tempList = formatIntakeItemListForMarker(context, dfiwfsList);
 
@@ -347,90 +365,76 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       mainNutrientsChartData = tempList;
     });
 
-    // 最上方的是当日摄入的主要营养素总量，根据详细和概要展示不同内容
-
-    return Card(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            flex: 3,
-            child: dataDisplayMode == "summary"
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildListTileText(CusAL.of(context).calorieLabels('0')),
-                      _buildListTileText(CusAL.of(context).calorieLabels('1')),
-                    ],
-                  )
-                : Padding(
-                    padding: EdgeInsets.only(left: 24.sp, bottom: 8.sp),
-                    child: Table(
-                      children: [
-                        TableRow(
-                          children: [
-                            _buildHeaderTableCell(
-                              CusAL.of(context).mainNutrients('4'),
-                            ),
-                            _buildHeaderTableCell(
-                              CusAL.of(context).mainNutrients('2'),
-                            ),
-                            _buildHeaderTableCell(
-                              CusAL.of(context).mainNutrients('3'),
-                            ),
-                            _buildHeaderTableCell(
-                              CusAL.of(context).mainNutrients('5'),
-                            ),
-                          ],
-                        ),
-                        _buildMainMutrientsValueTableRow(
-                          totalCho,
-                          totalProtein,
-                          totalFat,
-                          totalCalorie,
-                          fontSize: CusFontSizes.itemSubTitle,
-                        ),
-                      ],
+    // 最上方的是当日摄入的主要营养素总量，根据详细和概要展示不同内容.1是表格模式，2是简单的已食用和剩余卡路里
+    return ListTile(
+      title: Table(
+        children: (dataDisplayMode == "detailed")
+            ? [
+                TableRow(
+                  children: [
+                    _buildHeaderTableCell(CusAL.of(context).mainNutrients('4')),
+                    _buildHeaderTableCell(CusAL.of(context).mainNutrients('2')),
+                    _buildHeaderTableCell(CusAL.of(context).mainNutrients('3')),
+                    _buildHeaderTableCell(CusAL.of(context).mainNutrients('5')),
+                  ],
+                ),
+                _buildMainMutrientsValueTableRow(
+                    totalCho, totalProtein, totalFat, totalCalorie),
+              ]
+            : [
+                TableRow(
+                  children: [
+                    _buildHeaderTableCell(CusAL.of(context).calorieLabels('0')),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    // 不能使用上面那个header cell，格式细微不同
+                    TableCell(
+                      child: Text(
+                        CusAL.of(context).calorieLabels('1'),
+                        style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
+                        textAlign: TextAlign.end,
+                      ),
                     ),
-                  ),
-          ),
-          Expanded(
-            flex: 1,
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  dataDisplayMode =
-                      dataDisplayMode == "summary" ? "detailed" : "summary";
-                });
-              },
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(4.sp),
-                    child: _buildListTileText(
-                      (dataDisplayMode == "summary"
-                              ? (valueRDA - totalCalorie)
-                              : valueRDA)
-                          .toStringAsFixed(0),
-                      textAlign: TextAlign.right,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(4.sp),
-                    child: _buildListTileText(
-                      totalCalorie.toStringAsFixed(0),
-                      textAlign: TextAlign.right,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
+                  ],
+                ),
+              ],
       ),
+      // 尾部留七分之一显示RDA值
+      trailing: SizedBox(
+        width: 0.142.sw,
+        child: Table(
+          children: [
+            TableRow(
+              children: [
+                _buildHeaderTableCell(
+                  (dataDisplayMode == "detailed")
+                      ? valueRDA.toString()
+                      : (valueRDA - totalCalorie).toStringAsFixed(0),
+                  // color: Theme.of(context).primaryColor,
+                ),
+              ],
+            ),
+            TableRow(
+              children: [
+                // 不能使用上面那个header cell，格式细微不同
+                TableCell(
+                  child: Text(
+                    totalCalorie.toStringAsFixed(0),
+                    style: TextStyle(
+                      fontSize: CusFontSizes.itemSubTitle,
+                      // color: Theme.of(context).primaryColor,
+                    ),
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      dense: true,
     );
   }
 
@@ -438,18 +442,22 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     String label, {
     double? fontSize,
     textAlign = TextAlign.right,
+    Color? color,
   }) {
     fontSize ??= CusFontSizes.itemSubTitle;
     return TableCell(
       child: Text(
         label,
         textAlign: textAlign,
-        style: TextStyle(fontSize: fontSize),
+        style: TextStyle(fontSize: fontSize, color: color),
         // 中英文的leading好像不一样，统一一下避免显示不在一条水平线
         strutStyle: StrutStyle(
           forceStrutHeight: true,
           leading: 1.sp,
         ),
+        // 只显示1行,不然表格变形
+        maxLines: 1,
+        overflow: TextOverflow.clip,
       ),
     );
   }
@@ -768,12 +776,12 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                       title: _buildListTileText(
                         tempCalories.toStringAsFixed(0),
                         textAlign: TextAlign.right,
-                        fontSize: 16,
+                        fontSize: CusFontSizes.pageSubTitle,
                       ),
                       subtitle: _buildListTileText(
                         CusAL.of(context).calorieLabels("2"),
                         textAlign: TextAlign.right,
-                        fontSize: 12,
+                        fontSize: CusFontSizes.itemContent,
                       ),
                       dense: true,
                     ),

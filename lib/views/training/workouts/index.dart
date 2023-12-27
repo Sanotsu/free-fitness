@@ -262,29 +262,16 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                 children: [
                   TextSpan(
                     text:
-                        '${groupItem.actionDetailList.length} ${CusAL.of(context).exercise} ',
-                    style: TextStyle(
-                      color: Theme.of(context).shadowColor,
-                    ),
+                        '${groupItem.actionDetailList.length} ${CusAL.of(context).exercise}',
                   ),
                   TextSpan(
-                    text: '${getCusLabelText(
-                      groupItem.group.groupLevel,
-                      levelOptions,
-                    )}  ',
-                    style: TextStyle(
-                      fontSize: CusFontSizes.itemTitle,
-                      color: Colors.green[500],
-                    ),
+                    text:
+                        '  ${getCusLabelText(groupItem.group.groupLevel, levelOptions)}  ',
+                    style: TextStyle(color: Colors.green[500]),
                   ),
                   TextSpan(
-                    text: '${getCusLabelText(
-                      groupItem.group.groupCategory,
-                      groupCategoryOptions,
-                    )}  ',
-                    style: TextStyle(
-                      color: Theme.of(context).shadowColor,
-                    ),
+                    text:
+                        '${getCusLabelText(groupItem.group.groupCategory, groupCategoryOptions)}',
                   ),
                 ],
               ),
