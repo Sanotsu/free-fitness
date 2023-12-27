@@ -21,13 +21,13 @@ class ActionList extends StatefulWidget {
   // 从已存在的训练进入action list，会带上group信息去查询已存在的action list
   // 2023-12-04 如果是从计划页面跳转过来，就需要带上计划的编号已经训练日信息
   final TrainingGroup groupItem;
-  final int? planId;
+  final TrainingPlan? planItem;
   final int? dayNumber;
 
   const ActionList({
     super.key,
     required this.groupItem,
-    this.planId,
+    this.planItem,
     this.dayNumber,
   });
 
@@ -198,7 +198,7 @@ class _ActionListState extends State<ActionList> {
             },
           ),
           // 2023-12-23 如果有planId，则从计划跳某一个训练日，再到这里，就不允许修改这个训练组，只能查看
-          actions: widget.planId != null
+          actions: widget.planItem != null
               ? null
               : <Widget>[
                   if (_isEditing)
@@ -243,12 +243,11 @@ class _ActionListState extends State<ActionList> {
                       MaterialPageRoute(
                         builder: (context) => ActionFollowPracticeWithTTS(
                           // 虽然计划编号、训练日 和训练编号都有传，但理论上两者不会同时存在也不会同时为空
-                          planId: widget.planId,
+                          plan: widget.planItem,
                           dayNumber: widget.dayNumber,
                           // 有计划编号，就不传训练编号了
-                          groupId: widget.planId != null
-                              ? null
-                              : widget.groupItem.groupId,
+                          group:
+                              widget.planItem != null ? null : widget.groupItem,
                           // 动作组数据是必须要传的
                           actionList: actionList,
                         ),

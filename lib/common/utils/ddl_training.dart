@@ -24,8 +24,8 @@ class TrainingDdl {
   // 训练计划-动作组关系表
   static const tableNameOfPlanHasGroup = 'ff_plan_has_group';
 
-  // 训练日志记录表
-  static const tableNameOfTrainedLog = 'ff_trained_log';
+  // 2023-12-27 训练日志基础宽表，不再级联查询plan和group
+  static const tableNameOfTrainedDetailLog = 'ff_trained_detail_log';
 
   static const String ddlForExercise = """
     CREATE TABLE $tableNameOfExercise (
@@ -101,19 +101,24 @@ class TrainingDdl {
     );
     """;
 
-  static const String ddlForTrainedLog = """
-    CREATE TABLE $tableNameOfTrainedLog (
-      trained_log_id      INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-      trained_date        TEXT,
-      user_id             INTEGER   NOT NULL,
-      plan_id             INTEGER,
-      day_number          INTEGER,
-      group_id            INTEGER,
-      trained_start_time  TEXT      NOT NULL,
-      trained_end_time    TEXT      NOT NULL,
-      trained_duration    INTEGER   NOT NULL,
-      totol_paused_time   INTEGER   NOT NULL,
-      total_rest_time     INTEGER   NOT NULL
+  static const String ddlForTrainedDetailLog = """
+    CREATE TABLE $tableNameOfTrainedDetailLog (
+      trained_detail_log_id   INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+      trained_date            TEXT,
+      user_id                 INTEGER   NOT NULL,
+      plan_name               TEXT,
+      plan_category           TEXT,
+      plan_level              TEXT,
+      day_number              INTEGER,
+      group_name              TEXT,
+      group_category          TEXT,
+      group_level             TEXT,
+      consumption             INTEGER,
+      trained_start_time      TEXT      NOT NULL,
+      trained_end_time        TEXT      NOT NULL,
+      trained_duration        INTEGER   NOT NULL,
+      totol_paused_time       INTEGER   NOT NULL,
+      total_rest_time         INTEGER   NOT NULL
     );
     """;
 }

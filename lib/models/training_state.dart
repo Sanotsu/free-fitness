@@ -304,20 +304,27 @@ class PlanHasGroup {
   }
 }
 
-// 训练日志表
-class TrainedLog {
-  int? trainedLogId; // 自增的，可以不传
-  int? planId, dayNumber, groupId;
+// 2023-12-27 训练日志宽表，不再级联查询plan和group，这样后两者有删除也可以查看历史记录
+class TrainedDetailLog {
+  int? trainedDetailLogId; // 自增的，可以不传
+  int? dayNumber, consumption;
+  String? planName, planCategory, planLevel;
+  String? groupName, groupCategory, groupLevel;
   String trainedDate, trainedStartTime, trainedEndTime;
   int userId, trainedDuration, totolPausedTime, totalRestTime;
 
-  TrainedLog({
-    this.trainedLogId,
+  TrainedDetailLog({
+    this.trainedDetailLogId,
     required this.trainedDate,
     required this.userId,
-    this.planId,
+    this.planName,
+    this.planCategory,
+    this.planLevel,
     this.dayNumber,
-    this.groupId,
+    this.groupName,
+    this.groupCategory,
+    this.groupLevel,
+    this.consumption,
     required this.trainedStartTime,
     required this.trainedEndTime,
     required this.trainedDuration,
@@ -328,12 +335,17 @@ class TrainedLog {
   // 转换成一个Map。键必须对应于数据库中的列名。
   Map<String, dynamic> toMap() {
     return {
-      'trained_log_id': trainedLogId,
+      'trained_detail_log_id': trainedDetailLogId,
       'trained_date': trainedDate,
       'user_id': userId,
-      'plan_id': planId,
+      'plan_name': planName,
+      'plan_category': planCategory,
+      'plan_level': planLevel,
       'day_number': dayNumber,
-      'group_id': groupId,
+      'group_name': groupName,
+      'group_category': groupCategory,
+      'group_level': groupLevel,
+      'consumption': consumption,
       'trained_start_time': trainedStartTime,
       'trained_end_time': trainedEndTime,
       'trained_duration': trainedDuration,
@@ -343,14 +355,19 @@ class TrainedLog {
   }
 
 // 用于从数据库行映射到 ServingInfo 对象的 fromMap 方法
-  factory TrainedLog.fromMap(Map<String, dynamic> map) {
-    return TrainedLog(
-      trainedLogId: map['trained_log_id'] as int?,
+  factory TrainedDetailLog.fromMap(Map<String, dynamic> map) {
+    return TrainedDetailLog(
+      trainedDetailLogId: map['trained_detail_log_id'] as int?,
       trainedDate: map['trained_date'] as String,
       userId: map['user_id'] as int,
-      planId: map['plan_id'] as int?,
+      planName: map['plan_name'] as String?,
+      planCategory: map['plan_category'] as String?,
+      planLevel: map['plan_level'] as String?,
       dayNumber: map['day_number'] as int?,
-      groupId: map['group_id'] as int?,
+      groupName: map['group_name'] as String?,
+      groupCategory: map['group_category'] as String?,
+      groupLevel: map['group_level'] as String?,
+      consumption: map['consumption'] as int?,
       trainedStartTime: map['trained_start_time'] as String,
       trainedEndTime: map['trained_end_time'] as String,
       trainedDuration: map['trained_duration'] as int,
@@ -363,9 +380,10 @@ class TrainedLog {
   @override
   String toString() {
     return '''
-    TrainedLog{
-      trainedLogId:$trainedLogId, trainedDate:$trainedDate, userId:$userId, 
-      planId:$planId, dayNumber:$dayNumber, groupId:$groupId, 
+    TrainedDetailLog{
+      trainedDetailLogId:$trainedDetailLogId, trainedDate:$trainedDate, userId:$userId, 
+      planName:$planName, planCategory:$planCategory, planLevel:$planLevel, dayNumber:$dayNumber,
+      groupName:$groupName, groupCategory:$groupCategory, groupLevel:$groupLevel, consumption:$consumption, 
       trainedStartTime:$trainedStartTime, trainedEndTime:$trainedEndTime, 
       trainedDuration:$trainedDuration, totolPausedTime:$totolPausedTime, totalRestTime:$totalRestTime
     }
@@ -439,64 +457,4 @@ class ActionPractice {
       plan: $plan, groupDetailList: $groupDetailList,
     ''';
   }
-}
-
-// 训练日志要带上训练或者计划的基础信息(没有动作的信息)
-class TrainedLogWithGroupBasic {
-  final TrainedLog log;
-  // 如果直接的训练的跟练，对应训练的数据；如果是计划的某一天的训练，同样记录训练信息，是哪一天在log表中
-  final TrainingGroup? group;
-  // 如果是某个计划的某一天的训练，带上计划的信息
-  final TrainingPlan? plan;
-
-  TrainedLogWithGroupBasic({
-    required this.log,
-    // 不查询训练是也可以用这个类，代替日志类？
-    this.group,
-    this.plan,
-  });
-
-  @override
-  String toString() {
-    return '''
-    TrainedLogWithGroupBasic {
-      log: $log, group: $group, plan: $plan
-    ''';
-  }
-}
-
-// 2023-12-14 如果一个动作有被使用，则记录被哪个关联表使用
-class ExerciseUsageVO {
-  int? actionId;
-  int? groupId;
-  int? planId;
-  int? logId;
-
-  ExerciseUsageVO({
-    this.actionId,
-    this.groupId,
-    this.planId,
-    this.logId,
-  });
-
-  // 作为vo，应该只有查询的对应。目前只有联合查询时用到
-  // 注意栏位前缀有不同表的同名栏位，栏位会重复，而不会在栏位前带上表名
-  factory ExerciseUsageVO.fromMap(Map<String, dynamic> map) {
-    return ExerciseUsageVO(
-      actionId: map['action_id'] as int?,
-      groupId: map['group_id'] as int?,
-      planId: map['plan_id'] as int?,
-      logId: map['trained_log_id'] as int?,
-    );
-  }
-
-  @override
-  String toString() {
-    return 'ExerciseUsageVO {actionId: $actionId, groupId: $groupId, planId: $planId, logId: $logId }';
-  }
-
-  // @override
-  // String toString() {
-  //   return '配置编号:$actionId,训练编号:$groupId,计划编号:$planId,日志:$logId';
-  // }
 }

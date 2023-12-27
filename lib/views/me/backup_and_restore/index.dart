@@ -319,9 +319,9 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
       } else if (filename == "ff_meal_photo.json") {
         var temp = jsonMapList.map((e) => MealPhoto.fromMap(e)).toList();
         await _dietaryHelper.insertMealPhotoList(temp);
-      } else if (filename == "ff_trained_log.json") {
-        var temp = jsonMapList.map((e) => TrainedLog.fromMap(e)).toList();
-        await _trainingHelper.insertTrainingLogList(temp);
+      } else if (filename == "ff_trained_detail_log.json") {
+        var temp = jsonMapList.map((e) => TrainedDetailLog.fromMap(e)).toList();
+        await _trainingHelper.insertTrainingDetailLogList(temp);
       } else if (filename == "ff_diary.json") {
         var temp = jsonMapList.map((e) => Diary.fromMap(e)).toList();
         await _diaryHelper.insertDiaryList(temp);

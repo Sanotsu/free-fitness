@@ -41,7 +41,7 @@ class _GroupListState extends State<GroupList> {
   List<GroupWithActions> groupList = [];
 
   // 当前计划的每个训练日最后一次训练的日志map
-  Map<int, TrainedLog?> logMap = {};
+  Map<int, TrainedDetailLog?> logMap = {};
 
   // 是否在加载数据
   bool isLoading = false;
@@ -73,7 +73,7 @@ class _GroupListState extends State<GroupList> {
     );
 
     // 查询该训练计划的跟练日志信息，用于显示每个训练的最后一次跟练时间
-    var tempLog = await _dbHelper.searchLastTrainingLogByPlanId(
+    var tempLog = await _dbHelper.queryLastTrainingDetailLogByPlanName(
       widget.planItem,
     );
 
@@ -352,7 +352,7 @@ class _GroupListState extends State<GroupList> {
             MaterialPageRoute(
               builder: (context) => ActionList(
                 groupItem: groupItem,
-                planId: widget.planItem.planId,
+                planItem: widget.planItem,
                 dayNumber: index + 1,
               ),
             ),

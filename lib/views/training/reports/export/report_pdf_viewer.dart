@@ -33,7 +33,7 @@ class _TrainedReportPdfViewerState extends State<TrainedReportPdfViewer> {
   final DBTrainingHelper _trainingHelper = DBTrainingHelper();
 
   /// 根据条件查询的日记条目数据(所有数据的来源，格式化成VO可以在指定函数中去做)
-  List<TrainedLogWithGroupBasic> tlwgbList = [];
+  List<TrainedDetailLog> tdlList = [];
 
   bool isLoading = false;
 
@@ -41,11 +41,11 @@ class _TrainedReportPdfViewerState extends State<TrainedReportPdfViewer> {
   void initState() {
     super.initState();
 
-    _queryTrainedLogList();
+    _queryTrainedDetailLogList();
   }
 
   /// 有指定日期查询指定日期的饮食记录条目，没有就当前日期
-  _queryTrainedLogList() async {
+  _queryTrainedDetailLogList() async {
     if (isLoading) return;
 
     setState(() {
@@ -53,7 +53,7 @@ class _TrainedReportPdfViewerState extends State<TrainedReportPdfViewer> {
     });
 
     // 理论上是默认查询当日的，有选择其他日期则查询指定日期？？？还要是登录者这个用户编号的
-    var temp = await _trainingHelper.searchTrainedLogWithGroupBasic(
+    var temp = await _trainingHelper.queryTrainedDetailLog(
       userId: CacheUser.userId,
       startDate: widget.startDate,
       endDate: widget.endDate,
@@ -61,7 +61,7 @@ class _TrainedReportPdfViewerState extends State<TrainedReportPdfViewer> {
     );
 
     setState(() {
-      tlwgbList = temp;
+      tdlList = temp;
       isLoading = false;
     });
   }
@@ -77,7 +77,7 @@ class _TrainedReportPdfViewerState extends State<TrainedReportPdfViewer> {
           : PdfPreview(
               initialPageFormat: PdfPageFormat.a4,
               build: (context) => makeTrainedReportPdf(
-                tlwgbList,
+                tdlList,
                 // 在pdf页首会显示查询数据的日期
                 widget.startDate.split(" ")[0],
                 widget.endDate.split(" ")[0],

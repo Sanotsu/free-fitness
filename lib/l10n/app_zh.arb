@@ -102,7 +102,7 @@
     "exercise": "动作",
     "exerciseLabel": "基础动作",
     "exerciseSubtitle": "管理运动的各个基础动作",
-    "exerciseDeleteAlert":"确认要删除该动作: {exerciseName}？删除后不可恢复！",
+    "exerciseDeleteAlert":"确认要删除该动作: {exerciseName} ? 删除后不可恢复!",
     "exerciseInUse":"该动作 {exerciseName} 有被训练或计划使用，暂不支持删除.",
 
     "exerciseQuerys": "{num, select, 0{训练部位} 1{代号} 2{名称} 3{级别} 4{类型} 5{分类} 6{器械} 7{计量} other{其他} }",
@@ -132,8 +132,8 @@
     "@workoutQuerys": {
     "description": "常用workout查询用的标签"
     },
-    "groupDeleteAlert":"确认要删除该训练动作组:{workoutName}？删除后不可恢复！",
-    "groupInUse":"该训练 {workoutName} 有被计划使用或者存在跟练记录，暂不支持删除",
+    "groupDeleteAlert":"确认要删除该训练动作组: {workoutName} ? 删除后不可恢复!",
+    "groupInUse":"该训练 {workoutName} 有被计划使用，暂不支持删除",
     
     "modifyGroupLabels": "{num, select, 0{修改训练} 1{新建训练} 2{主要肌肉} 3{次要肌肉} 4{技术要点} 5{语音提示要点} 6{动作图片} 7{用户上传} other{其他} }",
     "@modifyGroupLabels": {
@@ -181,7 +181,7 @@
     "@planQuerys": {
     "description": "常用 plan 查询用的标签"
     },
-    "planDeleteAlert":"确认要删除该训练计划:{planName}？删除后不可恢复！",
+    "planDeleteAlert":"确认要删除该训练计划: {planName} ? 删除后不可恢复!",
     "planInUse":"该训练计划 {planName} 存在跟练记录，暂不支持删除",
     
     "modifyPlanLabels": "{num, select, 0{修改计划} 1{新建计划} 2{名称} 3{代号} 4{分类} 5{级别} 6{训练周期} 7{概述} other{其他} }",

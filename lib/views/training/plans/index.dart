@@ -301,59 +301,46 @@ class _TrainingPlansState extends State<TrainingPlans> {
                 },
                 // 长按点击弹窗提示是否删除
                 onLongPress: () async {
-                  // 如果该基础活动有被使用，则不允许直接删除
-                  var list =
-                      await _dbHelper.isPlanUsedByRawSQL(planItem.plan.planId!);
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text(CusAL.of(context).deleteConfirm),
+                        content: Text(CusAL.of(context)
+                            .planDeleteAlert(planItem.plan.planName)),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context, false);
+                            },
+                            child: Text(CusAL.of(context).cancelLabel),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context, true);
+                            },
+                            child: Text(CusAL.of(context).confirmLabel),
+                          ),
+                        ],
+                      );
+                    },
+                  ).then((value) async {
+                    if (value != null && value) {
+                      try {
+                        await _dbHelper.deletePlanById(planItem.plan.planId!);
 
-                  if (!mounted) return;
-                  if (list.isNotEmpty) {
-                    commonExceptionDialog(
-                      context,
-                      CusAL.of(context).exceptionWarningTitle,
-                      CusAL.of(context).planInUse(planItem.plan.planName),
-                    );
-                  } else {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text(CusAL.of(context).deleteConfirm),
-                          content: Text(CusAL.of(context)
-                              .planDeleteAlert(planItem.plan.planName)),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context, false);
-                              },
-                              child: Text(CusAL.of(context).cancelLabel),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context, true);
-                              },
-                              child: Text(CusAL.of(context).confirmLabel),
-                            ),
-                          ],
+                        // 删除后重新查询
+                        getPlanList();
+                      } catch (e) {
+                        if (!mounted) return;
+                        commonExceptionDialog(
+                          context,
+                          CusAL.of(context).exceptionWarningTitle,
+                          e.toString(),
                         );
-                      },
-                    ).then((value) async {
-                      if (value != null && value) {
-                        try {
-                          await _dbHelper.deletePlanById(planItem.plan.planId!);
-
-                          // 删除后重新查询
-                          getPlanList();
-                        } catch (e) {
-                          if (!mounted) return;
-                          commonExceptionDialog(
-                            context,
-                            CusAL.of(context).exceptionWarningTitle,
-                            e.toString(),
-                          );
-                        }
                       }
-                    });
-                  }
+                    }
+                  });
                 },
               ),
             ],

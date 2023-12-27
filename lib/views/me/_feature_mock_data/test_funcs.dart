@@ -358,17 +358,22 @@ Future<int> insertOneRandomPlanHasGroup() async {
   return planId;
 }
 
-// 插入一条跟练记录(不那么随机，且需要已有训练的基础数据)
-insertTrainingLogDemo({int? size = 10}) async {
-  print("【【【 插入测试数据 start-->:insertTrainingLogDemo ");
+// 2023-12-27 插入训练日志宽表数据，展示运动报告时不需要级联查询基础表
+insertTrainingDetailLogDemo({int? size = 10}) async {
+  print("【【【 插入测试数据 start-->:insertTrainingDetailLogDemo ");
+
+  /// 2023-12-27 正好是测试日志宽表，不会关联其他基础表，数据随意写就好了
 
   // 计划中的某一天
-  var tl1 = TrainedLog(
+  var tl1 = TrainedDetailLog(
     trainedDate: getCurrentDateTime(),
     userId: Random().nextInt(3) + 1,
     // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
-    planId: 1,
-    dayNumber: 2,
+    planName: generateRandomString(5, 20),
+    planCategory:
+        categoryOptions[Random().nextInt(categoryOptions.length)].value,
+    planLevel: levelOptions[Random().nextInt(levelOptions.length)].value,
+    dayNumber: Random().nextInt(8) + 1,
     // 起止时间就测试插入时的1个小时
     trainedStartTime: DateFormat(constDatetimeFormat)
         .format(DateTime.now().add(const Duration(hours: -1))),
@@ -379,14 +384,19 @@ insertTrainingLogDemo({int? size = 10}) async {
     totalRestTime: 12 * 60, // 休息的总时间
   );
 
-  var logId1 = await _trainingHelper.insertTrainingLog(tl1);
+  var logId1 = await _trainingHelper.insertTrainedDetailLog(tl1);
 
   // 直接的某个训练
-  var tl2 = TrainedLog(
+  var tl2 = TrainedDetailLog(
     trainedDate: getCurrentDateTime(),
     userId: Random().nextInt(3) + 1,
     // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
-    groupId: 1,
+    groupName: generateRandomString(5, 20),
+    groupCategory:
+        groupCategoryOptions[Random().nextInt(groupCategoryOptions.length)]
+            .value,
+    groupLevel: levelOptions[Random().nextInt(levelOptions.length)].value,
+    consumption: Random().nextInt(1000),
     // 起止时间就测试插入时的1个小时
     trainedStartTime: DateFormat(constDatetimeFormat)
         .format(DateTime.now().add(const Duration(hours: -2))),
@@ -398,16 +408,19 @@ insertTrainingLogDemo({int? size = 10}) async {
     totalRestTime: 20 * 60, // 休息的总时间
   );
 
-  var logId2 = await _trainingHelper.insertTrainingLog(tl2);
+  var logId2 = await _trainingHelper.insertTrainedDetailLog(tl2);
 
   // 前一天的日志 计划中的某一天
-  var tl3 = TrainedLog(
+  var tl3 = TrainedDetailLog(
     trainedDate: DateFormat(constDatetimeFormat)
         .format(DateTime.now().add(const Duration(days: -1))),
     userId: Random().nextInt(3) + 1,
     // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
-    planId: 1,
-    dayNumber: 1,
+    planName: generateRandomString(5, 20),
+    planCategory:
+        categoryOptions[Random().nextInt(categoryOptions.length)].value,
+    planLevel: levelOptions[Random().nextInt(levelOptions.length)].value,
+    dayNumber: Random().nextInt(8) + 1,
     // 起止时间就测试插入时的1个小时
     trainedStartTime: DateFormat(constDatetimeFormat)
         .format(DateTime.now().add(const Duration(days: -1, hours: -1))),
@@ -419,10 +432,10 @@ insertTrainingLogDemo({int? size = 10}) async {
     totalRestTime: 12 * 60, // 休息的总时间
   );
 
-  var logId3 = await _trainingHelper.insertTrainingLog(tl3);
+  var logId3 = await _trainingHelper.insertTrainedDetailLog(tl3);
 
   print(
-    "【【【 插入测试数据 end-->:insertTrainingLogDemo logId: $logId1 $logId2 $logId3",
+    "【【【 插入测试数据 end-->:insertTrainingDetailLogDemo logId: $logId1 $logId2 $logId3",
   );
 }
 

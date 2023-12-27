@@ -327,9 +327,8 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
             },
             // 长按点击弹窗提示是否删除
             onLongPress: () async {
-              // 如果该基础活动有被使用，则不允许直接删除
-              var list =
-                  await _dbHelper.isGroupUsedByRawSQL(groupItem.group.groupId!);
+              // 如果该训练有被使用，则不允许直接删除
+              var list = await _dbHelper.isGroupUsed(groupItem.group.groupId!);
 
               if (!mounted) return;
               if (list.isNotEmpty) {

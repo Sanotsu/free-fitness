@@ -41,7 +41,7 @@ class _TrainingReportsState extends State<TrainingReports> {
   final DBTrainingHelper _trainingHelper = DBTrainingHelper();
 
   // 被选中的事件
-  late ValueNotifier<List<TrainedLogWithGroupBasic>> _selectedEvents;
+  late ValueNotifier<List<TrainedDetailLog>> _selectedEvents;
   // 用于展示的日历格式(默认是当前这一个星期，可以切换为最近两个星期、当月)
   CalendarFormat _calendarFormat = CalendarFormat.week;
   // 点击两个日期变为选定日期范围
@@ -55,7 +55,7 @@ class _TrainingReportsState extends State<TrainingReports> {
   DateTime? _rangeEnd;
 
   // 初始化或查询时加载数据，没加载完就都是加载中
-  late List<TrainedLogWithGroupBasic> trainedLogList;
+  late List<TrainedDetailLog> tdlList;
 
   // 导出数据时默认选中为最近7天
   CusLabel exportDateValue = exportDateList.first;
@@ -84,13 +84,13 @@ class _TrainingReportsState extends State<TrainingReports> {
       isLoading = true;
     });
 
-    var list = await _trainingHelper.searchTrainedLogWithGroupBasic(
+    var list = await _trainingHelper.queryTrainedDetailLog(
       userId: CacheUser.userId,
       gmtCreateSort: "DESC",
     );
 
     setState(() {
-      trainedLogList = list;
+      tdlList = list;
       // 初始化时设定当前选中的日期就是聚焦的日期
       _selectedDay = _focusedDay;
       // 获取当前日期的事件
@@ -101,11 +101,11 @@ class _TrainingReportsState extends State<TrainingReports> {
   }
 
   // 获取指定某一天的手记列表
-  List<TrainedLogWithGroupBasic> _getLogsForADay(day) {
+  List<TrainedDetailLog> _getLogsForADay(day) {
     // 训练记录的训练日志存入的是完整的datetime，这里只取date部分
-    return trainedLogList
+    return tdlList
         .where((e) =>
-            e.log.trainedDate.split(" ")[0] ==
+            e.trainedDate.split(" ")[0] ==
             DateFormat(constDateFormat).format(day))
         .toList();
   }
@@ -267,14 +267,14 @@ class _TrainingReportsState extends State<TrainingReports> {
   buildReportsView() {
     // 统计的是所有的运动次数和总的运动时间
     return FutureBuilder(
-      future: _trainingHelper.searchTrainedLogWithGroupBasic(
+      future: _trainingHelper.queryTrainedDetailLog(
         userId: CacheUser.userId,
         gmtCreateSort: "DESC",
       ),
       builder: (BuildContext context,
-          AsyncSnapshot<List<TrainedLogWithGroupBasic>> snapshot) {
+          AsyncSnapshot<List<TrainedDetailLog>> snapshot) {
         if (snapshot.hasData) {
-          List<TrainedLogWithGroupBasic> data = snapshot.data!;
+          List<TrainedDetailLog> data = snapshot.data!;
 
           if (data.isEmpty) {
             return Center(
@@ -288,14 +288,14 @@ class _TrainingReportsState extends State<TrainingReports> {
             );
           }
 
-          // TrainedLogWithGroupBasic-->tlwgb
+          // TrainedDetailLog-->tlwgb
           // 计算所有训练日志的累加时间
-          int totalRest = data.fold(
-              0, (prevVal, tlwgb) => prevVal + tlwgb.log.totalRestTime);
-          int totolPaused = data.fold(
-              0, (prevVal, tlwgb) => prevVal + tlwgb.log.totolPausedTime);
-          int totalTrained = data.fold(
-              0, (prevVal, tlwgb) => prevVal + tlwgb.log.trainedDuration);
+          int totalRest =
+              data.fold(0, (prevVal, tdl) => prevVal + tdl.totalRestTime);
+          int totolPaused =
+              data.fold(0, (prevVal, tdl) => prevVal + tdl.totolPausedTime);
+          int totalTrained =
+              data.fold(0, (prevVal, tdl) => prevVal + tdl.trainedDuration);
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -420,7 +420,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                     Expanded(
                       flex: 3,
                       child: Text(
-                        data.first.log.trainedDate,
+                        data.first.trainedDate,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.green,
@@ -446,9 +446,9 @@ class _TrainingReportsState extends State<TrainingReports> {
                     Expanded(
                       flex: 3,
                       child: Text(
-                        (data.first.plan != null)
-                            ? "${data.first.plan?.planName} - ${CusAL.of(context).dayNumber(data.first.log.dayNumber ?? 0)}"
-                            : data.first.group?.groupName ?? "",
+                        (data.first.planName != null)
+                            ? "${data.first.planName} - ${CusAL.of(context).dayNumber(data.first.dayNumber ?? 0)}"
+                            : data.first.groupName ?? "",
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -476,7 +476,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                     Expanded(
                       flex: 3,
                       child: Text(
-                        "${cusDoubleTryToIntString(data.first.log.trainedDuration / 60)} ${CusAL.of(context).unitLabels('8')}",
+                        "${cusDoubleTryToIntString(data.first.trainedDuration / 60)} ${CusAL.of(context).unitLabels('8')}",
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.green,
@@ -574,7 +574,7 @@ class _TrainingReportsState extends State<TrainingReports> {
         ),
         SizedBox(height: 8.sp),
         // 日历某些操作改变后，显示对应的手记内容列表
-        ValueListenableBuilder<List<TrainedLogWithGroupBasic>>(
+        ValueListenableBuilder<List<TrainedDetailLog>>(
           valueListenable: _selectedEvents,
           // 当_selectedEvents有变化时，这个builder才会被调用
           builder: (context, value, _) {
@@ -592,7 +592,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                       EdgeInsets.symmetric(horizontal: 12.sp, vertical: 4.sp),
                   child: Padding(
                     padding: EdgeInsets.all(10.sp),
-                    child: _buildTrainedLogListTile(log),
+                    child: _buildTrainedDetailLogListTile(log),
                   ),
                 );
               },
@@ -610,16 +610,16 @@ class _TrainingReportsState extends State<TrainingReports> {
     var [start, end] = getStartEndDateString(30);
 
     return FutureBuilder(
-      future: _trainingHelper.searchTrainedLogWithGroupBasic(
+      future: _trainingHelper.queryTrainedDetailLog(
         userId: CacheUser.userId,
         startDate: start,
         endDate: end,
         gmtCreateSort: "DESC",
       ),
       builder: (BuildContext context,
-          AsyncSnapshot<List<TrainedLogWithGroupBasic>> snapshot) {
+          AsyncSnapshot<List<TrainedDetailLog>> snapshot) {
         if (snapshot.hasData) {
-          List<TrainedLogWithGroupBasic> data = snapshot.data!;
+          List<TrainedDetailLog> data = snapshot.data!;
 
           if (data.isEmpty) {
             return Center(
@@ -634,10 +634,10 @@ class _TrainingReportsState extends State<TrainingReports> {
           }
 
           // 将最近30天的记录，按天分组并排序展示。
-          Map<String, List<TrainedLogWithGroupBasic>> logGroupedByDate = {};
+          Map<String, List<TrainedDetailLog>> logGroupedByDate = {};
           for (var log in data) {
             // 日志的日期(不含时间)
-            var temp = log.log.trainedDate.split(" ")[0];
+            var temp = log.trainedDate.split(" ")[0];
             if (logGroupedByDate.containsKey(temp)) {
               logGroupedByDate[temp]!.add(log);
             } else {
@@ -679,7 +679,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                             children: [
                               if (index != 0)
                                 Divider(height: 5.sp, thickness: 3.sp),
-                              _buildTrainedLogListTile(log),
+                              _buildTrainedDetailLogListTile(log),
                             ],
                           );
                         },
@@ -719,7 +719,7 @@ class _TrainingReportsState extends State<TrainingReports> {
   }
 
   // 日历表格和最近30天记录的tab都可复用
-  _buildTrainedLogListTile(TrainedLogWithGroupBasic log) {
+  _buildTrainedDetailLogListTile(TrainedDetailLog log) {
     return ListTile(
       title: _buildWorkoutNameText(log),
       subtitle: Column(
@@ -728,27 +728,27 @@ class _TrainingReportsState extends State<TrainingReports> {
           SizedBox(height: 10.sp),
           _buildTileRow(
             CusAL.of(context).trainedCalendarLabels('5'),
-            '${log.log.trainedStartTime.split(" ")[1]} ~ ${log.log.trainedEndTime.split(" ")[1]}',
+            '${log.trainedStartTime.split(" ")[1]} ~ ${log.trainedEndTime.split(" ")[1]}',
           ),
           _buildTileRow(
             CusAL.of(context).trainedCalendarLabels('2'),
-            formatSeconds(log.log.trainedDuration.toDouble()),
+            formatSeconds(log.trainedDuration.toDouble()),
           ),
           _buildTileRow(
             CusAL.of(context).trainedCalendarLabels('3'),
-            formatSeconds(log.log.totolPausedTime.toDouble()),
+            formatSeconds(log.totolPausedTime.toDouble()),
           ),
           _buildTileRow(
             CusAL.of(context).trainedCalendarLabels('4'),
-            formatSeconds(log.log.totalRestTime.toDouble()),
+            formatSeconds(log.totalRestTime.toDouble()),
           ),
         ],
       ),
     );
   }
 
-  _buildWorkoutNameText(TrainedLogWithGroupBasic log) {
-    var planName = log.plan?.planName;
+  _buildWorkoutNameText(TrainedDetailLog log) {
+    var planName = log.planName;
     return planName != null
         ? RichText(
             textAlign: TextAlign.left,
@@ -765,24 +765,17 @@ class _TrainingReportsState extends State<TrainingReports> {
                   ),
                 ),
                 TextSpan(
-                  text: "  $planName \n",
+                  text: "  $planName  ",
                   style: TextStyle(
                     fontSize: CusFontSizes.itemTitle,
                     color: Colors.green,
                   ),
                 ),
                 TextSpan(
-                  text: CusAL.of(context).dayNumber(log.log.dayNumber ?? 0),
+                  text: CusAL.of(context).dayNumber(log.dayNumber ?? 0),
                   style: TextStyle(
                     color: Theme.of(context).primaryColor,
                     fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextSpan(
-                  text: '  ${log.group?.groupName}',
-                  style: TextStyle(
-                    fontSize: CusFontSizes.itemTitle,
-                    color: Colors.green,
                   ),
                 ),
               ],
@@ -803,7 +796,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                   ),
                 ),
                 TextSpan(
-                  text: '  ${log.group?.groupName}',
+                  text: '  ${log.groupName}',
                   style: TextStyle(
                     fontSize: CusFontSizes.itemTitle,
                     color: Colors.green[500],

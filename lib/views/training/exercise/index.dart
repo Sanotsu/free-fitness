@@ -278,8 +278,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
       // 左滑显示删除确认弹窗，？？？删除时还要检查删除者是否为创建者，这里只是测试左滑删除卡片
       confirmDismiss: (DismissDirection direction) async {
         // 如果该基础活动有被使用，则不允许直接删除
-        var list =
-            await _dbHelper.isExerciseUsedByRawSQL(exerciseItem.exerciseId!);
+        var list = await _dbHelper.isExerciseUsed(exerciseItem.exerciseId!);
 
         if (!mounted) return false;
         if (list.isNotEmpty) {

@@ -26,7 +26,7 @@ Map<String, CusLabel> _pdfLabelMap = {
   "number": CusLabel(enLabel: 'Page', cnLabel: "第", value: null),
   "page": CusLabel(enLabel: '', cnLabel: "页", value: null),
   "name": CusLabel(enLabel: 'Name', cnLabel: "训练名称", value: null),
-  "dayNumber": CusLabel(enLabel: 'Day ', cnLabel: "训练日 ", value: null),
+  "dayNumber": CusLabel(enLabel: 'Day', cnLabel: "训练日", value: null),
   "startAndEnd":
       CusLabel(enLabel: 'Start & End Time', cnLabel: "训练起止时间", value: null),
   "trainedDuration": CusLabel(
@@ -44,7 +44,7 @@ String _showLabel(String lang, CusLabel cusLable) {
 }
 
 Future<Uint8List> makeTrainedReportPdf(
-  List<TrainedLogWithGroupBasic> list,
+  List<TrainedDetailLog> list,
   String startDate,
   String endDate, {
   String lang = "cn",
@@ -68,11 +68,11 @@ Future<Uint8List> makeTrainedReportPdf(
   );
 
   // 1 先把条目按天分类，每天的所有餐次放到一致pdf中
-  Map<String, List<TrainedLogWithGroupBasic>> logGroupedByDate = {};
+  Map<String, List<TrainedDetailLog>> logGroupedByDate = {};
   for (var log in list) {
     // 日志的日期(不含时间)
     // 训练记录的训练日志存入的是完整的datetime，这里只取date部分
-    var tempDate = log.log.trainedDate.split(" ")[0];
+    var tempDate = log.trainedDate.split(" ")[0];
 
     if (logGroupedByDate.containsKey(tempDate)) {
       logGroupedByDate[tempDate]!.add(log);
@@ -95,7 +95,7 @@ Future<Uint8List> makeTrainedReportPdf(
 
 // 构建pdf的页面
 _buildPdfPage(
-  List<TrainedLogWithGroupBasic> logData,
+  List<TrainedDetailLog> logData,
   String date,
   String startDate,
   String endDate,
@@ -192,25 +192,23 @@ _buildHeaderTable(String lang) {
 }
 
 // 构建每餐的子表格数据部分
-_buildBodyTable(List<TrainedLogWithGroupBasic> trainedData, String lang) {
+_buildBodyTable(List<TrainedDetailLog> trainedData, String lang) {
   // 计算所有训练日志的累加时间
   int totalRest =
-      trainedData.fold(0, (prev, item) => prev + item.log.totalRestTime);
+      trainedData.fold(0, (prev, item) => prev + item.totalRestTime);
   int totolPaused =
-      trainedData.fold(0, (prev, item) => prev + item.log.totolPausedTime);
+      trainedData.fold(0, (prev, item) => prev + item.totolPausedTime);
   int totalTrained =
-      trainedData.fold(0, (prev, item) => prev + item.log.trainedDuration);
+      trainedData.fold(0, (prev, item) => prev + item.trainedDuration);
 
   return pw.Table(
     // 字数据可以不显示边框，更方便看？
     border: pw.TableBorder.all(color: PdfColors.black),
     children: [
       ...trainedData.map((e) {
-        var log = e.log;
-
-        var name = (e.plan != null)
-            ? "${e.plan!.planName} ${_showLabel(lang, _pdfLabelMap['dayNumber']!)} ${log.dayNumber} \n${e.group?.groupName}"
-            : e.group?.groupName ?? "";
+        var name = (e.planName != null)
+            ? "${e.planName} ${_showLabel(lang, _pdfLabelMap['dayNumber']!)} ${e.dayNumber}"
+            : e.groupName ?? "";
 
         return pw.TableRow(
           // 行中数据垂直居中
@@ -224,19 +222,19 @@ _buildBodyTable(List<TrainedLogWithGroupBasic> trainedData, String lang) {
               ),
             ),
             expandedSubText(
-              "${log.trainedStartTime.split(" ")[1]} - ${log.trainedEndTime.split(" ")[1]}",
+              "${e.trainedStartTime.split(" ")[1]} - ${e.trainedEndTime.split(" ")[1]}",
               flex: 2,
             ),
             expandedSubText(
-              cusDoubleTryToIntString(log.trainedDuration / 60),
+              cusDoubleTryToIntString(e.trainedDuration / 60),
               flex: 2,
             ),
             expandedSubText(
-              cusDoubleTryToIntString(log.totalRestTime / 60),
+              cusDoubleTryToIntString(e.totalRestTime / 60),
               flex: 2,
             ),
             expandedSubText(
-              cusDoubleTryToIntString(log.totolPausedTime / 60),
+              cusDoubleTryToIntString(e.totolPausedTime / 60),
               flex: 2,
             ),
           ],

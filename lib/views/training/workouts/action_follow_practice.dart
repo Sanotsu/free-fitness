@@ -23,17 +23,17 @@ import '../reports/index.dart';
 
 class ActionFollowPracticeWithTTS extends StatefulWidget {
   /// 跟练的时候，可能是直接的某个训练；也可能是某个计划的某个训练日。理论上不会两者都有
-  final int? planId;
+  final TrainingPlan? plan;
   final int? dayNumber;
-  final int? groupId;
+  final TrainingGroup? group;
   // 跟练需要传入动作组数据
   final List<ActionDetail> actionList;
 
   const ActionFollowPracticeWithTTS({
     Key? key,
     required this.actionList,
-    this.groupId,
-    this.planId,
+    this.group,
+    this.plan,
     this.dayNumber,
   }) : super(key: key);
 
@@ -58,10 +58,10 @@ class _ActionFollowPracticeWithTTSState
 
   /// 跟练的时候，可能是直接的某个训练；也可能是某个计划的某个训练日
   /// 理论上不会两者都有
-  // 当前的训练编号
-  int? groupId;
-  // 当前的计划编号
-  int? planId;
+  // 当前的训练
+  TrainingGroup? group;
+  // 当前的计划
+  TrainingPlan? plan;
   // 计划编号中的训练日
   int? dayNumber;
   // 当前的动作列表
@@ -150,9 +150,9 @@ class _ActionFollowPracticeWithTTSState
     setState(() {
       // 一定要传动作组数据
       actions = widget.actionList;
-      planId = widget.planId;
+      plan = widget.plan;
       dayNumber = widget.dayNumber;
-      groupId = widget.groupId;
+      group = widget.group;
       // 进入此跟练页面自动开始
       startedMoment = DateTime.now();
     });
@@ -1215,13 +1215,20 @@ class _ActionFollowPracticeWithTTSState
             .toStringAsFixed(0);
 
     // 训练日志
-    var tempLog = TrainedLog(
+    var tempDetailLog = TrainedDetailLog(
       trainedDate: getCurrentDateTime(),
       userId: CacheUser.userId,
-      // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
-      planId: planId,
+      // 单次记录，有计划及其训练日，就没有训练相关栏位了；反之亦然
+      planName: plan?.planName,
+      planCategory: plan?.planCategory,
+      planLevel: plan?.planLevel,
+      // 因为这里如果需要plan指定训练日的名称，还需要关联查询planHasGroup，再得到group；
+      // 此外也会和有planName无groupName的原则冲突，所以这里只记录计划的名称和训练日天数即可
       dayNumber: dayNumber,
-      groupId: groupId,
+      groupName: group?.groupName,
+      groupCategory: group?.groupCategory,
+      groupLevel: group?.groupLevel,
+      consumption: group?.consumption,
       // 起止时间都是datetime格式化后的字符串
       trainedStartTime: formatDateToString(
         startedMoment,
@@ -1239,7 +1246,7 @@ class _ActionFollowPracticeWithTTSState
 
     try {
       // 插入训练日志
-      await _trainingHelper.insertTrainingLog(tempLog);
+      await _trainingHelper.insertTrainedDetailLog(tempDetailLog);
 
       // 跟练结束后就可以停止禁止熄屏
       WakelockPlus.disable();

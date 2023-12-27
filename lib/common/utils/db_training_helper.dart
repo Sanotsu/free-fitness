@@ -64,7 +64,7 @@ class DBTrainingHelper {
       txn.execute(TrainingDdl.ddlForGroup);
       txn.execute(TrainingDdl.ddlForPlan);
       txn.execute(TrainingDdl.ddlForPlanHasGroup);
-      txn.execute(TrainingDdl.ddlForTrainedLog);
+      txn.execute(TrainingDdl.ddlForTrainedDetailLog);
     });
   }
 
@@ -710,27 +710,29 @@ class DBTrainingHelper {
   }
 
   ///***********************************************/
-  ///  training_log 的相关操作
+  ///  training_detail_log 的相关操作
   ///
-  /// 插入单个计划基本信息
-  Future<int> insertTrainingLog(TrainedLog log) async =>
-      (await database).insert(TrainingDdl.tableNameOfTrainedLog, log.toMap());
 
-  Future<List<Object?>> insertTrainingLogList(
-    List<TrainedLog> tlList,
+  /// 插入单个计划基本信息
+  Future<int> insertTrainedDetailLog(TrainedDetailLog log) async =>
+      (await database)
+          .insert(TrainingDdl.tableNameOfTrainedDetailLog, log.toMap());
+
+  // 批量插入训练日志(备份恢复时有用到)
+  Future<List<Object?>> insertTrainingDetailLogList(
+    List<TrainedDetailLog> tlList,
   ) async {
     var batch = (await database).batch();
 
     for (var item in tlList) {
-      batch.insert(TrainingDdl.tableNameOfTrainedLog, item.toMap());
+      batch.insert(TrainingDdl.tableNameOfTrainedDetailLog, item.toMap());
     }
 
     return batch.commit();
   }
 
-  // 查询指定训练以及其所有动作
-  // 训练支持条件查询，估计训练的数量不会多，就暂时不分页；同事关联的动作就全部带出。
-  Future<List<TrainedLogWithGroupBasic>> searchTrainedLogWithGroupBasic({
+  // 2023-12-27 日志改为宽表，直接查出数据，不用关联查询
+  Future<List<TrainedDetailLog>> queryTrainedDetailLog({
     int? userId,
     String? startDate,
     String? endDate,
@@ -757,194 +759,33 @@ class DBTrainingHelper {
     // 如果有传入创建时间排序，不是传的降序一律升序
     var sort = gmtCreateSort?.toLowerCase() == 'desc' ? 'DESC' : 'ASC';
 
-    final userRows = await db.query(
-      TrainingDdl.tableNameOfTrainedLog,
+    final rows = await db.query(
+      TrainingDdl.tableNameOfTrainedDetailLog,
       where: where.isNotEmpty ? where.join(" AND ") : null,
       whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
       orderBy: 'trained_date $sort',
     );
 
-    // 查询到了基础日志，遍历查询每个详情数据？？？性能好差
-    List<TrainedLog> logs =
-        userRows.map((row) => TrainedLog.fromMap(row)).toList();
-
-    final list = <TrainedLogWithGroupBasic>[];
-
-    for (final row in logs) {
-      /// 理论上，训练日志中group id和plan id不能也不会同时为空
-      /// 从训练 和 计划查询到指定天数的训练的过程中，默认全部数据都存在且唯一（很丑陋，别这样写）。
-      // 不做空判断，出错在最外面嵌套个try catch
-      if (row.groupId != null) {
-        var tempGroup = TrainingGroup.fromMap((await db.query(
-          TrainingDdl.tableNameOfGroup,
-          where: 'group_id = ?',
-          whereArgs: [row.groupId],
-        ))
-            .first);
-
-        list.add(TrainedLogWithGroupBasic(log: row, group: tempGroup));
-      } else if (row.planId != null) {
-        var tempPlan = TrainingPlan.fromMap((await db.query(
-                TrainingDdl.tableNameOfPlan,
-                where: 'plan_id = ?',
-                whereArgs: [row.planId]))
-            .first);
-
-        // 查到plan之后再通过daynumber查询groupId，再查到group
-        (await db.query(TrainingDdl.tableNameOfPlanHasGroup,
-                where: 'plan_id = ?', whereArgs: [row.planId]))
-            .map((e) => PlanHasGroup.fromMap(e))
-            .forEach((e) async {
-          if (e.dayNumber == row.dayNumber) {
-            /// ？？？2023-12-04 还真不一定有，计划跟练之后又有修改，导致某些训练、动作都有变化了，那么这里就一定会报错了。。
-            /// 暂时有跟练的计划不让修改，后续再看如何设计日志表
-            var tempGroup = TrainingGroup.fromMap((await db.query(
-              TrainingDdl.tableNameOfGroup,
-              where: 'group_id = ?',
-              whereArgs: [e.groupId],
-            ))
-                .first);
-
-            // 如果有计划但是没有跑到这里来的话，那么数据某个地方就有问题
-            list.add(TrainedLogWithGroupBasic(
-                log: row, group: tempGroup, plan: tempPlan));
-          }
-        });
-      } else {
-        throw Exception("训练编号和计划编号同时为空");
-      }
-    }
-
-    return list;
+    return rows.map((row) => TrainedDetailLog.fromMap(row)).toList();
   }
 
-  /*
-  // 查询指定训练以及其所有动作
-  // 训练支持条件查询，估计训练的数量不会多，就暂时不分页；同事关联的动作就全部带出。
-  Future<List<TrainedLogWithGroupBasic>> bakSearchTrainedLogWithGroupBasic({
-    int? userId,
-    String? startDate,
-    String? endDate,
-    String? gmtCreateSort = "ASC", // 按创建时间升序或者降序排序
-  }) async {
-    final db = await database;
-
-    var where = [];
-    var whereArgs = [];
-
-    if (userId != null) {
-      where.add(" user_id = ? ");
-      whereArgs.add(userId);
-    }
-    if (startDate != null) {
-      where.add(" trained_date >= ? ");
-      whereArgs.add(startDate);
-    }
-    if (endDate != null) {
-      where.add(" trained_date <= ? ");
-      whereArgs.add(endDate);
-    }
-
-    // 如果有传入创建时间排序，不是传的降序一律升序
-    var sort = gmtCreateSort?.toLowerCase() == 'desc' ? 'DESC' : 'ASC';
-
-    final userRows = await db.query(
-      TrainingDdl.tableNameOfTrainedLog,
-      where: where.isNotEmpty ? where.join(" AND ") : null,
-      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
-      orderBy: 'trained_date $sort',
-    );
-
-    // 查询到了基础日志，遍历查询每个详情数据？？？性能好差
-    List<TrainedLog> logs =
-        userRows.map((row) => TrainedLog.fromMap(row)).toList();
-
-    final list = <TrainedLogWithGroupBasic>[];
-
-    for (final row in logs) {
-      // 默认是这三个值
-      var tempLog1, tempPlan1, tempGroup1;
-
-      if (row.groupId != null) {
-        final groupRows = await db.query(
-          TrainingDdl.tableNameOfGroup,
-          where: 'group_id = ?',
-          whereArgs: [row.groupId],
-        );
-
-        // ？？？理论上这里只有查到1个group，且不应该差不多(暂不考虑异常情况)
-        if (groupRows.isNotEmpty) {
-          tempGroup1 = TrainingGroup.fromMap(groupRows[0]);
-        }
-      }
-      if (row.planId != null) {
-        final planRows = await db.query(
-          TrainingDdl.tableNameOfPlan,
-          where: 'plan_id = ?',
-          whereArgs: [row.planId],
-        );
-
-        // ？？？理论上这里只有查到1个 plan ，且不应该差不多(暂不考虑异常情况)
-        if (planRows.isNotEmpty) {
-          TrainingPlan tempPlan = TrainingPlan.fromMap(planRows[0]);
-
-          tempPlan1 = tempPlan;
-
-          // 查到plan之后再通过daynumber查询groupId，再查到group
-
-          final phgRows = await db.query(
-            TrainingDdl.tableNameOfPlanHasGroup,
-            where: 'plan_id = ?',
-            whereArgs: [row.planId],
-          );
-
-          if (phgRows.isNotEmpty) {
-            var tempPhgs = phgRows.map((e) => PlanHasGroup.fromMap(e)).toList();
-
-            for (var e in tempPhgs) {
-              if (e.dayNumber == row.dayNumber) {
-                final groupRows = await db.query(
-                  TrainingDdl.tableNameOfGroup,
-                  where: 'group_id = ?',
-                  whereArgs: [e.groupId],
-                );
-
-                if (groupRows.isNotEmpty) {
-                  TrainingGroup group = TrainingGroup.fromMap(groupRows[0]);
-                  tempGroup1 = group;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      var ttt = TrainedLogWithGroupBasic(
-          group: tempGroup1, plan: tempPlan1, log: tempLog1);
-
-      list.add(ttt);
-    }
-
-    return list;
-  }
-  */
-
-  /// 查询指定计划中各个训练日上一次训练的时间
-  /// 用于点击知道计划进入训练日列表时，显示每个训练日最近一次训练时间的训练记录
-  Future<Map<int, TrainedLog?>> searchLastTrainingLogByPlanId(
+  /// 2023-12-27 查询训练计划中每一个训练日最近一次跟练的时间
+  /// 因为group_name和plan_name是唯一的，而id是自增，可能删除之后万一新的又和旧的编号一样了
+  /// 所以通过名称查询；而且这个名称也不会是用户手动输入，所以也不担心匹配不上。
+  Future<Map<int, TrainedDetailLog?>> queryLastTrainingDetailLogByPlanName(
     TrainingPlan plan,
   ) async {
     final db = await database;
 
     // 对应计划的每个训练日编号作为key，该训练日的最新训练记录作为value。
-    Map<int, TrainedLog?> logMap = {};
+    Map<int, TrainedDetailLog?> logMap = {};
 
     /// 只找最后一次的记录，那就创建时间倒序查询计划编号和对应训练日编号的最新数据
     for (var i = 0; i < plan.planPeriod; i++) {
       final logRows = await db.query(
-        TrainingDdl.tableNameOfTrainedLog,
-        where: "plan_id = ? AND day_number = ? ",
-        whereArgs: [plan.planId, i + 1],
+        TrainingDdl.tableNameOfTrainedDetailLog,
+        where: "plan_name = ? AND day_number = ? ",
+        whereArgs: [plan.planName, i + 1],
         orderBy: 'trained_date DESC',
       );
 
@@ -952,149 +793,38 @@ class DBTrainingHelper {
         logMap[i + 1] = null;
       } else {
         // 训练时间倒序排列的，所以选第一个即可
-        logMap[i + 1] = TrainedLog.fromMap(logRows.first);
+        logMap[i + 1] = TrainedDetailLog.fromMap(logRows.first);
       }
     }
 
     return logMap;
   }
 
-  ///
-  /// 2023-12-14
-  /// 判断某个锻炼是否被使用，有被使用则不允许删除
-  /// 具体就是这个exercise是否有对应的action，
-  ///   该action所属的group是否存在于训练日志中；
-  ///   该action所属的group是否存在于某个计划中，而该计划存在于训练日志中；
-
-  Future<bool> isExerciseUsed(int exerciseId) async {
-    Database db = await database;
-
-    // 1 找到exercise对应的action，如果没有，则是没有被使用
-    var actionRows = await db.query(
-      TrainingDdl.tableNameOfAction,
-      where: 'exercise_id = ? ',
-      whereArgs: [exerciseId],
-    );
-    if (actionRows.isEmpty) return false;
-
-    // 2 找到所有的action，并找到对应的group
-    //  一个exercise可能对应不同group中多个不同的action
-    for (var row in actionRows) {
-      var action = TrainingAction.fromMap(row);
-      // 寻找action所属的group
-      var groupRows = await db.query(
-        TrainingDdl.tableNameOfGroup,
-        where: 'action_id = ? ',
-        whereArgs: [action.actionId],
-      );
-      // 当前动作没被训练使用则继续找下一个
-      if (groupRows.isEmpty) continue;
-
-      // 正常就应该一个action只有一个对应的 group
-      var group = TrainingGroup.fromMap(groupRows.first);
-      // 先判断group有没有直接被使用
-      var rst = await isGroupUsed(group.groupId!);
-      // 2-1 如果action对应的group有被使用，就不用后续操作了
-      if (rst) return true;
-
-      // 2-2 group没有直接使用，再判断包含该group的plan是否有被使用
-      var planRows = await db.query(
-        TrainingDdl.tableNameOfPlanHasGroup,
-        where: 'group_id = ? ',
-        whereArgs: [group.groupId],
-      );
-
-      // 2-2-1 group没有对应的plan，则不用后续操作了
-      if (planRows.isEmpty) return false;
-
-      // 2-2-2 有对应的plan，检测是否有被用到
-      for (var plan in planRows) {
-        var rst = await isPlanUsed(TrainingPlan.fromMap(plan).planId!);
-        // 2-2-2-1 只要有一个被用到，就不用继续了
-        if (rst) return true;
-      }
-    }
-
-    // action、group、plan及其日志都没有用到，就最终也没用到
-    return false;
-  }
-
-  // 指定训练是否已有训练记录
-  Future<bool> isGroupUsed(int groupId) async {
-    Database db = await database;
-
-    var groupLogRows = await db.query(
-      TrainingDdl.tableNameOfTrainedLog,
-      where: 'group_id = ? ',
-      whereArgs: [groupId],
-    );
-
-    if (groupLogRows.isEmpty) return false;
-
-    return true;
-  }
-
-  // 指定计划是否已有运动记录
-  Future<bool> isPlanUsed(int planId) async {
-    Database db = await database;
-
-    var logRows = await db.query(
-      TrainingDdl.tableNameOfTrainedLog,
-      where: 'plan_id = ? ',
-      whereArgs: [planId],
-    );
-
-    if (logRows.isEmpty) return false;
-
-    return true;
-  }
-
-  ///
-  ///  直接联合查询判断是否被使用
-  ///
-  Future<List<ExerciseUsageVO>> isExerciseUsedByRawSQL(int exerciseId) async {
+  /// 2023-12-27 因为已经有了训练日志宽表，所以，即便有训练日志也可以删除；
+  /// 因此判断是否被使用排除掉存在于日志表这一条；也就是说:
+  ///   计划可以随便删；
+  ///   训练没有被计划使用即可删除；
+  ///   exercise没有对应action(没有被训练使用)即可删除
+  Future<List<Map<String, Object?>>> isExerciseUsed(int exerciseId) async {
     Database db = await database;
 
     // 如果对应的exercise编号关联查询的结果不为空，则说明有被使用，不允许删除
-    var rows = await db.rawQuery(
+    return await db.rawQuery(
       '''
-      SELECT a.action_id,g.group_id,phg.plan_id,l.trained_log_id
+      SELECT a.action_id,g.group_id,phg.plan_id
       FROM ${TrainingDdl.tableNameOfAction} a
       LEFT JOIN ${TrainingDdl.tableNameOfGroup}         g   ON g.group_id = a.group_id  
       LEFT JOIN ${TrainingDdl.tableNameOfPlanHasGroup}  phg ON phg.group_id = g.group_id
-      LEFT JOIN ${TrainingDdl.tableNameOfTrainedLog}    l   ON l.plan_id = phg.plan_id OR l.group_id = phg.group_id
       WHERE a.exercise_id = $exerciseId;
       ''',
     );
-
-    return rows.map((e) => ExerciseUsageVO.fromMap(e)).toList();
   }
 
-  Future<List<ExerciseUsageVO>> isGroupUsedByRawSQL(int groupId) async {
-    Database db = await database;
-
-    // 这个训练有日志或者训练所属的计划有日志都算，但没法区分group是直接跟练的训练还是计划的某一天
-    var rows = await db.rawQuery(
-      '''
-      SELECT phg.plan_id,l.trained_log_id
-      FROM ${TrainingDdl.tableNameOfPlanHasGroup} phg 
-      LEFT JOIN ${TrainingDdl.tableNameOfTrainedLog} l ON l.plan_id = phg.plan_id OR l.group_id = phg.group_id
-      WHERE phg.group_id = $groupId;
-      ''',
-    );
-
-    return rows.map((e) => ExerciseUsageVO.fromMap(e)).toList();
-  }
-
-  Future<List<ExerciseUsageVO>> isPlanUsedByRawSQL(int planId) async {
-    Database db = await database;
-
-    var logRows = await db.query(
-      TrainingDdl.tableNameOfTrainedLog,
-      where: 'plan_id = ? ',
-      whereArgs: [planId],
-    );
-
-    return logRows.map((e) => ExerciseUsageVO.fromMap(e)).toList();
-  }
+  // 这个训练有所属的计划
+  Future<List<Map<String, Object?>>> isGroupUsed(int groupId) async =>
+      await (await database).query(
+        TrainingDdl.tableNameOfPlanHasGroup,
+        where: 'group_id = ? ',
+        whereArgs: [groupId],
+      );
 }
