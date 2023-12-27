@@ -89,6 +89,7 @@
   },
 
   "trainedReportExport":"Export trained records",
+  "trainedDoneNote":"Completed. Duration {totolTime}(s):",
 
 
   "exercise": "Exercises",
@@ -135,18 +136,18 @@
   "description": "常用action相关的标签"
   },
 
-  "actionDetailLabel": "{num, select, 0{Dur.(s)} 1{Rpt. (times)} 2{Eqpt. (kg)} other{其他} }",
+  "actionDetailLabel": "{num, select, 0{Dur.(s)} 1{Rpt. (times)} 2{Eqpt. (kg)} other{Other} }",
   "@actionDetailLabel": {
   "description": "在action详情弹窗中显示的栏位"
   },
 
-  "actionConfigLabel": "{num, select, 0{Action Configuration Dialog} 1{Eqpt.Wgt.(kg)} 2{Click to select exercise} other{其他} }",
+  "actionConfigLabel": "{num, select, 0{Action Configuration Dialog} 1{Eqpt.Wgt.(kg)} 2{Click to select exercise} other{Other} }",
   "@actionConfigLabel": {
   "description": "action list页面中，在action详情弹窗中显示的栏位和新增action时exercise 列表页面显示的栏位"
   },
 
 
-  "workoutFollowLabel": "{num, select, 0{Follow Workout} 1{Ready} 2{Rest} 3{Next} 4{Congratulations} other{其他} }",
+  "workoutFollowLabel": "{num, select, 0{Follow Workout} 1{Ready} 2{REST} 3{Next} 4{Congratulations} other{Other} }",
   "@workoutFollowLabel": {
   "description": "训练跟练页面相关栏位"
   },
@@ -158,12 +159,12 @@
   },
 
 
-  "quitFollowNotes": "{num, select, 0{Workout Pause } 1{Are you sure want to quit this workout?} other{其他} }",
+  "quitFollowNotes": "{num, select, 0{Workout Pause } 1{Are you sure want to quit this workout?} other{Other} }",
   "@quitFollowNotes": {
   "description": "退出跟练页面是的弹窗标题和正文"
   },
 
-  "previewReport":"Preview Report",
+  "previewReport":"Report",
 
   "plans": "Plans",
   "plan": "Plan",

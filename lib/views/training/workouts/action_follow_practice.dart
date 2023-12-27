@@ -362,21 +362,51 @@ class _ActionFollowPracticeWithTTSState
         /// 点击了返回按钮，就先暂停，并弹窗询问是否退出跟练
         // 点击返回按钮时，可能处在准备、跟练、休息3种情况的任意一种。
         // 只要是已经开始或者继续的状态，就暂停
-        if (_actionController.isResumed ||
-            _actionController.isStarted ||
-            _actionController.isRestarted) {
-          _actionController.pause();
+        // if (_actionController.isResumed ||
+        //     _actionController.isStarted ||
+        //     _actionController.isRestarted) {
+        //   _actionController.pause();
+        // }
+        // if (_restController.isResumed ||
+        //     _restController.isStarted ||
+        //     _restController.isRestarted) {
+        //   _restController.pause();
+        // }
+        // if (_prepareController.isResumed ||
+        //     _prepareController.isStarted ||
+        //     _prepareController.isRestarted) {
+        //   _prepareController.pause();
+        // }
+
+        /// 2023-12-27 当前页面只会处于预备、跟练、休息中的某一个，切换后其他两个的anmation是dispose的
+        /// 所以还需要按照当前的页面是哪一个对应去暂停和继续，时机就和页面展示时一样
+        // 预备页面的返回暂停
+        if (_currentIndex < 0) {
+          if (_prepareController.isResumed ||
+              _prepareController.isStarted ||
+              _prepareController.isRestarted) {
+            _prepareController.pause();
+          }
         }
-        if (_restController.isResumed ||
-            _restController.isStarted ||
-            _restController.isRestarted) {
-          _restController.pause();
+        // 跟练页面的返回暂停
+        if (!isRestTurn &&
+            _currentIndex >= 0 &&
+            _currentIndex <= actions.length - 1) {
+          if (_actionController.isResumed ||
+              _actionController.isStarted ||
+              _actionController.isRestarted) {
+            _actionController.pause();
+          }
         }
-        if (_prepareController.isResumed ||
-            _prepareController.isStarted ||
-            _prepareController.isRestarted) {
-          _prepareController.pause();
+        // 休息页面的返回暂停
+        if (isRestTurn) {
+          if (_restController.isResumed ||
+              _restController.isStarted ||
+              _restController.isRestarted) {
+            _restController.pause();
+          }
         }
+
         setState(() {
           pausedMoment = DateTime.now();
           // 这个标志只是用于显示跟练画面的暂停和继续的文字，
@@ -412,15 +442,38 @@ class _ActionFollowPracticeWithTTSState
             Navigator.pop(context);
           } else {
             // 关闭弹窗，不是退出就继续跟练。如果这些控制器是暂停的状态，就恢复
-            if (_actionController.isPaused) {
-              _actionController.resume();
+            // if (_actionController.isPaused) {
+            //   _actionController.resume();
+            // }
+            // if (_restController.isPaused) {
+            //   _restController.resume();
+            // }
+            // if (_prepareController.isPaused) {
+            //   _prepareController.resume();
+            // }
+
+            /// 2023-12-27 根据当前是哪个倒计时页面对应判断不同的倒计时控制器
+            // 准备页面的暂停恢复
+            if (_currentIndex < 0) {
+              if (_prepareController.isPaused) {
+                _prepareController.resume();
+              }
             }
-            if (_restController.isPaused) {
-              _restController.resume();
+            // 跟练页面的暂停恢复
+            if (!isRestTurn &&
+                _currentIndex >= 0 &&
+                _currentIndex <= actions.length - 1) {
+              if (_actionController.isPaused) {
+                _actionController.resume();
+              }
             }
-            if (_prepareController.isPaused) {
-              _prepareController.resume();
+            // 休息页面的暂停恢复
+            if (isRestTurn) {
+              if (_restController.isPaused) {
+                _restController.resume();
+              }
             }
+
             setState(() {
               // 点击继续时需要统计该次暂停的时间
               totalPausedTimes += DateTime.now().millisecondsSinceEpoch -
@@ -1202,10 +1255,16 @@ class _ActionFollowPracticeWithTTSState
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('你已完成所有锻炼\n总耗时 $totolTime 秒，其中：'),
-              Text('  暂停耗时约 $pausedTime 秒'),
-              Text('  休息耗时约 $totalRestTimes 秒'),
-              Text('  锻炼耗时约 $workoutTime 秒'),
+              Text(CusAL.of(context).trainedDoneNote(totolTime)),
+              Text(
+                '    ${CusAL.of(context).trainedCalendarLabels("3")}: $pausedTime ${CusAL.of(context).unitLabels("6")}',
+              ),
+              Text(
+                '    ${CusAL.of(context).trainedCalendarLabels("4")}: $totalRestTimes ${CusAL.of(context).unitLabels("6")}',
+              ),
+              Text(
+                '    ${CusAL.of(context).trainedCalendarLabels("2")}: $workoutTime ${CusAL.of(context).unitLabels("6")}',
+              ),
             ],
           ),
           actions: [

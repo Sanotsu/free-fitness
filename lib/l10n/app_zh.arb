@@ -94,6 +94,7 @@
     },
 
     "trainedReportExport":"导出训练记录",
+    "trainedDoneNote":"你已完成所有锻炼\n总耗时 {totolTime} 秒，其中：",
 
 
 
