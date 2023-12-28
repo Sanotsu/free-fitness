@@ -219,8 +219,7 @@ class _DietaryReportsState extends State<DietaryReports> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            // CusAL.of(context).dietaryReports,
-            'Dietary Reports',
+            CusAL.of(context).dietaryReports,
             style: TextStyle(fontSize: CusFontSizes.pageTitle),
           ),
           bottom: TabBar(

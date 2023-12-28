@@ -273,7 +273,8 @@ class _AddIntakeItemState extends State<AddIntakeItem>
       length: 2, // 选项卡的数量
       child: Scaffold(
         appBar: AppBar(
-          title: buildAppBarTitle(),
+          // z这个宽度配合下拉框的 isExpanded 可以限制下拉框的宽度
+          title: SizedBox(width: 125.sp, child: buildAppBarTitle()),
           actions: buildAppBarActions(),
           bottom: TabBar(
             controller: _tabController,
@@ -303,9 +304,13 @@ class _AddIntakeItemState extends State<AddIntakeItem>
     return ListTile(
       // 这里使用DropdownButton可以控制显示的大小，用DropdownMenu暂时没搞定，会挤掉子标题文字
       title: SizedBox(
-        height: 20.sp,
+        height: 24.sp,
         child: DropdownButton<CusLabel>(
+          borderRadius: BorderRadius.all(Radius.circular(10.sp)),
           value: dropdownValue,
+          isExpanded: true,
+          // 默认背景是白色，但我需要字体默认是白色，和appbar中其他保持一致，那么背景色改为灰色
+          dropdownColor: CusColors.dropdownColor,
           onChanged: (CusLabel? newValue) {
             setState(() {
               // 修改下拉按钮的显示值
@@ -322,20 +327,31 @@ class _AddIntakeItemState extends State<AddIntakeItem>
               return DropdownMenuItem<CusLabel>(
                 value: value,
                 child: Text(
-                  showCusLableMapLabel(context, value),
-                  style: TextStyle(fontSize: CusFontSizes.itemTitle),
+                  showCusLable(value),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: CusFontSizes.pageSubTitle,
+                  ),
                 ),
               );
             },
           ).toList(),
           underline: Container(), // 将下划线设置为空的Container
-          icon: null, // 将图标设置为null
+          // icon: null, // 将图标设置为null
+          icon: Icon(
+            Icons.arrow_drop_down,
+            size: CusIconSizes.iconNormal,
+            color: Colors.white,
+          ),
         ),
       ),
-      subtitle: Text(currentDate,
-          style: TextStyle(
-            fontSize: CusFontSizes.itemSubTitle,
-          )),
+      subtitle: Text(
+        currentDate,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: CusFontSizes.itemContent,
+        ),
+      ),
     );
   }
 
