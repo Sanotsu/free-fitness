@@ -235,36 +235,39 @@ class _ActionListState extends State<ActionList> {
             : SizedBox(
                 height: 50.sp,
                 width: 0.6.sw,
-                child: ElevatedButton(
-                  onPressed: () {
-                    /// 点击开始跟练
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ActionFollowPracticeWithTTS(
-                          // 虽然计划编号、训练日 和训练编号都有传，但理论上两者不会同时存在也不会同时为空
-                          plan: widget.planItem,
-                          dayNumber: widget.dayNumber,
-                          // 有计划编号，就不传训练编号了
-                          group:
-                              widget.planItem != null ? null : widget.groupItem,
-                          // 动作组数据是必须要传的
-                          actionList: actionList,
+                child: (actionList.isNotEmpty)
+                    ? ElevatedButton(
+                        onPressed: () {
+                          /// 点击开始跟练
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ActionFollowPracticeWithTTS(
+                                // 虽然计划编号、训练日 和训练编号都有传，但理论上两者不会同时存在也不会同时为空
+                                plan: widget.planItem,
+                                dayNumber: widget.dayNumber,
+                                // 有计划编号，就不传训练编号了
+                                group: widget.planItem != null
+                                    ? null
+                                    : widget.groupItem,
+                                // 动作组数据是必须要传的
+                                actionList: actionList,
+                              ),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20.sp), // 设置圆角
+                          ),
+                          backgroundColor: Colors.green,
                         ),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.sp), // 设置圆角
-                    ),
-                    backgroundColor: Colors.green,
-                  ),
-                  child: Text(
-                    CusAL.of(context).startLabel,
-                    style: TextStyle(fontSize: CusFontSizes.pageTitle),
-                  ),
-                ),
+                        child: Text(
+                          CusAL.of(context).startLabel,
+                          style: TextStyle(fontSize: CusFontSizes.pageTitle),
+                        ),
+                      )
+                    : Container(),
               ),
         // 悬浮按钮位置
         floatingActionButtonLocation: _isEditing

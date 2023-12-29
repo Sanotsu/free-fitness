@@ -256,8 +256,7 @@ Future<int> _insertOneRandomGroup() async {
   var group = TrainingGroup(
     groupName: generateRandomString(5, 20),
     groupCategory:
-        groupCategoryOptions[Random().nextInt(groupCategoryOptions.length)]
-            .value,
+        categoryOptions[Random().nextInt(categoryOptions.length)].value,
     groupLevel: levelOptions[Random().nextInt(levelOptions.length)].value,
     consumption: Random().nextInt(1000),
     timeSpent: Random().nextInt(100),
@@ -393,8 +392,7 @@ insertTrainingDetailLogDemo({int? size = 10}) async {
     // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
     groupName: generateRandomString(5, 20),
     groupCategory:
-        groupCategoryOptions[Random().nextInt(groupCategoryOptions.length)]
-            .value,
+        categoryOptions[Random().nextInt(categoryOptions.length)].value,
     groupLevel: levelOptions[Random().nextInt(levelOptions.length)].value,
     consumption: Random().nextInt(1000),
     // 起止时间就测试插入时的1个小时

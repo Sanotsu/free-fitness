@@ -366,7 +366,7 @@ List<CusLabel> countingOptions = [
   CusLabel(enLabel: 'counted', cnLabel: "计次", value: 'counted'),
 ];
 
-// 这个分类除了exercise外，plan计划也用这个
+// 这个分类除了exercise外，group、plan计划也用这个
 List<CusLabel> categoryOptions = [
   CusLabel(enLabel: 'strength', cnLabel: "力量", value: 'strength'),
   CusLabel(enLabel: 'stretching', cnLabel: "拉伸", value: 'stretching'),
@@ -375,14 +375,6 @@ List<CusLabel> categoryOptions = [
   CusLabel(enLabel: 'strongman', cnLabel: "大力士", value: 'strongman'),
   CusLabel(enLabel: 'cardio', cnLabel: "有氧", value: 'cardio'),
   CusLabel(enLabel: 'anaerobic', cnLabel: "无氧", value: 'anaerobic'),
-  CusLabel(enLabel: 'other', cnLabel: "其他", value: 'other'),
-];
-
-// 训练组的分类示例(？？？可以考虑也用上面那一个？)
-List<CusLabel> groupCategoryOptions = [
-  CusLabel(enLabel: 'chest training', cnLabel: "练胸", value: 'chest_training'),
-  CusLabel(enLabel: 'arm training', cnLabel: "练臂", value: 'arm_training'),
-  CusLabel(enLabel: 'slimming', cnLabel: "减肥", value: 'slimming'),
   CusLabel(enLabel: 'other', cnLabel: "其他", value: 'other'),
 ];
 

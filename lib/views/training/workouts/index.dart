@@ -196,7 +196,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                   Expanded(
                     child: cusFormBuilerDropdown(
                       "group_category",
-                      groupCategoryOptions,
+                      categoryOptions,
                       labelText: CusAL.of(context).workoutQuerys('1'),
                       optionFontSize: CusFontSizes.itemContent,
                     ),
@@ -275,7 +275,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                   ),
                   TextSpan(
                     text:
-                        '${getCusLabelText(groupItem.group.groupCategory, groupCategoryOptions)}',
+                        '${getCusLabelText(groupItem.group.groupCategory, categoryOptions)}',
                     style: TextStyle(
                       color: Theme.of(context).textTheme.bodyMedium?.color,
                     ),
@@ -412,7 +412,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                   ),
                   cusFormBuilerDropdown(
                     "group_category",
-                    groupCategoryOptions,
+                    categoryOptions,
                     labelText: '*${CusAL.of(context).workoutQuerys('1')}',
                     validator: FormBuilderValidators.required(),
                   ),

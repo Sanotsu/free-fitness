@@ -59,7 +59,7 @@ void showConfigDialog(
             CusAL.of(context).saveLabel,
             style: TextStyle(
               fontSize: CusFontSizes.buttonMedium,
-              color: Theme.of(context).primaryColor,
+              // color: Theme.of(context).primaryColor,
             ),
           ),
         ),

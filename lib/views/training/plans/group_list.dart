@@ -330,7 +330,7 @@ class _GroupListState extends State<GroupList> {
             TextSpan(
               text: '\n${getCusLabelText(
                 groupItem.groupCategory,
-                groupCategoryOptions,
+                categoryOptions,
               )}',
               style: TextStyle(color: Theme.of(context).shadowColor),
             ),
