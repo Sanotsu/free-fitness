@@ -573,6 +573,16 @@ class DBTrainingHelper {
         whereArgs: [planId],
       );
 
+  Future<List<TrainingPlan>> queryTrainingPlanById(int planId) async {
+    return (await (await database).query(
+      TrainingDdl.tableNameOfPlan,
+      where: "plan_id =? ",
+      whereArgs: [planId],
+    ))
+        .map((row) => TrainingPlan.fromMap(row))
+        .toList();
+  }
+
   /// ？？？查询指定计划以及其所有训练（3层嵌套，看怎么优化）
   // 计划支持条件查询，估计计划的数量不会多，就暂时不分页；同时关联的训练就全部带出。
   Future<List<PlanWithGroups>> searchPlanWithGroups({
@@ -694,6 +704,12 @@ class DBTrainingHelper {
     Database db = await database;
 
     return await db.transaction((txn) async {
+      // 2023-12-30 一并更新该计划的周期为列表的长度
+      await txn.rawUpdate(
+        'UPDATE ${TrainingDdl.tableNameOfPlan} SET plan_period = ?  WHERE plan_id = ?',
+        [phgList.length, planId],
+      );
+
       await txn.delete(
         TrainingDdl.tableNameOfPlanHasGroup,
         where: "plan_id = ? ",

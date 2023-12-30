@@ -15,12 +15,6 @@ import '../../models/diary_state.dart';
 import 'diary_modify_rich_text.dart';
 import 'index_timeline.dart';
 
-/// 默认的日历显示范围，当前月的前后3个月
-/// ？？？实际手记的日历显示范围的话，就第一个手记的月份，到当前月份即可
-final kToday = DateTime.now();
-final kFirstDay = DateTime(kToday.year, kToday.month - 3, kToday.day);
-final kLastDay = DateTime(kToday.year, kToday.month + 3, kToday.day);
-
 class DiaryTableCalendar extends StatefulWidget {
   const DiaryTableCalendar({super.key});
 
@@ -359,8 +353,15 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
 
               ListTile(
                 title: Text(diary.title),
-                subtitle: Text(
-                  "${CusAL.of(context).lastModified}: ${diarys[index].gmtModified ?? diarys[index].gmtCreate}",
+                subtitle: Column(
+                  children: [
+                    Text(
+                      "${CusAL.of(context).lastModified}: ${diarys[index].gmtModified ?? diarys[index].gmtCreate}",
+                    ),
+                    Text(
+                      "${CusAL.of(context).gmtCreate}: ${diarys[index].gmtCreate ?? unknownDateTimeString}",
+                    )
+                  ],
                 ),
                 trailing: Icon(
                   Icons.arrow_forward,

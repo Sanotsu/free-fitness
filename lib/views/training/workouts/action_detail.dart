@@ -52,7 +52,7 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
           SizedBox(height: 40.sp, child: buildCloseButton(context)),
           Expanded(
             flex: 2,
-            child: buildImageArea(context, _currentItem.exercise),
+            child: _buildExerciseImageArea(_currentItem.exercise),
           ),
           Expanded(flex: 1, child: _buildCountArea()),
           Expanded(
@@ -80,6 +80,13 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
         ],
       ),
     );
+  }
+
+  // 动作的图片
+  _buildExerciseImageArea(Exercise item) {
+    List<String> imageList =
+        (item.images?.trim().isNotEmpty == true) ? item.images!.split(",") : [];
+    return buildImageCarouselSlider(imageList);
   }
 
   _buildCountArea() {

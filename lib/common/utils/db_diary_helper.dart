@@ -182,18 +182,28 @@ class DBDiaryHelper {
     required String keyword,
     required int pageSize, // 一次查询条数显示
     required int page, // 一次查询的偏移量，用于分页
+    // 2023-12-30 指定创建日期升序或者降序排序
+    String? dateSort = "desc",
   }) async {
     Database db = await database;
     // 根据页数和页面获得偏移量
     var offset = (page - 1) * pageSize;
 
+    var sort = dateSort?.toLowerCase();
+    if (dateSort != null) {
+      // 如果有传入创建时间排序，不是传的降序一律升序
+      sort = dateSort.toLowerCase() == 'desc' ? 'DESC' : 'ASC';
+    }
+
     try {
       // 查询指定关键字当前页的数据
       List<Map<String, dynamic>> maps = await db.query(
         DiaryDdl.tableNameOfDiary,
-        where:
-            '(title LIKE ? OR content LIKE ?) AND user_id = ? LIMIT ? OFFSET ?',
-        whereArgs: ['%$keyword%', '%$keyword%', userId, pageSize, offset],
+        where: '(title LIKE ? OR content LIKE ?) AND user_id = ?',
+        whereArgs: ['%$keyword%', '%$keyword%', userId],
+        limit: pageSize,
+        offset: offset,
+        orderBy: sort != null ? 'gmt_create $sort' : null,
       );
       final list = maps.map((row) => Diary.fromMap(row)).toList();
 
@@ -220,6 +230,8 @@ class DBDiaryHelper {
     int userId, {
     String? startDate,
     String? endDate,
+    // 2023-12-30 指定创建日期升序或者降序排序
+    String? dateSort = "desc",
   }) async {
     Database db = await database;
 
@@ -239,12 +251,19 @@ class DBDiaryHelper {
       whereArgs.add(endDate);
     }
 
+    var sort = dateSort?.toLowerCase();
+    if (dateSort != null) {
+      // 如果有传入创建时间排序，不是传的降序一律升序
+      sort = dateSort.toLowerCase() == 'desc' ? 'DESC' : 'ASC';
+    }
+
     try {
       // 查询指定关键字当前页的数据
       List<Map<String, dynamic>> maps = await db.query(
         DiaryDdl.tableNameOfDiary,
         where: where.isNotEmpty ? where.join(' AND ') : null,
         whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
+        orderBy: sort != null ? 'gmt_create $sort' : null,
       );
       final list = maps.map((row) => Diary.fromMap(row)).toList();
 

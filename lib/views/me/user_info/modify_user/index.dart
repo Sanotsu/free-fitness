@@ -107,12 +107,17 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
               : CusAL.of(context).eidtLabel(CusAL.of(context).userInfo),
         ),
         actions: [
-          TextButton(
+          // TextButton(
+          //   onPressed: _saveUser,
+          //   child: Text(
+          //     CusAL.of(context).saveLabel,
+          //     style: const TextStyle(color: Colors.white),
+          //   ),
+          // ),
+          // 2023-12-30 appbar 的action都优先iconbutton
+          IconButton(
             onPressed: _saveUser,
-            child: Text(
-              CusAL.of(context).saveLabel,
-              style: const TextStyle(color: Colors.white),
-            ),
+            icon: const Icon(Icons.save),
           ),
         ],
       ),

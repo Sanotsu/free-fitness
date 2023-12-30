@@ -135,7 +135,7 @@
     "groupDeleteAlert":"确认要删除该训练动作组: {workoutName} ? 删除后不可恢复!",
     "groupInUse":"该训练 {workoutName} 有被计划使用，暂不支持删除",
     
-    "modifyGroupLabels": "{num, select, 0{修改训练} 1{新建训练} 2{主要肌肉} 3{次要肌肉} 4{技术要点} 5{语音提示要点} 6{动作图片} 7{用户上传} other{其他} }",
+    "modifyGroupLabels": "{num, select, 0{新建训练} 1{修改训练} 2{主要肌肉} 3{次要肌肉} 4{技术要点} 5{语音提示要点} 6{动作图片} 7{用户上传} other{其他} }",
     "@modifyGroupLabels": {
     "description": "修改或新建训练动作组的标签"
     },
@@ -184,7 +184,7 @@
     "planDeleteAlert":"确认要删除该训练计划: {planName} ? 删除后不可恢复!",
     "planInUse":"该训练计划 {planName} 存在跟练记录，暂不支持删除",
     
-    "modifyPlanLabels": "{num, select, 0{修改计划} 1{新建计划} 2{名称} 3{代号} 4{分类} 5{级别} 6{训练周期} 7{概述} other{其他} }",
+    "modifyPlanLabels": "{num, select, 0{新建计划} 1{修改计划} 2{名称} 3{代号} 4{分类} 5{级别} 6{训练周期} 7{概述} other{其他} }",
     "@modifyPlanLabels": {
     "description": "修改或新建 plan 的标签"
     },
@@ -321,6 +321,7 @@
     "richTextToolNote":"展开富文本编辑工具栏",
 
     "lastModified":"上次修改时间",
+    "gmtCreate":"初始创建时间",
 
     "confirmLabel":"确定",
     "cancelLabel":"取消",
@@ -329,8 +330,8 @@
     "moreLabel":"更多",
     "moreDetail": "更多详情",
     "lessLabel":"收起",
-    "enterLabel":"进入",
-    "skipLabel":"下一步",
+    "enterLabel":"完成输入",
+    "skipLabel":"暂时忽略",
     "backLabel":"返回",
     "saveLabel":"保存",
     "eidtLabel":"修改{name}",

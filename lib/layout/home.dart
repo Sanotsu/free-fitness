@@ -55,15 +55,15 @@ class _HomePageState extends State<HomePage> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.pop(context, true);
-                  },
-                  child: Text(CusAL.of(context).confirmLabel),
-                ),
-                ElevatedButton(
-                  onPressed: () {
                     Navigator.pop(context, false);
                   },
                   child: Text(CusAL.of(context).cancelLabel),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: Text(CusAL.of(context).confirmLabel),
                 ),
               ],
             );

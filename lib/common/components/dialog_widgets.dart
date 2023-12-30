@@ -37,42 +37,6 @@ buildCloseButton(
   );
 }
 
-/// 弹窗中的图片展示
-/// 目前在基础运动详情弹窗、动作详情弹窗、动作配置弹窗中可复用
-buildImageArea(BuildContext context, Exercise exercise) {
-  return Container(
-    // 预设的图片背景色一般是白色，所以这里也设置为白色，看起来一致
-    // color: Colors.white,
-    // 2023-12-25 因为有设计深色模式，所以不能固定为白色
-    color: Theme.of(context).canvasColor,
-    child: Center(
-      child: Padding(
-        padding: EdgeInsets.only(bottom: 10.sp),
-        child: GestureDetector(
-          onTap: () {
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return Dialog(
-                  child: Hero(
-                    tag: 'imageTag',
-                    child: buildExerciseImageCarouselSlider(exercise),
-                  ),
-                );
-              },
-            );
-          },
-          child: Hero(
-            tag: 'imageTag',
-            // child: buildExerciseImage(exercise),
-            child: buildExerciseImageCarouselSlider(exercise),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
 /// 弹窗中的标题部分
 /// 主体是个ListTile，但有的地方其title只是显示文本，有的可能会是按钮，所以title部分保留传入部件
 /// 目前在基础运动详情弹窗、动作详情弹窗、动作配置弹窗中可复用
@@ -114,50 +78,6 @@ Image buildExerciseImage(Exercise exercise) {
         (BuildContext context, Object exception, StackTrace? stackTrace) {
       return Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown);
     },
-  );
-}
-
-// 锻炼的图片轮播图(后续如果食物的图片或者其他图片有类似功能，可能再抽一次)
-buildExerciseImageCarouselSlider(Exercise exercise) {
-  List<String> imageList = [];
-  // 先要排除image是个空字符串
-  if (exercise.images != null && exercise.images!.trim().isNotEmpty) {
-    imageList = exercise.images!.split(",");
-  }
-
-  return CarouselSlider(
-    options: CarouselOptions(
-      autoPlay: true, // 自动播放
-      enlargeCenterPage: true, // 居中图片放大
-      aspectRatio: 16 / 9, // 图片宽高比
-      viewportFraction: 1, // 图片占屏幕宽度的比例
-      // 只有一张图片时不滚动
-      enableInfiniteScroll: imageList.length > 1,
-    ),
-    // 没有图片显示一张占位图片
-    items: imageList.isEmpty
-        ? [Image.asset(placeholderImageUrl, fit: BoxFit.scaleDown)]
-        : imageList.map((imageUrl) {
-            return Builder(
-              builder: (BuildContext context) {
-                return Container(
-                  width: MediaQuery.of(context).size.width,
-                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.grey,
-                  ),
-                  child: Image.file(
-                    File(imageUrl),
-                    errorBuilder: (BuildContext context, Object exception,
-                        StackTrace? stackTrace) {
-                      return Image.asset(placeholderImageUrl,
-                          fit: BoxFit.scaleDown);
-                    },
-                  ),
-                );
-              },
-            );
-          }).toList(),
   );
 }
 
@@ -271,7 +191,7 @@ _buildImageCarouselSliderType(
                     imageProvider: FileImage(File(imageList[index])),
                   );
                 },
-                enableRotation: true,
+                // enableRotation: true,
                 scrollPhysics: const BouncingScrollPhysics(),
                 backgroundDecoration: const BoxDecoration(
                   color: Colors.transparent,

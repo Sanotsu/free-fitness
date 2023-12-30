@@ -127,8 +127,6 @@ class _ExerciseModifyState extends State<ExerciseModify> {
                 .toList()
                 .join(",")
             : null,
-
-        ///
         isCustom: true,
         contributor: CacheUser.userName,
         // 时间都存时间戳，显示的时候再格式化
@@ -345,13 +343,14 @@ class _ExerciseModifyState extends State<ExerciseModify> {
 
           const SizedBox(height: 10),
           // 语音提醒文本
-          cusFormBuilerTextField(
-            "tts_notes",
-            labelText: CusAL.of(context).exerciseLabels('5'),
-            initialValue: updateTarget?.ttsNotes,
-            maxLines: 5,
-            isOutline: true,
-          ),
+          // 2023-12-30 这个栏位目前无实际意义
+          // cusFormBuilerTextField(
+          //   "tts_notes",
+          //   labelText: CusAL.of(context).exerciseLabels('5'),
+          //   initialValue: updateTarget?.ttsNotes,
+          //   maxLines: 5,
+          //   isOutline: true,
+          // ),
 
           const SizedBox(height: 10),
           // 上传活动示例图片（静态图或者gif）
@@ -424,8 +423,8 @@ class _ExerciseModifyState extends State<ExerciseModify> {
   }) {
     // 把预设的基础活动选项列表转化为 MultiSelectDialogField 支持的列表
     final muscleItems = musclesOptions
-        .map<MultiSelectItem<CusLabel>>((opt) => MultiSelectItem<CusLabel>(
-            opt, box.read("language") == 'en' ? opt.enLabel : opt.cnLabel))
+        .map<MultiSelectItem<CusLabel>>(
+            (opt) => MultiSelectItem<CusLabel>(opt, showCusLable(opt)))
         .toList();
 
     return Padding(
@@ -454,9 +453,11 @@ class _ExerciseModifyState extends State<ExerciseModify> {
             fontSize: CusFontSizes.pageContent,
           ),
         ),
-        searchable: true,
+        // searchable: true,
         validator: validator,
         onConfirm: onConfirm,
+        cancelText: Text(CusAL.of(context).cancelLabel),
+        confirmText: Text(CusAL.of(context).confirmLabel),
       ),
     );
   }

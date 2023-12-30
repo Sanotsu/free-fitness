@@ -72,7 +72,7 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
                   context,
                   popValue: modifiedFlag,
                 )),
-            Expanded(flex: 2, child: buildImageArea(context, _currentItem)),
+            Expanded(flex: 2, child: _buildExerciseImageArea(_currentItem)),
             Expanded(
               flex: 3,
               child: buildTitleAndDescription(
@@ -86,6 +86,16 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
         ),
       ),
     );
+  }
+
+  // 动作的图片
+  _buildExerciseImageArea(Exercise item) {
+    List<String> imageList = [];
+    // 先要排除image是个空字符串
+    if (item.images != null && item.images!.trim().isNotEmpty) {
+      imageList = item.images!.split(",");
+    }
+    return buildImageCarouselSlider(imageList);
   }
 
   // 更多和修改按钮

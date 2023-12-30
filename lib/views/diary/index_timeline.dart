@@ -249,6 +249,9 @@ class _IndexTimelineState extends State<IndexTimeline> {
       DateTime.parse(diaryItem.gmtCreate ?? unknownDateTimeString),
     );
 
+    var createDate = DateFormat(constDateFormat).format(
+      DateTime.parse(diaryItem.gmtCreate ?? unknownDateTimeString),
+    );
     return Container(
       // 内外边距
       // padding: EdgeInsets.all(5.sp),
@@ -260,7 +263,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            diaryItem.date,
+            createDate,
             style: TextStyle(fontSize: CusFontSizes.pageSubContent),
           ),
           Text(

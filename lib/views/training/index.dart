@@ -66,44 +66,52 @@ class _TrainingState extends State<Training> {
           //     CusAL.of(context).report,
           //   ),
           // ),
-          SizedBox(
-            height: screenHeight / 4,
-            child: buildCoverCard(
-              context,
-              const TrainingReports(),
-              CusAL.of(context).trainingReports,
-              CusAL.of(context).trainingReportsSubtitle,
-              reportImageUrl,
+          Expanded(
+            child: SizedBox(
+              height: screenHeight / 4,
+              child: buildCoverCard(
+                context,
+                const TrainingReports(),
+                CusAL.of(context).trainingReports,
+                CusAL.of(context).trainingReportsSubtitle,
+                reportImageUrl,
+              ),
             ),
           ),
-          SizedBox(
-            height: screenHeight / 4,
-            child: buildCoverCard(
-              context,
-              const TrainingExercise(),
-              CusAL.of(context).exerciseLabel,
-              CusAL.of(context).exerciseSubtitle,
-              workoutWomanImageUrl,
+          Expanded(
+            child: SizedBox(
+              height: screenHeight / 4,
+              child: buildCoverCard(
+                context,
+                const TrainingExercise(),
+                CusAL.of(context).exerciseLabel,
+                CusAL.of(context).exerciseSubtitle,
+                workoutWomanImageUrl,
+              ),
             ),
           ),
-          SizedBox(
-            height: screenHeight / 4,
-            child: buildCoverCard(
-              context,
-              const TrainingWorkouts(),
-              CusAL.of(context).workout,
-              CusAL.of(context).workoutSubtitle,
-              workoutManImageUrl,
+          Expanded(
+            child: SizedBox(
+              height: screenHeight / 4,
+              child: buildCoverCard(
+                context,
+                const TrainingWorkouts(),
+                CusAL.of(context).workout,
+                CusAL.of(context).workoutSubtitle,
+                workoutManImageUrl,
+              ),
             ),
           ),
-          SizedBox(
-            height: screenHeight / 4,
-            child: buildCoverCard(
-              context,
-              const TrainingPlans(),
-              CusAL.of(context).plan,
-              CusAL.of(context).planSubtitle,
-              workoutCalendarImageUrl,
+          Expanded(
+            child: SizedBox(
+              height: screenHeight / 4,
+              child: buildCoverCard(
+                context,
+                const TrainingPlans(),
+                CusAL.of(context).plan,
+                CusAL.of(context).planSubtitle,
+                workoutCalendarImageUrl,
+              ),
             ),
           ),
         ],

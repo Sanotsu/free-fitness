@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
 import '../../../common/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
@@ -25,6 +26,11 @@ void showConfigDialog(
   int timeInSeconds = ad.action.duration ?? 20;
   int count = ad.action.frequency ?? 10;
   double equipmentWeight = ad.action.equipmentWeight ?? 0;
+
+  // 基础动作的图片
+  List<String> imageList = (ad.exercise.images?.trim().isNotEmpty == true)
+      ? ad.exercise.images!.split(",")
+      : [];
 
   // 其他需要输入的例如器械重量、action名称、描述之类的
   final formKey = GlobalKey<FormBuilderState>();
@@ -179,15 +185,9 @@ void showConfigDialog(
                 Stack(
                   children: [
                     // 图片部分
-                    Container(
+                    SizedBox(
                       height: 200.0,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage(placeholderImageUrl),
-                          // ？？？这个不好弄，暂时与屏幕宽度对其就好，不知道会不会变形或者超出
-                          fit: BoxFit.fitWidth,
-                        ),
-                      ),
+                      child: buildImageCarouselSlider(imageList),
                     ),
                   ],
                 ),

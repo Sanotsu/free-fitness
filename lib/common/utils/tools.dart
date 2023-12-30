@@ -7,6 +7,11 @@ import 'package:intl/intl.dart';
 
 import '../global/constants.dart';
 
+/// 默认的日历显示范围，当前月的前后3个月
+final kToday = DateTime.now();
+final kFirstDay = DateTime(2023, 10, 12);
+final kLastDay = DateTime(kToday.year, kToday.month + 1, 15);
+
 // 10位的时间戳转字符串
 String formatTimestampToString(int timestamp) {
   if (timestamp.toString().length == 10) {

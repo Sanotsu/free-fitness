@@ -67,7 +67,7 @@ class _InitGuidePageState extends State<InitGuidePage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.sp),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -78,12 +78,21 @@ class _InitGuidePageState extends State<InitGuidePage> {
                 controller: _usernameController,
                 decoration: InputDecoration(
                   labelText: CusAL.of(context).nameLabel,
+                  // 设置透明底色
+                  filled: true,
+                  fillColor: Colors.transparent,
                 ),
               ),
             ),
             Padding(
               padding: EdgeInsets.all(10.sp),
               child: DropdownButtonFormField<CusLabel>(
+                decoration: const InputDecoration(
+                  isDense: true,
+                  // 设置透明底色
+                  filled: true,
+                  fillColor: Colors.transparent,
+                ),
                 items: genderOptions.map((CusLabel gender) {
                   return DropdownMenuItem<CusLabel>(
                     value: gender,

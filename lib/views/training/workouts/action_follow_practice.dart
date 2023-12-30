@@ -71,7 +71,7 @@ class _ActionFollowPracticeWithTTSState
   int _currentIndex = -1;
 
   // 预设的休息时间(从用户配置表读取的，是不变的。每次休息完成之后都要重置为这个时间)
-  final _defaultCusRestTime = 10;
+  int _defaultCusRestTime = 10;
   // 当前休息的倒计时时间(每个跟练间隔的休息时间用户可以调整)
   int _cusRestTime = 10;
 
@@ -175,7 +175,7 @@ class _ActionFollowPracticeWithTTSState
     var tempUser = (await _userHelper.queryUser(userId: CacheUser.userId))!;
 
     setState(() {
-      _cusRestTime = tempUser.actionRestTime ?? 10;
+      _defaultCusRestTime = tempUser.actionRestTime ?? 10;
     });
   }
 
@@ -244,6 +244,12 @@ class _ActionFollowPracticeWithTTSState
       _currentIndex = -1;
     });
   }
+
+  // 从基础动作获取其图片列表(要排除images是个空字符串)
+  List<String> _getExerciseImageList(Exercise exercise) =>
+      (exercise.images?.trim().isNotEmpty == true)
+          ? exercise.images!.split(",")
+          : [];
 
   ///
   /// TTS 相关的操作===============
@@ -516,7 +522,9 @@ class _ActionFollowPracticeWithTTSState
       Expanded(
         // 这里的盒子，只是单纯区分休息时显示下一个要小点，跟练时图片大点
         flex: 5,
-        child: buildExerciseImageCarouselSlider(actions[0].exercise),
+        child: buildImageCarouselSlider(
+          _getExerciseImageList(actions[0].exercise),
+        ),
       ),
       Expanded(
         flex: 2,
@@ -530,7 +538,7 @@ class _ActionFollowPracticeWithTTSState
                 TextSpan(
                   text: "${CusAL.of(context).workoutFollowLabel('1')}\n",
                   style: TextStyle(
-                    color: Colors.green,
+                    color: Theme.of(context).primaryColor,
                     fontSize: CusFontSizes.flagBig,
                     fontWeight: FontWeight.bold,
                   ),
@@ -538,8 +546,9 @@ class _ActionFollowPracticeWithTTSState
                 TextSpan(
                   text: actions[_currentIndex + 1].exercise.exerciseName,
                   style: TextStyle(
+                    color: Theme.of(context).primaryColor,
                     fontSize: CusFontSizes.flagMedium,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
@@ -608,7 +617,10 @@ class _ActionFollowPracticeWithTTSState
                   // 跳过预备时也停止语音
                   _stop();
                 },
-                icon: const Icon(Icons.arrow_forward),
+                icon: Icon(
+                  Icons.arrow_forward,
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
             ),
           ],
@@ -623,8 +635,8 @@ class _ActionFollowPracticeWithTTSState
       Expanded(
         // 这里的盒子，只是单纯区分休息时显示下一个要小点，跟练时图片大点
         flex: 4,
-        child: buildExerciseImageCarouselSlider(
-          actions[_currentIndex].exercise,
+        child: buildImageCarouselSlider(
+          _getExerciseImageList(actions[_currentIndex].exercise),
         ),
       ),
       // 在跟练页面显示当前训练占全部的进度条
@@ -654,7 +666,7 @@ class _ActionFollowPracticeWithTTSState
                       TextSpan(
                         text: actions[_currentIndex].exercise.exerciseName,
                         style: TextStyle(
-                          color: Colors.green,
+                          color: Theme.of(context).primaryColor,
                           fontSize: CusFontSizes.flagMedium,
                           fontWeight: FontWeight.bold,
                         ),
@@ -1161,7 +1173,7 @@ class _ActionFollowPracticeWithTTSState
                       // 索引是从0开始的，这里显示的序号，所以+1
                       text: '  ${_currentIndex + 1}/${actions.length}',
                       style: TextStyle(
-                        color: Colors.green,
+                        color: Theme.of(context).primaryColor,
                         fontSize: CusFontSizes.flagMedium,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1169,8 +1181,8 @@ class _ActionFollowPracticeWithTTSState
                     TextSpan(
                       text: '\n${actions[_currentIndex].exercise.exerciseName}',
                       style: TextStyle(
-                        color: Colors.green,
-                        fontSize: CusFontSizes.flagBig,
+                        color: Theme.of(context).primaryColor,
+                        fontSize: CusFontSizes.flagMedium,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1195,8 +1207,8 @@ class _ActionFollowPracticeWithTTSState
 
       Expanded(
         flex: 3,
-        child: buildExerciseImageCarouselSlider(
-          actions[_currentIndex].exercise,
+        child: buildImageCarouselSlider(
+          _getExerciseImageList(actions[_currentIndex].exercise),
         ),
       ),
     ];

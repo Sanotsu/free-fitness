@@ -15,12 +15,6 @@ import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import 'export/report_pdf_viewer.dart';
 
-/// 默认的日历显示范围，当前月的前后3个月
-/// ？？？实际手记的日历显示范围的话，就第一个手记的月份，到当前月份即可
-final kToday = DateTime.now();
-final kFirstDay = DateTime(kToday.year, kToday.month - 3, kToday.day);
-final kLastDay = DateTime(kToday.year, kToday.month + 3, kToday.day);
-
 class TrainingReports extends StatefulWidget {
   const TrainingReports({super.key});
 

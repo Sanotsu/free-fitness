@@ -63,6 +63,13 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
 
   @override
   Widget build(BuildContext context) {
+    // 获取该动作的图片列表
+    List<String> imageList = [];
+    // 先要排除image是个空字符串
+    if (_item.images != null && _item.images!.trim().isNotEmpty) {
+      imageList = _item.images!.split(",");
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(CusAL.of(context).exerciseDetail),
@@ -75,7 +82,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
               padding: EdgeInsets.all(10.sp),
               child: SizedBox(
                 height: 0.3.sh,
-                child: buildExerciseImageCarouselSlider(_item),
+                child: buildImageCarouselSlider(imageList),
               ),
             ),
             Padding(
@@ -158,16 +165,17 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
               CusAL.of(context).exerciseLabels('4'),
               _item.instructions ?? "",
             ),
-            _buildTableRow(
-              CusAL.of(context).exerciseLabels('5'),
-              _item.ttsNotes ?? "",
-            ),
-            _buildTableRow(
-              CusAL.of(context).exerciseLabels('7'),
-              (_item.isCustom != null && _item.isCustom == true)
-                  ? CusAL.of(context).boolLabels('0')
-                  : CusAL.of(context).boolLabels('1'),
-            ),
+            // 2023-12-30 这两个栏位目前没有实际含义，暂时不显示
+            // _buildTableRow(
+            //   CusAL.of(context).exerciseLabels('5'),
+            //   _item.ttsNotes ?? "",
+            // ),
+            // _buildTableRow(
+            //   CusAL.of(context).exerciseLabels('7'),
+            //   (_item.isCustom != null && _item.isCustom == true)
+            //       ? CusAL.of(context).boolLabels('0')
+            //       : CusAL.of(context).boolLabels('1'),
+            // ),
           ],
         ),
       ),

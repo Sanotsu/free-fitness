@@ -299,12 +299,12 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                   .exerciseDeleteAlert(exerciseItem.exerciseName)),
               actions: <Widget>[
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: Text(CusAL.of(context).confirmLabel),
-                ),
-                ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(CusAL.of(context).cancelLabel),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text(CusAL.of(context).confirmLabel),
                 ),
               ],
             );
@@ -337,6 +337,11 @@ class _TrainingExerciseState extends State<TrainingExercise> {
   _buildExerciseItemCard(int index) {
     var exerciseItem = exerciseItems[index];
 
+    // 构建轮播图片列表
+    List<String> imageList = (exerciseItem.images?.trim().isNotEmpty == true)
+        ? exerciseItem.images!.split(",")
+        : [];
+
     return Card(
       child: InkWell(
         onTap: () {
@@ -367,7 +372,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
             SizedBox(
               width: 0.4.sw,
               height: 0.3.sh,
-              child: buildExerciseImageCarouselSlider(exerciseItem),
+              child: buildImageCarouselSlider(imageList),
             ),
             Expanded(
               flex: 3,

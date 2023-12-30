@@ -198,7 +198,6 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                       "group_category",
                       categoryOptions,
                       labelText: CusAL.of(context).workoutQuerys('1'),
-                      optionFontSize: CusFontSizes.itemContent,
                     ),
                   ),
                   Expanded(
@@ -206,7 +205,6 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                       "group_level",
                       levelOptions,
                       labelText: CusAL.of(context).workoutQuerys('2'),
-                      optionFontSize: CusFontSizes.itemContent,
                     ),
                   ),
                 ],
@@ -433,7 +431,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                 Navigator.of(context).pop();
               },
             ),
-            ElevatedButton(
+            TextButton(
               child: Text(CusAL.of(context).confirmLabel),
               onPressed: () async {
                 if (_groupFormKey.currentState!.saveAndValidate()) {

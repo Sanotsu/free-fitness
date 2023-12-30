@@ -57,19 +57,37 @@ class _UserInfoState extends State<UserInfo> {
       appBar: AppBar(
         title: Text(CusAL.of(context).settingLabels("0")),
         actions: [
-          TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ModifyUserPage(user: user),
-                  ),
-                ).then((value) {
-                  // 确认新增成功后重新加载当前日期的条目数据
-                  _queryLoginedUserInfo();
-                });
-              },
-              child: Text(CusAL.of(context).eidtLabel("")))
+          // TextButton(
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => ModifyUserPage(user: user),
+          //       ),
+          //     ).then((value) {
+          //       // 确认新增成功后重新加载当前日期的条目数据
+          //       _queryLoginedUserInfo();
+          //     });
+          //   },
+          //   child: Text(
+          //     CusAL.of(context).eidtLabel(""),
+          //     style: const TextStyle(color: Colors.white),
+          //   ),
+          // ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ModifyUserPage(user: user),
+                ),
+              ).then((value) {
+                // 确认新增成功后重新加载当前日期的条目数据
+                _queryLoginedUserInfo();
+              });
+            },
+            icon: const Icon(Icons.edit),
+          )
         ],
       ),
       body: isLoading

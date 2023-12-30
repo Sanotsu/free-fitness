@@ -246,15 +246,15 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                 actions: [
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context, true);
-                    },
-                    child: Text(CusAL.of(context).confirmLabel),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
                       Navigator.pop(context, false);
                     },
                     child: Text(CusAL.of(context).cancelLabel),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context, true);
+                    },
+                    child: Text(CusAL.of(context).confirmLabel),
                   ),
                 ],
               );

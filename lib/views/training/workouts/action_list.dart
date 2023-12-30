@@ -312,6 +312,12 @@ class _ActionListState extends State<ActionList> {
               .join(' + ');
         }
 
+        // 基础动作的图片
+        List<String> imageList =
+            (adItem.exercise.images?.trim().isNotEmpty == true)
+                ? adItem.exercise.images!.split(",")
+                : [];
+
         return Card(
           elevation: 3,
           key: Key('$index'),
@@ -366,7 +372,7 @@ class _ActionListState extends State<ActionList> {
                     flex: 6,
                     child: Padding(
                       padding: EdgeInsets.all(_isEditing ? 5.sp : 10.sp),
-                      child: buildExerciseImageCarouselSlider(adItem.exercise),
+                      child: buildImageCarouselSlider(imageList),
                     ),
                   ),
                   if (_isEditing)

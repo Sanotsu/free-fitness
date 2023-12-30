@@ -6,6 +6,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:math' as math;
 
+import '../../layout/themes/cus_font_size.dart';
 import '../../models/cus_app_localizations.dart';
 import '../global/constants.dart';
 import 'tools.dart';
@@ -62,8 +63,14 @@ Widget buildLoader(bool isLoading) {
 //    表单使用是FormBuilderDropdown<String>但要注意类型改为匹配的，或者不指定String
 List<DropdownMenuItem<Object>> genDropdownMenuItems(
   List<CusLabel> options, {
-  double? textSize = 16,
+  double? textSize,
 }) {
+// 2023-12-30 为了英文的时候输入框显示完整，字体小点(13)，中午就16
+  var fontSize = textSize ??
+      (box.read('language') == "en"
+          ? CusFontSizes.pageSubContent
+          : CusFontSizes.pageSubTitle);
+
   return options
       .map(
         (option) => DropdownMenuItem(
@@ -71,7 +78,7 @@ List<DropdownMenuItem<Object>> genDropdownMenuItems(
           value: option.value,
           child: Text(
             showCusLable(option),
-            style: TextStyle(fontSize: textSize),
+            style: TextStyle(fontSize: fontSize),
           ),
         ),
       )

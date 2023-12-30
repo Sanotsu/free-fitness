@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -368,7 +367,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
               },
               child: Text(CusAL.of(context).cancelLabel),
             ),
-            ElevatedButton(
+            TextButton(
               onPressed: () {
                 _clickPlanModifyButton(planItem);
               },
@@ -399,42 +398,35 @@ class _TrainingPlansState extends State<TrainingPlans> {
               initialValue: planItem?.planCode,
               validator: FormBuilderValidators.required(),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Flexible(
-                  child: cusFormBuilerDropdown(
-                    "plan_category",
-                    categoryOptions,
-                    labelText: '*${CusAL.of(context).modifyPlanLabels('4')}',
-                    initialValue: planItem?.planCategory,
-                    validator: FormBuilderValidators.required(),
-                  ),
-                ),
-                Flexible(
-                  child: cusFormBuilerDropdown(
-                    "plan_level",
-                    levelOptions,
-                    labelText: '*${CusAL.of(context).modifyPlanLabels('5')}',
-                    initialValue: planItem?.planLevel,
-                    validator: FormBuilderValidators.required(),
-                  ),
-                ),
-              ],
+            cusFormBuilerDropdown(
+              "plan_category",
+              categoryOptions,
+              labelText: '*${CusAL.of(context).modifyPlanLabels('4')}',
+              initialValue: planItem?.planCategory,
+              validator: FormBuilderValidators.required(),
             ),
-            cusFormBuilerTextField(
-              "plan_period",
-              labelText: '*${CusAL.of(context).modifyPlanLabels('6')}',
-              initialValue: planItem?.planPeriod.toString(),
-              validator: FormBuilderValidators.compose([
-                FormBuilderValidators.required(),
-              ]),
-              // 正则来只允许输入数字
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-              ],
-              keyboardType: TextInputType.number,
+            cusFormBuilerDropdown(
+              "plan_level",
+              levelOptions,
+              labelText: '*${CusAL.of(context).modifyPlanLabels('5')}',
+              initialValue: planItem?.planLevel,
+              validator: FormBuilderValidators.required(),
             ),
+
+            // 2023-12-30 实际这个周期不需要用户手动输入，它就是该plan对应的group列表的长度
+            // cusFormBuilerTextField(
+            //   "plan_period",
+            //   labelText: '*${CusAL.of(context).modifyPlanLabels('6')}',
+            //   initialValue: planItem?.planPeriod.toString(),
+            //   validator: FormBuilderValidators.compose([
+            //     FormBuilderValidators.required(),
+            //   ]),
+            //   // 正则来只允许输入数字
+            //   inputFormatters: [
+            //     FilteringTextInputFormatter.digitsOnly,
+            //   ],
+            //   keyboardType: TextInputType.number,
+            // ),
             cusFormBuilerTextField(
               "description",
               labelText: '*${CusAL.of(context).modifyPlanLabels('7')}',
@@ -456,14 +448,18 @@ class _TrainingPlansState extends State<TrainingPlans> {
       // 获取表单数值
       Map<String, dynamic> formData = _addFormKey.currentState!.value;
 
+      print("修改的计划表单数据-----$formData");
       // 对周期进行类型转换
-      var planPeriod = int.parse(formData['plan_period']);
-      // 再放回去
-      // 深拷贝表单数据的Map，修改拷贝后的(原始的那个好像是不可修改的，会报错)
-      var copiedFormData = Map<String, dynamic>.from(formData);
-      copiedFormData["plan_period"] = planPeriod;
+      // var planPeriod = int.parse(formData['plan_period']);
+      // // 再放回去
+      // // 深拷贝表单数据的Map，修改拷贝后的(原始的那个好像是不可修改的，会报错)
+      // var copiedFormData = Map<String, dynamic>.from(formData);
+      // copiedFormData["plan_period"] = planPeriod;
 
-      var temp = TrainingPlan.fromMap(copiedFormData);
+      // var temp = TrainingPlan.fromMap(copiedFormData);
+
+      // 2023-12-30 实际这个周期不需要用户手动输入，它就是该plan对应的group列表的长度
+      var temp = TrainingPlan.fromMap(formData);
 
       try {
         // 如果是新增

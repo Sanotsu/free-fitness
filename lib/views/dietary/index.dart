@@ -53,44 +53,52 @@ class _DietaryState extends State<Dietary> {
           //     CusAL.of(context).dietaryReports,
           //   ),
           // ),
-          SizedBox(
-            height: screenHeight / 4,
-            child: buildCoverCard(
-              context,
-              const DietaryReports(),
-              CusAL.of(context).dietaryReports,
-              CusAL.of(context).dietaryReportsSubtitle,
-              reportImageUrl,
+          Expanded(
+            child: SizedBox(
+              height: screenHeight / 4,
+              child: buildCoverCard(
+                context,
+                const DietaryReports(),
+                CusAL.of(context).dietaryReports,
+                CusAL.of(context).dietaryReportsSubtitle,
+                reportImageUrl,
+              ),
             ),
           ),
-          SizedBox(
-            height: screenHeight / 4,
-            child: buildCoverCard(
-              context,
-              const MealPhotoGallery(),
-              CusAL.of(context).mealGallery,
-              CusAL.of(context).mealGallerySubtitle,
-              dietaryMealImageUrl,
+          Expanded(
+            child: SizedBox(
+              height: screenHeight / 4,
+              child: buildCoverCard(
+                context,
+                const MealPhotoGallery(),
+                CusAL.of(context).mealGallery,
+                CusAL.of(context).mealGallerySubtitle,
+                dietaryMealImageUrl,
+              ),
             ),
           ),
-          SizedBox(
-            height: screenHeight / 4,
-            child: buildCoverCard(
-              context,
-              const DietaryFoods(),
-              CusAL.of(context).foodCompo,
-              CusAL.of(context).foodCompoSubtitle,
-              dietaryNutritionImageUrl,
+          Expanded(
+            child: SizedBox(
+              height: screenHeight / 4,
+              child: buildCoverCard(
+                context,
+                const DietaryFoods(),
+                CusAL.of(context).foodCompo,
+                CusAL.of(context).foodCompoSubtitle,
+                dietaryNutritionImageUrl,
+              ),
             ),
           ),
-          SizedBox(
-            height: screenHeight / 4,
-            child: buildCoverCard(
-              context,
-              const DietaryRecords(),
-              CusAL.of(context).dietaryRecords,
-              CusAL.of(context).dietaryRecordsSubtitle,
-              dietaryLogCoverImageUrl,
+          Expanded(
+            child: SizedBox(
+              height: screenHeight / 4,
+              child: buildCoverCard(
+                context,
+                const DietaryRecords(),
+                CusAL.of(context).dietaryRecords,
+                CusAL.of(context).dietaryRecordsSubtitle,
+                dietaryLogCoverImageUrl,
+              ),
             ),
           ),
         ],

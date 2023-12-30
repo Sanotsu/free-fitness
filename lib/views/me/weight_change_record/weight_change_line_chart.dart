@@ -174,7 +174,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
 
   // 找了很多问题，是Android9及之下，无法保存。
   // 权限什么的都已经给了的，还是存不了，有时间找个Android10及其之上的设备试一下
-  _saveChartImage() async {
+  saveChartImage() async {
     RenderRepaintBoundary boundary =
         _chartKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
     ui.Image image = await boundary.toImage(pixelRatio: 2.sp);
@@ -243,14 +243,15 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (isShowSaveButton)
-                    IconButton(
-                      onPressed: _saveChartImage,
-                      icon: Icon(
-                        Icons.download,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
+                  // 2023-12-30 还没有优化，暂时不支持下载
+                  // if (isShowSaveButton)
+                  //   IconButton(
+                  //     onPressed: saveChartImage,
+                  //     icon: Icon(
+                  //       Icons.download,
+                  //       color: Theme.of(context).primaryColor,
+                  //     ),
+                  //   ),
                   IconButton(
                     onPressed: () {
                       setState(() {

@@ -43,6 +43,8 @@ class _GroupListState extends State<GroupList> {
   // 当前计划的每个训练日最后一次训练的日志map
   Map<int, TrainedDetailLog?> logMap = {};
 
+  late TrainingPlan planItem;
+
   // 是否在加载数据
   bool isLoading = false;
 
@@ -53,7 +55,10 @@ class _GroupListState extends State<GroupList> {
   void initState() {
     super.initState();
 
-    _getGroupListByPlanId();
+    setState(() {
+      planItem = widget.planItem;
+      _getGroupListByPlanId();
+    });
   }
 
   // 查询指定训练中的动作列表
@@ -69,13 +74,14 @@ class _GroupListState extends State<GroupList> {
     // ？？？正常来讲，这里一定只有1个结果，不会有多个，也不会没有（验证就暂时不做了）
     // 指定计划包含多个训练
     var tempPWG = await _dbHelper.searchPlanWithGroups(
-      planId: widget.planItem.planId,
+      planId: planItem.planId,
     );
 
     // 查询该训练计划的跟练日志信息，用于显示每个训练的最后一次跟练时间
-    var tempLog = await _dbHelper.queryLastTrainingDetailLogByPlanName(
-      widget.planItem,
-    );
+    var tempLog =
+        await _dbHelper.queryLastTrainingDetailLogByPlanName(planItem);
+
+    print("动作组的跟练日志$tempLog");
 
     // 设置查询结果
     setState(() {
@@ -97,7 +103,7 @@ class _GroupListState extends State<GroupList> {
     // 保存现有的动作列表到当前训练中
     // 必须要把plan has group中对应plan的旧的plan has group id 删除
     // 然后让数据库设定的自增生效，否则显示的结果默认以主键排序，和实际显示的结果可能不一致。
-    var planId = widget.planItem.planId!;
+    var planId = planItem.planId!;
     List<PlanHasGroup> tempList = [];
 
     for (var i = 0; i < groupList.length; i++) {
@@ -110,8 +116,16 @@ class _GroupListState extends State<GroupList> {
     }
 
     try {
+      // 2023-12-30 也一并修改计划的周期为目前group列表的长度
       await _dbHelper.renewPlanWithGroupList(planId, tempList);
       await _getGroupListByPlanId();
+      // 虽然更新了plan，则重新获取最新的plan
+      var plans = await _dbHelper.queryTrainingPlanById(planItem.planId!);
+      if (plans.isNotEmpty) {
+        setState(() {
+          planItem = plans.first;
+        });
+      }
     } catch (e) {
       // 弹出报错提示框
       if (!mounted) return;
@@ -171,7 +185,7 @@ class _GroupListState extends State<GroupList> {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: widget.planItem.planName,
+                  text: planItem.planName,
                   style: TextStyle(fontSize: CusFontSizes.pageTitle),
                 ),
                 TextSpan(
@@ -352,7 +366,7 @@ class _GroupListState extends State<GroupList> {
             MaterialPageRoute(
               builder: (context) => ActionList(
                 groupItem: groupItem,
-                planItem: widget.planItem,
+                planItem: planItem,
                 dayNumber: index + 1,
               ),
             ),

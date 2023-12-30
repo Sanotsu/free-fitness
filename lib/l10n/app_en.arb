@@ -314,6 +314,7 @@
   "richTextToolNote":" Expand Quill Toolbar",
 
   "lastModified":"Last Modified",
+  "gmtCreate":"Created Time",
 
 
   "confirmLabel":"Confirm",
@@ -324,7 +325,7 @@
   "moreDetail": "More Detail",
   "lessLabel":"less",
   "enterLabel":"Enter",
-  "skipLabel":"Next",
+  "skipLabel":"Not Now",
   "backLabel":"Back",
   "saveLabel":"Save",
   "eidtLabel":"Edit {name}",

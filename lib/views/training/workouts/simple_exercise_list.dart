@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/components/dialog_widgets.dart';
@@ -37,10 +38,10 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
   bool isLoading = false;
   ScrollController scrollController = ScrollController();
 
-  // 查询条件输入框控制器
-  final queryTextController = TextEditingController();
-  // 输入的条件查询关键字
-  String queryConditon = "";
+  // 查询表单的key
+  final _queryFormKey = GlobalKey<FormBuilderState>();
+  // 可以筛选训练，条件用个map来存，初始化一个空map
+  Map<String, dynamic> conditionMap = {};
 
   @override
   void initState() {
@@ -53,7 +54,7 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
   void dispose() {
     scrollController.removeListener(_scrollListener);
     scrollController.dispose();
-    queryTextController.dispose();
+
     super.dispose();
   }
 
@@ -78,12 +79,27 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
       isLoading = true;
     });
 
+    print("查询数据中的条件$conditionMap");
+
     // 查询结果是个动态的list和该表的总数据，使用list要转型
-    var temp = await _dbHelper.queryExerciseByKeyword(
-      pageSize: pageSize,
-      page: currentPage,
-      keyword: queryConditon,
-    );
+    CusDataResult temp;
+    if (conditionMap.isEmpty) {
+      // 没有查询条件就默认查询所有
+      temp = await _dbHelper.queryExerciseByKeyword(
+        pageSize: pageSize,
+        page: currentPage,
+        keyword: "",
+      );
+    } else {
+      // 有其他条件，就条件查询
+      temp = await _dbHelper.queryExercise(
+        pageSize: pageSize,
+        page: currentPage,
+        level: conditionMap["level"],
+        exerciseName: conditionMap["exercise_name"],
+        category: conditionMap["category"],
+      );
+    }
 
     List<Exercise> newData = temp.data as List<Exercise>;
 
@@ -103,21 +119,6 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
       exerciseCount = temp.total;
       currentPage++;
       isLoading = false;
-    });
-  }
-
-  // 定义查询回调函数，参数为查询条件的值
-  void handleQuery(String query) {
-    // 处理查询条件的值
-    print(query); // 示例：打印查询条件的值
-
-    // 有变动查询条件，则重新开始查询
-    setState(() {
-      queryConditon = query;
-      exerciseItems.clear();
-      exerciseCount = 0;
-      currentPage = 1;
-      _loadData();
     });
   }
 
@@ -144,51 +145,115 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
       ),
       body: Column(
         children: [
-          Card(elevation: 5, child: _buildQueryRow()),
+          FormBuilder(
+            key: _queryFormKey,
+            child: Card(
+              elevation: 5.sp,
+              child: Column(
+                children: [_buildQueryAreaRow(), SizedBox(height: 10.sp)],
+              ),
+            ),
+          ),
           Expanded(child: _buildListArea()),
         ],
       ),
     );
   }
 
-  _buildQueryRow() {
+  _buildQueryAreaRow() {
     return Row(
       children: [
         Expanded(
-          flex: 3,
-          child: Padding(
-            padding: EdgeInsets.all(10.sp),
-            child: TextField(
-              // 设置文本大小
-              style: TextStyle(fontSize: CusFontSizes.searchInputMedium),
-              decoration: InputDecoration(
-                // 四周带上边框
-                border: const OutlineInputBorder(),
-                // 设置输入框大小
-                contentPadding: EdgeInsets.all(10.sp),
-                // 占位符文本
-                hintText: CusAL.of(context).queryKeywordHintText(
-                  CusAL.of(context).exercise,
-                ),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: cusFormBuilerTextField(
+                      "exercise_name",
+                      labelText: CusAL.of(context).workoutQuerys('0'),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 50.sp,
+                    height: 36.sp,
+                    child: TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _queryFormKey.currentState?.reset();
+                          // 2023-12-12 不知道为什么，reset对下拉选中的没有效，所以手动清除
+                          _queryFormKey.currentState?.fields['category']
+                              ?.didChange(null);
+                          _queryFormKey.currentState?.fields['level']
+                              ?.didChange(null);
+
+                          // 重置后重新查询
+                          conditionMap = {};
+                          currentPage = 1;
+                          exerciseItems.clear();
+                          exerciseCount = 0;
+                          _loadData();
+                        });
+                        // 如果有键盘就收起键盘
+                        FocusScope.of(context).focusedChild?.unfocus();
+                      },
+                      child: Text(
+                        CusAL.of(context).resetLabel,
+                        style: TextStyle(
+                          fontSize: CusFontSizes.pageAppendix,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              controller: queryTextController,
-            ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: cusFormBuilerDropdown(
+                      "category",
+                      categoryOptions,
+                      labelText: CusAL.of(context).workoutQuerys('1'),
+                    ),
+                  ),
+                  Expanded(
+                    child: cusFormBuilerDropdown(
+                      "level",
+                      levelOptions,
+                      labelText: CusAL.of(context).workoutQuerys('2'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-        Expanded(
-          flex: 1,
-          child: Center(
-            child: ElevatedButton(
-              onPressed: () {
-                // 点击查询按钮时收起键盘
-                FocusScope.of(context).unfocus();
-                // 执行条件查询
-                handleQuery(queryTextController.text);
-              },
-              child: const Icon(Icons.search),
-            ),
+        Container(
+          width: 50.sp,
+          alignment: Alignment.center,
+          child: IconButton(
+            icon: Icon(Icons.search, color: Theme.of(context).primaryColor),
+            onPressed: () {
+              if (_queryFormKey.currentState!.saveAndValidate()) {
+                setState(() {
+                  conditionMap = _queryFormKey.currentState!.value;
+
+                  // 重新查询的结果要全部替换掉之前的结果
+                  currentPage = 1;
+                  exerciseItems.clear();
+                  exerciseCount = 0;
+                  _loadData();
+                });
+              }
+              // 如果有键盘就收起键盘
+              FocusScope.of(context).focusedChild?.unfocus();
+            },
           ),
-        ),
+        )
       ],
     );
   }
@@ -202,6 +267,12 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
           return buildLoader(isLoading);
         } else {
           var exerciseItem = exerciseItems[index];
+
+          List<String> imageList =
+              (exerciseItem.images?.trim().isNotEmpty == true)
+                  ? exerciseItem.images!.split(",")
+                  : [];
+
           return Card(
             elevation: 10,
             child: GestureDetector(
@@ -222,7 +293,7 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
                     flex: 9,
                     child: ListTile(
                       title: Text(
-                        "$index-${exerciseItem.exerciseName}",
+                        "${index + 1}-${exerciseItem.exerciseName}",
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,
                         style: TextStyle(
@@ -247,7 +318,7 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
                       height: 80.sp,
                       child: Padding(
                         padding: EdgeInsets.all(5.sp),
-                        child: buildExerciseImageCarouselSlider(exerciseItem),
+                        child: buildImageCarouselSlider(imageList),
                       ),
                     ),
                   ),

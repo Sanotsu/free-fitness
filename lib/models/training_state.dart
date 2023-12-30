@@ -248,7 +248,7 @@ class TrainingPlan {
       planName: map['plan_name'] as String,
       planCategory: map['plan_category'] as String,
       planLevel: map['plan_level'] as String,
-      planPeriod: map['plan_period'] as int,
+      planPeriod: map['plan_period'] as int? ?? 0,
       description: map['description'] as String?,
       contributor: map['contributor'] as String?,
       gmtCreate: map['gmt_create'] as String?,

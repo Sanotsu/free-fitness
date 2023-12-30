@@ -358,7 +358,7 @@ Future<int> insertOneRandomPlanHasGroup() async {
 }
 
 // 2023-12-27 插入训练日志宽表数据，展示运动报告时不需要级联查询基础表
-insertTrainingDetailLogDemo({int? size = 10}) async {
+insertTrainingDetailLogDemo() async {
   print("【【【 插入测试数据 start-->:insertTrainingDetailLogDemo ");
 
   /// 2023-12-27 正好是测试日志宽表，不会关联其他基础表，数据随意写就好了
