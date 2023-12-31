@@ -89,6 +89,8 @@ class _IndexTimelineState extends State<IndexTimeline> {
 
     List<Diary> newData = temp.data as List<Diary>;
 
+    print(newData);
+
     // 如果没有更多数据，则在底部显示回弹
     if (newData.isEmpty) {
       if (!mounted) return;

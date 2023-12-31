@@ -66,9 +66,9 @@ Future<Uint8List> makeReportPdf(
       // bold: await PdfGoogleFonts.notoSerifHKBold(),
       // 但是使用知道的本地字体，会增加app体积
       base: Font.ttf(await rootBundle.load("assets/MiSans-Regular.ttf")),
-      // fontFallback: [
-      //   pw.Font.ttf(await rootBundle.load('assets/MiSans-Regular.ttf'))
-      // ],
+      fontFallback: [
+        pw.Font.ttf(await rootBundle.load('assets/MiSans-Regular.ttf'))
+      ],
     ),
   );
 

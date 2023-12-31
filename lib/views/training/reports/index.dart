@@ -186,6 +186,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                     return AlertDialog(
                       title: Text(CusAL.of(context).exportRangeNote),
                       content: DropdownMenu<CusLabel>(
+                        width: 0.6.sw,
                         initialSelection: exportDateList.first,
                         onSelected: (CusLabel? value) {
                           setState(() {

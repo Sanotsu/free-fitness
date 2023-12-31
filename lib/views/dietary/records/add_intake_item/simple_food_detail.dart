@@ -275,6 +275,9 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
             initialValue: cusDoubleTryToIntString(inputServingValue),
             decoration: InputDecoration(
               labelText: CusAL.of(context).dietaryAddTabs('2'),
+              // 背景透明色
+              filled: true,
+              fillColor: Colors.transparent,
             ),
             keyboardType: TextInputType.number,
             validator: FormBuilderValidators.compose([
@@ -300,6 +303,9 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
                   name: 'serving_unit',
                   decoration: InputDecoration(
                     labelText: CusAL.of(context).dietaryAddTabs('3'),
+                    // 背景透明色
+                    filled: true,
+                    fillColor: Colors.transparent,
                   ),
                   initialValue: servingUnitOptions[0],
                   items: servingUnitOptions
@@ -336,6 +342,9 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
             name: 'new_mealtime',
             decoration: InputDecoration(
               labelText: CusAL.of(context).dietaryAddTabs('5'),
+              // 背景透明色
+              filled: true,
+              fillColor: Colors.transparent,
             ),
             initialValue: inputMealtimeValue,
             items: mealtimeList

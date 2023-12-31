@@ -264,6 +264,7 @@
  
 
   "photoLabel":"Photo ({count})",
+  "photoUnitLabel":"photo(s)",
 
   "dietaryAddTabs": "{num, select, 0{Recently Eaten} 1{Food List} 2{Size} 3{Unit} 4{New Unit?} 5{Meal}  other{Other} }",
   "@dietaryAddTabs": {

@@ -412,10 +412,18 @@ class DBDietaryHelper {
   Future<CusDataResult> searchFoodWithServingInfoWithPagination(
     String keyword,
     int page,
-    int pageSize,
-  ) async {
+    int pageSize, {
+    // 2023-12-31 指定创建日期升序或者降序排序
+    String? dateSort = "desc",
+  }) async {
     final db = await database;
     final offset = (page - 1) * pageSize;
+
+    var sort = dateSort?.toLowerCase();
+    if (dateSort != null) {
+      // 如果有传入创建时间排序，不是传的降序一律升序
+      sort = dateSort.toLowerCase() == 'desc' ? 'DESC' : 'ASC';
+    }
 
     final foodRows = await db.query(
       DietaryDdl.tableNameOfFood,
@@ -423,6 +431,7 @@ class DBDietaryHelper {
       whereArgs: ['%$keyword%', '%$keyword%', 0],
       limit: pageSize,
       offset: offset,
+      orderBy: sort != null ? 'gmt_create $sort' : null,
     );
 
     final foods = <FoodAndServingInfo>[];

@@ -233,7 +233,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
       temp.dailyFoodItemId = null;
       // 最主要的摄入量、食物编号、单份营养素编号不用改
       temp.userId = CacheUser.userId;
-      temp.date = getCurrentDate();
+      temp.date = currentDate;
       temp.mealCategory = dropdownValue.enLabel;
       temp.gmtCreate = getCurrentDateTime();
 

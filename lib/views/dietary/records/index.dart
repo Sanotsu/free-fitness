@@ -145,6 +145,16 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     );
 
     setState(() {
+      // 2023-12-31 需要先清空之前的，否则即便没有也会展示旧的数据
+      // mealPhotoNums = {
+      //   MealLabels.enBreakfast: null,
+      //   MealLabels.enLunch: null,
+      //   MealLabels.enDinner: null,
+      //   MealLabels.enOther: null,
+      // };
+
+      mealPhotoNums.clear();
+
       // 正常来讲，每天每个餐次最多只有一条数据，只要有数据，照片就是修改或删除了
       for (var e in temp) {
         if (e.mealCategory == MealLabels.enBreakfast) {
@@ -171,7 +181,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     if (!mounted) return;
     if (picked != null) {
       // 包含了月日星期，其他格式修改 MMMEd 为其他即可
-      var formatDate = DateFormat('MMMEd', "zh_CN").format(picked);
+      var formatDate = DateFormat.MMMEd().format(picked);
 
       // 昨天今天明天三天的显示可以特殊一点，比较的话就比较对应年月日转换的字符串即可
       var today = DateTime.now();
@@ -223,7 +233,11 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                       bottom: BorderSide(color: Colors.white, width: 1.sp),
                     ),
                   ),
-                  child: Text(showedDateStr, textAlign: TextAlign.center),
+                  child: Text(
+                    showedDateStr,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: CusFontSizes.pageTitle),
+                  ),
                 ),
               ),
             ],
@@ -626,6 +640,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                               mealtime: mealtime,
                               mealItems: dfiwfsMealItems,
                               mealPhoto: mealPhotoNums[mealtime.enLabel],
+                              date: selectedDateStr,
                             ),
                           ),
                         ).then((value) {
@@ -635,7 +650,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                           });
                         });
                       },
-                      icon: const Icon(Icons.photo),
+                      icon: const Icon(Icons.add),
                       label: Text(
                         CusAL.of(context).photoLabel(_getPhotoCount(mealtime)),
                       ),

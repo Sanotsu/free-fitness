@@ -650,6 +650,8 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             options: options,
             // 标签被选中时的颜色
             selectedColor: Colors.blue,
+            // 不显示选中图标
+            showCheckmark: false,
             // 选项列表中文字样式
             labelStyle: TextStyle(
               fontSize: CusFontSizes.flagTiny,

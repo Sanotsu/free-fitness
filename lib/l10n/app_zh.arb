@@ -269,6 +269,7 @@
     },
 
     "photoLabel":"照片 ({count})",
+    "photoUnitLabel":"张照片",
 
     "dietaryAddTabs": "{num, select, 0{最近记录} 1{食物列表} 2{数量} 3{单位} 4{添加新单位?} 5{餐次}  other{其他} }",
     "@dietaryAddTabs": {

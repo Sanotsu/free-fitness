@@ -115,11 +115,15 @@ class _MealPhotoGalleryState extends State<MealPhotoGallery> {
         elevation: 5,
         child: Column(
           children: [
+            SizedBox(height: 10.sp),
             ListTile(
               title: Text(mp.date),
-              subtitle: Text(showCusLableMapLabel(context, temp)),
+              subtitle: Text(
+                '[${showCusLable(temp)}] ${photoList.length} ${CusAL.of(context).photoUnitLabel}',
+              ),
             ),
             buildImageCarouselSlider(photoList),
+            SizedBox(height: 10.sp),
           ],
         ),
       );

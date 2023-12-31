@@ -863,7 +863,10 @@ class _DietaryReportsState extends State<DietaryReports> {
                 showCusLable(value),
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: CusFontSizes.pageSubContent,
+                  // fontSize: CusFontSizes.pageSubContent,
+                  fontSize: (box.read('language') == "en"
+                      ? CusFontSizes.pageSubContent
+                      : CusFontSizes.pageSubTitle),
                 ),
                 textAlign: TextAlign.end,
               ),

@@ -15,14 +15,18 @@ import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 
 class SaveMealPhotos extends StatefulWidget {
-// 需要传入餐次和对应餐次的饮食条目，方便展示
+  // 2023-12-31 还需要传是为哪一天的餐次添加照片
+  final String date;
+  // 需要传入餐次和对应餐次的饮食条目，方便展示
   final CusLabel mealtime;
   final List<DailyFoodItemWithFoodServing> mealItems;
+
   // 如果是修改，则会带上之前实例的照片；没有则是新增没有旧照片(也是用这个判断是新增还是修改)
   final MealPhoto? mealPhoto;
 
   const SaveMealPhotos({
     super.key,
+    required this.date,
     required this.mealtime,
     required this.mealItems,
     this.mealPhoto,
@@ -73,7 +77,25 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
     // 最上面图片走马灯，下面餐次item信息，action是保存和取消/返回按钮
     return Scaffold(
       appBar: AppBar(
-        title: Text(CusAL.of(context).mealPhotos),
+        title: RichText(
+          textAlign: TextAlign.left,
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: CusAL.of(context).mealPhotos,
+                style: TextStyle(
+                  fontSize: CusFontSizes.pageTitle,
+                ),
+              ),
+              TextSpan(
+                text: "\n${widget.date}",
+                style: TextStyle(
+                  fontSize: CusFontSizes.pageAppendix,
+                ),
+              ),
+            ],
+          ),
+        ),
         actions: [
           if (!isEditing)
             IconButton(
@@ -105,7 +127,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                           : '';
 
                   var tempMp = MealPhoto(
-                    date: getCurrentDate(),
+                    date: widget.date,
                     mealCategory: widget.mealtime.enLabel,
                     photos: photos,
                     gmtCreate: getCurrentDateTime(),
@@ -165,6 +187,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
       ),
       body: Column(
         children: [
+          SizedBox(height: 10.sp),
           if (imagesUrls.isNotEmpty && !isEditing)
             buildImageCarouselSlider(imagesUrls),
           const SizedBox(height: 10),
@@ -179,6 +202,10 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                     child: FormBuilderFilePicker(
                       name: 'images',
                       initialValue: initImages,
+                      decoration: const InputDecoration(
+                        filled: true,
+                        fillColor: Colors.transparent,
+                      ),
                       maxFiles: null,
                       allowMultiple: true,
                       previewImages: true,
