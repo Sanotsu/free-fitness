@@ -62,3 +62,6 @@ ios
 
 # 统计行插件自己生成的文件夹
 .VSCodeCounter
+
+# 旧的说明文件，当成开发记录
+**/_old_readme/*

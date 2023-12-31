@@ -12,7 +12,7 @@ import '../../common/utils/db_user_helper.dart';
 import '../../layout/themes/cus_font_size.dart';
 import '../../models/cus_app_localizations.dart';
 import '../../models/user_state.dart';
-import '_feature_mock_data/index.dart';
+// import '_feature_mock_data/index.dart';
 import 'backup_and_restore/index.dart';
 import 'intake_goals/intake_target.dart';
 import 'more_settings/index.dart';
@@ -201,17 +201,17 @@ class _UserAndSettingsState extends State<UserAndSettings> {
           CusAL.of(context).moduleTitles('3'),
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const FeatureMockDemo(),
-                ),
-              );
-            },
-            icon: const Icon(Icons.bug_report),
-          ),
+          // IconButton(
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => const FeatureMockDemo(),
+          //       ),
+          //     );
+          //   },
+          //   icon: const Icon(Icons.bug_report),
+          // ),
           // 切换用户(切换后缓存的用户编号也得修改)
           IconButton(
             onPressed: _switchUser,
