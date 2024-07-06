@@ -164,7 +164,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                     // Navigator.pop(context, true);
                   } catch (e) {
                     // 将错误信息展示给用户
-                    if (!mounted) return;
+                    if (!context.mounted) return;
                     commonExceptionDialog(
                       context,
                       CusAL.of(context).exceptionWarningTitle,

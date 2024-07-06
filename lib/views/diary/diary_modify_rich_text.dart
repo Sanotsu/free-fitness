@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -129,6 +130,8 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
       lastSavedTime = item.gmtModified ?? item.gmtCreate;
 
       isEditing = false;
+      // 2024-07-06 现在编辑文本是否只读在控制器配置了，需要要先改是否修改，再修改控制器
+      _controller.readOnly = !isEditing;
     });
   }
 
@@ -199,6 +202,8 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
 
       setState(() {
         isEditing = !isEditing;
+        // 2024-07-06 现在编辑文本是否只读在控制器配置了，需要要先改是否修改，再修改控制器
+        _controller.readOnly = !isEditing;
         isQuillToolbarExpanded = false;
         // ？？？应该是取上面新增或保存时的时间，但者差距不大，先这样
         lastSavedTime = getCurrentDateTime();
@@ -308,6 +313,8 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                 onPressed: () {
                   setState(() {
                     isEditing = !isEditing;
+                    // 2024-07-06 现在编辑文本是否只读在控制器配置了，需要要先改是否修改，再修改控制器
+                    _controller.readOnly = !isEditing;
                   });
                 },
                 icon: const Icon(Icons.edit_document),
@@ -462,14 +469,14 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                 bgColor: CusColors.tagTinyTagBg,
                 labelTextSize: CusFontSizes.flagTiny,
               );
-            }).toList(),
+            }),
             ...initMoods.map((mood) {
               return buildSmallButtonTag(
                 mood,
                 bgColor: CusColors.moodTinyTagBg,
                 labelTextSize: CusFontSizes.flagTiny,
               );
-            }).toList(),
+            }),
             buildSmallButtonTag(
               initCategory,
               bgColor: CusColors.cateTinyTagBg,
@@ -532,75 +539,106 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
         // 所以实际使用时，可以大概在(1.sh-480/1.sh)=>？？？但实际显示不太对，不是这样算的？？？
         height: isQuillToolbarExpanded ? (0.75.sh + 176.sp) : 0.75.sh,
         width: 1.sw,
-        child: QuillProvider(
-          configurations: QuillConfigurations(
-            controller: _controller,
-            sharedConfigurations: QuillSharedConfigurations(
-              locale: box.read('language') == 'system'
-                  ? null
-                  : Locale(box.read('language')),
-            ),
-          ),
-          child: Column(
-            children: [
-              // 在编辑状态下才显示工具栏
-              if (isEditing)
-                Card(
-                  elevation: 3,
-                  child: ExpansionTile(
-                    title: Text(CusAL.of(context).richTextToolNote),
-                    leading: const Icon(Icons.tag, color: Colors.green),
-                    // 2023-12-26 固定白色，在深色主题就看不到字了
-                    // backgroundColor: Colors.white,
-                    initiallyExpanded: isQuillToolbarExpanded, // 是否默认展开
-                    onExpansionChanged: (isExpanded) {
-                      setState(() {
-                        isQuillToolbarExpanded = isExpanded;
-                      });
-                    },
-                    children: <Widget>[
-                      QuillToolbar(
-                        configurations: QuillToolbarConfigurations(
-                          // 默认有嵌入：视频、图片、摄像头、多媒体，也可以指定
-                          embedButtons: FlutterQuillEmbeds.toolbarButtons(),
-                          // embedButtons: FlutterQuillEmbeds.toolbarButtons(
-                          //   imageButtonOptions:
-                          //       const QuillToolbarImageButtonOptions(),
-                          // ),
+        child: Column(
+          children: [
+            // 在编辑状态下才显示工具栏
+            if (isEditing)
+              Card(
+                elevation: 3,
+                child: ExpansionTile(
+                  title: Text(CusAL.of(context).richTextToolNote),
+                  leading: const Icon(Icons.tag, color: Colors.green),
+                  // 2023-12-26 固定白色，在深色主题就看不到字了
+                  // backgroundColor: Colors.white,
+                  initiallyExpanded: isQuillToolbarExpanded, // 是否默认展开
+                  onExpansionChanged: (isExpanded) {
+                    setState(() {
+                      isQuillToolbarExpanded = isExpanded;
+                    });
+                  },
+                  children: <Widget>[
+                    // 如果工具栏简单点就这样
+
+                    SizedBox(
+                      width: 1.sw,
+                      child: QuillToolbar.simple(
+                        configurations: QuillSimpleToolbarConfigurations(
+                          controller: _controller,
+                          // 这几个默认没开启
+                          // showSmallButton: true,
+                          // showAlignmentButtons: true,
+                          // showDirection: true,
                         ),
                       ),
-                    ],
+                    ),
+
+                    /// 使用自定义工具栏的话，那些功能需要自己添加。
+                    // 比如要嵌入：视频、图片、摄像头、多媒体，需要自己指定
+                    // 具体参看 https://github.com/singerdmx/flutter-quill/blob/master/example/lib/screens/quill/my_quill_toolbar.dart#L103
+                    // 我这里只保留多媒体文件的几个
+                    QuillToolbar(
+                      configurations: QuillToolbarConfigurations(
+                        sharedConfigurations: QuillSharedConfigurations(
+                          locale: box.read('language') == 'system'
+                              ? null
+                              : Locale(box.read('language')),
+                        ),
+                      ),
+                      child: QuillToolbar(
+                        configurations: const QuillToolbarConfigurations(),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Wrap(
+                            children: [
+                              QuillToolbarImageButton(
+                                controller: _controller,
+                              ),
+                              QuillToolbarCameraButton(
+                                controller: _controller,
+                              ),
+                              QuillToolbarVideoButton(
+                                controller: _controller,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            // 编辑框
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(5.sp),
+                child: DecoratedBox(
+                  // 边框在编辑时显示灰色，预览时显示透明(假装没有)
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: isEditing ? Colors.grey : Colors.transparent,
+                    ),
+                    borderRadius: BorderRadius.circular(8.sp),
+                    // 2023-12-26 固定白色，在深色主题就看不到字了
+                    // color: Colors.white,
+                  ),
+                  child: QuillEditor.basic(
+                    focusNode: quillFocusNode,
+                    configurations: QuillEditorConfigurations(
+                      autoFocus: false,
+                      controller: _controller,
+                      scrollable: true,
+                      expands: true,
+                      padding: EdgeInsets.all(5.sp),
+                      embedBuilders: kIsWeb
+                          ? FlutterQuillEmbeds.editorWebBuilders()
+                          : FlutterQuillEmbeds.editorBuilders(),
+                    ),
                   ),
                 ),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.all(5.sp),
-                  child: DecoratedBox(
-                    // 边框在编辑时显示灰色，预览时显示透明(假装没有)
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: isEditing ? Colors.grey : Colors.transparent,
-                      ),
-                      borderRadius: BorderRadius.circular(8.sp),
-                      // 2023-12-26 固定白色，在深色主题就看不到字了
-                      // color: Colors.white,
-                    ),
-                    child: QuillEditor.basic(
-                      focusNode: quillFocusNode,
-                      configurations: QuillEditorConfigurations(
-                        autoFocus: false,
-                        readOnly: !isEditing,
-                        scrollable: true,
-                        expands: true,
-                        padding: EdgeInsets.all(5.sp),
-                        embedBuilders: FlutterQuillEmbeds.editorBuilders(),
-                      ),
-                    ),
-                  ),
-                ),
-              )
-            ],
-          ),
+              ),
+            )
+          ],
         ),
       ),
     );

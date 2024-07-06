@@ -1,4 +1,4 @@
-/// json 文件转换时对应的类
+// json 文件转换时对应的类
 
 // 食物营养素构成
 class FoodComposition {

@@ -424,7 +424,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
         return Flexible(
           child: TextButton(
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.resolveWith((states) {
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
                 if (isSelected) {
                   return Colors.blue; // 设置选中时的背景色
                 }

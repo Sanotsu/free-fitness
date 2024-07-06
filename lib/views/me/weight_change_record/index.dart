@@ -421,10 +421,10 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
 
                       try {
                         await _userHelper.insertWeightTrendList([temp]);
-                        if (!mounted) return;
+                        if (!context.mounted) return;
                         Navigator.of(context).pop(true);
                       } catch (e) {
-                        if (!mounted) return;
+                        if (!context.mounted) return;
                         commonExceptionDialog(
                           context,
                           CusAL.of(context).exceptionWarningTitle,

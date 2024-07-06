@@ -572,11 +572,11 @@ class NewCusSettingCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const NewCusSettingCard({
-    Key? key,
+    super.key,
     required this.leadingIcon,
     required this.title,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

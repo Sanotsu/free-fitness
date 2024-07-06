@@ -15,7 +15,7 @@ import '../common/global/constants.dart';
 import 'home.dart';
 
 class FreeFitnessApp extends StatefulWidget {
-  const FreeFitnessApp({Key? key}) : super(key: key);
+  const FreeFitnessApp({super.key});
 
   @override
   State<FreeFitnessApp> createState() => _FreeFitnessAppState();

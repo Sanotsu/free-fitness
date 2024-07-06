@@ -14,10 +14,10 @@ class ExerciseDetailDialog extends StatefulWidget {
   final int exerciseIndex;
 
   const ExerciseDetailDialog({
-    Key? key,
+    super.key,
     required this.exerciseItems,
     required this.exerciseIndex,
-  }) : super(key: key);
+  });
 
   @override
   State<ExerciseDetailDialog> createState() => _ExerciseDetailDialogState();

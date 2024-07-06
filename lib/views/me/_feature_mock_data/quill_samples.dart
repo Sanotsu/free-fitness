@@ -354,7 +354,7 @@ const quillTextSample2 = [
   {
     "insert": {
       "image":
-          "/data/user/0/com.example.free_fitness/cache/c48eed9e-5d95-4f1d-ace8-c996a14a88f8/weight_intake_exercise_detail.png"
+          "/data/user/0/com.swm.free_fitness/cache/c48eed9e-5d95-4f1d-ace8-c996a14a88f8/weight_intake_exercise_detail.png"
     },
     "attributes": {"style": "mobileWidth: 130.68; mobileHeight: 65.92; "}
   },

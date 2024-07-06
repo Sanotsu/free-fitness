@@ -43,7 +43,7 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
       barTouchData: BarTouchData(
         // 提示框的样式和内容
         touchTooltipData: BarTouchTooltipData(
-          tooltipBgColor: Colors.blueGrey,
+          getTooltipColor: (_) => Colors.blueGrey,
           // 太宽了的话最两边还是超出了屏幕
           tooltipHorizontalAlignment: FLHorizontalAlignment.center,
           tooltipPadding: EdgeInsets.symmetric(

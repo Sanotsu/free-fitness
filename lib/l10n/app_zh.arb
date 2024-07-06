@@ -321,8 +321,8 @@
     "diaryTagsNote":" 输入标签(输入逗号或分号自动分割)",
     "richTextToolNote":"展开富文本编辑工具栏",
 
-    "lastModified":"上次修改时间",
-    "gmtCreate":"初始创建时间",
+    "lastModified":"上次修改",
+    "gmtCreate":"初始创建",
 
     "confirmLabel":"确定",
     "cancelLabel":"取消",

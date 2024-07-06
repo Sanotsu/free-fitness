@@ -1,4 +1,4 @@
-/// 关于 训练trainnig 模块的model都放在这里，对照相关表栏位了解更多
+// 关于 训练trainnig 模块的model都放在这里，对照相关表栏位了解更多
 
 /// --- 基础表
 class Exercise {

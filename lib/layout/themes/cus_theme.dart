@@ -47,8 +47,8 @@ ThemeData lightTheme = ThemeData(
   // 指定某种按钮的主体
   elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
-    backgroundColor: MaterialStateProperty.resolveWith<Color?>(
-      (Set<MaterialState> states) => Colors.red,
+    backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+      (Set<WidgetState> states) => Colors.red,
     ),
   )),
 );

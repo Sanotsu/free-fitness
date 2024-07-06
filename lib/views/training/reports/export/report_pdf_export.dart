@@ -239,7 +239,7 @@ _buildBodyTable(List<TrainedDetailLog> trainedData, String lang) {
             ),
           ],
         );
-      }).toList(),
+      }),
       pw.TableRow(
         // 行中数据垂直居中
         verticalAlignment: pw.TableCellVerticalAlignment.middle,

@@ -264,7 +264,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
                   // ？？？删除对应的单份营养素列表，应该要检测执行结果
                   await _dietaryHelper.deleteServingInfoList(selecteds);
 
-                  if (!mounted) return;
+                  if (!context.mounted) return;
                   Navigator.pop(context);
                   // 如果食物相关数据被修改，则变动标识设为true
                   setState(() {
@@ -455,10 +455,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
 
         return DataRow(
           // 偶数行(算上标题行)添加灰色背景色，和选中时的背景色
-          color: MaterialStateProperty.resolveWith<Color?>(
-              (Set<MaterialState> states) {
+          color: WidgetStateProperty.resolveWith<Color?>(
+              (Set<WidgetState> states) {
             // 所有行被选中后都使用统一的背景
-            if (states.contains(MaterialState.selected)) {
+            if (states.contains(WidgetState.selected)) {
               return Theme.of(context).colorScheme.primary.withOpacity(0.08);
             }
             // 偶数行使用灰色背景

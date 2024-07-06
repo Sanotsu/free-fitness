@@ -2,7 +2,7 @@ name: free_fitness
 description: 使用flutter编写的健身训练、饮食记录、附带简单日记编写的健康生活追踪器.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -16,10 +16,10 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.0.1-beta+1
+version: 0.0.1-beta+2
 
 environment:
-  sdk: '>=3.0.1 <4.0.0'
+  sdk: ">=3.0.1 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -31,25 +31,24 @@ dependencies:
   flutter:
     sdk: flutter
 
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   flutter_screenutil: ^5.9.0
-  intl: ^0.18.0
+  intl: ^0.19.0
   flutter_localizations:
     sdk: flutter
   sqflite: ^2.3.0
   path_provider: ^2.1.1
   # 表单创建和验证
   flutter_form_builder: ^9.1.1
-  form_builder_validators: ^9.0.0
+  form_builder_validators: ^10.0.1
   # 带文件的表单
   form_builder_file_picker: ^4.1.0
   # 下拉多选
   multi_select_flutter: ^4.1.3
   # 图表
-  fl_chart: ^0.64.0
+  fl_chart: ^0.68.0
   # 日志工具
   logger: ^2.0.2+1
   # 文件选择
@@ -57,15 +56,15 @@ dependencies:
   # 圆形倒计时部件
   circular_countdown_timer: ^0.2.3
   # 富文本编辑
-  flutter_quill: ^8.6.1
+  flutter_quill: ^9.5.6
   # 富文本编辑扩展(插入图片之类的)
-  flutter_quill_extensions: ^0.7.0
+  flutter_quill_extensions: ^9.5.6
   # 表格日历
   table_calendar: ^3.0.9
   # 时间线列表
   timeline_tile: ^2.0.0
   # 文本转语音
-  flutter_tts: ^3.8.5
+  flutter_tts: ^4.0.2
   # 权限处理
   permission_handler: ^11.1.0
   # 轮播组件
@@ -77,7 +76,7 @@ dependencies:
   # 保存图片(Android9及其以下可能保存不了)
   image_gallery_saver: ^2.0.3
   # 获取设备信息
-  device_info_plus: ^9.1.1
+  device_info_plus: ^10.1.0
   # 创建和预览pdf
   pdf: ^3.10.7
   # 允许 Flutter 应用程序生成文档并将其打印到 android 或 ios 兼容打印机
@@ -94,7 +93,7 @@ dependencies:
   # 一个颜色主题插件
   flex_color_scheme: ^7.3.1
   # 可以按照手势缩放图片进行预览
-  photo_view: ^0.14.0
+  photo_view: ^0.15.0
 
 dev_dependencies:
   flutter_test:
@@ -105,14 +104,13 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -153,4 +151,4 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
 
   # 启用 generate 标志, 添加自己的本地化信息需要
-  generate: true  
+  generate: true

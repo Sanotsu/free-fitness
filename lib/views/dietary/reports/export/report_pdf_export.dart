@@ -342,7 +342,7 @@ _buildMealSubBodyTable(
             expandedSubText(log.foodIntakeSize * (serving.cholesterol ?? 0)),
           ],
         );
-      }).toList(),
+      }),
       pw.TableRow(
         // 行中数据垂直居中
         verticalAlignment: pw.TableCellVerticalAlignment.middle,

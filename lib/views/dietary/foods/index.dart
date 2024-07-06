@@ -17,7 +17,7 @@ import 'food_nutrient_detail.dart';
 /// 这里是对食物的管理，所以不涉及饮食日志和餐次等逻辑
 /// 主要就是食物的增删改查、详情、导入等内容
 class DietaryFoods extends StatefulWidget {
-  const DietaryFoods({Key? key}) : super(key: key);
+  const DietaryFoods({super.key});
 
   @override
   State<DietaryFoods> createState() => _DietaryFoodsState();

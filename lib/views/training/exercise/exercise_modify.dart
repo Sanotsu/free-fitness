@@ -17,7 +17,7 @@ import '../../../models/training_state.dart';
 class ExerciseModify extends StatefulWidget {
   final Exercise? item;
 
-  const ExerciseModify({Key? key, this.item}) : super(key: key);
+  const ExerciseModify({super.key, this.item});
 
   @override
   State<ExerciseModify> createState() => _ExerciseModifyState();

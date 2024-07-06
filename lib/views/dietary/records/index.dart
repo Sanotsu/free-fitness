@@ -178,7 +178,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
         firstDate: DateTime(1994, 7),
         lastDate: DateTime(2077));
 
-    if (!mounted) return;
+    if (!context.mounted) return;
     if (picked != null) {
       // 包含了月日星期，其他格式修改 MMMEd 为其他即可
       var formatDate = DateFormat.MMMEd().format(picked);
