@@ -1,10 +1,23 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+<!-- **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)* -->
+
+- [开发更新记录](#%E5%BC%80%E5%8F%91%E6%9B%B4%E6%96%B0%E8%AE%B0%E5%BD%95)
+  - [2024-07-06](#2024-07-06)
+    - [**升级 flutter 版本，更新兼容依赖**](#%E5%8D%87%E7%BA%A7-flutter-%E7%89%88%E6%9C%AC%E6%9B%B4%E6%96%B0%E5%85%BC%E5%AE%B9%E4%BE%9D%E8%B5%96)
+    - [Android 环境配置的修改](#android-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%E7%9A%84%E4%BF%AE%E6%94%B9)
+    - [主要修改代码部分](#%E4%B8%BB%E8%A6%81%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E9%83%A8%E5%88%86)
+    - [flutter 升级到 3.22 后打包 apk 的体积增加很多](#flutter-%E5%8D%87%E7%BA%A7%E5%88%B0-322-%E5%90%8E%E6%89%93%E5%8C%85-apk-%E7%9A%84%E4%BD%93%E7%A7%AF%E5%A2%9E%E5%8A%A0%E5%BE%88%E5%A4%9A)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## 开发更新记录
 
 这是无关紧要的东西，记录一些开发过程中的细节，防止以为我忘记了。
 
 ### 2024-07-06
 
-#### **升级 flutter 版本，更新兼容依赖**
+#### 升级 flutter 版本，更新兼容依赖
 
 ```sh
 # 更新flutter
@@ -536,3 +549,7 @@ dart devtools --appSizeBase=apk-code-size-analysis_09.json
 ```
 
 </details>
+
+### 2024-07-08
+
+- feat:添加了 dio http client 的自定义封装；添加在“饮食”-“饮食日记”页面中“AI 对话助手”功能。
