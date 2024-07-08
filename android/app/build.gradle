@@ -40,6 +40,14 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
+    // 在构建应用时打包压缩的原生库
+    // https://developer.android.com/build/releases/past-releases/agp-4-2-0-release-notes?hl=zh-cn#compress-native-libs-dsl
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true
+        }
+    }
+
     kotlinOptions {
         jvmTarget = '1.8'
     }

@@ -338,3 +338,201 @@ QuillProvider(
 现在 9.5.6 移除了 QuillProvider，直接使用工具栏和编辑器即可，具体参看[富文本编辑组件](lib/views/diary/diary_modify_rich_text.dart)的相关代码。
 
 之前编辑器 QuillEditor 有 readOnly 属性，现在是在 ` _controller.readOnly = !isEditing;` 设定了，所以在改动是否可以编辑的地方，修改控制器的只读属性。
+
+#### flutter 升级到 3.22 后打包 apk 的体积增加很多
+
+我看 0.0.1-beta 的时候，只有不到 18M，但升级到 3.22 后打包就到了 将近 37M。使用以下命令查看:
+
+```sh
+flutter build apk --target-platform android-arm64 --analyze-size
+```
+
+得到结果:
+
+<details>
+<summary>分析 flutter 的 apk 打包体积:</summary>
+
+```sh
+Running Gradle task 'assembleRelease'...                          523.0s
+✓ Built build/app/outputs/flutter-apk/app-release.apk (36.6MB)
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+app-release.apk (total compressed)                                         35 MB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  META-INF/
+    CERT.SF                                                                20 KB
+    CERT.RSA                                                                1 KB
+    MANIFEST.MF                                                            17 KB
+  assets/
+    dexopt                                                                  1 KB
+    flutter_assets                                                          6 MB
+  classes.dex                                                               2 MB
+  lib/
+    arm64-v8a                                                              24 MB
+    Dart AOT symbols accounted decompressed size                           13 MB
+      package:flutter                                                       4 MB
+      package:free_fitness                                                  1 MB
+      package:image                                                       805 KB
+      package:flutter_quill                                               682 KB
+      package:flutter_localizations                                       412 KB
+      dart:core                                                           332 KB
+      package:pdf                                                         265 KB
+      package:html                                                        246 KB
+      dart:typed_data                                                     238 KB
+      dart:ui                                                             227 KB
+      package:bidi/
+        bidi.dart                                                         219 KB
+      package:fl_chart                                                    209 KB
+      dart:collection                                                     189 KB
+      dart:io                                                             174 KB
+      dart:async                                                          138 KB
+      package:archive                                                     111 KB
+      package:intl                                                         89 KB
+      package:youtube_explode_dart                                         89 KB
+      package:xml                                                          83 KB
+      package:flutter_quill_extensions                                     74 KB
+    armeabi-v7a                                                           953 KB
+    x86_64                                                                  1 MB
+  AndroidManifest.xml                                                       3 KB
+  res/
+    33.9.png                                                                2 KB
+    CG.png                                                                  4 KB
+    D2.png                                                                  3 KB
+    ER.9.png                                                                2 KB
+    FM.9.png                                                                1 KB
+    J6.9.png                                                                2 KB
+    Mr.9.png                                                                1 KB
+    Pi.9.png                                                                3 KB
+    Q11.9.png                                                               3 KB
+    SD.png                                                                  2 KB
+    Vq.png                                                                  1 KB
+    color-v23                                                               2 KB
+    color                                                                   2 KB
+    e1.xml                                                                  1 KB
+    eB.9.png                                                                2 KB
+    gV.9.png                                                                1 KB
+    jy.png                                                                  2 KB
+    tj.9.png                                                                2 KB
+    u3.png                                                                  1 KB
+    wi.9.png                                                                2 KB
+    wi1.9.png                                                               1 KB
+  resources.arsc                                                          317 KB
+  kotlin/
+    collections                                                             1 KB
+    kotlin.kotlin_builtins                                                  5 KB
+    ranges                                                                  1 KB
+    reflect                                                                 1 KB
+  org/
+    apache                                                                  5 KB
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+A summary of your APK analysis can be found at: /home/david/.flutter-devtools/apk-code-size-analysis_08.json
+
+To analyze your app size in Dart DevTools, run the following command:
+dart devtools --appSizeBase=apk-code-size-analysis_08.json
+```
+
+</details>
+
+得到了类似`/home/david/.flutter-devtools/apk-code-size-analysis_08.json`的分析文件后，假如使用的是 VSCode，就在“查看”->“命令面板”，输入"devtool"，找到“Flutter: Open DevTools”，找到打开开发工具的位置。
+
+我是在网页打开，然后点击网页上方的“App Size”按钮，把刚刚的`apk-code-size-analysis_08.json`打开，分析 apk 的体积问题。
+
+而这个体积增加的问题，参看 stackoverflow 的 [Flutter App Size İncrease Too much after Updating Dependencies](https://stackoverflow.com/questions/78550965/flutter-app-size-%C4%B0ncrease-too-much-after-updating-dependencies) 问题。
+
+**在`android/app/build.gradle` 的`android`对应配置中添加以下代码(没有就新增)**：
+
+```gradle
+android {
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true
+        }
+    }
+}
+```
+
+此时 3 个体积的变化为:
+
+- 0.0.1.bata：17.7M
+- 升级到 flutter 3.22 默认： 36.6M
+- 升级到 flutter 3.22 打包压缩的原生库：19.7M
+
+<details>
+<summary>压缩后分析 flutter 的 apk 打包体积:</summary>
+
+```sh
+Running Gradle task 'assembleRelease'...                          469.4s
+✓ Built build/app/outputs/flutter-apk/app-release.apk (19.7MB)
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+app-release.apk (total compressed)                                         19 MB
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  META-INF/
+    CERT.SF                                                                20 KB
+    CERT.RSA                                                                1 KB
+    MANIFEST.MF                                                            17 KB
+  assets/
+    dexopt                                                                  1 KB
+    flutter_assets                                                          6 MB
+  classes.dex                                                               2 MB
+  lib/
+    arm64-v8a                                                              10 MB
+    Dart AOT symbols accounted decompressed size                           13 MB
+      package:flutter                                                       4 MB
+      package:free_fitness                                                  1 MB
+      package:image                                                       805 KB
+      package:flutter_quill                                               682 KB
+      package:flutter_localizations                                       412 KB
+      dart:core                                                           332 KB
+      package:pdf                                                         265 KB
+      package:html                                                        246 KB
+      dart:typed_data                                                     238 KB
+      dart:ui                                                             227 KB
+      package:bidi/
+        bidi.dart                                                         219 KB
+      package:fl_chart                                                    209 KB
+      dart:collection                                                     189 KB
+      dart:io                                                             174 KB
+      dart:async                                                          138 KB
+      package:archive                                                     111 KB
+      package:intl                                                         89 KB
+      package:youtube_explode_dart                                         89 KB
+      package:xml                                                          83 KB
+      package:flutter_quill_extensions                                     74 KB
+  AndroidManifest.xml                                                       3 KB
+  res/
+    33.9.png                                                                2 KB
+    CG.png                                                                  4 KB
+    D2.png                                                                  3 KB
+    ER.9.png                                                                2 KB
+    FM.9.png                                                                1 KB
+    J6.9.png                                                                2 KB
+    Mr.9.png                                                                1 KB
+    Pi.9.png                                                                3 KB
+    Q11.9.png                                                               3 KB
+    SD.png                                                                  2 KB
+    Vq.png                                                                  1 KB
+    color-v23                                                               2 KB
+    color                                                                   2 KB
+    e1.xml                                                                  1 KB
+    eB.9.png                                                                2 KB
+    gV.9.png                                                                1 KB
+    jy.png                                                                  2 KB
+    tj.9.png                                                                2 KB
+    u3.png                                                                  1 KB
+    wi.9.png                                                                2 KB
+    wi1.9.png                                                               1 KB
+  resources.arsc                                                          317 KB
+  kotlin/
+    collections                                                             1 KB
+    kotlin.kotlin_builtins                                                  5 KB
+    ranges                                                                  1 KB
+    reflect                                                                 1 KB
+  org/
+    apache                                                                  5 KB
+▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+A summary of your APK analysis can be found at: /home/david/.flutter-devtools/apk-code-size-analysis_09.json
+
+To analyze your app size in Dart DevTools, run the following command:
+dart devtools --appSizeBase=apk-code-size-analysis_09.json
+```
+
+</details>
