@@ -4,10 +4,11 @@
 
 - [开发更新记录](#%E5%BC%80%E5%8F%91%E6%9B%B4%E6%96%B0%E8%AE%B0%E5%BD%95)
   - [2024-07-06](#2024-07-06)
-    - [**升级 flutter 版本，更新兼容依赖**](#%E5%8D%87%E7%BA%A7-flutter-%E7%89%88%E6%9C%AC%E6%9B%B4%E6%96%B0%E5%85%BC%E5%AE%B9%E4%BE%9D%E8%B5%96)
+    - [升级 flutter 版本，更新兼容依赖](#%E5%8D%87%E7%BA%A7-flutter-%E7%89%88%E6%9C%AC%E6%9B%B4%E6%96%B0%E5%85%BC%E5%AE%B9%E4%BE%9D%E8%B5%96)
     - [Android 环境配置的修改](#android-%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%E7%9A%84%E4%BF%AE%E6%94%B9)
     - [主要修改代码部分](#%E4%B8%BB%E8%A6%81%E4%BF%AE%E6%94%B9%E4%BB%A3%E7%A0%81%E9%83%A8%E5%88%86)
     - [flutter 升级到 3.22 后打包 apk 的体积增加很多](#flutter-%E5%8D%87%E7%BA%A7%E5%88%B0-322-%E5%90%8E%E6%89%93%E5%8C%85-apk-%E7%9A%84%E4%BD%93%E7%A7%AF%E5%A2%9E%E5%8A%A0%E5%BE%88%E5%A4%9A)
+  - [2024-07-08](#2024-07-08)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -252,14 +253,9 @@ Changed 9 constraints in pubspec.yaml:
 org.gradle.java.home=/home/david/.jdks/temurin-17.0.6
 ```
 
-<details>
-<summary>
-
 **3** 错误日志有 [applying-flutters-app-plugin-loader-gradle-plugin](https://stackoverflow.com/questions/78032396/applying-flutters-app-plugin-loader-gradle-plugin-imperatively-using-the-apply-s)
 
 参看官方文档[Deprecated imperative apply of Flutter's Gradle plugins](https://docs.flutter.dev/release/breaking-changes/flutter-gradle-plugin-apply) 进行修改:
-
-</summary>
 
 依次修改以下 3 个文件:
 
@@ -268,8 +264,6 @@ android/settings.gradle
 android/build.gradle
 android/app/build.gradle
 ```
-
-</details>
 
 <br/>
 

@@ -581,23 +581,26 @@ class NewCusSettingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 150.sp,
       padding: EdgeInsets.all(2.sp),
-      child: Card(
-        elevation: 5,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.sp),
-        ),
-        child: ListTile(
-          leading: Icon(leadingIcon),
-          title: Text(
-            title,
-            style: TextStyle(
-              fontSize: CusFontSizes.pageSubTitle,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
-            ),
+      child: Center(
+        child: Card(
+          elevation: 5,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.sp),
           ),
-          onTap: onTap,
+          child: ListTile(
+            leading: Icon(leadingIcon),
+            title: Text(
+              title,
+              style: TextStyle(
+                fontSize: CusFontSizes.pageSubTitle,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+            onTap: onTap,
+          ),
         ),
       ),
     );
