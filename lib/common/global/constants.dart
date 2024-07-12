@@ -1,3 +1,7 @@
+// ignore_for_file: non_constant_identifier_names
+
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -569,3 +573,6 @@ List<CusLabel> exportDateList = [
     value: "all",
   ),
 ];
+
+/// 上传的餐食图片默认存放的文件夹
+final MEAL_PHOTO_DIR = Directory('/storage/emulated/0/FreeFitness/MealPhotos');

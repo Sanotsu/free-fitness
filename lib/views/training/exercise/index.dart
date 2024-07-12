@@ -1,9 +1,13 @@
 // ignore_for_file: avoid_print
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/cus_app_localizations.dart';
 import 'package:free_fitness/models/training_state.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
@@ -39,10 +43,13 @@ class _TrainingExerciseState extends State<TrainingExercise> {
   // 查询条件
   Map<String, dynamic>? queryConditon;
 
+  late File file;
+
   @override
   void initState() {
     super.initState();
-    _loadExerciseData();
+    initStorage();
+
     scrollController.addListener(_scrollListener);
   }
 
@@ -66,6 +73,17 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     }
   }
 
+  initStorage() async {
+    var state = await requestStoragePermission();
+
+    if (!state) {
+      if (!mounted) return;
+      EasyLoading.showToast(CusAL.of(context).noStorageHint);
+    }
+
+    _loadExerciseData();
+  }
+
   // 加载更多数据(一次10条，有初始值)
   _loadExerciseData() async {
     if (isLoading) return;
@@ -76,6 +94,10 @@ class _TrainingExerciseState extends State<TrainingExercise> {
 
     CusDataResult temp = await _searchExercise();
     List<Exercise> newData = temp.data as List<Exercise>;
+
+    print("[[基础动作的洗洗脑]]---$newData");
+
+    print((await getExternalStorageDirectory()));
 
     // 如果没有更多数据，则在底部显示
     if (newData.isEmpty) {

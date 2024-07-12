@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -119,13 +119,40 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                 if (_formKey.currentState!.saveAndValidate()) {
                   var temp = _formKey.currentState?.fields['images']?.value;
 
-                  var photos =
-                      (temp != null && temp != "" && temp.toString() != "[]")
-                          ? (temp as List<PlatformFile>)
-                              .map((e) => e.path)
-                              .toList()
-                              .join(",")
-                          : '';
+                  // 用于存入数据库的图片地址
+                  List<String> photoStrs = [];
+                  // 用于去重的文件名列表
+                  List<String> fileNames = [];
+                  if (temp != null && temp != "" && temp.toString() != "[]") {
+                    // 餐次图片上传，放到设备外部存储固定位置
+                    if (!await MEAL_PHOTO_DIR.exists()) {
+                      await MEAL_PHOTO_DIR.create(recursive: true);
+                    }
+
+                    // 把上传的文件都异动到指定的位置去
+                    // 2024-07-12 注意，暂时不考虑餐次图片被删除的情况
+                    for (var e in (temp as List<PlatformFile>)) {
+                      final file = File(e.path!);
+
+                      var filename = file.path.split('/').last;
+
+                      // 2024-07-12？？？注意，这里同名的图片，简单去重
+                      if (!fileNames.contains(filename)) {
+                        fileNames.add(filename);
+                      } else {
+                        continue;
+                      }
+                      // 将上传的文件放到设备外部存储，避免冲突，文件重命名加上时间戳
+                      final targetPath =
+                          '${MEAL_PHOTO_DIR.path}/${DateTime.now().millisecondsSinceEpoch}-$filename';
+
+                      await file.copy(targetPath);
+                      photoStrs.add(targetPath);
+                    }
+                  }
+
+                  // 餐食相册地址数组字符串
+                  var photos = photoStrs.join(",");
 
                   var tempMp = MealPhoto(
                     date: widget.date,

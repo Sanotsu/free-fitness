@@ -411,6 +411,10 @@
   "aiSuggestionHint":"You can ask me questions for advice on healthy eating",
   "regeneration":"regen",
   "copiedHint":"cpoied",
-  "apiErrorHint":"The HTTP API reports an error, please check the network or try again later!"
+  "apiErrorHint":"The HTTP API reports an error, please check the network or try again later!",
+  "noStorageHint":"File management permissions have not been granted, and some features may be affected.",
+  "permissionRequest":"Permission Request",
+  "featuresRestrictionNote":"The features of display images, import exercise, import food composition, and data backup in the application require file management permissions. Please allow them."
+
 
 }
