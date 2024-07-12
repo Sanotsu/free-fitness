@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/dietary_state.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
@@ -101,25 +100,28 @@ class _DietaryFoodsState extends State<DietaryFoods> {
 
   // 进入json文件导入前，先获取权限
   Future<void> clickFoodImport() async {
-    final status = await Permission.storage.request();
+    final status = await requestStoragePermission();
+
+    // 用户禁止授权，那就无法导入
+    if (!status) {
+      if (!mounted) return;
+      showSnackMessage(context, CusAL.of(context).noStorageErrorText);
+      return;
+    }
 
     // 用户授权了访问内部存储权限，可以跳转到导入
     if (!mounted) return;
-    if (status.isGranted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const FoodJsonImport()),
-      ).then((value) {
-        // 从导入页面返回，总是刷新当前页面数据
-        setState(() {
-          foodItems.clear();
-          currentPage = 1;
-        });
-        _loadFoodData();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const FoodJsonImport()),
+    ).then((value) {
+      // 从导入页面返回，总是刷新当前页面数据
+      setState(() {
+        foodItems.clear();
+        currentPage = 1;
       });
-    } else {
-      showSnackMessage(context, CusAL.of(context).noStorageErrorText);
-    }
+      _loadFoodData();
+    });
   }
 
   @override

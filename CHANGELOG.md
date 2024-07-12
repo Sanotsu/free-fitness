@@ -2,10 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-## 0.0.1-beta+2
+## 0.2.0-beta.1
 
-- 升级 flutter 从 3.16.3 到 3.22.2,修正对应 Android 配置和标记为弃用的部分代码
-- 升级相关依赖，尤其是 fl_chart、flutter_tts、flutter_quill 不兼容的部分
+- feat:
+  - 加入了“零一万物”AI 大模型的使用:
+    - 增加“饮食日记”中，对每天摄入食物和营养素，提供 AI 分析和问答建议
+    - 增加“餐食相册”中，对每餐的指定图片进行 AI 图像分析(仅仅单张)，提供饮食建议
+- chore:
+  - 升级 flutter 从 3.16.3 到 3.22.2,修正对应 Android 配置和标记为弃用的部分代码
+  - 升级相关依赖，尤其是 fl_chart、flutter_tts、flutter_quill 不兼容的部分
+  - 修正版本号命名规则(主版本从第三位挪到第二位)
+- fix:
+  - 修正 Android 下未在`AndroidManifest.xml`中正确申请网络和文件读取权限的问题
+  - 修正 Android14 等高版本系统，存储权限申请方式不规范的问题
+    - 现在高版本 Android 下，“备份恢复”-“全量备份”、运动模块-“基础动作”和饮食模块-“食物成分”的导入正常可用了
 
 ## 0.0.1-beta+1(0.0.1-beta)
 

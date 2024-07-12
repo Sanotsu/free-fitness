@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/cus_app_localizations.dart';
 import 'package:free_fitness/models/training_state.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
@@ -156,26 +155,28 @@ class _TrainingExerciseState extends State<TrainingExercise> {
 
   // 进入json文件导入前，先获取权限
   Future<void> clickExerciseImport() async {
-    final status = await Permission.storage.request();
+    final status = await requestStoragePermission();
+    // 用户禁止授权，那就无法导入
+    if (!status) {
+      if (!mounted) return;
+      showSnackMessage(context, CusAL.of(context).noStorageErrorText);
+      return;
+    }
 
     // 用户授权了访问内部存储权限，可以跳转到导入
     if (!mounted) return;
-    if (status.isGranted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const ExerciseJsonImport(),
-        ),
-      ).then((value) {
-        setState(() {
-          exerciseItems.clear();
-          currentPage = 1;
-        });
-        _loadExerciseData();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ExerciseJsonImport(),
+      ),
+    ).then((value) {
+      setState(() {
+        exerciseItems.clear();
+        currentPage = 1;
       });
-    } else {
-      showSnackMessage(context, CusAL.of(context).noStorageErrorText);
-    }
+      _loadExerciseData();
+    });
   }
 
   @override
