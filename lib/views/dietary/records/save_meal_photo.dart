@@ -13,6 +13,7 @@ import '../../../common/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
+import 'ai_suggestion/ai_suggestion_page.dart';
 
 class SaveMealPhotos extends StatefulWidget {
   // 2023-12-31 还需要传是为哪一天的餐次添加照片
@@ -268,6 +269,78 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
               }),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          if (imagesUrls.isNotEmpty && !isEditing) {
+            handleImageAnalysis(context, imagesUrls);
+          } else {
+            commonExceptionDialog(
+              context,
+              box.read('language') == "en" ? "Tips" : "温馨提示",
+              box.read('language') == "en"
+                  ? """There is no food intake information available for this day and no need for the AI assistant to give analytical advice."""
+                  : "本日暂无食物摄入信息，无须AI助手给出分析建议。",
+            );
+          }
+        },
+        tooltip: box.read('language') == "en" ? "AI Assistant" : 'AI分析对话助手',
+        child: const Icon(Icons.chat),
+      ),
     );
   }
+}
+
+/// 2024-07-12 这两个函数在 meal_photo_gallery 也会用到
+// 提示即将用于AI分析的图片信息
+void handleImageAnalysis(BuildContext context, List<String> imagesUrls) {
+  if (imagesUrls.length > 1) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(box.read('language') == "en" ? "Tips" : "温馨提示"),
+          content: Text(
+            box.read('language') == "en"
+                ? """Currently, only a single image with a size no larger than 1024*1024 is supported for analysis.
+                \nIf there are more than one meal image, only the first image will be used for analysis.
+                """
+                : "目前仅支持单张、且尺寸不大于1024*1024的图片进行分析。如果餐次图片大于1张，仅会使用第一张图片进行分析",
+            style: TextStyle(fontSize: 15.sp),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text(box.read('language') == "en" ? "confirm" : "确定"),
+            ),
+          ],
+        );
+      },
+    ).then((value) {
+      navigateToOneChatScreen(context, imagesUrls.first);
+    });
+  } else {
+    navigateToOneChatScreen(context, imagesUrls.first);
+  }
+}
+
+// 跳转到AI问答页面
+void navigateToOneChatScreen(BuildContext context, String imageUrl) {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (context) => OneChatScreen(
+        intakeInfo: box.read('language') == "en"
+            ? """Please analyze the given pictures and answer each of the following questions.
+         \n\n - Please list the foods in the pictures and estimate the number of servings (in grams) of each food. If the food items are not present, answer truthfully; 
+         \n\n - Analyze the nutritional composition of the meal in the picture, whether it is reasonably balanced and healthy;.
+         \n\n - Optimize the proportions of the food provided in the picture to achieve nutritional balance."""
+            : """请分析给出的图片，分别回答以下问题:
+         \n\n - 请列出图片中的食物，并预估每种食物的份量(单位：克)。如果不存在食物，请如实回答;
+         \n\n - 分析图中这顿饭的营养搭配，是否合理均衡，是否健康;
+         \n\n - 优化图片提供食物的比例，达到营养均衡。""",
+        imageUrl: imageUrl,
+      ),
+    ),
+  );
 }

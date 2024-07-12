@@ -404,6 +404,13 @@
   "uniqueErrorText":"{text} already exists",
   "noStorageErrorText":"The user has disabled access to internal storage and cannot import JSON files",
   "requiredErrorText":"{text} required",
-  "numericErrorText":"{text} must be numeric"
+  "numericErrorText":"{text} must be numeric",
+
+
+  "aiSuggestionTitle":"AI Dietary Health Analysis",
+  "aiSuggestionHint":"You can ask me questions for advice on healthy eating",
+  "regeneration":"regen",
+  "copiedHint":"cpoied",
+  "apiErrorHint":"The HTTP API reports an error, please check the network or try again later!"
 
 }

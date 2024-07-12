@@ -547,3 +547,8 @@ dart devtools --appSizeBase=apk-code-size-analysis_09.json
 ### 2024-07-08
 
 - feat:添加了 dio http client 的自定义封装；添加在“饮食”-“饮食日记”页面中“AI 对话助手”功能。
+
+### 2024-07-12
+
+- fix:修正较新版本 Android 下存储权限未正常获取的问题.
+- feat:添加了对饮食模块下“餐食相册”和“饮食日记”页面中指定餐次的食物图片，进行“AI 分析”的功能。

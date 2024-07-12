@@ -1,5 +1,8 @@
 // ignore_for_file: avoid_print,
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -8,14 +11,21 @@ import 'package:free_fitness/models/paid_llm/common_chat_model_spec.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../apis/paid_llm_apis.dart';
+import '../../../../common/components/dialog_widgets.dart';
 import '../../../../common/global/constants.dart';
+import '../../../../models/cus_app_localizations.dart';
 import '../../../../models/paid_llm/common_chat_completion_state.dart';
 import '../../../../models/paid_llm/llm_chat.dart';
 import 'widgets/message_item.dart';
 
 class OneChatScreen extends StatefulWidget {
+  // 初始的对话提示词(如果是营养摄入时点击，则只有这个)
   final String intakeInfo;
-  const OneChatScreen({super.key, required this.intakeInfo});
+  // 如果是在餐次相册中分析指定图片，则除了提示词，还需要图片
+  // 因为这里还需要展示图片，所以传入图片地址即可
+  final String? imageUrl;
+
+  const OneChatScreen({super.key, required this.intakeInfo, this.imageUrl});
 
   @override
   State createState() => _OneChatScreenState();
@@ -43,7 +53,9 @@ class _OneChatScreenState extends State<OneChatScreen> {
     // 预设第一个role为system，指定系统角色
     ChatMessage(
       messageId: const Uuid().v4(),
-      content: "你是一名资深且优秀的营养学、健康学、养生学专家。",
+      content: box.read('language') == "en"
+          ? "You are a senior and excellent expert in nutrition, health, and wellness."
+          : "你是一名资深且优秀的营养学、健康学、养生学专家。",
       role: "system",
       dateTime: DateTime.now(),
       isPlaceholder: false,
@@ -53,11 +65,22 @@ class _OneChatScreenState extends State<OneChatScreen> {
   // 等待AI响应时的占位的消息，在构建真实对话的list时要删除
   var placeholderMessage = ChatMessage(
     messageId: "placeholderMessage",
-    content: "努力思考中(等待越久,回复内容越多)  ",
+    content: box.read('language') == "en"
+        ? "thinking(longer wait,more replies)  "
+        : "努力思考中(等待越久,回复内容越多)  ",
     role: "assistant",
     dateTime: DateTime.now(),
     isPlaceholder: true,
   );
+
+  // 如果是图片分析，还需要传入参数，图片base64
+  String? imageBase64String;
+  // 图像理解就第一次需要传图片
+  bool? isFirstSendImage;
+
+  // 2024-07-12 因为等到AI响应是异步的，可能会出现等待中此页面被用户关闭，此时再调用setstate就会报错
+  // 所以在dispose的时候设定标记，如果已经被销毁，则不执行setstate
+  bool _isDisposed = false;
 
   @override
   void initState() {
@@ -65,8 +88,65 @@ class _OneChatScreenState extends State<OneChatScreen> {
 
     // 这是在表单初始化之后再提问题
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _sendMessage(widget.intakeInfo);
+      initSend();
     });
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
+
+  // 2024-07-12 如果是餐次相册的图片分析，那么进入这个页面需要先处理图片数据
+  initSend() async {
+    if (widget.imageUrl != null) {
+      var selectedImage = File(widget.imageUrl!);
+      try {
+        // 可能会出现不存在的图片路径，那边这里转base64就会报错，那么就返回上一页了
+        var tempBase64Str = base64Encode((await selectedImage.readAsBytes()));
+        setState(() {
+          imageBase64String = "data:image/jpeg;base64,$tempBase64Str";
+
+          // 初始化时设定需要发送图片
+          isFirstSendImage = true;
+          _sendMessage(widget.intakeInfo);
+          // 初始化提交之后，就不再发送图片了
+          isFirstSendImage = false;
+        });
+
+        print(imageBase64String);
+      } catch (e) {
+        // 图片数据不能转base64,就弹窗提示，并返回上一页
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text(
+                box.read('language') == "en" ? "Exception" : "异常提示",
+              ),
+              content: Text(
+                e.toString(),
+                style: TextStyle(fontSize: 15.sp),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(box.read('language') == "en" ? "confirm" : "确认"),
+                ),
+              ],
+            );
+          },
+        ).then((value) {
+          Navigator.of(context).pop();
+        });
+      }
+    } else {
+      _sendMessage(widget.intakeInfo);
+    }
   }
 
   // 这个发送消息实际是将对话文本添加到对话列表中
@@ -83,6 +163,8 @@ class _OneChatScreenState extends State<OneChatScreen> {
       totalTokens: usage?.totalTokens,
     );
 
+    // 注意：如果在AI异步回复前，用户返回到其他页面，这里就不存在状态了，就会报错
+    if (_isDisposed) return;
     setState(() {
       // AI思考和用户输入是相反的(如果角色是用户，那就是在等到机器回复了)
       isBotThinking = (role == "user");
@@ -122,23 +204,62 @@ class _OneChatScreenState extends State<OneChatScreen> {
             ))
         .toList();
 
+    // 2024-07-12 如果有图片，content结构会不一样.
+    // 看多伦对话的示例，似乎只需要第一次时传图片数据，后面不必再传
+    if (imageBase64String != null) {
+      // yi-vision 暂不支持设置系统消息。
+      msgs = messages
+          .where((e) => e.isPlaceholder != true && e.role != "system")
+          .map((e) => CCMessage(
+                content: (e.role == "assistant")
+                    ? e.content
+                    : isFirstSendImage == true
+                        ? [
+                            // 2024-07-12 这里就不使用VisionContent，直接拼接json
+                            {
+                              "type": "image_url",
+                              "image_url": {"url": imageBase64String}
+                            },
+                            {"type": "text", "text": e.content},
+                          ]
+                        : [
+                            {"type": "text", "text": e.content}
+                          ],
+                role: e.role,
+              ))
+          .toList();
+    }
+
     // 等待请求响应
     // 这里一定要确保存在模型名称，因为要作为http请求参数
-    List<CCRespBody> temp = await getChatResp(
-      ApiPlatform.lingyiwanwu,
-      msgs,
-      model: ccmSpecList[CCM.YiSpark]!.model,
-    );
+    List<CCRespBody> temp;
+    if (imageBase64String != null) {
+      temp = await getChatResp(
+        ApiPlatform.lingyiwanwu,
+        msgs,
+        model: ccmSpecList[CCM.YiVision]!.model,
+      );
+    } else {
+      temp = await getChatResp(
+        ApiPlatform.lingyiwanwu,
+        msgs,
+        model: ccmSpecList[CCM.YiSpark]!.model,
+      );
+    }
 
     // 得到回复后要删除表示加载中的占位消息
-    setState(() {
-      messages.removeWhere((e) => e.isPlaceholder == true);
-    });
+    // 注意：如果在AI回复时，用户返回到其他页面，这里就不存在状态了，就会报错
+    if (!_isDisposed) {
+      setState(() {
+        messages.removeWhere((e) => e.isPlaceholder == true);
+      });
+    }
 
     // 得到AI回复之后，添加到列表中，也注明不是用户提问
     var tempText = temp.map((e) => e.customReplyText).join();
     if (temp.isNotEmpty && temp.first.error?.code != null) {
-      tempText = """接口报错，请检查网络或稍后重试:
+      if (!mounted) return;
+      tempText = """${CusAL.of(context).apiErrorHint}:
 \ncode: ${temp.first.error?.code} 
 \ntype: ${temp.first.error?.type} 
 \nmessage: ${temp.first.error?.message}
@@ -182,9 +303,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          box.read('language') == "en"
-              ? "AI Dietary Health Analysis"
-              : '问答式饮食健康分析',
+          CusAL.of(context).aiSuggestionTitle,
           style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
         ),
       ),
@@ -199,6 +318,18 @@ class _OneChatScreenState extends State<OneChatScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 如果是图片分析，在顶部展示图片
+            if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty)
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.all(5.sp),
+                  child: SizedBox(
+                    width: 100.sp,
+                    child: buildImageCarouselSlider([widget.imageUrl!]),
+                  ),
+                ),
+              ),
+
             /// 显示对话消息主体
             buildChatListArea(),
 
@@ -245,7 +376,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
                           onPressed: () {
                             regenerateLatestQuestion();
                           },
-                          child: const Text("重新生成"),
+                          child: Text(CusAL.of(context).regeneration),
                         ),
                       //
                       // 如果不是等待响应才可以点击复制该条回复
@@ -257,7 +388,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
                             );
 
                             EasyLoading.showToast(
-                              "已复制到剪贴板",
+                              CusAL.of(context).copiedHint,
                               duration: const Duration(seconds: 3),
                               toastPosition: EasyLoadingToastPosition.center,
                             );
@@ -291,7 +422,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
             child: TextField(
               controller: _userInputController,
               decoration: InputDecoration(
-                hintText: '可以向我提问，获取健康饮食相关建议',
+                hintText: CusAL.of(context).aiSuggestionHint,
                 hintStyle: TextStyle(fontSize: 15.sp, color: Colors.grey),
                 border: const OutlineInputBorder(), // 添加边框
               ),

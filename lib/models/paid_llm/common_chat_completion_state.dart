@@ -41,6 +41,7 @@ class CCMessage<T> {
 //     "text": "请详细描述一下这张图片。"
 //   }
 // ]
+// 2024-07-12 暂时不使用这个class，直接在调用处手动拼接上面的json
 class VisionContent {
   String? type;
   ImageUrl? imageUrl;

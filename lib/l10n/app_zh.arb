@@ -409,8 +409,12 @@
     "uniqueErrorText":"{text}已存在",
     "noStorageErrorText":"用户已禁止访问内部存储,无法进行json文件导入。",
     "requiredErrorText":"{text}不可为空",
-    "numericErrorText":"{text}只能是数字"
+    "numericErrorText":"{text}只能是数字",
     
-    
-    
+    "aiSuggestionTitle":"问答式饮食健康分析",
+    "aiSuggestionHint":"可以向我提问，获取健康饮食相关建议",
+    "regeneration":"重新生成",
+    "copiedHint":"已复制到剪贴板",
+    "apiErrorHint":"接口报错，请检查网络或稍后重试"
+   
 }
