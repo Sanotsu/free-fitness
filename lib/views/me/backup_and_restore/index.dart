@@ -9,7 +9,6 @@ import 'package:archive/archive_io.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../../../common/utils/db_diary_helper.dart';
 import '../../../common/utils/db_dietary_helper.dart';
@@ -43,10 +42,11 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
 
   // 导出db中所有的数据
   _exportAllData() async {
-    final status = await Permission.storage.request();
+    final status = await requestStoragePermission();
+
     // 用户没有授权，简单提示一下
     if (!mounted) return;
-    if (!status.isGranted) {
+    if (!status) {
       showSnackMessage(context, CusAL.of(context).noStorageErrorText);
       return;
     }

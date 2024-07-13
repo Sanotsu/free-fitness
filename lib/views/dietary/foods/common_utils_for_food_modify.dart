@@ -165,7 +165,7 @@ buildServingModifyFormColumn(BuildContext context, CusLabel servingType) {
         context,
         "cholesterol",
         CusAL.of(context).microNutrients('2'),
-        suffix: CusAL.of(context).unitLabels('2'),
+        suffix: CusAL.of(context).unitLabels('1'),
       ),
     ],
   );

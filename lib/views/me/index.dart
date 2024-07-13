@@ -572,32 +572,35 @@ class NewCusSettingCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const NewCusSettingCard({
-    Key? key,
+    super.key,
     required this.leadingIcon,
     required this.title,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(2.sp),
-      child: Card(
-        elevation: 5,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.sp),
-        ),
-        child: ListTile(
-          leading: Icon(leadingIcon),
-          title: Text(
-            title,
-            style: TextStyle(
-              fontSize: CusFontSizes.pageSubTitle,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).primaryColor,
+    return Card(
+      elevation: 5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.sp),
+      ),
+      child: Container(
+        height: 150.sp,
+        padding: EdgeInsets.all(2.sp),
+        child: Center(
+          child: ListTile(
+            leading: Icon(leadingIcon),
+            title: Text(
+              title,
+              style: TextStyle(
+                fontSize: CusFontSizes.pageSubTitle,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).primaryColor,
+              ),
             ),
+            onTap: onTap,
           ),
-          onTap: onTap,
         ),
       ),
     );

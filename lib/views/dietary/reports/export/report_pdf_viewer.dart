@@ -22,10 +22,10 @@ class ReportPdfViewer extends StatefulWidget {
   final String endDate;
 
   const ReportPdfViewer({
-    Key? key,
+    super.key,
     required this.startDate,
     required this.endDate,
-  }) : super(key: key);
+  });
 
   @override
   State<ReportPdfViewer> createState() => _ReportPdfViewerState();

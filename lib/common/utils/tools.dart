@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../global/constants.dart';
 
@@ -287,4 +289,31 @@ getCusLabelText(String item, List<CusLabel> options) {
   );
 
   return box.read('language') == "en" ? op.enLabel : op.cnLabel;
+}
+
+// 只请求内部存储访问权限(食物营养素、锻炼动作导入；备份还原等)
+Future<bool> requestStoragePermission() async {
+  if (Platform.isAndroid) {
+    // 获取设备sdk版本
+    final androidInfo = await DeviceInfoPlugin().androidInfo;
+    int sdkInt = androidInfo.version.sdkInt;
+
+    if (sdkInt <= 32) {
+      var storageStatus = await Permission.storage.request();
+      return storageStatus.isGranted;
+    } else {
+      var storageStatus = await Permission.manageExternalStorage.request();
+      return (storageStatus.isGranted);
+    }
+  } else if (Platform.isIOS) {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.mediaLibrary,
+      Permission.storage,
+    ].request();
+    return (statuses[Permission.mediaLibrary]!.isGranted &&
+        statuses[Permission.storage]!.isGranted);
+  } else {
+    // 除了安卓和ios其他先不考虑
+    return false;
+  }
 }

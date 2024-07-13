@@ -15,10 +15,10 @@ class ActionDetailDialog extends StatefulWidget {
   final int adIndex;
 
   const ActionDetailDialog({
-    Key? key,
+    super.key,
     required this.adItems,
     required this.adIndex,
-  }) : super(key: key);
+  });
 
   @override
   State<ActionDetailDialog> createState() => _ActionDetailDialogState();

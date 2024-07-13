@@ -321,8 +321,8 @@
     "diaryTagsNote":" 输入标签(输入逗号或分号自动分割)",
     "richTextToolNote":"展开富文本编辑工具栏",
 
-    "lastModified":"上次修改时间",
-    "gmtCreate":"初始创建时间",
+    "lastModified":"上次修改",
+    "gmtCreate":"初始创建",
 
     "confirmLabel":"确定",
     "cancelLabel":"取消",
@@ -409,8 +409,18 @@
     "uniqueErrorText":"{text}已存在",
     "noStorageErrorText":"用户已禁止访问内部存储,无法进行json文件导入。",
     "requiredErrorText":"{text}不可为空",
-    "numericErrorText":"{text}只能是数字"
+    "numericErrorText":"{text}只能是数字",
     
-    
-    
+    "aiSuggestionTitle":"问答式饮食健康分析",
+    "aiSuggestionHint":"可以向我提问，获取健康饮食相关建议",
+    "regeneration":"重新生成",
+    "copiedHint":"已复制到剪贴板",
+    "apiErrorHint":"接口报错，请检查网络或稍后重试",
+    "noStorageHint":"未授予文件管理权限，部分功能可能将会受到影响。",
+    "permissionRequest":"权限申请",
+    "featuresRestrictionNote":"应用中显示图片、基础动作导入、营养成分导入、数据备份等功能需要文件管理权限，请允许。",
+
+    "appNote":"注意事项"
+
+   
 }

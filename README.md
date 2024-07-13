@@ -1,8 +1,8 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-
 - [说明](#%E8%AF%B4%E6%98%8E)
+  - [版本更新](#%E7%89%88%E6%9C%AC%E6%9B%B4%E6%96%B0)
   - [功能说明](#%E5%8A%9F%E8%83%BD%E8%AF%B4%E6%98%8E)
     - [运动模块](#%E8%BF%90%E5%8A%A8%E6%A8%A1%E5%9D%97)
       - [基础动作](#%E5%9F%BA%E7%A1%80%E5%8A%A8%E4%BD%9C)
@@ -29,9 +29,15 @@
 
 # 说明
 
-Free-Fitness 是使用 flutter(v3.16.2) 开发的集运动训练、饮食记录、日记编写等功能为一体的健身饮食记录管理 App。
+Free-Fitness 是使用 flutter 3.x 开发的集运动训练、饮食记录、日记编写等功能为一体的健身饮食记录管理 App。
 
 此 App 适合拥有运动健身、减肥增肌、随手记录等需求的辅助使用。所有数据全部在本地，无需联网，且默认无内置数据，自定性比较灵活。
+
+## 版本更新
+
+- 2024-07-13 `0.2.0-beta.1`
+  - 主要接入零一万物 AI 大模型，对饮食记录进行 AI 分析和问答式提供建议。
+  - 更多改动参看[CHANGELOG](CHANGELOG.md)
 
 ## 功能说明
 

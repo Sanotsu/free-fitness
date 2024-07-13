@@ -331,7 +331,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
                         // 删除后重新查询
                         getPlanList();
                       } catch (e) {
-                        if (!mounted) return;
+                        if (!context.mounted) return;
                         commonExceptionDialog(
                           context,
                           CusAL.of(context).exceptionWarningTitle,

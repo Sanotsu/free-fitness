@@ -2,7 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
+import '../common/utils/tools.dart';
 import '../models/cus_app_localizations.dart';
 import '../views/diary/index_table_calendar.dart';
 import '../views/dietary/index.dart';
@@ -27,6 +29,49 @@ class _HomePageState extends State<HomePage> {
     DiaryTableCalendar(),
     UserAndSettings()
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    initPermission();
+  }
+
+  initPermission() async {
+    var state = await requestStoragePermission();
+
+    if (!state) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(CusAL.of(context).permissionRequest),
+            content: Text(CusAL.of(context).featuresRestrictionNote),
+            actions: <Widget>[
+              TextButton(
+                child: Text(CusAL.of(context).cancelLabel),
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+              ),
+              ElevatedButton(
+                child: Text(CusAL.of(context).confirmLabel),
+                onPressed: () async {
+                  var state = await requestStoragePermission();
+                  if (!context.mounted) return;
+                  Navigator.of(context).pop(state);
+                },
+              ),
+            ],
+          );
+        },
+      ).then((value) {
+        if (value == false) {
+          EasyLoading.showToast(CusAL.of(context).noStorageHint);
+        }
+      });
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {

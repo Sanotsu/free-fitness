@@ -30,12 +30,12 @@ class ActionFollowPracticeWithTTS extends StatefulWidget {
   final List<ActionDetail> actionList;
 
   const ActionFollowPracticeWithTTS({
-    Key? key,
+    super.key,
     required this.actionList,
     this.group,
     this.plan,
     this.dayNumber,
-  }) : super(key: key);
+  });
 
   @override
   State<ActionFollowPracticeWithTTS> createState() =>
@@ -273,14 +273,6 @@ class _ActionFollowPracticeWithTTSState
         ttsState = TtsState.playing;
       });
     });
-
-    if (isAndroid) {
-      flutterTts.setInitHandler(() {
-        setState(() {
-          print("TTS Initialized");
-        });
-      });
-    }
 
     flutterTts.setCompletionHandler(() {
       setState(() {
@@ -1042,7 +1034,7 @@ class _ActionFollowPracticeWithTTSState
                   _restController.restart(duration: _cusRestTime);
                 },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(
+                  backgroundColor: WidgetStateProperty.all<Color>(
                     Theme.of(context).primaryColor,
                   ),
                 ),
@@ -1137,7 +1129,7 @@ class _ActionFollowPracticeWithTTSState
                   isClickPlusRestTime = false;
                 },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all<Color>(
+                  backgroundColor: WidgetStateProperty.all<Color>(
                     Theme.of(context).primaryColor,
                   ),
                 ),

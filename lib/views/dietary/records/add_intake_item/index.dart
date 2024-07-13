@@ -25,10 +25,10 @@ class AddIntakeItem extends StatefulWidget {
   final String logDate;
 
   const AddIntakeItem({
-    Key? key,
+    super.key,
     required this.mealtime,
     required this.logDate,
-  }) : super(key: key);
+  });
 
   @override
   State<AddIntakeItem> createState() => _AddIntakeItemState();

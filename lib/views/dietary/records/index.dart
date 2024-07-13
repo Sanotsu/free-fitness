@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,6 +16,7 @@ import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../reports/index.dart';
 import 'add_intake_item/index.dart';
+import 'ai_suggestion/ai_suggestion_page.dart';
 import 'format_tools.dart';
 import 'report_calendar_summary.dart';
 import 'save_meal_photo.dart';
@@ -178,7 +181,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
         firstDate: DateTime(1994, 7),
         lastDate: DateTime(2077));
 
-    if (!mounted) return;
+    if (!context.mounted) return;
     if (picked != null) {
       // 包含了月日星期，其他格式修改 MMMEd 为其他即可
       var formatDate = DateFormat.MMMEd().format(picked);
@@ -205,6 +208,47 @@ class _DietaryRecordsState extends State<DietaryRecords> {
         _queryDailyFoodItemList();
       });
     }
+  }
+
+  /// 2024-07-08 可以使用大模型询问今日摄入的情况，并做出分析
+  /// 但需要比较好的规划提问的内容。
+  String buildSuggestionString() {
+    var str = box.read('language') == "en"
+        ? """Please analyze my food intake today, provide effective healthy dietary recommendations, and arrange improved quantitative recipes.
+        \n\nThis is my main food intake for today:\n\n"""
+        : "请根据我今天的食物摄入做出分析，给出有效的健康饮食建议，安排改善后的量化食谱。\n\n这是我今天的主要食物摄入量:\n\n";
+
+    // 2024-07-08 想要分餐次，营养素也得分，然后食物的营养素成分表也得说明。目前这AI也不好用，就笼统一整天的好了
+    // Map<String, List<DailyFoodItemWithFoodServing>> itemsByMeal =
+    //     dfiwfsList.groupListsBy((l) => l.dailyFoodItem.mealCategory);
+
+    // // 分餐次的食物摄入
+    // itemsByMeal.forEach((meal, items) {
+    //   str += "- $meal:\n\n";
+    //   for (var e in items) {
+    //     str +=
+    //         "  - ${e.food.product} ${e.dailyFoodItem.foodIntakeSize} x ${e.servingInfo.servingUnit}; \n\n";
+    //   }
+    // });
+
+    for (var e in dfiwfsList) {
+      var temp = mealtimeList
+          .firstWhere((m) => m.enLabel == e.dailyFoodItem.mealCategory);
+
+      str += """  - [${showCusLable(temp)}] ${e.food.product} 
+          ${e.dailyFoodItem.foodIntakeSize} x ${e.servingInfo.servingUnit}\n\n""";
+    }
+
+    str += box.read('language') == "en"
+        ? "\n\nThis is my main nutrient intake for today:\n\n"
+        : "\n\n这是我今天的主要营养素摄入量:\n\n";
+
+    // 全部营养素
+    for (var e in mainNutrientsChartData) {
+      str += "  - ${e.name} ${e.value.toStringAsFixed(2)} ${e.unit}\n\n";
+    }
+
+    return str;
   }
 
   @override
@@ -341,6 +385,31 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                 ),
               ],
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (dfiwfsList.isEmpty) {
+            commonExceptionDialog(
+              context,
+              "提示",
+              "本日暂无食物摄入信息，无须AI助手给出分析建议。",
+            );
+          } else {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    OneChatScreen(intakeInfo: buildSuggestionString()),
+              ),
+            );
+          }
+        },
+        tooltip: box.read('language') == "en" ? "AI Assistant" : 'AI分析对话助手',
+        child: const Icon(Icons.chat),
+        // child: Text(
+        //   box.read('language') == "en" ? "AIA" : "AI\n助手",
+        //   style: TextStyle(fontSize: 12.sp),
+        //   textAlign: TextAlign.center,
+        // ),
+      ),
     );
   }
 

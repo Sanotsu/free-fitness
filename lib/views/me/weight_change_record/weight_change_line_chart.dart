@@ -431,7 +431,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
                   }).toList();
                 },
                 touchTooltipData: LineTouchTooltipData(
-                  tooltipBgColor: Colors.pink,
+                  getTooltipColor: (_) => Colors.pink,
                   tooltipRoundedRadius: 8,
                   getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
                     return lineBarsSpot.map((lineBarSpot) {

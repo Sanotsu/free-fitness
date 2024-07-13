@@ -669,10 +669,10 @@ Ab_Roller.json:
             rows: List<DataRow>.generate(
               exerciseItemsNum,
               (int index) => DataRow(
-                color: MaterialStateProperty.resolveWith<Color?>(
-                    (Set<MaterialState> states) {
+                color: WidgetStateProperty.resolveWith<Color?>(
+                    (Set<WidgetState> states) {
                   // All rows will have the same selected color.
-                  if (states.contains(MaterialState.selected)) {
+                  if (states.contains(WidgetState.selected)) {
                     return Theme.of(context)
                         .colorScheme
                         .primary

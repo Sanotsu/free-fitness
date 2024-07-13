@@ -2,6 +2,7 @@
 
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -15,7 +16,7 @@ import '../common/global/constants.dart';
 import 'home.dart';
 
 class FreeFitnessApp extends StatefulWidget {
-  const FreeFitnessApp({Key? key}) : super(key: key);
+  const FreeFitnessApp({super.key});
 
   @override
   State<FreeFitnessApp> createState() => _FreeFitnessAppState();
@@ -90,6 +91,7 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
           home: box.read(LocalStorageKey.userId) != null
               ? const HomePage()
               : const InitGuidePage(),
+          builder: EasyLoading.init(),
         );
       },
     );

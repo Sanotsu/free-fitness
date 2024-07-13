@@ -14,7 +14,7 @@ import '../../models/diary_state.dart';
 import 'diary_modify_rich_text.dart';
 
 class IndexTimeline extends StatefulWidget {
-  const IndexTimeline({Key? key}) : super(key: key);
+  const IndexTimeline({super.key});
 
   @override
   State<IndexTimeline> createState() => _IndexTimelineState();
@@ -349,7 +349,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
                       bgColor: CusColors.moodTinyTagBg,
                       labelTextSize: CusFontSizes.flagMinute,
                     );
-                  }).toList(),
+                  }),
                   ...((diaryItem.tags != null &&
                               diaryItem.tags!.trim().isNotEmpty)
                           ? diaryItem.tags!.trim().split(",")
@@ -360,7 +360,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
                       bgColor: CusColors.tagTinyTagBg,
                       labelTextSize: CusFontSizes.flagMinute,
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ],
@@ -442,10 +442,9 @@ class _IndexTimelineState extends State<IndexTimeline> {
 // 自定义的时间线指示器养蛇
 class _CusIndicator extends StatelessWidget {
   const _CusIndicator({
-    Key? key,
     required this.category,
     required this.borderColor,
-  }) : super(key: key);
+  });
 
   final String category;
   final Color borderColor;

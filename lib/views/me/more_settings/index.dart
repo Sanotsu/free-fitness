@@ -79,6 +79,45 @@ class _MoreSettingsState extends State<MoreSettings> {
               ),
             ],
           ),
+
+          ListTile(
+            title: Text(CusAL.of(context).appNote),
+            trailing: const Icon(Icons.info_outlined),
+            onTap: () {
+              showAboutDialog(
+                context: context,
+                applicationName: 'Free Fitness',
+                children: [
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(flex: 1, child: Text("Author")),
+                      Expanded(flex: 3, child: Text("SanotSu")),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const Expanded(flex: 1, child: Text("Email")),
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          "callmedavidsu@gmail.com",
+                          style: TextStyle(fontSize: 13.sp),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20.sp),
+                  Text(
+                    "Not for commercial use.",
+                    style: TextStyle(fontSize: 20.sp, color: Colors.blue),
+                  ),
+                ],
+              );
+            },
+          ),
+
           // SizedBox(height: 10.sp),
           // ListTile(
           //   leading: const Icon(Icons.description),
@@ -152,6 +191,11 @@ class _MoreSettingsState extends State<MoreSettings> {
 
   // 重新加载应用程序以更新UI
   void _reloadApp(BuildContext context) {
+    // ???2024-07-12 这里有问题，新版本在切换语言后重载，会出现OnBackInvokedCallback is not enabled for the application.
+    // 即便已经在manifest文件进行配置了，现象类似：https://github.com/flutter/flutter/issues/146132
+    // 这会导致在连续的pop 例如Navigator.of(context)..pop()..pop();
+    //    或者两个Navigator.of(context).pop();Navigator.of(context).pop(); 的地方出现白屏，找不到路径的现象
+    // 暂未解决
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const FreeFitnessApp()),

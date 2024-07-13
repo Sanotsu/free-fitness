@@ -166,7 +166,7 @@ class _FeatureMockDemoState extends State<FeatureMockDemo> {
                         await _trainingHelper.deleteDB();
                         await _diaryHelper.deleteDB();
 
-                        if (!mounted) return;
+                        if (!context.mounted) return;
                         _showSimpleDialog(context, "已删除所有测试数据");
                       },
                       child: const Text("删除测试数据"),
@@ -202,7 +202,7 @@ class _FeatureMockDemoState extends State<FeatureMockDemo> {
                           isLoading = false;
                         });
 
-                        if (!mounted) return;
+                        if (!context.mounted) return;
                         _showSimpleDialog(context, "已插入测试数据");
                       },
                       child: const Text("插入测试数据"),

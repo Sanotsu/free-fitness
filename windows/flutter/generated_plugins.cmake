@@ -3,6 +3,15 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  connectivity_plus
+  file_selector_windows
+  flutter_tts
+  gal
+  irondash_engine_context
+  permission_handler_windows
+  printing
+  super_native_extensions
+  url_launcher_windows
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

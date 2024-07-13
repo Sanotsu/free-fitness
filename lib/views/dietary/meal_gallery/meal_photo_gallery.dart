@@ -8,6 +8,7 @@ import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
+import '../records/save_meal_photo.dart';
 
 class MealPhotoGallery extends StatefulWidget {
   const MealPhotoGallery({super.key});
@@ -120,6 +121,14 @@ class _MealPhotoGalleryState extends State<MealPhotoGallery> {
               title: Text(mp.date),
               subtitle: Text(
                 '[${showCusLable(temp)}] ${photoList.length} ${CusAL.of(context).photoUnitLabel}',
+              ),
+              trailing: TextButton(
+                onPressed: () {
+                  handleImageAnalysis(context, photoList);
+                },
+                child: Text(
+                  box.read('language') == "en" ? "AI analysis" : 'AI分析',
+                ),
               ),
             ),
             buildImageCarouselSlider(photoList),

@@ -328,7 +328,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
               // 如果该训练有被使用，则不允许直接删除
               var list = await _dbHelper.isGroupUsed(groupItem.group.groupId!);
 
-              if (!mounted) return;
+              if (!context.mounted) return;
               if (list.isNotEmpty) {
                 commonExceptionDialog(
                   context,
@@ -367,7 +367,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                       // 删除后重新查询
                       getGroupList();
                     } catch (e) {
-                      if (!mounted) return;
+                      if (!context.mounted) return;
                       commonExceptionDialog(
                         context,
                         CusAL.of(context).exceptionWarningTitle,
@@ -447,7 +447,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                     var groupId = await _dbHelper.insertTrainingGroup(temp);
                     temp.groupId = groupId;
 
-                    if (!mounted) return;
+                    if (!context.mounted) return;
                     Navigator.of(context).pop();
                     Navigator.push(
                       context,
@@ -469,7 +469,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                     );
 
                     // 如果是修改就返回训练组列表，而不是进入动作列表
-                    if (!mounted) return;
+                    if (!context.mounted) return;
                     Navigator.of(context).pop();
                     setState(() {
                       getGroupList();

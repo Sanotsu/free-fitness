@@ -1,14 +1,15 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
     localPropertiesFile.withReader('UTF-8') { reader ->
         localProperties.load(reader)
     }
-}
-
-def flutterRoot = localProperties.getProperty('flutter.sdk')
-if (flutterRoot == null) {
-    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
@@ -21,10 +22,6 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
-
 // 在 gradle 中配置签名
 // 1. 在 android 代码块之前将你 properties 文件的密钥库信息添加进去
 def keystoreProperties = new Properties()
@@ -34,13 +31,21 @@ def keystorePropertiesFile = rootProject.file('key.properties')
    }
 
 android {
-    namespace "com.swm.FreeFitness"
+    namespace "com.swm.free_fitness"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    // 在构建应用时打包压缩的原生库
+    // https://developer.android.com/build/releases/past-releases/agp-4-2-0-release-notes?hl=zh-cn#compress-native-libs-dsl
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true
+        }
     }
 
     kotlinOptions {
@@ -53,12 +58,13 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.swm.FreeFitness"
+        applicationId "com.swm.free_fitness"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         // minSdkVersion flutter.minSdkVersion
         // 2023-11-29 flutter_tts最小需要21
-        minSdkVersion 21
+        // 2024-07-05 更新依赖后，最小需要23
+        minSdkVersion 23
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -91,6 +97,3 @@ flutter {
     source '../..'
 }
 
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-}

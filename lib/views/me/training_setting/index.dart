@@ -101,7 +101,7 @@ class _TrainingSettingState extends State<TrainingSetting> {
 
                 await _userHelper.updateUser(user);
 
-                if (!mounted) return;
+                if (!context.mounted) return;
                 Navigator.of(context).pop();
               },
               child: Text(CusAL.of(context).confirmLabel),

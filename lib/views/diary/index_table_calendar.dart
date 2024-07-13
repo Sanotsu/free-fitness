@@ -155,7 +155,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
               );
             },
             style: ButtonStyle(
-              foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+              foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
             ),
             child: Text(CusAL.of(context).diaryLables("1")),
           ),
@@ -179,7 +179,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
             label: Text(CusAL.of(context).addLabel("")),
             icon: const Icon(Icons.add),
             style: ButtonStyle(
-              foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+              foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
             ),
           )
         ],
@@ -416,7 +416,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                         await _dbHelper.deleteDiaryById(diary.diaryId!);
                         _queryDairyList(_focusedDay);
                       } catch (e) {
-                        if (!mounted) return;
+                        if (!context.mounted) return;
                         commonExceptionDialog(
                           context,
                           CusAL.of(context).exceptionWarningTitle,
