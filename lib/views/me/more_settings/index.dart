@@ -79,6 +79,45 @@ class _MoreSettingsState extends State<MoreSettings> {
               ),
             ],
           ),
+
+          ListTile(
+            title: Text(CusAL.of(context).appNote),
+            trailing: const Icon(Icons.info_outlined),
+            onTap: () {
+              showAboutDialog(
+                context: context,
+                applicationName: 'Free Fitness',
+                children: [
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(flex: 1, child: Text("Author")),
+                      Expanded(flex: 3, child: Text("SanotSu")),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const Expanded(flex: 1, child: Text("Email")),
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          "callmedavidsu@gmail.com",
+                          style: TextStyle(fontSize: 13.sp),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20.sp),
+                  Text(
+                    "Not for commercial use.",
+                    style: TextStyle(fontSize: 20.sp, color: Colors.blue),
+                  ),
+                ],
+              );
+            },
+          ),
+
           // SizedBox(height: 10.sp),
           // ListTile(
           //   leading: const Icon(Icons.description),

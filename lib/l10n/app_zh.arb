@@ -418,7 +418,9 @@
     "apiErrorHint":"接口报错，请检查网络或稍后重试",
     "noStorageHint":"未授予文件管理权限，部分功能可能将会受到影响。",
     "permissionRequest":"权限申请",
-    "featuresRestrictionNote":"应用中显示图片、基础动作导入、营养成分导入、数据备份等功能需要文件管理权限，请允许。"
+    "featuresRestrictionNote":"应用中显示图片、基础动作导入、营养成分导入、数据备份等功能需要文件管理权限，请允许。",
+
+    "appNote":"注意事项"
 
    
 }
