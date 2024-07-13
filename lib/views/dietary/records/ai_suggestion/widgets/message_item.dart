@@ -21,7 +21,8 @@ class MessageItem extends StatelessWidget {
         isFromUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
 
     // 所有的文字颜色，暂定用户蓝色AI黑色
-    Color textColor = isFromUser ? Colors.blue : Colors.black;
+    // Color textColor = isFromUser ? Colors.blue : Colors.black;
+    Color textColor = isFromUser ? Colors.blue : Theme.of(context).hintColor;
 
     /// 这里暂时不考虑外边框的距离，使用时在外面加padding之类的
     return Row(
