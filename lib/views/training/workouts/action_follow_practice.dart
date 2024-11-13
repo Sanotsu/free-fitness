@@ -354,7 +354,7 @@ class _ActionFollowPracticeWithTTSState
       // 跟练页面点击返回默认不返回，先暂停，然后弹窗提示是否退出；是就退出，否就继续
       canPop: false,
 
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) return;
 
         /// 点击了返回按钮，就先暂停，并弹窗询问是否退出跟练
@@ -380,9 +380,9 @@ class _ActionFollowPracticeWithTTSState
         /// 所以还需要按照当前的页面是哪一个对应去暂停和继续，时机就和页面展示时一样
         // 预备页面的返回暂停
         if (_currentIndex < 0) {
-          if (_prepareController.isResumed ||
-              _prepareController.isStarted ||
-              _prepareController.isRestarted) {
+          if (_prepareController.isResumed.value ||
+              _prepareController.isStarted.value ||
+              _prepareController.isRestarted.value) {
             _prepareController.pause();
           }
         }
@@ -390,17 +390,17 @@ class _ActionFollowPracticeWithTTSState
         if (!isRestTurn &&
             _currentIndex >= 0 &&
             _currentIndex <= actions.length - 1) {
-          if (_actionController.isResumed ||
-              _actionController.isStarted ||
-              _actionController.isRestarted) {
+          if (_actionController.isResumed.value ||
+              _actionController.isStarted.value ||
+              _actionController.isRestarted.value) {
             _actionController.pause();
           }
         }
         // 休息页面的返回暂停
         if (isRestTurn) {
-          if (_restController.isResumed ||
-              _restController.isStarted ||
-              _restController.isRestarted) {
+          if (_restController.isResumed.value ||
+              _restController.isStarted.value ||
+              _restController.isRestarted.value) {
             _restController.pause();
           }
         }
@@ -437,6 +437,7 @@ class _ActionFollowPracticeWithTTSState
         ).then((value) {
           // 确定确定退出跟练，就直接中断所有内容进行退出，没有任何记录；否则就是继续
           if (value != null && value) {
+            if (!context.mounted) return;
             Navigator.pop(context);
           } else {
             // 关闭弹窗，不是退出就继续跟练。如果这些控制器是暂停的状态，就恢复
@@ -453,7 +454,7 @@ class _ActionFollowPracticeWithTTSState
             /// 2023-12-27 根据当前是哪个倒计时页面对应判断不同的倒计时控制器
             // 准备页面的暂停恢复
             if (_currentIndex < 0) {
-              if (_prepareController.isPaused) {
+              if (_prepareController.isPaused.value) {
                 _prepareController.resume();
               }
             }
@@ -461,13 +462,13 @@ class _ActionFollowPracticeWithTTSState
             if (!isRestTurn &&
                 _currentIndex >= 0 &&
                 _currentIndex <= actions.length - 1) {
-              if (_actionController.isPaused) {
+              if (_actionController.isPaused.value) {
                 _actionController.resume();
               }
             }
             // 休息页面的暂停恢复
             if (isRestTurn) {
-              if (_restController.isPaused) {
+              if (_restController.isPaused.value) {
                 _restController.resume();
               }
             }
@@ -1314,6 +1315,7 @@ class _ActionFollowPracticeWithTTSState
         if (value == null || value == false) {
           // Navigator.pop(context);
           // 返回上一页还是直接到主页？跟练完之后没点击按钮直接返回主页更合理
+          if (!mounted) return;
           Navigator.of(context).popUntil((route) => route.isFirst);
         }
       });

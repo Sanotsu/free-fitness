@@ -137,9 +137,9 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
 
   // 新增手记时，在没有保存的情况下点击重置，则不将修改状态改为false，只是清空当前的内容；只有点击返回时才退出当前页面。
   resetInitData() {
-    // 标签清空
-    _formKey.currentState?.fields['mood']?.didChange("");
-    _formKey.currentState?.fields['category']?.didChange([]);
+    // 标签清空(心情可以多选，分类只能单选)
+    _formKey.currentState?.fields['mood']?.didChange([]);
+    _formKey.currentState?.fields['category']?.didChange("");
     initTags = [];
     _tagTextController.text = "";
 
@@ -228,7 +228,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
     return PopScope(
       // 点击返回键时暂停返回
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) {
           return;
         }
@@ -562,13 +562,13 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                     SizedBox(
                       width: 1.sw,
                       child: QuillToolbar.simple(
-                        configurations: QuillSimpleToolbarConfigurations(
-                          controller: _controller,
-                          // 这几个默认没开启
-                          // showSmallButton: true,
-                          // showAlignmentButtons: true,
-                          // showDirection: true,
-                        ),
+                        controller: _controller,
+                        configurations: const QuillSimpleToolbarConfigurations(
+                            // 这几个默认没开启
+                            // showSmallButton: true,
+                            // showAlignmentButtons: true,
+                            // showDirection: true,
+                            ),
                       ),
                     ),
 
@@ -624,9 +624,9 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                   ),
                   child: QuillEditor.basic(
                     focusNode: quillFocusNode,
+                    controller: _controller,
                     configurations: QuillEditorConfigurations(
                       autoFocus: false,
-                      controller: _controller,
                       scrollable: true,
                       expands: true,
                       padding: EdgeInsets.all(5.sp),

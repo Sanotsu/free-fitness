@@ -141,6 +141,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
             );
           },
         ).then((value) {
+          if (!mounted) return;
           Navigator.of(context).pop();
         });
       }

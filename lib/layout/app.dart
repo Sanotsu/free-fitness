@@ -79,10 +79,20 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
           /// 跟随系统的浅色和深色和手动选择的一样
           theme: box.read('mode') == 'system'
               // 跟随系统的默认浅色是一个绿色主题
-              ? FlexThemeData.light(scheme: FlexScheme.greenM3)
+              ? FlexThemeData.light(
+                  scheme: FlexScheme.greenM3,
+                  // 2024-11-11 flutter更新到3.24.4、对应插件更新到最新版本时，不添加这个为false效果和之前不一样了
+                  useMaterial3: false,
+                )
               : box.read('mode') == 'dark'
-                  ? FlexThemeData.dark(scheme: FlexScheme.mandyRed)
-                  : FlexThemeData.light(scheme: FlexScheme.aquaBlue),
+                  ? FlexThemeData.dark(
+                      scheme: FlexScheme.mandyRed,
+                      useMaterial3: false,
+                    )
+                  : FlexThemeData.light(
+                      scheme: FlexScheme.aquaBlue,
+                      useMaterial3: false,
+                    ),
 
           // 使用了initalRoute就不能使用home了，参看文档：
           // https://flutter.cn/docs/cookbook/navigation/named-routes#2-define-the-routes

@@ -43,8 +43,13 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# 暂时不关注ios的构建
+# 暂时不关注其他的构建
 ios
+linux
+macos
+web
+windows
+
 **/_demos
 **/_tests
 

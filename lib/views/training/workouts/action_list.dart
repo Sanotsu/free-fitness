@@ -148,7 +148,7 @@ class _ActionListState extends State<ActionList> {
       canPop: !_isEditing,
       // 处理pop操作。如果 didPop 为false，则pop被阻止，进行执行后面代码块的操作。
       // 如果didPop为true，则直接返回。
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) return;
         // ？？？这下面好像没生效，但返回上一层的逻辑又是正确的
         // (修改中点击返回按钮变为非修改中；非修改中点击返回则返回尚义页)
@@ -421,6 +421,7 @@ class _ActionListState extends State<ActionList> {
             );
 
             // 索引从0开始，所以新增的时候就从 actionList.length 开始
+            if (!mounted) return;
             showConfigDialog(context, temp, actionList.length, onConfiguClosed);
           }
         });

@@ -345,6 +345,7 @@ void handleImageAnalysis(BuildContext context, List<String> imagesUrls) {
         );
       },
     ).then((value) {
+      if (!context.mounted) return;
       navigateToOneChatScreen(context, imagesUrls.first);
     });
   } else {

@@ -90,7 +90,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) return;
 
         // 返回上一页时，返回是否被修改标识，用于父组件判断是否需要重新查询
@@ -323,6 +323,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     ).then((value) {
       // 因为默认有选中新增单份营养素的类型，所以返回true确认新增时，一定有该type
       if (value != null && value) {
+        if (!mounted) return;
         Navigator.push(
           context,
           MaterialPageRoute(

@@ -54,7 +54,7 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) return;
         Navigator.pop(context, modifiedFlag);
       },

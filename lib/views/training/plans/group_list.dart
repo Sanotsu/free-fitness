@@ -165,7 +165,7 @@ class _GroupListState extends State<GroupList> {
       canPop: !_isEditing,
       // 处理pop操作。如果 didPop 为false，则pop被阻止，进行执行后面代码块的操作。
       // 如果didPop为true，则直接返回。
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) return;
         // (修改中点击返回按钮变为非修改中；非修改中点击返回则返回上一页)
         if (_isEditing) {
