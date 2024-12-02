@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -12,7 +10,6 @@ import '../../common/utils/db_user_helper.dart';
 import '../../layout/themes/cus_font_size.dart';
 import '../../models/cus_app_localizations.dart';
 import '../../models/user_state.dart';
-// import '_feature_mock_data/index.dart';
 import 'backup_and_restore/index.dart';
 import 'intake_goals/intake_target.dart';
 import 'more_settings/index.dart';
@@ -49,13 +46,11 @@ class _UserAndSettingsState extends State<UserAndSettings> {
   void initState() {
     super.initState();
 
-    setState(() {
-      currentUserId = CacheUser.userId;
-    });
-
+    currentUserId = CacheUser.userId;
     _queryLoginedUserInfo();
   }
 
+  // 查询登录用户的信息
   _queryLoginedUserInfo() async {
     if (isLoading) return;
     setState(() {
@@ -65,6 +60,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
     // 查询登录用户的信息一定会有的
     var tempUser = (await _userHelper.queryUser(userId: currentUserId))!;
 
+    if (!mounted) return;
     setState(() {
       userInfo = tempUser;
       if (tempUser.avatar != null) {
@@ -167,6 +163,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: source);
+    if (!mounted) return;
     if (pickedFile != null) {
       setState(() {
         _avatarPath = pickedFile.path;
@@ -180,38 +177,12 @@ class _UserAndSettingsState extends State<UserAndSettings> {
 
   @override
   Widget build(BuildContext context) {
-    // 计算屏幕剩余的高度
-    // 设备屏幕的总高度
-    //  - 屏幕顶部的安全区域高度，即状态栏的高度
-    //  - 屏幕底部的安全区域高度，即导航栏的高度或者虚拟按键的高度
-    //  - 应用程序顶部的工具栏（如 AppBar）的高度
-    //  - 应用程序底部的导航栏的高度
-    //  - 组件的边框间隔(不一定就是2)
-    double screenBodyHeight = MediaQuery.of(context).size.height -
-        MediaQuery.of(context).padding.top -
-        MediaQuery.of(context).padding.bottom -
-        kToolbarHeight -
-        kBottomNavigationBarHeight;
-
-    print("screenBodyHeight--------$screenBodyHeight");
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
           CusAL.of(context).moduleTitles('3'),
         ),
         actions: [
-          // IconButton(
-          //   onPressed: () {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(
-          //         builder: (context) => const FeatureMockDemo(),
-          //       ),
-          //     );
-          //   },
-          //   icon: const Icon(Icons.bug_report),
-          // ),
           // 切换用户(切换后缓存的用户编号也得修改)
           IconButton(
             onPressed: _switchUser,
@@ -233,31 +204,21 @@ class _UserAndSettingsState extends State<UserAndSettings> {
       ),
       body: isLoading
           ? buildLoader(isLoading)
-          : ListView(
+          : Column(
+              // 从listview改为column后需要纵向主轴为stretch切换头像等图标才不会跑偏
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                /// 用户基本信息展示区域(固定高度10+120+120=250)
+                /// 用户基本信息展示区域(固定高度)
                 ..._buildBaseUserInfoArea(userInfo),
 
-                /// 功能区，参看别的app大概留几个
-                /// 功能区的占位就是除去状态栏、标题、底部按钮、头像区域个人信息外的高度进行等分
-                /// 底部还预留20sp
-                // 基本信息和体重趋势
-                SizedBox(
-                  height: (screenBodyHeight - 250 - 20) / 3,
-                  child: _buildInfoAndWeightChangeRow(),
-                ),
+                /// 用户基本信息和体重趋势按钮
+                Expanded(child: _buildInfoAndWeightChangeRow()),
 
-                // 摄入目标和运动设置
-                SizedBox(
-                  height: (screenBodyHeight - 250 - 20) / 3,
-                  child: _buildIntakeGoalAndRestTimeRow(),
-                ),
+                /// 摄入目标和运动设置按钮
+                Expanded(child: _buildIntakeGoalAndRestTimeRow()),
 
-                // 备份还原和更多设置
-                SizedBox(
-                  height: (screenBodyHeight - 250 - 20) / 3,
-                  child: _buildBakAndRestoreAndMoreSettingRow(),
-                ),
+                /// 备份还原和更多设置按钮
+                Expanded(child: _buildBakAndRestoreAndMoreSettingRow()),
               ],
             ),
     );
@@ -267,16 +228,19 @@ class _UserAndSettingsState extends State<UserAndSettings> {
   _buildBaseUserInfoArea(User userInfo) {
     return [
       SizedBox(height: 10.sp),
+
+      /// 头像相关
       Stack(
         alignment: Alignment.center,
         children: [
+          /// 头像图片
           // 没有修改头像，就用默认的
           if (_avatarPath.isEmpty)
             CircleAvatar(
               maxRadius: 60.sp,
               backgroundColor: Colors.transparent,
               backgroundImage: const AssetImage(defaultAvatarImageUrl),
-              // y圆形头像的边框线
+              // 圆形头像的边框线
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -317,6 +281,8 @@ class _UserAndSettingsState extends State<UserAndSettings> {
                 backgroundImage: FileImage(File(_avatarPath)),
               ),
             ),
+
+          /// 性别图标
           Positioned(
             top: 90.sp,
             right: 0.5.sw - 70.sp,
@@ -333,11 +299,13 @@ class _UserAndSettingsState extends State<UserAndSettings> {
                         color: Colors.green,
                       )
                     : Icon(
-                        Icons.circle_outlined,
+                        Icons.bolt,
                         size: CusIconSizes.iconNormal,
                         color: Theme.of(context).disabledColor,
                       ),
           ),
+
+          /// 修改头像按钮
           Positioned(
             top: 0.sp,
             right: 0.sp,
@@ -382,8 +350,10 @@ class _UserAndSettingsState extends State<UserAndSettings> {
           ),
         ],
       ),
+
+      /// 个人简介
       SizedBox(
-        height: 120.sp,
+        height: 130.sp,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -411,17 +381,22 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             ),
 
             // 用户简介 description
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18.sp),
-              child: Text(
-                "${userInfo.description ?? 'no description'} ",
-                textAlign: TextAlign.center,
-                softWrap: true,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: CusFontSizes.pageContent),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 18.sp),
+                  child: Text(
+                    "${userInfo.description ?? 'no description'} ",
+                    textAlign: TextAlign.center,
+                    // softWrap: true,
+                    // maxLines: 3,
+                    // overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: CusFontSizes.pageContent),
+                  ),
+                ),
               ),
             ),
+            SizedBox(height: 10.sp),
           ],
         ),
       ),
@@ -436,14 +411,12 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             leadingIcon: Icons.account_circle_outlined,
             title: CusAL.of(context).settingLabels('0'),
             onTap: () {
-              // 处理相应的点击事件
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const UserInfo(),
                 ),
               ).then((value) {
-                // 确认新增成功后重新加载当前日期的条目数据
                 _queryLoginedUserInfo();
               });
             },
@@ -454,14 +427,12 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             leadingIcon: Icons.table_chart_outlined,
             title: CusAL.of(context).settingLabels('1'),
             onTap: () {
-              // 处理相应的点击事件
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => WeightChangeRecord(userInfo: userInfo),
                 ),
               ).then((value) {
-                // 确认新增成功后重新加载当前日期的条目数据
                 if (value != null && value == true) {
                   _queryLoginedUserInfo();
                 }
@@ -481,14 +452,12 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             leadingIcon: Icons.flag_circle_outlined,
             title: CusAL.of(context).settingLabels('2'),
             onTap: () {
-              // 处理相应的点击事件
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => IntakeTargetPage(userInfo: userInfo),
                 ),
               ).then((value) {
-                // 确认新增成功后重新加载当前日期的条目数据
                 _queryLoginedUserInfo();
               });
             },
@@ -499,14 +468,12 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             leadingIcon: Icons.run_circle_outlined,
             title: CusAL.of(context).settingLabels('3'),
             onTap: () {
-              // 处理相应的点击事件
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => TrainingSetting(userInfo: userInfo),
                 ),
               ).then((value) {
-                // 确认新增成功后重新加载当前日期的条目数据
                 _queryLoginedUserInfo();
               });
             },
@@ -524,8 +491,6 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             leadingIcon: Icons.backup_outlined,
             title: CusAL.of(context).settingLabels('4'),
             onTap: () {
-              // 处理相应的点击事件
-
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -540,8 +505,6 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             leadingIcon: Icons.more_horiz_outlined,
             title: CusAL.of(context).settingLabels('5'),
             onTap: () {
-              // 处理相应的点击事件
-
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -580,14 +543,15 @@ class NewCusSettingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.sp),
-      ),
-      child: Container(
-        height: 150.sp,
-        padding: EdgeInsets.all(2.sp),
+    // 这里套一层容器宽高过小会生效不好看，但过大会在使用处的expanded限制住
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10.sp),
+      child: Card(
+        elevation: 2.sp,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.sp),
+        ),
         child: Center(
           child: ListTile(
             leading: Icon(leadingIcon),
@@ -599,7 +563,6 @@ class NewCusSettingCard extends StatelessWidget {
                 color: Theme.of(context).primaryColor,
               ),
             ),
-            onTap: onTap,
           ),
         ),
       ),

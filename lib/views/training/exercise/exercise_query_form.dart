@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -54,130 +52,140 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
     return Card(
       elevation: 5.sp,
       child: Padding(
-        padding: EdgeInsets.all(5.sp),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+        padding: EdgeInsets.fromLTRB(0, 5.sp, 0, 0),
+        child: Column(
           children: [
-            Expanded(
-              flex: 6,
-              // FormBuilderDropdown需要指定外部容器大小，或者放在类似expanded中自动扩展
-              child: cusFormBuilerDropdown(
-                "primary_muscles",
-                musclesOptions,
-                labelText: CusAL.of(context).exerciseQuerys("0"),
-                hintStyle: TextStyle(fontSize: CusFontSizes.searchInputMedium),
-                isOutline: true,
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: IconButton(
-                onPressed: _showHintDialog,
-                icon: Icon(
-                  Icons.warning,
-                  size: CusIconSizes.iconSmall,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: IconButton(
-                onPressed: () {
-                  setState(() {
-                    _showAdvancedOptions = !_showAdvancedOptions;
-                  });
-                },
-                icon: Icon(
-                  _showAdvancedOptions ? Icons.expand_less : Icons.expand_more,
-                  size: CusIconSizes.iconSmall,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-
-              //     TextButton(
-              //   onPressed: () {
-              //     setState(() {
-              //       _showAdvancedOptions = !_showAdvancedOptions;
-              //     });
-              //   },
-              //   child: Text(
-              //     _showAdvancedOptions
-              //         ? CusAL.of(context).lessLabel
-              //         : CusAL.of(context).moreLabel,
-              //     style: TextStyle(fontSize: 12.sp),
-              //   ),
-              // ),
-            ),
-            Expanded(
-              flex: 2,
-              child:
-                  // IconButton(
-                  //   onPressed: () {
-                  //     // todo 如果有高级查询条件被选择，但是被折叠了，点击重置是不会清除的。
-                  //     setState(() {
-                  //       _formKey.currentState!.reset();
-                  //       // 2023-12-12 不知道为什么，reset对下拉选中的没有效，所以手动清除
-                  //       _formKey.currentState?.fields['primary_muscles']
-                  //           ?.didChange(null);
-                  //       _formKey.currentState?.fields['level']?.didChange(null);
-                  //       _formKey.currentState?.fields['mechanic']?.didChange(null);
-                  //       _formKey.currentState?.fields['category']?.didChange(null);
-                  //       _formKey.currentState?.fields['equipment']?.didChange(null);
-                  //     });
-
-                  //     // 失去焦点
-                  //     FocusScope.of(context).requestFocus(FocusNode());
-                  //   },
-                  //   icon: Icon(Icons.settings_backup_restore, size: 16.sp),
-                  // ),
-
-                  TextButton(
-                onPressed: () {
-                  // todo 如果有高级查询条件被选择，但是被折叠了，点击重置是不会清除的。
-                  setState(() {
-                    _formKey.currentState!.reset();
-                    // 2023-12-12 不知道为什么，reset对下拉选中的没有效，所以手动清除
-                    _formKey.currentState?.fields['primary_muscles']
-                        ?.didChange(null);
-                    _formKey.currentState?.fields['level']?.didChange(null);
-                    _formKey.currentState?.fields['mechanic']?.didChange(null);
-                    _formKey.currentState?.fields['category']?.didChange(null);
-                    _formKey.currentState?.fields['equipment']?.didChange(null);
-                  });
-
-                  // 失去焦点
-                  FocusScope.of(context).requestFocus(FocusNode());
-                },
-                child: Text(
-                  CusAL.of(context).resetLabel,
-                  style: TextStyle(
-                    fontSize: CusFontSizes.itemContent,
-                    color: Theme.of(context).primaryColor,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  flex: 3,
+                  // FormBuilderDropdown需要指定外部容器大小，或者放在类似expanded中自动扩展
+                  child: cusFormBuilerDropdown(
+                    "primary_muscles",
+                    musclesOptions,
+                    labelText: CusAL.of(context).exerciseQuerys("0"),
+                    hintStyle: TextStyle(
+                      fontSize: CusFontSizes.searchInputLarge,
+                    ),
+                    isOutline: true,
+                    optionFontSize: CusFontSizes.searchInputLarge,
                   ),
                 ),
-              ),
+                Expanded(
+                  child: Padding(
+                    // 因为下拉框两侧有空10,所以整体的row左侧有空10,所以右侧填充一个10
+                    padding: EdgeInsets.only(right: 10.sp),
+                    child: SizedBox(
+                      // height: 48.sp,
+                      child: ElevatedButton(
+                        onPressed: _submitForm,
+                        child: const Icon(Icons.search),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            Expanded(
-              flex: 2,
-              child: ElevatedButton(
-                onPressed: _submitForm,
-                child: const Icon(Icons.search),
-              ),
-              // IconButton(
-              //   onPressed: _submitForm,
-              //   icon: Icon(
-              //     Icons.search,
-              //     size: 32.sp,
-              //     color: Theme.of(context).primaryColor,
-              //   ),
-              // ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TextButton(
+                  onPressed: _showHintDialog,
+                  child: Text(
+                    CusAL.of(context).noteLabel,
+                    style: TextStyle(fontSize: CusFontSizes.pageAppendix),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _showAdvancedOptions = !_showAdvancedOptions;
+                    });
+                  },
+                  child: Text(
+                    _showAdvancedOptions
+                        ? CusAL.of(context).lessLabel
+                        : CusAL.of(context).moreLabel,
+                    style: TextStyle(fontSize: CusFontSizes.pageAppendix),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // todo 如果有高级查询条件被选择，但是被折叠了，点击重置是不会清除的。
+                    setState(() {
+                      _formKey.currentState!.reset();
+                      // 2023-12-12 不知道为什么，reset对下拉选中的没有效，所以手动清除
+                      _formKey.currentState?.fields['primary_muscles']
+                          ?.didChange(null);
+                      _formKey.currentState?.fields['level']?.didChange(null);
+                      _formKey.currentState?.fields['mechanic']
+                          ?.didChange(null);
+                      _formKey.currentState?.fields['category']
+                          ?.didChange(null);
+                      _formKey.currentState?.fields['equipment']
+                          ?.didChange(null);
+                    });
 
-              // ElevatedButton(
-              //   onPressed: _submitForm,
-              //   child: Text(CusAL.of(context).queryLabel),
-              // ),
+                    // 失去焦点
+                    unfocusHandle();
+                  },
+                  child: Text(
+                    CusAL.of(context).resetLabel,
+                    style: TextStyle(
+                      fontSize: CusFontSizes.itemContent,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+
+                // IconButton(
+                //   onPressed: _showHintDialog,
+                //   icon: Icon(
+                //     Icons.warning_amber_rounded,
+                //     size: CusIconSizes.iconMedium,
+                //   ),
+                // ),
+                // IconButton(
+                //   onPressed: () {
+                //     setState(() {
+                //       _showAdvancedOptions = !_showAdvancedOptions;
+                //     });
+                //   },
+                //   icon: Icon(
+                //     _showAdvancedOptions
+                //         ? Icons.expand_less
+                //         : Icons.expand_more,
+                //     size: CusIconSizes.iconMedium,
+                //   ),
+                // ),
+                // IconButton(
+                //   onPressed: () {
+                //     // todo 如果有高级查询条件被选择，但是被折叠了，点击重置是不会清除的。
+                //     setState(() {
+                //       _formKey.currentState!.reset();
+                //       // 2023-12-12 不知道为什么，reset对下拉选中的没有效，所以手动清除
+                //       _formKey.currentState?.fields['primary_muscles']
+                //           ?.didChange(null);
+                //       _formKey.currentState?.fields['level']?.didChange(null);
+                //       _formKey.currentState?.fields['mechanic']
+                //           ?.didChange(null);
+                //       _formKey.currentState?.fields['category']
+                //           ?.didChange(null);
+                //       _formKey.currentState?.fields['equipment']
+                //           ?.didChange(null);
+                //     });
+
+                //     // 失去焦点
+                //     unfocusHandle();
+                //   },
+                //   icon: Icon(
+                //     Icons.refresh,
+                //     size: CusIconSizes.iconMedium,
+                //   ),
+                // ),
+              ],
             ),
           ],
         ),
@@ -194,7 +202,7 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
     return Card(
       elevation: 5.sp,
       child: Padding(
-        padding: EdgeInsets.all(10.sp),
+        padding: EdgeInsets.all(5.sp),
         child: Column(
           children: [
             // 更多查询条件

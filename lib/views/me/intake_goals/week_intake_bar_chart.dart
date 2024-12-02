@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -41,7 +39,7 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
         touchTooltipData: BarTouchTooltipData(
           getTooltipColor: (_) => Colors.blueGrey,
           tooltipHorizontalAlignment: FLHorizontalAlignment.center,
-          tooltipPadding: EdgeInsets.symmetric(horizontal: 5.sp, vertical: 8),
+          tooltipPadding: EdgeInsets.all(5.sp),
           // 提示框的最大宽度(默认120)
           maxContentWidth: 0.5.sw,
           // 提示框举例条状图顶部的距离(正数就是往上空，负数就是向下移动)
@@ -80,7 +78,7 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
             // 构建气泡框显示的内容
             return BarTooltipItem(
               '$weekDay\n',
-              TextStyle(fontSize: CusFontSizes.flagTiny),
+              TextStyle(fontSize: CusFontSizes.flagTiny, color: Colors.white),
               textAlign: TextAlign.left,
               children: <TextSpan>[
                 TextSpan(text: "$choStr\n"),
@@ -98,14 +96,14 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            reservedSize: 28,
+            reservedSize: 28.sp,
             getTitlesWidget: _bottomTitles,
           ),
         ),
         leftTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            reservedSize: 50, // 左侧刻度标签的宽度
+            reservedSize: 50.sp, // 左侧刻度标签的宽度
             getTitlesWidget: _leftTitles,
           ),
         ),

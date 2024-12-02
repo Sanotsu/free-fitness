@@ -50,7 +50,8 @@ class Exercise {
       'primary_muscles': primaryMuscles,
       'secondary_muscles': secondaryMuscles,
       'images': images,
-      'is_custom': isCustom,
+      // sqlite不支持bool类型，这个值是int类型
+      'is_custom': isCustom == true ? 1 : 0,
       'contributor': contributor,
       'gmt_create': gmtCreate,
       'gmt_modified': gmtModified,

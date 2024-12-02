@@ -120,7 +120,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   /// 处理点击了搜索按钮
   _handleSearch() {
     // 取消键盘输入框聚焦
-    FocusScope.of(context).unfocus();
+    unfocusHandle();
     setState(() {
       foodItems.clear();
       currentPage = 1;
@@ -146,6 +146,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
 
     List<FoodAndServingInfo> newData = temp.data as List<FoodAndServingInfo>;
 
+    if (!mounted) return;
     setState(() {
       foodItems.addAll(newData);
       currentPage++;
@@ -205,6 +206,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
     }
     List<DailyFoodItemWithFoodServing> result = uniqueObjects.values.toList();
 
+    if (!mounted) return;
     setState(() {
       dfiwfsList = result;
       // 要根据实际list的数量设置录每个列表项是否被选中
@@ -243,11 +245,11 @@ class _AddIntakeItemState extends State<AddIntakeItem>
     try {
       var rst = await _dietaryHelper.insertDailyFoodItemList(tempList);
 
+      if (!mounted) return;
       if (rst.isNotEmpty) {
-        if (!mounted) return;
-
         Navigator.of(context).pop(dropdownValue.enLabel);
       }
+
       setState(() {
         isRecentLoading = false;
       });
@@ -367,13 +369,6 @@ class _AddIntakeItemState extends State<AddIntakeItem>
           onPressed: _saveSelectedRecentListToDb,
           icon: const Icon(Icons.save),
         ),
-      // TextButton(
-      //   onPressed: _saveSelectedRecentListToDb,
-      //   child: Text(
-      //     CusAL.of(context).addLabel(""),
-      //     style: TextStyle(color: Theme.of(context).canvasColor),
-      //   ),
-      // ),
 
       /// 当tab是食物列表时，才显示增加食物的按钮
       if (isShowAddButton)
@@ -473,7 +468,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   ///
   buildSimpleFoodListTabView() {
     return Padding(
-      padding: EdgeInsets.all(8.sp),
+      padding: EdgeInsets.all(5.sp),
       child: Column(
         children: [
           /// 搜索区域
@@ -502,7 +497,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   /// 查询条件输入行
   _buildSearchRowArea() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 10.sp),
+      padding: EdgeInsets.symmetric(horizontal: 5.sp),
       child: Row(
         children: [
           Expanded(
@@ -534,7 +529,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
     var foodEnergy = (fistServingInfo.energy / constants.oneCalToKjRatio);
 
     return Card(
-      elevation: 2,
+      // elevation: 2.sp,
       child: ListTile(
         // 食物名称
         title: Text(

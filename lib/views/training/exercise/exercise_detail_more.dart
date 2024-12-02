@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -86,7 +84,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(16.0.sp),
+              padding: EdgeInsets.all(10.sp),
               child: Text(
                 CusAL.of(context).moreDetail,
                 style: TextStyle(fontSize: CusFontSizes.itemTitle),
@@ -103,14 +101,14 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
   buildTableData() {
     return [
       Padding(
-        padding: EdgeInsets.all(10.sp),
+        padding: EdgeInsets.all(5.sp),
         child: Table(
           // 设置表格边框
           border: TableBorder.all(color: Theme.of(context).primaryColor),
           // 设置每列的宽度占比
-          columnWidths: const {
-            0: FlexColumnWidth(1),
-            1: FlexColumnWidth(2),
+          columnWidths: {
+            0: FixedColumnWidth(110.sp),
+            1: const FlexColumnWidth(1),
           },
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           children: [
@@ -187,7 +185,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
     return TableRow(
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.sp),
+          padding: EdgeInsets.symmetric(horizontal: 5.sp),
           child: Text(
             label,
             style: TextStyle(
@@ -197,11 +195,11 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
           ),
         ),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.sp),
+          padding: EdgeInsets.symmetric(horizontal: 5.sp),
           child: Text(
             value,
             style: TextStyle(
-              fontSize: CusFontSizes.pageSubContent,
+              fontSize: CusFontSizes.pageContent,
               color: Theme.of(context).disabledColor,
             ),
             textAlign: TextAlign.left,

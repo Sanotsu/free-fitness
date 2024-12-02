@@ -13,8 +13,9 @@ import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 
-/// 基础活动变更表单（希望新增、修改可通用）
+/// 基础活动变更表单
 class ExerciseModify extends StatefulWidget {
+  // 有传数据是修改，没有则是新增
   final Exercise? item;
 
   const ExerciseModify({super.key, this.item});
@@ -45,27 +46,25 @@ class _ExerciseModifyState extends State<ExerciseModify> {
   void initState() {
     super.initState();
 
-    setState(() {
-      if (widget.item != null) {
-        updateTarget = widget.item;
-        // 有图片地址，显示图片
-        if (updateTarget?.images != null && updateTarget?.images != "") {
-          exerciseImages = convertStringToPlatformFiles(updateTarget!.images!);
-        }
-        // 有主要肌肉，显示主要肌肉
-        if (updateTarget?.primaryMuscles != null &&
-            updateTarget?.primaryMuscles != "") {
-          selectedPrimaryMuscles =
-              _genSelectedMuscleOptions(updateTarget?.primaryMuscles);
-        }
-        // 有次要肌肉，显示次要肌肉
-        if (updateTarget?.secondaryMuscles != null &&
-            updateTarget?.secondaryMuscles != "") {
-          selectedSecondaryMuscles =
-              _genSelectedMuscleOptions(updateTarget?.secondaryMuscles);
-        }
+    if (widget.item != null) {
+      updateTarget = widget.item;
+      // 有图片地址，显示图片
+      if (updateTarget?.images != null && updateTarget?.images != "") {
+        exerciseImages = convertStringToPlatformFiles(updateTarget!.images!);
       }
-    });
+      // 有主要肌肉，显示主要肌肉
+      if (updateTarget?.primaryMuscles != null &&
+          updateTarget?.primaryMuscles != "") {
+        selectedPrimaryMuscles =
+            _genSelectedMuscleOptions(updateTarget?.primaryMuscles);
+      }
+      // 有次要肌肉，显示次要肌肉
+      if (updateTarget?.secondaryMuscles != null &&
+          updateTarget?.secondaryMuscles != "") {
+        selectedSecondaryMuscles =
+            _genSelectedMuscleOptions(updateTarget?.secondaryMuscles);
+      }
+    }
   }
 
   // 根据数据库拼接的字符串值转回对应选项
@@ -107,7 +106,7 @@ class _ExerciseModifyState extends State<ExerciseModify> {
         equipment: temp?.fields['equipment']?.value,
         countingMode: temp?.fields['counting_mode']?.value,
         standardDuration:
-            int.tryParse(temp?.fields['standard_duration']?.value) ?? 1,
+            int.tryParse(temp?.fields['standard_duration']?.value ?? "1") ?? 1,
         instructions: temp?.fields['instructions']?.value,
         ttsNotes: temp?.fields['tts_notes']?.value,
         category: temp?.fields['category']?.value,
@@ -168,35 +167,21 @@ class _ExerciseModifyState extends State<ExerciseModify> {
 
   @override
   Widget build(BuildContext context) {
-    // 只能接收一个子组件滚动组件
     return Scaffold(
       appBar: AppBar(
         title: Text(
           "${updateTarget != null ? CusAL.of(context).eidtLabel('') : CusAL.of(context).addLabel('')}${CusAL.of(context).exerciseLabel}",
           style: TextStyle(fontSize: CusFontSizes.pageTitle),
         ),
-        elevation: 0,
         actions: [
           IconButton(onPressed: _saveNewExercise, icon: const Icon(Icons.save))
-          // TextButton(
-          //   onPressed: _saveNewExercise,
-          //   child: Text(
-          //     CusAL.of(context).saveLabel,
-          //     style: TextStyle(
-          //       color: Theme.of(context).primaryColor,
-          //     ),
-          //   ),
-          // )
         ],
       ),
-      body: Card(
-        elevation: 10.sp,
-        child: Padding(
-          padding: EdgeInsets.all(10.sp),
-          child: SingleChildScrollView(
-            // 创建表单
-            child: _buildFormBuilder(),
-          ),
+      body: Padding(
+        padding: EdgeInsets.symmetric(vertical: 10.sp),
+        child: SingleChildScrollView(
+          // 创建表单
+          child: _buildFormBuilder(),
         ),
       ),
     );

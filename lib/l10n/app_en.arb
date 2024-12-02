@@ -152,7 +152,7 @@
   "description": "训练跟练页面相关栏位"
   },
 
-
+  "noTtsEngine":"No available TTS engine",
   "followTtsLabel": "{num, select, 0{Ready, the next action is } 1{It's half the time.} 2{Start} 3{Congratulations,the workout is over.} 4{Take a break, the next action} other{其他} }",
   "@followTtsLabel": {
   "description": "训练跟练页面tts相关文字"
@@ -185,6 +185,7 @@
 
 
   "dayNumber":"Day {number}",
+  "dayCount":"total {number} day(s)",
   "incompleteLabel":"Never Completed",
 
 
@@ -351,6 +352,7 @@
 
   "switchUser":"Switch User",
 
+  "noteLabel":"note",
   "tipLabel":"Notification",
   "itemLabel":"{num} item(s)",
 
@@ -396,7 +398,8 @@
   "settingLabels": "{ setting, select, 0{Basic Info} 1{Weight Trend} 2{Intake Goal} 3{Training Setting} 4{Backup & Restore} 5{More Settings} other{Unknown Setting} }",
   
   "exportRangeNote":"Select export range",
-
+ 
+  "importJsonButtons": "{ num, select, 0{Select Json} 1{Clear Data} other{Unknown Setting} }",
   "importJsonError":"Import json file error",
   "importJsonErrorText":"Filename:\n{path}\n\nError:\n{msg}",
 

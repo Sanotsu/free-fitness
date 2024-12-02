@@ -1,8 +1,5 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:logger/logger.dart';
 
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
@@ -18,8 +15,8 @@ import 'action_follow_practice.dart';
 import 'simple_exercise_list.dart';
 
 class ActionList extends StatefulWidget {
-  // 从已存在的训练进入action list，会带上group信息去查询已存在的action list
-  // 2023-12-04 如果是从计划页面跳转过来，就需要带上计划的编号已经训练日信息
+  // 从已存在的训练(workout)进入action list，会带上group信息去查询已存在的action list
+  // 2023-12-04 如果是从计划(plan)页面跳转过来，就还需要额外带上计划的编号以及训练日信息
   final TrainingGroup groupItem;
   final TrainingPlan? planItem;
   final int? dayNumber;
@@ -36,8 +33,6 @@ class ActionList extends StatefulWidget {
 }
 
 class _ActionListState extends State<ActionList> {
-  var log = Logger();
-
   final DBTrainingHelper _dbHelper = DBTrainingHelper();
 
   // 这里不使用TrainingAction 是因为actionDetail有更多信息可以直接显示
@@ -72,6 +67,7 @@ class _ActionListState extends State<ActionList> {
     );
 
     // 设置查询结果
+    if (!mounted) return;
     setState(() {
       // ？？？因为没有分页查询，所有这里直接替换已有的数组
       actionList = tempGWA.isNotEmpty ? tempGWA[0].actionDetailList : [];
@@ -102,6 +98,7 @@ class _ActionListState extends State<ActionList> {
   // 点击了顶部保存按钮，把新的动作列表存入数据库，并更新动作列表页面
   void _onSavePressed() async {
     await _saveActionList();
+    if (!mounted) return;
     setState(() {
       _isEditing = false;
     });
@@ -151,10 +148,11 @@ class _ActionListState extends State<ActionList> {
       onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) return;
         // ？？？这下面好像没生效，但返回上一层的逻辑又是正确的
-        // (修改中点击返回按钮变为非修改中；非修改中点击返回则返回尚义页)
+        // (修改中点击返回按钮变为非修改中；非修改中点击返回则返回上一页)
         if (_isEditing) {
           // 取消时数据恢复原本的内容
           await _getActionListByGroupId();
+          if (!mounted) return;
           setState(() {
             _isEditing = !_isEditing;
           });
@@ -171,8 +169,9 @@ class _ActionListState extends State<ActionList> {
             text: TextSpan(
               children: [
                 TextSpan(
-                    text: widget.groupItem.groupName,
-                    style: TextStyle(fontSize: CusFontSizes.pageTitle)),
+                  text: widget.groupItem.groupName,
+                  style: TextStyle(fontSize: CusFontSizes.pageTitle),
+                ),
                 TextSpan(
                   text:
                       "\n${CusAL.of(context).actionLabel('1')}: ${CusAL.of(context).itemCount(actionList.length)}",
@@ -188,6 +187,7 @@ class _ActionListState extends State<ActionList> {
               if (_isEditing) {
                 // 取消时数据恢复原本的内容
                 await _getActionListByGroupId();
+                if (!mounted) return;
                 setState(() {
                   _isEditing = !_isEditing;
                 });
@@ -207,6 +207,7 @@ class _ActionListState extends State<ActionList> {
                       onPressed: () async {
                         // 取消时数据恢复原本的内容
                         await _getActionListByGroupId();
+                        if (!mounted) return;
                         setState(() {
                           _isEditing = !_isEditing;
                         });
@@ -222,9 +223,7 @@ class _ActionListState extends State<ActionList> {
             ? buildLoader(isLoading)
             : Column(
                 children: [
-                  Expanded(
-                    child: _buildReorderableList(),
-                  ),
+                  Expanded(child: _buildReorderableList()),
                   // 避免修改时新增按钮遮住最后一条列表
                   if (_isEditing) SizedBox(height: 80.sp),
                 ],
@@ -261,6 +260,7 @@ class _ActionListState extends State<ActionList> {
                             borderRadius: BorderRadius.circular(20.sp), // 设置圆角
                           ),
                           backgroundColor: Colors.green,
+                          // backgroundColor: Theme.of(context).primaryColor,
                         ),
                         child: Text(
                           CusAL.of(context).startLabel,
@@ -319,7 +319,7 @@ class _ActionListState extends State<ActionList> {
                 : [];
 
         return Card(
-          elevation: 3,
+          elevation: 2.sp,
           key: Key('$index'),
           child: InkWell(
             onTap: () {

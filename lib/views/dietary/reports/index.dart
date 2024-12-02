@@ -53,9 +53,7 @@ class _DietaryReportsState extends State<DietaryReports> {
   void initState() {
     super.initState();
 
-    setState(() {
-      _queryDailyFoodItemList();
-    });
+    _queryDailyFoodItemList();
   }
 
   /// 通过下拉按钮获取统计的范围日期
@@ -127,6 +125,7 @@ class _DietaryReportsState extends State<DietaryReports> {
         .where((e) => e.dayOfWeek == DateTime.now().weekday.toString())
         .toList();
 
+    if (!mounted) return;
     setState(() {
       // 如果有对应的星期几的摄入目标，则使用该值
       if (dailyGoal.isNotEmpty) {
@@ -290,6 +289,8 @@ class _DietaryReportsState extends State<DietaryReports> {
 
         /// 食物摄入条目统计卡片(类型为name表示食物摄入次数)
         _buildDataTableCard(dfiwfsList, CusChartType.calory),
+
+        SizedBox(height: 20.sp),
       ],
     );
   }
@@ -362,6 +363,8 @@ class _DietaryReportsState extends State<DietaryReports> {
 
         /// 食物摄入宏量统计卡片
         _buildDataTableCard(dfiwfsList, CusChartType.macro),
+
+        SizedBox(height: 20.sp),
       ],
     );
   }
@@ -383,24 +386,27 @@ class _DietaryReportsState extends State<DietaryReports> {
       }
     }
 
-    return DataTable(
-      columns: [
-        DataColumn(
-          label: Text(
-            CusAL.of(context).dietaryReportTabs('2'),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+    return Card(
+      elevation: 5.sp,
+      child: DataTable(
+        columns: [
+          DataColumn(
+            label: Text(
+              CusAL.of(context).dietaryReportTabs('2'),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
-        ),
-        DataColumn(
-          label: Text(
-            CusAL.of(context).eatableSize,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+          DataColumn(
+            label: Text(
+              CusAL.of(context).eatableSize,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            numeric: true,
           ),
-          numeric: true,
-        ),
-        // DataColumn(label: Text('目标量'), numeric: true),
-      ],
-      rows: rows,
+          // DataColumn(label: Text('目标量'), numeric: true),
+        ],
+        rows: rows,
+      ),
     );
   }
 
@@ -428,7 +434,7 @@ class _DietaryReportsState extends State<DietaryReports> {
   /// 绘制卡路里摄入或宏量素摄入的【饼图卡片】(包含图例legend和图chart两部分)
   _buildPieChartCard(FoodNutrientTotals fntVO, CusChartType type) {
     return Card(
-      elevation: 10.sp,
+      elevation: 5.sp,
       child: SizedBox(
         height: 200.sp,
         child: Column(
@@ -661,7 +667,7 @@ class _DietaryReportsState extends State<DietaryReports> {
 
     // 绘制整体柱状图表
     return Card(
-      elevation: 10,
+      elevation: 5.sp,
       child: SizedBox(
         child: Column(
           children: [
@@ -787,7 +793,7 @@ class _DietaryReportsState extends State<DietaryReports> {
     ));
 
     return Card(
-      elevation: 10,
+      elevation: 5.sp,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -805,7 +811,7 @@ class _DietaryReportsState extends State<DietaryReports> {
             child: FittedBox(
               // 使用FittedBox来自动调整宽度
               child: DataTable(
-                columnSpacing: 10.0,
+                columnSpacing: 10.sp,
                 columns: type == CusChartType.calory
                     ? [
                         DataColumn(label: Text(CusAL.of(context).foodName)),

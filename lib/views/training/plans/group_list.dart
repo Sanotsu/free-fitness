@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/views/training/workouts/action_list.dart';
@@ -19,8 +17,6 @@ import '../workouts/index.dart';
 ///   这个是指定plan 的内容，后者是所有的训练数据；
 ///   在这个知道plan中新增训练，就需要跳转到后者列表去选择指定的训练，再带回来进行新增。
 ///   这里删除某个训练只是从plan中移除某一个训练，后者删除某个训练就是直接从数据库删除了。
-///
-///
 ///
 class GroupList extends StatefulWidget {
 //  从已存在的计划进入group list，会带上plan信息去查询已存在的group list
@@ -55,10 +51,8 @@ class _GroupListState extends State<GroupList> {
   void initState() {
     super.initState();
 
-    setState(() {
-      planItem = widget.planItem;
-      _getGroupListByPlanId();
-    });
+    planItem = widget.planItem;
+    _getGroupListByPlanId();
   }
 
   // 查询指定训练中的动作列表
@@ -81,8 +75,7 @@ class _GroupListState extends State<GroupList> {
     var tempLog =
         await _dbHelper.queryLastTrainingDetailLogByPlanName(planItem);
 
-    print("动作组的跟练日志$tempLog");
-
+    if (!mounted) return;
     // 设置查询结果
     setState(() {
       // 因为没有分页查询，所有这里直接替换已有的数组
@@ -121,6 +114,8 @@ class _GroupListState extends State<GroupList> {
       await _getGroupListByPlanId();
       // 虽然更新了plan，则重新获取最新的plan
       var plans = await _dbHelper.queryTrainingPlanById(planItem.planId!);
+
+      if (!mounted) return;
       if (plans.isNotEmpty) {
         setState(() {
           planItem = plans.first;
@@ -171,6 +166,7 @@ class _GroupListState extends State<GroupList> {
         if (_isEditing) {
           // 取消时数据恢复原本的内容
           await _getGroupListByPlanId();
+          if (!mounted) return;
           setState(() {
             _isEditing = !_isEditing;
           });
@@ -202,6 +198,7 @@ class _GroupListState extends State<GroupList> {
               if (_isEditing) {
                 // 取消时数据恢复原本的内容
                 await _getGroupListByPlanId();
+                if (!mounted) return;
                 setState(() {
                   _isEditing = !_isEditing;
                 });
@@ -213,25 +210,47 @@ class _GroupListState extends State<GroupList> {
           ),
           // 2023-12-04 因为有跟练日志之后再修改计划的内容可能会导致日志查不到对应的基础表数据
           // 所以暂时有跟练的计划不让修改内容(理论上对应的action list也不允许再改了)
-          actions: (logMap.values.where((value) => value != null).isNotEmpty)
-              ? null
-              : <Widget>[
-                  if (_isEditing)
-                    IconButton(
-                      icon: const Icon(Icons.cancel_outlined),
-                      onPressed: () async {
-                        // 取消时数据恢复原本的内容
-                        await _getGroupListByPlanId();
-                        setState(() {
-                          _isEditing = !_isEditing;
-                        });
-                      },
-                    ),
-                  IconButton(
-                    icon: Icon(_isEditing ? Icons.done : Icons.edit),
-                    onPressed: _isEditing ? _onSavePressed : _onEditPressed,
-                  ),
-                ],
+          actions: [
+            // 没有训练日志的训练才可修改
+            if (!(logMap.values
+                .where((value) => value != null)
+                .isNotEmpty)) ...[
+              // 如果已经在修改中，显示取消修改按钮
+              if (_isEditing)
+                IconButton(
+                  icon: const Icon(Icons.cancel_outlined),
+                  onPressed: () async {
+                    // 取消时数据恢复原本的内容
+                    await _getGroupListByPlanId();
+                    if (!mounted) return;
+                    setState(() {
+                      _isEditing = !_isEditing;
+                    });
+                  },
+                ),
+              IconButton(
+                icon: Icon(_isEditing ? Icons.done : Icons.edit),
+                onPressed: _isEditing ? _onSavePressed : _onEditPressed,
+              ),
+            ],
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              onPressed: () {
+                var content = """
+- ${planItem.planCode}
+- ${getCusLabelText(planItem.planCategory, categoryOptions)} 
+- ${getCusLabelText(planItem.planLevel, levelOptions)} 
+- ${CusAL.of(context).dayCount(planItem.planPeriod)}
+- ${planItem.description}
+""";
+                commonMDHintModalBottomSheet(
+                  context,
+                  planItem.planName,
+                  content,
+                );
+              },
+            ),
+          ],
         ),
         body: isLoading
             ? buildLoader(isLoading)
@@ -245,7 +264,7 @@ class _GroupListState extends State<GroupList> {
                       itemBuilder: (context, index) {
                         return Card(
                           key: Key('$index'),
-                          elevation: 3,
+                          elevation: 2.sp,
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
@@ -274,11 +293,13 @@ class _GroupListState extends State<GroupList> {
                       ),
                     ),
                   ).then((value) {
-                    // 这里正常返回值的话，一定是一个GroupWithActions类型的 groupItem，
-                    // 存入group列表尾部就好了
-                    setState(() {
-                      groupList.add(value);
-                    });
+                    // 这里正常返回值的话，一定是一个GroupWithActions类型的 groupItem， 存入group列表尾部就好了
+                    // 2024-11-15 注意，存在今日 workout 列表但是没有点选，直接返回的，value就为空
+                    if (value != null) {
+                      setState(() {
+                        groupList.add(value);
+                      });
+                    }
                   });
                 },
                 child: const Icon(Icons.add),
@@ -292,7 +313,6 @@ class _GroupListState extends State<GroupList> {
 
   // 构建训练条目瓦片
   _buildGroupItemListTile(List<GroupWithActions> groupList, int index) {
-    // actionDetailItem
     GroupWithActions gwaItem = groupList[index];
     TrainingGroup groupItem = gwaItem.group;
 

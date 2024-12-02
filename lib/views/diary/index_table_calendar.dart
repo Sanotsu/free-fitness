@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -75,6 +73,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
       endDate: endDate,
     );
 
+    if (!mounted) return;
     setState(() {
       diaryList = temp;
       // 初始化时设定当前选中的日期就是聚焦的日期
@@ -110,7 +109,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
 
   // 当某个日期被长按可以新增备注？？？
   _onDayLongPressed(DateTime selectedDay, DateTime focusedDay) {
-    print("日期被长按了---$selectedDay --$focusedDay");
+    debugPrint("日期被长按了---$selectedDay --$focusedDay");
   }
 
   // 当日期范围被选中时
@@ -159,7 +158,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
             ),
             child: Text(CusAL.of(context).diaryLables("1")),
           ),
-          TextButton.icon(
+          IconButton(
             onPressed: () {
               Navigator.push(
                 context,
@@ -176,7 +175,6 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                 _queryDairyList(_focusedDay);
               });
             },
-            label: Text(CusAL.of(context).addLabel("")),
             icon: const Icon(Icons.add),
             style: ButtonStyle(
               foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
@@ -298,7 +296,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
         var chipLength = initTags.length + initMoods.length + 1;
 
         return Card(
-          elevation: 3,
+          elevation: 2.sp,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,

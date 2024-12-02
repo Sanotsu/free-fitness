@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -26,8 +24,8 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
   // 应用程序的根部件
   @override
   Widget build(BuildContext context) {
-    print("getUserId---${box.read(LocalStorageKey.userId)}");
-    print("language mode---${box.read('language')} ${box.read('mode')}");
+    debugPrint("getUserId--${box.read(LocalStorageKey.userId)}");
+    debugPrint("language--${box.read('language')}; mode--${box.read('mode')}");
 
     return ScreenUtilInit(
       designSize: const Size(360, 640), // 1080p / 3 ,单位dp

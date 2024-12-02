@@ -160,6 +160,7 @@
     "description": "训练跟练页面相关栏位"
     },
 
+    "noTtsEngine":"无可用TTS引擎",
     "followTtsLabel": "{num, select, 0{预备开始，下一个动作：} 1{一半时间了} 2{开始} 3{祝贺，锻炼已结束} 4{休息一下，下一个动作：} other{其他} }",
     "@followTtsLabel": {
     "description": "训练跟练页面tts相关文字，不会显示，但语音会用到"
@@ -190,6 +191,7 @@
     },
 
     "dayNumber":"第 {number} 天",
+    "dayCount":"共 {number} 天",
     "incompleteLabel":"从未跟练",
 
 
@@ -361,7 +363,7 @@
 
 
     
-
+    "noteLabel":"提示",
     "tipLabel":"提示",
     "itemLabel":"{num} 项",
   
@@ -402,6 +404,7 @@
 
     "exportRangeNote":"选择导出范围",
 
+    "importJsonButtons": "{ num, select, 0{选择文件} 1{清空数据} other{未知设置} }",
     "importJsonError":"导入json文件出错",
     "importJsonErrorText":"文件名称:\n{path}\n\n错误信息:\n{msg}",
 

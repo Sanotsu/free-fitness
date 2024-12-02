@@ -1,9 +1,6 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:logger/logger.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../../common/global/constants.dart';
@@ -23,9 +20,6 @@ class TrainingReports extends StatefulWidget {
 }
 
 class _TrainingReportsState extends State<TrainingReports> {
-  // 过长的字符串无法打印显示完，默认的developer库的log有时候没效果
-  var log = Logger();
-
   // 数据是否加载中
   bool isLoading = false;
 
@@ -60,9 +54,7 @@ class _TrainingReportsState extends State<TrainingReports> {
 
     _getEventsForInitDay();
 
-    setState(() {
-      initialIndex = 1;
-    });
+    initialIndex = 1;
   }
 
   ///
@@ -83,6 +75,7 @@ class _TrainingReportsState extends State<TrainingReports> {
       gmtCreateSort: "DESC",
     );
 
+    if (!mounted) return;
     setState(() {
       tdlList = list;
       // 初始化时设定当前选中的日期就是聚焦的日期
@@ -106,13 +99,13 @@ class _TrainingReportsState extends State<TrainingReports> {
 
   // 当某一天被选中时的回调
   _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    print("某天被选中--------$selectedDay $focusedDay");
+    debugPrint("某天被选中--------$selectedDay $focusedDay");
 
     if (!isSameDay(_selectedDay, selectedDay)) {
       setState(() {
         _selectedDay = selectedDay;
         _focusedDay = focusedDay;
-        // 如果当前点击的日期就是已经被选中的日期，日期范围也得情况
+        // 如果当前点击的日期就是已经被选中的日期，日期范围也得清空
         _rangeStart = null;
         _rangeEnd = null;
         _rangeSelectionMode = RangeSelectionMode.toggledOff;
@@ -124,13 +117,13 @@ class _TrainingReportsState extends State<TrainingReports> {
 
   // 当某个日期被长按
   _onDayLongPressed(DateTime selectedDay, DateTime focusedDay) {
-    print("日期被长按了---$selectedDay --$focusedDay");
+    debugPrint("日期被长按了---$selectedDay --$focusedDay");
     // 长按某一天，可以新增备注？？？
   }
 
   // 当日期范围被选中时
   _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
-    print("日期被_onRangeSelected了---$start --$end $focusedDay");
+    debugPrint("日期被_onRangeSelected了---$start --$end $focusedDay");
 
     setState(() {
       _selectedDay = null;
@@ -259,6 +252,9 @@ class _TrainingReportsState extends State<TrainingReports> {
     );
   }
 
+  ///
+  /// 绘制训练统计的tab
+  ///
   buildReportsView() {
     // 统计的是所有的运动次数和总的运动时间
     return FutureBuilder(
@@ -283,7 +279,7 @@ class _TrainingReportsState extends State<TrainingReports> {
             );
           }
 
-          // TrainedDetailLog-->tlwgb
+          // TrainedDetailLog-->tdl
           // 计算所有训练日志的累加时间
           int totalRest =
               data.fold(0, (prevVal, tdl) => prevVal + tdl.totalRestTime);
@@ -295,6 +291,7 @@ class _TrainingReportsState extends State<TrainingReports> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              /// 总训练次数
               SizedBox(height: 10.sp),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -322,6 +319,8 @@ class _TrainingReportsState extends State<TrainingReports> {
                   ),
                 ],
               ),
+
+              /// 总训练时长
               SizedBox(height: 10.sp),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -384,6 +383,8 @@ class _TrainingReportsState extends State<TrainingReports> {
                   ),
                 ],
               ),
+
+              /// 上一次训练项目
               SizedBox(height: 10.sp),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -582,13 +583,8 @@ class _TrainingReportsState extends State<TrainingReports> {
                 var log = value[index];
 
                 return Card(
-                  elevation: 5,
-                  margin:
-                      EdgeInsets.symmetric(horizontal: 12.sp, vertical: 4.sp),
-                  child: Padding(
-                    padding: EdgeInsets.all(10.sp),
-                    child: _buildTrainedDetailLogListTile(log),
-                  ),
+                  elevation: 2.sp,
+                  child: _buildTrainedDetailLogListTile(log),
                 );
               },
             );
@@ -658,9 +654,9 @@ class _TrainingReportsState extends State<TrainingReports> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.fromLTRB(10.sp, 0, 10.sp, 10.sp),
+                    padding: EdgeInsets.only(bottom: 10.sp),
                     child: Card(
-                      elevation: 5,
+                      elevation: 5.sp,
                       child: ListView.builder(
                         // 和外层的滚动只保留一个
                         shrinkWrap: true,
@@ -673,7 +669,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               if (index != 0)
-                                Divider(height: 5.sp, thickness: 3.sp),
+                                Divider(height: 3.sp, thickness: 2.sp),
                               _buildTrainedDetailLogListTile(log),
                             ],
                           );

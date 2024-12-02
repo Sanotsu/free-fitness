@@ -31,7 +31,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
   // 整体卡路里宏量素表单全局key，用于验证表单
   final _macrosFormKey = GlobalKey<FormBuilderState>();
   Map<String, dynamic> initialMacrosMap = {};
-  // 能量卡里里等效千焦数
+  // 能量卡路里等效千焦数
   String equivalentKJdata = '';
 
   // 是否在修改每日卡路里和宏量素
@@ -61,19 +61,18 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
 
     // 初始化整体卡路里和营养素目标
     user = widget.userInfo;
-    setState(() {
-      // 给整体营养素目标设置初始值
-      // (注意key要和表单中name一致。因为是两个不同的表单，所以和每日营养素目标表单同名了也不影响)
-      initialMacrosMap = {
-        "calory": (user.rdaGoal ?? 0).toString(),
-        "carbs": cusDoubleTryToIntString(user.choGoal ?? 0),
-        "fat": cusDoubleTryToIntString(user.fatGoal ?? 0),
-        "protein": cusDoubleTryToIntString(user.proteinGoal ?? 0),
-      };
 
-      equivalentKJdata = caloryToKjStr(user.rdaGoal ?? 0);
-      _macrosFormKey.currentState?.patchValue(initialMacrosMap);
-    });
+    // 给整体营养素目标设置初始值
+    // (注意key要和表单中name一致。因为是两个不同的表单，所以和每日营养素目标表单同名了也不影响)
+    initialMacrosMap = {
+      "calory": (user.rdaGoal ?? 0).toString(),
+      "carbs": cusDoubleTryToIntString(user.choGoal ?? 0),
+      "fat": cusDoubleTryToIntString(user.fatGoal ?? 0),
+      "protein": cusDoubleTryToIntString(user.proteinGoal ?? 0),
+    };
+
+    equivalentKJdata = caloryToKjStr(user.rdaGoal ?? 0);
+    _macrosFormKey.currentState?.patchValue(initialMacrosMap);
 
     // 格式化处理每日卡路里和营养素目标
     formatDailyIntakeMap();
@@ -113,6 +112,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
       );
     }
 
+    if (!mounted) return;
     setState(() {
       intakeData = tempIntakes;
     });
@@ -161,9 +161,9 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
 
   buildWeekMacrosBarChartCard() {
     return Card(
-      elevation: 10,
+      elevation: 5.sp,
       child: Padding(
-        padding: EdgeInsets.all(16.sp),
+        padding: EdgeInsets.all(5.sp),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,9 +217,9 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
   /// 构建修改整体宏量素目标的卡片
   buildEditMacrosCard() {
     return Card(
-      elevation: 10,
+      elevation: 5.sp,
       child: Padding(
-        padding: EdgeInsets.all(16.sp),
+        padding: EdgeInsets.all(5.sp),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,7 +242,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                   Expanded(
                     flex: 2,
                     child: TextButton(
-                      onPressed: () async {
+                      onPressed: () {
                         setState(() {
                           _isEditing = !_isEditing;
                         });
@@ -272,6 +272,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                           await _userHelper.updateUser(user);
 
                           // 平均营养素目标修改后，也更新下方图表的值
+                          if (!mounted) return;
                           setState(() {
                             formatDailyIntakeMap();
                           });
@@ -387,9 +388,9 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
   /// 构建修改每日卡路里和宏量素目标的卡片
   buildEditWeekMacrosCard() {
     return Card(
-      elevation: 10,
+      elevation: 5.sp,
       child: Padding(
-        padding: EdgeInsets.all(16.sp),
+        padding: EdgeInsets.all(5.sp),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -475,7 +476,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                   Expanded(
                     flex: 2,
                     child: TextButton(
-                      onPressed: () async {
+                      onPressed: () {
                         setState(() {
                           _isWeekdayEditing = !_isWeekdayEditing;
                         });
@@ -562,6 +563,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
 
         await _userHelper.updateIntakeDailyGoalByUser([temp]);
         // 修改了数据库，也修改对应显示内容
+        if (!mounted) return;
         setState(() {
           intakeData[selectedDay] = newData;
 

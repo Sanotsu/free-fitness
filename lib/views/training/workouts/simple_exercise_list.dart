@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -79,8 +77,6 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
       isLoading = true;
     });
 
-    print("查询数据中的条件$conditionMap");
-
     // 查询结果是个动态的list和该表的总数据，使用list要转型
     CusDataResult temp;
     if (conditionMap.isEmpty) {
@@ -104,8 +100,8 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
     List<Exercise> newData = temp.data as List<Exercise>;
 
     // 如果没有更多数据，则在底部显示回弹一下
+    if (!mounted) return;
     if (newData.isEmpty) {
-      if (!mounted) return;
       scrollController.animateTo(
         scrollController.position.pixels, // 回弹的距离
         duration: const Duration(milliseconds: 1000), // 动画持续300毫秒
@@ -197,7 +193,7 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
                           _loadData();
                         });
                         // 如果有键盘就收起键盘
-                        FocusScope.of(context).focusedChild?.unfocus();
+                        unfocusHandle();
                       },
                       child: Text(
                         CusAL.of(context).resetLabel,
@@ -250,7 +246,7 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
                 });
               }
               // 如果有键盘就收起键盘
-              FocusScope.of(context).focusedChild?.unfocus();
+              unfocusHandle();
             },
           ),
         )
@@ -274,55 +270,55 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
                   : [];
 
           return Card(
-            elevation: 10,
+            elevation: 2.sp,
             child: GestureDetector(
               onTap: () {
                 // 在这里添加你想要执行的点击事件逻辑
                 Navigator.pop(context, exerciseItem);
               },
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: Icon(
-                      Icons.add_circle_outline,
-                      color: Theme.of(context).primaryColor,
+              child: SizedBox(
+                height: 80.sp,
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Icon(
+                        Icons.add_circle_outline,
+                        color: Theme.of(context).primaryColor,
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 9,
-                    child: ListTile(
-                      title: Text(
-                        "${index + 1}-${exerciseItem.exerciseName}",
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 2,
-                        style: TextStyle(
-                          fontSize: CusFontSizes.itemTitle,
-                          fontWeight: FontWeight.bold,
+                    Expanded(
+                      flex: 9,
+                      child: ListTile(
+                        title: Text(
+                          "${index + 1}-${exerciseItem.exerciseName}",
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                          style: TextStyle(
+                            fontSize: CusFontSizes.itemTitle,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: Text(
+                          '${getCusLabelText(
+                            exerciseItem.countingMode,
+                            countingOptions,
+                          )} ${getCusLabelText(
+                            exerciseItem.level ?? '',
+                            levelOptions,
+                          )}',
                         ),
                       ),
-                      subtitle: Text(
-                        '${getCusLabelText(
-                          exerciseItem.countingMode,
-                          countingOptions,
-                        )} ${getCusLabelText(
-                          exerciseItem.level ?? '',
-                          levelOptions,
-                        )}',
-                      ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 6,
-                    child: SizedBox(
-                      height: 80.sp,
+                    Expanded(
+                      flex: 6,
                       child: Padding(
                         padding: EdgeInsets.all(5.sp),
                         child: buildImageCarouselSlider(imageList),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );

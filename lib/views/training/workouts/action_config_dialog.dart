@@ -35,59 +35,23 @@ void showConfigDialog(
   // 其他需要输入的例如器械重量、action名称、描述之类的
   final formKey = GlobalKey<FormBuilderState>();
 
-  // 底部的保存按钮区域(固定在底部靠上10)
-  Widget genBottomArea() {
-    return Center(
-      child: SizedBox(
-        width: 0.8.sw,
-        child: FloatingActionButton.extended(
-          onPressed: () {
-            // 点击保存按钮的逻辑
-            if (formKey.currentState!.saveAndValidate()) {
-              // 输入的是0或者0.0或者0.000类似物，这里转换完都是0
-              var tempWeight = double.tryParse(
-                formKey.currentState?.fields['equipment_weight']?.value,
-              );
-
-              // 是个对象，直接修改(直接复制的浅拷贝没意义)
-              ad.action.duration = timeInSeconds;
-              ad.action.frequency = count;
-              ad.action.equipmentWeight =
-                  (tempWeight == 0 || tempWeight == 0.0) ? null : tempWeight;
-
-              Navigator.pop(context);
-
-              // 调用回调函数并传递数据
-              onConfigurationDialogClosed(index, ad);
-            }
-          },
-          label: Text(
-            CusAL.of(context).saveLabel,
-            style: TextStyle(
-              fontSize: CusFontSizes.buttonMedium,
-              // color: Theme.of(context).primaryColor,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   // 顶部的关闭按钮和重置按钮
   List<Widget> genTopArea() {
-    // 关闭按钮
     return [
+      // 弹窗标题
       Positioned(
-        left: 20,
-        top: 10,
+        left: 20.sp,
+        top: 10.sp,
         child: Text(
           CusAL.of(context).actionConfigLabel('0'),
           style: TextStyle(fontSize: CusFontSizes.pageTitle),
         ),
       ),
+
+      // 关闭按钮
       Positioned(
-        right: 0,
-        top: 0,
+        right: 0.sp,
+        top: 0.sp,
         // 不要重置按钮了，就关闭再打开就好
         child: IconButton(
           icon: Icon(
@@ -186,7 +150,7 @@ void showConfigDialog(
                   children: [
                     // 图片部分
                     SizedBox(
-                      height: 200.0,
+                      height: 200.sp,
                       child: buildImageCarouselSlider(imageList),
                     ),
                   ],
@@ -203,7 +167,7 @@ void showConfigDialog(
                     SizedBox(
                       height: 300.sp,
                       child: Padding(
-                        padding: EdgeInsets.all(10.sp),
+                        padding: EdgeInsets.all(5.sp),
                         child: Container(
                           padding: EdgeInsets.only(bottom: 20.sp),
                           child: ListTile(
@@ -220,7 +184,7 @@ void showConfigDialog(
                             subtitle: SingleChildScrollView(
                               scrollDirection: Axis.vertical,
                               child: Text(
-                                ad.exercise.instructions ?? "",
+                                ad.exercise.instructions ?? '',
                                 overflow: TextOverflow.clip, // 设置文字溢出时的处理方式
                               ),
                             ),
@@ -229,13 +193,51 @@ void showConfigDialog(
                       ),
                     ),
                     // 预留空白避免被下方的保存按钮挡住说明文字，显示不全
-                    SizedBox(height: 60.sp)
+                    SizedBox(height: 120.sp)
                   ],
                 ),
               ],
             ),
           ), // 此处添加一个高度以便滑动
         ],
+      ),
+    );
+  }
+
+  // 底部的保存按钮区域(固定在底部靠上10)
+  Widget genBottomArea() {
+    return Center(
+      child: SizedBox(
+        width: 0.8.sw,
+        child: FloatingActionButton.extended(
+          onPressed: () {
+            // 点击保存按钮的逻辑
+            if (formKey.currentState!.saveAndValidate()) {
+              // 输入的是0或者0.0或者0.000类似物，这里转换完都是0
+              var tempWeight = double.tryParse(
+                formKey.currentState?.fields['equipment_weight']?.value,
+              );
+
+              // 是个对象，直接修改(直接复制的浅拷贝没意义)
+              ad.action.duration = timeInSeconds;
+              ad.action.frequency = count;
+              ad.action.equipmentWeight =
+                  (tempWeight == 0 || tempWeight == 0.0) ? null : tempWeight;
+
+              Navigator.pop(context);
+
+              // 调用回调函数并传递数据
+              onConfigurationDialogClosed(index, ad);
+            }
+          },
+          label: Text(
+            CusAL.of(context).saveLabel,
+            style: TextStyle(
+              fontSize: CusFontSizes.buttonMedium,
+              // color: Theme.of(context).primaryColor,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -259,7 +261,7 @@ void showConfigDialog(
             Positioned(
               left: 0,
               right: 0,
-              top: 50,
+              top: 50.sp,
               child: genConfigBody(),
             ),
 

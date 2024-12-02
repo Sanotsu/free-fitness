@@ -31,7 +31,7 @@ class Food {
       'category': category,
       'contributor': contributor,
       'gmt_create': gmtCreate,
-      "is_deleted": isDeleted,
+      "is_deleted": isDeleted == true ? 1 : 0,
     };
   }
 

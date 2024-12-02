@@ -189,6 +189,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
         tempDiary.gmtCreate = getCurrentDateTime();
         var newDiaryId = await _dbHelper.insertDiary(tempDiary);
 
+        if (!mounted) return;
         setState(() {
           initDiaryId = newDiaryId;
         });
@@ -200,6 +201,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
         await _dbHelper.updateDiary(tempDiary);
       }
 
+      if (!mounted) return;
       setState(() {
         isEditing = !isEditing;
         // 2024-07-06 现在编辑文本是否只读在控制器配置了，需要要先改是否修改，再修改控制器
@@ -333,12 +335,14 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
 
                     // 能查到结果，将其数据格式化显示
                     if (temp.isNotEmpty) {
+                      if (!mounted) return;
                       setState(() {
                         initFormatData(temp.first);
                       });
                     }
                   } else {
                     // ？？？如果是新增时的撤销，那就退出当前页面，还是清空已有数据但还是修改状态？？
+                    if (!mounted) return;
                     setState(() {
                       // 2023-11-27 暂时先清空已有数据，并保持编辑状态；再点击退出时才手动退出
                       resetInitData();
@@ -356,7 +360,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
           ],
         ),
         body: Scrollbar(
-          thickness: 10,
+          thickness: 10.sp,
           // 设置交互模式后，滚动条和手势滚动方向才一致
           interactive: true,
           radius: Radius.circular(5.sp),
@@ -391,7 +395,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
   // 标题和标签选择放在一个折叠栏中，方便修改正文时折叠起来能显示更多内容
   _buildTitleAndTags() {
     return Card(
-      elevation: 3,
+      elevation: 2.sp,
       child: ExpansionTile(
         title: buildTitleArea(),
         tilePadding: EdgeInsets.symmetric(horizontal: 5.sp),
@@ -435,7 +439,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
               // 预览时不显示边框
               border: isEditing
                   ? OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.sp),
                     )
                   : InputBorder.none,
               // 设置透明底色
@@ -461,7 +465,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
       if (!isEditing)
         // 这个更小
         Wrap(
-          spacing: 5,
+          spacing: 5.sp,
           children: [
             ...initTags.map((tag) {
               return buildSmallButtonTag(
@@ -544,7 +548,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             // 在编辑状态下才显示工具栏
             if (isEditing)
               Card(
-                elevation: 3,
+                elevation: 2.sp,
                 child: ExpansionTile(
                   title: Text(CusAL.of(context).richTextToolNote),
                   leading: const Icon(Icons.tag, color: Colors.green),
@@ -775,7 +779,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
               hintText: CusAL.of(context).diaryTagsNote,
               contentPadding: EdgeInsets.symmetric(vertical: 2.sp),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
+                borderRadius: BorderRadius.circular(10.sp),
               ),
               // 设置透明底色
               filled: true,

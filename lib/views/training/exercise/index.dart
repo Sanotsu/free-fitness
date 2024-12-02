@@ -1,13 +1,8 @@
-// ignore_for_file: avoid_print
-
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:free_fitness/models/cus_app_localizations.dart';
 import 'package:free_fitness/models/training_state.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/global/constants.dart';
@@ -42,8 +37,6 @@ class _TrainingExerciseState extends State<TrainingExercise> {
   ScrollController scrollController = ScrollController();
   // 查询条件
   Map<String, dynamic>? queryConditon;
-
-  late File file;
 
   @override
   void initState() {
@@ -94,10 +87,6 @@ class _TrainingExerciseState extends State<TrainingExercise> {
 
     CusDataResult temp = await _searchExercise();
     List<Exercise> newData = temp.data as List<Exercise>;
-
-    print("[[基础动作的洗洗脑]]---$newData");
-
-    print((await getExternalStorageDirectory()));
 
     // 如果没有更多数据，则在底部显示
     if (newData.isEmpty) {
@@ -154,11 +143,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
 
   // 定义查询表单点击确认的回调函数，参数为查询条件的值
   _handleQuery(Map<String, dynamic> query) {
-    // 处理查询条件的值
-    print(query); // 示例：打印查询条件的值
-
-    // 失焦
-    FocusScope.of(context).requestFocus(FocusNode());
+    unfocusHandle();
 
     // 有变动查询条件，则重新开始查询
     setState(() {
@@ -211,9 +196,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
             children: [
               TextSpan(
                 text: '${CusAL.of(context).exercise}\n',
-                style: TextStyle(
-                  fontSize: CusFontSizes.pageTitle,
-                ),
+                style: TextStyle(fontSize: CusFontSizes.pageTitle),
               ),
               TextSpan(
                 text: CusAL.of(context).itemCount(itemsCount),
@@ -265,7 +248,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                 itemCount: exerciseItems.length + 1,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 1,
-                  childAspectRatio: 3, // 主轴和纵轴的比例
+                  childAspectRatio: 3.6, // 主轴和纵轴的比例
                 ),
                 controller: scrollController,
                 itemBuilder: (context, index) {
@@ -366,6 +349,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
         : [];
 
     return Card(
+      elevation: 2.sp,
       child: InkWell(
         onTap: () {
           // 点击卡片，弹窗显示基础活动的基本信息
@@ -392,13 +376,12 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 0.4.sw,
-              height: 0.3.sh,
+            Expanded(
+              flex: 3,
               child: buildImageCarouselSlider(imageList),
             ),
             Expanded(
-              flex: 3,
+              flex: 5,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -409,7 +392,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                       style: TextStyle(
-                        fontSize: CusFontSizes.itemTitle,
+                        fontSize: CusFontSizes.itemSmallTitle,
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).primaryColor,
                       ),

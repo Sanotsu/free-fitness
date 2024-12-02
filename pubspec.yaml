@@ -73,8 +73,6 @@ dependencies:
   wakelock_plus: ^1.2.8
   # 数字选择器
   numberpicker: ^2.1.2
-  # 保存图片(Android9及其以下可能保存不了)
-  image_gallery_saver: ^2.0.3
   # 获取设备信息(和flutter_quill_extensions有冲突，所以没有使用到最新版本)
   device_info_plus: ^10.1.2
   # 创建和预览pdf
@@ -100,12 +98,17 @@ dependencies:
   pretty_dio_logger: ^1.4.0
   # 提示框
   flutter_easyloading: ^3.0.5
+  toastification: ^2.3.0
   # 查看网络状态
   connectivity_plus: ^6.1.0
   flutter_markdown: ^0.7.4+1
   uuid: ^4.5.1
   # 集合的一些工具方法
   collection: ^1.18.0 
+  # 将部件内容保存为截图(透明的png)
+  screenshot: ^3.0.0
+  # 压缩图片(比如把透明png压成白底jpg)
+  flutter_image_compress: ^2.3.0
 
 dev_dependencies:
   flutter_test:

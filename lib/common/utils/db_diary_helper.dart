@@ -141,8 +141,6 @@ class DBDiaryHelper {
 
       // 将JSON字符串写入临时文件
       await tempFile.writeAsString(jsonStr);
-
-      // print('表 $tableName 已成功导出到：$tempFilePath');
     }
   }
 
@@ -219,8 +217,6 @@ class DBDiaryHelper {
       // 查询每页指定数量的数据，但带上总条数
       return CusDataResult(data: list, total: totalCount ?? 0);
     } catch (e) {
-      print('Error at queryDiaryByKeyword: $e');
-      // ？？？抛出异常来触发回滚的方式是 sqflite 中常用的做法
       rethrow;
     }
   }
@@ -270,8 +266,6 @@ class DBDiaryHelper {
       // 查询每页指定数量的数据，但带上总条数
       return list;
     } catch (e) {
-      print('Error at queryDiaryByDateRange: $e');
-      // ？？？抛出异常来触发回滚的方式是 sqflite 中常用的做法
       rethrow;
     }
   }

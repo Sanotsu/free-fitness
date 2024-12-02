@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
 
 import '../dio_client/cus_http_client.dart';
@@ -10,7 +8,10 @@ import '../models/paid_llm/common_chat_model_spec.dart';
 import '_self_keys.dart';
 
 ///
-/// 这里都是用自己的账号,要付费的
+/// 这里 _self_keys 都是用自己的账号,要付费的
+/// final Map<ApiPlatform, String> cusAKMap = {
+///   ApiPlatform.lingyiwanwu: 'xxxxx',
+/// };
 ///
 
 /// 获取流式响应数据
@@ -20,8 +21,6 @@ Future<List<CCRespBody>> getChatResp(
   String? model,
 }) async {
   var body = CCReqBody(model: model, messages: messages);
-
-  var start = DateTime.now().millisecondsSinceEpoch;
 
   try {
     // 如果选择的平台不存在，抛错
@@ -50,13 +49,9 @@ Future<List<CCRespBody>> getChatResp(
       respData = json.decode(respData);
     }
 
-    var end = DateTime.now().millisecondsSinceEpoch;
-    print("CC 响应耗时: ${(end - start) / 1000} 秒");
-
     return [CCRespBody.fromJson(respData)];
   } on HttpException catch (e) {
     // 这里是拦截器抛出的http异常的处理
-    print("aaaaaaaaaaaaa ${e.runtimeType}---${e.msg}");
     return [
       CCRespBody(
         customReplyText: e.toString(),
@@ -65,7 +60,6 @@ Future<List<CCRespBody>> getChatResp(
     ];
   } catch (e) {
     // 这里是其他异常处理
-    print("bbbbbbbbbbbbbbbb ${e.runtimeType}---$e");
     // API请求报错，显示报错信息
     return [
       CCRespBody(

@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -53,14 +51,12 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   void initState() {
     super.initState();
 
-    setState(() {
-      fsInfo = widget.foodItem;
+    fsInfo = widget.foodItem;
 
-      // 更新需要构建的表格的长度和每条数据的可选中状态(初始状态是都未选中)
-      servingItemsNum = fsInfo.servingInfoList.length;
-      servingSelectedList =
-          List<bool>.generate(servingItemsNum, (int index) => false);
-    });
+    // 更新需要构建的表格的长度和每条数据的可选中状态(初始状态是都未选中)
+    servingItemsNum = fsInfo.servingInfoList.length;
+    servingSelectedList =
+        List<bool>.generate(servingItemsNum, (int index) => false);
   }
 
   //
@@ -71,6 +67,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
       widget.foodItem.food.foodId!,
     );
 
+    if (!mounted) return;
     if (newItem != null) {
       setState(() {
         fsInfo = newItem;
@@ -126,14 +123,17 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
             ...buildFoodTable(fsInfo),
 
             /// 展示所有单份的数据，不用实时根据摄入数量修改值
-            Text(
-              CusAL.of(context).foodNutrientInfo,
-              style: TextStyle(
-                fontSize: CusFontSizes.pageTitle,
-                fontWeight: FontWeight.bold,
-                color: Colors.green,
+            Padding(
+              padding: EdgeInsets.all(5.sp),
+              child: Text(
+                CusAL.of(context).foodNutrientInfo,
+                style: TextStyle(
+                  fontSize: CusFontSizes.pageTitle,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+                textAlign: TextAlign.left,
               ),
-              textAlign: TextAlign.left,
             ),
 
             /// 当有单份营养素被选中后，显示删除或修改(仅单个被选中时)按钮；默认即可新增
@@ -161,12 +161,12 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
               ),
             ),
 
-            SizedBox(height: 20.sp),
+            SizedBox(height: 10.sp),
             Card(
-              elevation: 5,
+              elevation: 2.sp,
               child: buildFoodServingDataTable(fsInfo),
             ),
-            SizedBox(height: 20.sp),
+            SizedBox(height: 10.sp),
           ],
         ),
       ),
@@ -204,6 +204,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
       if (value != null && value == true) {
         refreshFoodAndServing();
         // 如果食物相关数据被修改，则变动标识设为true
+        if (!mounted) return;
         setState(() {
           isModified = true;
         });
@@ -337,6 +338,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           if (value != null && value == true) {
             refreshFoodAndServing();
             // 如果食物相关数据被修改，则变动标识设为true
+            if (!mounted) return;
             setState(() {
               isModified = true;
             });
@@ -356,26 +358,29 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     }
 
     return [
-      Text(
-        CusAL.of(context).foodBasicInfo,
-        style: TextStyle(
-          fontSize: CusFontSizes.flagMedium,
-          fontWeight: FontWeight.bold,
-          color: Colors.green,
+      Padding(
+        padding: EdgeInsets.all(5.sp),
+        child: Text(
+          CusAL.of(context).foodBasicInfo,
+          style: TextStyle(
+            fontSize: CusFontSizes.flagMedium,
+            fontWeight: FontWeight.bold,
+            color: Colors.green,
+          ),
+          textAlign: TextAlign.start,
         ),
-        textAlign: TextAlign.start,
       ),
       Padding(
-        padding: EdgeInsets.all(10.sp),
+        padding: EdgeInsets.all(5.sp),
         child: Table(
           // 设置表格边框
           border: TableBorder.all(
             color: Theme.of(context).disabledColor,
           ),
           // 设置每列的宽度占比
-          columnWidths: const {
-            0: FlexColumnWidth(4),
-            1: FlexColumnWidth(9),
+          columnWidths: {
+            0: FixedColumnWidth(100.sp),
+            1: const FlexColumnWidth(1),
           },
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           children: [
@@ -403,7 +408,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
         ),
       ),
       buildImageCarouselSlider(imageList),
-      SizedBox(height: 20.sp),
+      SizedBox(height: 10.sp),
     ];
   }
 

@@ -36,9 +36,9 @@ class AppCatchError {
             .then((_) async {
           WidgetsFlutterBinding.ensureInitialized();
           await GetStorage.init();
-          // await GetStorage().write('language', 'en');
+          await GetStorage().write('language', 'en');
           // await GetStorage().write('language', 'cn');
-          await GetStorage().write('language', 'system');
+          // await GetStorage().write('language', 'system');
           // await GetStorage().write('mode', 'dark');
           // await GetStorage().write('mode', 'light');
           await GetStorage().write('mode', 'system');

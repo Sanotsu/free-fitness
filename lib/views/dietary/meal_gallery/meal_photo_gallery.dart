@@ -69,6 +69,7 @@ class _MealPhotoGalleryState extends State<MealPhotoGallery> {
       dateSort: "DESC",
     );
 
+    if (!mounted) return;
     setState(() {
       photoItems.addAll(temp);
       currentPage++;
@@ -113,7 +114,7 @@ class _MealPhotoGalleryState extends State<MealPhotoGallery> {
 
     if (photoList.isNotEmpty) {
       return Card(
-        elevation: 5,
+        elevation: 2.sp,
         child: Column(
           children: [
             SizedBox(height: 10.sp),

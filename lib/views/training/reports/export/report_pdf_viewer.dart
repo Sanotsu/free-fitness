@@ -60,6 +60,7 @@ class _TrainedReportPdfViewerState extends State<TrainedReportPdfViewer> {
       gmtCreateSort: "desc",
     );
 
+    if (!mounted) return;
     setState(() {
       tdlList = temp;
       isLoading = false;
@@ -83,6 +84,11 @@ class _TrainedReportPdfViewerState extends State<TrainedReportPdfViewer> {
                 widget.endDate.split(" ")[0],
                 lang: box.read('language'),
               ),
+              pdfFileName: box.read('language') == "en"
+                  // ? "TrainedRecords_${widget.startDate}~${widget.endDate}"
+                  // : "训练日志导出_${widget.startDate}~${widget.endDate}"),
+                  ? "TrainingLogExport_${DateTime.now().millisecondsSinceEpoch}"
+                  : "训练日志导出_${DateTime.now().millisecondsSinceEpoch}",
             ),
     );
   }

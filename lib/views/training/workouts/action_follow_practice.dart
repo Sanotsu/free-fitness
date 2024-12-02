@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -8,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:circular_countdown_timer/circular_countdown_timer.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:toastification/toastification.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../../../common/components/dialog_widgets.dart';
@@ -53,7 +52,7 @@ class _ActionFollowPracticeWithTTSState
   final _actionController = CountDownController();
   // 休息时的倒计时组件控制器
   final _restController = CountDownController();
-  // 准备时的倒计时组件控制器
+  // 预备时的倒计时组件控制器
   final _prepareController = CountDownController();
 
   /// 跟练的时候，可能是直接的某个训练；也可能是某个计划的某个训练日
@@ -67,7 +66,7 @@ class _ActionFollowPracticeWithTTSState
   // 当前的动作列表
   late List<ActionDetail> actions;
 
-  // 设置动作开始索引为-1，这时不会匹配任何动作，只是为了有个准备的10秒倒计时
+  // 设置动作开始索引为-1，这时不会匹配任何动作，只是为了有个预备的10秒倒计时
   int _currentIndex = -1;
 
   // 预设的休息时间(从用户配置表读取的，是不变的。每次休息完成之后都要重置为这个时间)
@@ -153,6 +152,7 @@ class _ActionFollowPracticeWithTTSState
       plan = widget.plan;
       dayNumber = widget.dayNumber;
       group = widget.group;
+
       // 进入此跟练页面自动开始
       startedMoment = DateTime.now();
     });
@@ -171,9 +171,10 @@ class _ActionFollowPracticeWithTTSState
   ///
   /// 获取用户自定义的间隔耗时
   ///
-  getUserConfig() async {
+  void getUserConfig() async {
     var tempUser = (await _userHelper.queryUser(userId: CacheUser.userId))!;
 
+    if (!mounted) return;
     setState(() {
       _defaultCusRestTime = tempUser.actionRestTime ?? 10;
     });
@@ -209,7 +210,7 @@ class _ActionFollowPracticeWithTTSState
   }
 
   /// 获取指定动作的次数或者持续时间(休息或者跟练的页面显示有用)
-  _getActionCountString(index) {
+  String _getActionCountString(index) {
     // currentActionDetail
     var curAd = actions[index];
     // currentExercisecountingMode
@@ -240,7 +241,7 @@ class _ActionFollowPracticeWithTTSState
       totalRestTimes = 0;
       _cusRestTime = _defaultCusRestTime;
 
-      // 修改索引为-1就直接到准备页面了
+      // 修改索引为-1就直接到预备页面了
       _currentIndex = -1;
     });
   }
@@ -253,7 +254,6 @@ class _ActionFollowPracticeWithTTSState
 
   ///
   /// TTS 相关的操作===============
-  ///
   ///
 
   // 初始化tts服务
@@ -269,42 +269,42 @@ class _ActionFollowPracticeWithTTSState
 
     flutterTts.setStartHandler(() {
       setState(() {
-        print("Playing");
+        debugPrint("Playing");
         ttsState = TtsState.playing;
       });
     });
 
     flutterTts.setCompletionHandler(() {
       setState(() {
-        print("Complete");
+        debugPrint("Complete");
         ttsState = TtsState.stopped;
       });
     });
 
     flutterTts.setCancelHandler(() {
       setState(() {
-        print("Cancel");
+        debugPrint("Cancel");
         ttsState = TtsState.stopped;
       });
     });
 
     flutterTts.setPauseHandler(() {
       setState(() {
-        print("Paused");
+        debugPrint("Paused");
         ttsState = TtsState.paused;
       });
     });
 
     flutterTts.setContinueHandler(() {
       setState(() {
-        print("Continued");
+        debugPrint("Continued");
         ttsState = TtsState.continued;
       });
     });
 
     flutterTts.setErrorHandler((msg) {
       setState(() {
-        print("error: $msg");
+        debugPrint("【setErrorHandler】: $msg");
         ttsState = TtsState.stopped;
       });
     });
@@ -313,14 +313,24 @@ class _ActionFollowPracticeWithTTSState
   Future _getDefaultEngine() async {
     var engine = await flutterTts.getDefaultEngine;
     if (engine != null) {
-      print(engine);
+    } else {
+      if (!mounted) return;
+      // EasyLoading.showToast(CusAL.of(context).noTtsEngine);
+      toastification.show(
+        context: context,
+        type: ToastificationType.warning,
+        style: ToastificationStyle.fillColored,
+        alignment: Alignment.center,
+        title: Text(CusAL.of(context).noTtsEngine),
+        autoCloseDuration: const Duration(seconds: 5),
+      );
     }
   }
 
   Future _getDefaultVoice() async {
     var voice = await flutterTts.getDefaultVoice;
     if (voice != null) {
-      print(voice);
+      debugPrint("【_getDefaultVoice】$voice");
     }
   }
 
@@ -337,19 +347,19 @@ class _ActionFollowPracticeWithTTSState
 
   Future _stop() async {
     var result = await flutterTts.stop();
+    if (!mounted) return;
     if (result == 1) setState(() => ttsState = TtsState.stopped);
   }
 
   Future _pause() async {
     var result = await flutterTts.pause();
+    if (!mounted) return;
     if (result == 1) setState(() => ttsState = TtsState.paused);
   }
 
   @override
   Widget build(BuildContext context) {
-    // 完成之后，这里页面点返回按钮，应该和弹窗中跳到报告页面一样。
-    // ？？？或者正式的时候，弹窗就直接改为跳到报告页面即可
-    // 跟练中点击返回按钮是暂停，然后询问用户是否确定退出，还是继续等等
+    /// 跟练中点击返回按钮是暂停，然后询问用户是否确定退出，还是继续等等
     return PopScope(
       // 跟练页面点击返回默认不返回，先暂停，然后弹窗提示是否退出；是就退出，否就继续
       canPop: false,
@@ -357,28 +367,15 @@ class _ActionFollowPracticeWithTTSState
       onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) return;
 
+        ///
         /// 点击了返回按钮，就先暂停，并弹窗询问是否退出跟练
-        // 点击返回按钮时，可能处在准备、跟练、休息3种情况的任意一种。
-        // 只要是已经开始或者继续的状态，就暂停
-        // if (_actionController.isResumed ||
-        //     _actionController.isStarted ||
-        //     _actionController.isRestarted) {
-        //   _actionController.pause();
-        // }
-        // if (_restController.isResumed ||
-        //     _restController.isStarted ||
-        //     _restController.isRestarted) {
-        //   _restController.pause();
-        // }
-        // if (_prepareController.isResumed ||
-        //     _prepareController.isStarted ||
-        //     _prepareController.isRestarted) {
-        //   _prepareController.pause();
-        // }
-
-        /// 2023-12-27 当前页面只会处于预备、跟练、休息中的某一个，切换后其他两个的anmation是dispose的
+        /// - 点击返回按钮时，可能处在预备、跟练、休息3种情况的任意一种。
+        /// - 只要是已经开始或者继续的状态，就暂停
+        /// 2023-12-27
+        /// 当前页面只会处于预备、跟练、休息中的某一个，切换后其他两个的anmation是dispose的
         /// 所以还需要按照当前的页面是哪一个对应去暂停和继续，时机就和页面展示时一样
-        // 预备页面的返回暂停
+        ///
+        /// 预备页面的返回暂停
         if (_currentIndex < 0) {
           if (_prepareController.isResumed.value ||
               _prepareController.isStarted.value ||
@@ -405,6 +402,7 @@ class _ActionFollowPracticeWithTTSState
           }
         }
 
+        if (!mounted) return;
         setState(() {
           pausedMoment = DateTime.now();
           // 这个标志只是用于显示跟练画面的暂停和继续的文字，
@@ -440,19 +438,9 @@ class _ActionFollowPracticeWithTTSState
             if (!context.mounted) return;
             Navigator.pop(context);
           } else {
-            // 关闭弹窗，不是退出就继续跟练。如果这些控制器是暂停的状态，就恢复
-            // if (_actionController.isPaused) {
-            //   _actionController.resume();
-            // }
-            // if (_restController.isPaused) {
-            //   _restController.resume();
-            // }
-            // if (_prepareController.isPaused) {
-            //   _prepareController.resume();
-            // }
-
+            /// 关闭弹窗，不是退出就继续跟练。如果这些控制器是暂停的状态，就恢复
             /// 2023-12-27 根据当前是哪个倒计时页面对应判断不同的倒计时控制器
-            // 准备页面的暂停恢复
+            // 预备页面的暂停恢复
             if (_currentIndex < 0) {
               if (_prepareController.isPaused.value) {
                 _prepareController.resume();
@@ -473,6 +461,7 @@ class _ActionFollowPracticeWithTTSState
               }
             }
 
+            if (!mounted) return;
             setState(() {
               // 点击继续时需要统计该次暂停的时间
               totalPausedTimes += DateTime.now().millisecondsSinceEpoch -
@@ -487,20 +476,20 @@ class _ActionFollowPracticeWithTTSState
       child: Scaffold(
         appBar: AppBar(title: Text(CusAL.of(context).workoutFollowLabel('0'))),
         body: Padding(
-          padding: EdgeInsets.all(10.sp),
+          padding: EdgeInsets.all(5.sp),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 专门的一个预备开始的倒计时(只有当前索引为-1的时候触发)
+              /// 专门的一个预备开始的倒计时(只有当前索引为-1的时候触发)
               if (_currentIndex < 0) ..._buildPrepareScreen(),
 
-              // 跟练的时候，动作不能调整倒计时
+              /// 跟练的时候，动作不能调整倒计时
               if (!isRestTurn &&
                   _currentIndex >= 0 &&
                   _currentIndex <= actions.length - 1)
                 ..._buildFollowScreen(),
 
-              // 休息的时候，可以增加休息时间，或者跳过休息时间
+              /// 休息的时候，可以增加休息时间，或者跳过休息时间
               if (isRestTurn) ..._buildRestScreen(),
             ],
           ),
@@ -590,6 +579,7 @@ class _ActionFollowPracticeWithTTSState
                   _speak(prepareText);
                 },
                 onComplete: () {
+                  if (!mounted) return;
                   setState(() {
                     // 预备动作，下一个一定是跟练的第一个，所以设置索引加1(默认是-1开始的),非休息状态。
                     _currentIndex = 0;
@@ -826,7 +816,7 @@ class _ActionFollowPracticeWithTTSState
             Expanded(
               flex: 1,
               child: Text(
-                '${_getActionCountString(_currentIndex)}',
+                _getActionCountString(_currentIndex),
                 style: TextStyle(
                   fontSize: CusFontSizes.flagSmall,
                   color: Theme.of(context).disabledColor,
@@ -1186,7 +1176,7 @@ class _ActionFollowPracticeWithTTSState
             Expanded(
               flex: 1,
               child: Text(
-                '${_getActionCountString(_currentIndex)}',
+                _getActionCountString(_currentIndex),
                 style: TextStyle(
                   fontSize: CusFontSizes.flagMedium,
                   color: Theme.of(context).disabledColor,
@@ -1269,13 +1259,13 @@ class _ActionFollowPracticeWithTTSState
             children: [
               Text(CusAL.of(context).trainedDoneNote(totolTime)),
               Text(
-                '    ${CusAL.of(context).trainedCalendarLabels("3")}: $pausedTime ${CusAL.of(context).unitLabels("6")}',
+                '\t\t${CusAL.of(context).trainedCalendarLabels("3")}: $pausedTime ${CusAL.of(context).unitLabels("6")}',
               ),
               Text(
-                '    ${CusAL.of(context).trainedCalendarLabels("4")}: $totalRestTimes ${CusAL.of(context).unitLabels("6")}',
+                '\t\t${CusAL.of(context).trainedCalendarLabels("4")}: $totalRestTimes ${CusAL.of(context).unitLabels("6")}',
               ),
               Text(
-                '    ${CusAL.of(context).trainedCalendarLabels("2")}: $workoutTime ${CusAL.of(context).unitLabels("6")}',
+                '\t\t${CusAL.of(context).trainedCalendarLabels("2")}: $workoutTime ${CusAL.of(context).unitLabels("6")}',
               ),
             ],
           ),

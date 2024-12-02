@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
@@ -19,7 +17,7 @@ import 'home.dart';
 ///
 /// 当用户首次进入app时，需要他填写一个用户名，作为默认的userId=1的初始用户。
 ///   不填的话就使用随机数或者获取手机型号？
-///   填入或者自动获取手机型号之后，讲这个唯一用户存入sqlite和storage，下次启动时获取storage的数据。
+///   填入或者自动获取手机型号之后，将这个唯一用户存入sqlite和storage，下次启动时获取storage的数据。
 ///
 /// 如果启动app时获取storage的用户信息是空，就认为是首次使用，就跳动此登录页面。
 ///   如果能获取到，就从这里跳转到主页面去
@@ -101,7 +99,7 @@ class _InitGuidePageState extends State<InitGuidePage> {
                     ),
                   );
                 }).toList(),
-                onChanged: (CusLabel? value) async {
+                onChanged: (CusLabel? value) {
                   setState(() {
                     selectedGender = value?.value;
                   });
@@ -195,7 +193,7 @@ class _InitGuidePageState extends State<InitGuidePage> {
     await _userHelper.insertUserList([defaultUser]);
     // 注意用户编号类型要一致都用int，storage支持的类型String, int, double, Map and List
     await box.write(LocalStorageKey.userId, 1);
-    await box.write(LocalStorageKey.userName, username);
+    await box.write(LocalStorageKey.userName, defaultUser.userName);
 
     var bmi = _currentWeight / (_currentHeight / 100 * _currentHeight / 100);
     // 新增体重趋势信息
@@ -241,7 +239,7 @@ class _InitGuidePageState extends State<InitGuidePage> {
     await _userHelper.insertUserList([defaultUser]);
     // 注意用户编号类型要一致都用int，storage支持的类型String, int, double, Map and List
     await box.write(LocalStorageKey.userId, 1);
-    await box.write(LocalStorageKey.userName, "$deviceName 用户");
+    await box.write(LocalStorageKey.userName, "$deviceName用户");
 
     if (!mounted) return;
     Navigator.pushReplacement(

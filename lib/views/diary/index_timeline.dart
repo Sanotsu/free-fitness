@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -89,8 +87,6 @@ class _IndexTimelineState extends State<IndexTimeline> {
 
     List<Diary> newData = temp.data as List<Diary>;
 
-    print(newData);
-
     // 如果没有更多数据，则在底部显示回弹
     if (newData.isEmpty) {
       if (!mounted) return;
@@ -101,6 +97,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
       );
     }
 
+    if (!mounted) return;
     // 设置查询结果
     setState(() {
       // 因为没有分页查询，所有这里直接替换已有的数组
@@ -115,7 +112,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
   /// 处理点击了搜索按钮
   _handleSearch() {
     // 取消键盘输入框聚焦
-    FocusScope.of(context).unfocus();
+    unfocusHandle();
     setState(() {
       diaryList.clear();
       currentPage = 1;
@@ -226,8 +223,8 @@ class _IndexTimelineState extends State<IndexTimeline> {
             isFirst: index == 0,
             isLast: index == diaryList.length - 1,
             indicatorStyle: IndicatorStyle(
-              width: 65,
-              height: 40,
+              width: 65.sp,
+              height: 40.sp,
               indicator: _CusIndicator(
                 category: '${diaryItem.category}',
                 // borderColor: borderColor,
@@ -286,11 +283,12 @@ class _IndexTimelineState extends State<IndexTimeline> {
           // 内外边距
           padding: EdgeInsets.all(2.sp),
           margin: EdgeInsets.all(2.sp),
-          // color: Colors.transparent,
-          // 装饰和颜色不能同时设置
+          color: Colors.transparent,
+          // // 装饰和颜色不能同时设置，有装饰颜色就放装饰里面
           // decoration: BoxDecoration(
           //   border: Border.all(color: Colors.black54, width: 1),
           //   borderRadius: BorderRadius.circular(10),
+          //   color: Colors.transparent,
           // ),
           // 不要用ListTile，很难看也很难布局
           child: Column(
@@ -418,6 +416,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
               await _dbHelper.deleteDiaryById(diaryItem.diaryId!);
 
               // 删除后重新查询
+              if (!mounted) return;
               setState(() {
                 currentPage = 1; // 数据库查询的时候会从0开始offset
                 pageSize = 10;
@@ -439,7 +438,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
   }
 }
 
-// 自定义的时间线指示器养蛇
+// 自定义的时间线指示器样式
 class _CusIndicator extends StatelessWidget {
   const _CusIndicator({
     required this.category,
