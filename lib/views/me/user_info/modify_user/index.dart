@@ -13,7 +13,7 @@ import '../../../../models/cus_app_localizations.dart';
 import '../../../../models/user_state.dart';
 
 class ModifyUserPage extends StatefulWidget {
-  // 修改的时候可能会传用户信息
+  // 修改的时候可能会传用户信息，“我的”首页新增用户时就没有用户信息
   final User? user;
   const ModifyUserPage({super.key, this.user});
 
@@ -38,7 +38,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         setState(() {
           _formKey.currentState?.patchValue(widget.user!.toStringMap());
         });
-      } else {}
+      }
     });
   }
 
@@ -107,14 +107,6 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
               : CusAL.of(context).eidtLabel(CusAL.of(context).userInfo),
         ),
         actions: [
-          // TextButton(
-          //   onPressed: _saveUser,
-          //   child: Text(
-          //     CusAL.of(context).saveLabel,
-          //     style: const TextStyle(color: Colors.white),
-          //   ),
-          // ),
-          // 2023-12-30 appbar 的action都优先iconbutton
           IconButton(
             onPressed: _saveUser,
             icon: const Icon(Icons.save),
@@ -125,7 +117,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.all(20.sp),
+              padding: EdgeInsets.all(5.sp),
               child: FormBuilder(
                 key: _formKey,
                 child: Column(
@@ -171,7 +163,6 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
           filled: true,
           fillColor: Colors.transparent,
         ),
-        // 2023-12-21 enableSuggestions 设为 true后键盘类型为text(默认就是)就正常了。
         enableSuggestions: true,
       ),
       FormBuilderDropdown<CusLabel>(
@@ -225,14 +216,27 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
               'height',
               CusAL.of(context).userInfoLabels("4"),
               CusAL.of(context).unitLabels("4"),
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.numeric(),
+                FormBuilderValidators.min(30),
+                FormBuilderValidators.max(240),
+              ]),
             ),
           ),
-          SizedBox(width: 10.sp),
+        ],
+      ),
+      Row(
+        children: [
           Expanded(
             child: _buildDoubleTextField(
               'current_weight',
               CusAL.of(context).userInfoLabels("5"),
               CusAL.of(context).unitLabels("5"),
+              validator: FormBuilderValidators.compose([
+                FormBuilderValidators.numeric(),
+                FormBuilderValidators.min(5),
+                FormBuilderValidators.max(300),
+              ]),
             ),
           ),
         ],
@@ -264,14 +268,18 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
           filled: true,
           fillColor: Colors.transparent,
         ),
-        // 2023-12-21 enableSuggestions 设为 true后键盘类型为multitext(默认是text)就正常了。
         enableSuggestions: true,
         keyboardType: TextInputType.multiline,
       ),
     ];
   }
 
-  _buildDoubleTextField(String name, String labelText, String suffixText) {
+  _buildDoubleTextField(
+    String name,
+    String labelText,
+    String suffixText, {
+    String? Function(String?)? validator,
+  }) {
     // 这里的只读就用全局的isEditing了，不作为参数传递了
     return FormBuilderTextField(
       name: name,
@@ -287,6 +295,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'))
       ],
       keyboardType: TextInputType.number,
+      validator: validator,
     );
   }
 }

@@ -148,8 +148,6 @@ class DBTrainingHelper {
 
       // 将JSON字符串写入临时文件
       await tempFile.writeAsString(jsonStr);
-
-      // print('表 $tableName 已成功导出到：$tempFilePath');
     }
   }
 
@@ -258,8 +256,6 @@ class DBTrainingHelper {
       // 查询每页指定数量的数据，但带上总条数
       return CusDataResult(data: list, total: totalCount ?? 0);
     } catch (e) {
-      print('Error at queryExerciseByKeyword: $e');
-      // 抛出异常来触发回滚的方式是 sqflite 中常用的做法
       rethrow;
     }
   }
@@ -335,13 +331,8 @@ class DBTrainingHelper {
       sql += ' WHERE ${where.join(' AND ')}';
     }
 
-    print(sql);
-    print("whereArgs $whereArgs");
-
     int totalCount =
         Sqflite.firstIntValue(await db.rawQuery(sql, whereArgs)) ?? 0;
-
-    print('Total count: $totalCount');
 
     final list = maps.map((row) => Exercise.fromMap(row)).toList();
 
@@ -481,7 +472,6 @@ class DBTrainingHelper {
           whereArgs: [action.exerciseId],
         );
 
-        // print("exerciseRows----${exerciseRows.length}");
         // ？？？理论上这里只有查到1个exercise，且不应该差不多(暂不考虑异常情况)
         if (exerciseRows.isNotEmpty) {
           var ad = ActionDetail(

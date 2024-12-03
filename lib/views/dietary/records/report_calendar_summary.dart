@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -74,6 +72,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
       withDetail: true,
     ) as List<DailyFoodItemWithFoodServing>);
 
+    if (!mounted) return;
     setState(() {
       dfiwfsList = temp;
 
@@ -96,7 +95,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
 
   // 当某一天被选中，获取该天的数据
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    print("某天被选中--------$selectedDay $focusedDay");
+    debugPrint("某天被选中--------$selectedDay $focusedDay");
 
     if (!isSameDay(_selectedDay, selectedDay)) {
       setState(() {
@@ -126,11 +125,14 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
                   SizedBox(height: 8.sp),
 
                   /// 总计本月摄入量和平均到每天的摄入量
-                  _buildDailyAverageCount(),
+                  SizedBox(
+                    width: 1.sw,
+                    child: _buildDailyAverageCount(),
+                  ),
 
                   SizedBox(height: 8.sp),
 
-                  /// 日历某些操作改变后，显示对应的手记内容列表
+                  /// 日历某些操作改变后，显示选中那日的摄入信息
                   ValueListenableBuilder<List<DailyFoodItemWithFoodServing>>(
                     valueListenable: _selectedItems,
                     // 当_selectedEvents有变化时，这个builder才会被调用
@@ -140,15 +142,19 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
                         return Container();
                       }
 
-                      return Card(
-                        elevation: 5,
-                        child: _buildSelectedDayListView(
-                          value,
-                          formatIntakeItemListForMarker(context, value),
+                      return SizedBox(
+                        width: 1.sw,
+                        child: Card(
+                          elevation: 2.sp,
+                          child: _buildSelectedDayListView(
+                            value,
+                            formatIntakeItemListForMarker(context, value),
+                          ),
                         ),
                       );
                     },
                   ),
+                  SizedBox(height: 20.sp),
                 ],
               ),
       ),
@@ -261,6 +267,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
     var totalCho = tempList.firstWhere((e) => e.label == "cho").value;
 
     return Card(
+      elevation: 2.sp,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -364,13 +371,20 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
           scrollDirection: Axis.horizontal,
           child: _buildSummaryTable(formatList),
         ),
-        Text(
-          CusAL.of(context).dietaryCalendarLabels('2'),
-          style: TextStyle(
-            fontSize: CusFontSizes.flagMedium,
-            fontWeight: FontWeight.bold,
-            color: Colors.green,
-          ),
+
+        /// 详细摄入输入每日摄入的子项，不应该是一样的标题样式，要小一号
+        Row(
+          children: [
+            SizedBox(width: 20.sp),
+            Text(
+              CusAL.of(context).dietaryCalendarLabels('2'),
+              style: TextStyle(
+                fontSize: CusFontSizes.flagSmall,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+            )
+          ],
         ),
         ListView.builder(
           shrinkWrap: true,
@@ -381,37 +395,19 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
             var intakeSize = value[index].dailyFoodItem.foodIntakeSize;
             var servingUnit = value[index].servingInfo.servingUnit;
 
-            // return Container(
-            //   margin: const EdgeInsets.symmetric(
-            //     horizontal: 12.0,
-            //     vertical: 4.0,
-            //   ),
-            //   decoration: BoxDecoration(
-            //     border: Border.all(),
-            //     borderRadius: BorderRadius.circular(12.sp),
-            //   ),
-            //   child: ListTile(
-            //     title: Text(
-            //       '${CusAL.of(context).foodName}: ${food.product} (${food.brand})',
-            //       style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
-            //     ),
-            //     subtitle: Text(
-            //       '${CusAL.of(context).eatableSize}: ${cusDoubleTryToIntString(intakeSize)} x $servingUnit',
-            //       style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
-            //     ),
-            //   ),
-            // );
-            return Card(
-              elevation: 5.sp,
-              child: ListTile(
-                title: Text(
-                  '${CusAL.of(context).foodName}: ${food.product} (${food.brand})',
-                  style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
-                ),
-                subtitle: Text(
-                  '${CusAL.of(context).eatableSize}: ${cusDoubleTryToIntString(intakeSize)} x $servingUnit',
-                  style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
-                ),
+            return ListTile(
+              dense: true,
+              // 自定义下划线当个分割线
+              shape: Border(
+                bottom: BorderSide(color: Colors.grey[300]!, width: 1.sp),
+              ),
+              title: Text(
+                '${CusAL.of(context).foodName}: ${food.product} (${food.brand})',
+                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
+              ),
+              subtitle: Text(
+                '${CusAL.of(context).eatableSize}: ${cusDoubleTryToIntString(intakeSize)} x $servingUnit',
+                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
               ),
             );
           },

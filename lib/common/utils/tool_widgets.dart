@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:math' as math;
 
@@ -340,4 +341,101 @@ void showSnackMessage(
   );
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+/// 强制收起键盘
+unfocusHandle() {
+  // 这个不一定有用，比如下面原本键盘弹出来了，跳到历史记录页面，回来之后还是弹出来的
+  // FocusScope.of(context).unfocus();
+
+  // FocusScope.of(context).requestFocus(FocusNode());
+
+  FocusManager.instance.primaryFocus?.unfocus();
+}
+
+/// 通用的底部信息弹窗
+commonMDHintModalBottomSheet(
+  BuildContext context,
+  String title,
+  String message, {
+  double? msgFontSize,
+}) {
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return Container(
+        // height: MediaQuery.of(context).size.height / 4 * 3,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(15.sp),
+            topRight: Radius.circular(15.sp),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.sp),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(title, style: TextStyle(fontSize: 18.sp)),
+                  TextButton(
+                    child: Text(CusAL.of(context).closeLabel),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      unfocusHandle();
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Divider(height: 2.sp, thickness: 2.sp),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(10.sp),
+                  child: MarkdownBody(
+                    data: message,
+                    selectable: true,
+                    // 设置Markdown文本全局样式
+                    styleSheet: MarkdownStyleSheet(
+                      // 普通段落文本颜色(假定用户输入就是普通段落文本)
+                      p: TextStyle(fontSize: msgFontSize, color: Colors.black),
+                      // ... 其他级别的标题样式
+                      // 可以继续添加更多Markdown元素的样式
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+/// json文件导入时显示的行中文本
+buildRichTextItem(
+  String text,
+  Color? color, {
+  TextAlign textAlign = TextAlign.start,
+}) {
+  return RichText(
+    textAlign: textAlign,
+    text: TextSpan(
+      children: [
+        TextSpan(
+          text: text,
+          style: TextStyle(
+            fontSize: CusFontSizes.itemContent,
+            color: color,
+          ),
+        ),
+      ],
+    ),
+  );
 }

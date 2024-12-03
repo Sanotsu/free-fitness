@@ -7,6 +7,7 @@ class CusFontSizes {
 
   // 一般的卡片或者ListTile中的标题、子标题、正文的大小
   static double itemTitle = 18.sp;
+  static double itemSmallTitle = 16.sp;
   static double itemSubTitle = 14.sp;
   static double itemContent = 12.sp;
   static double itemSubContent = 10.sp;

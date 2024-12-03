@@ -1,12 +1,9 @@
 import 'dart:convert';
 
-/// 2027-07-08 零一万物 API 的入参出参
+/// 2024-07-08 零一万物 API 的入参出参
 ///
 /// 所以这里减少数量，就使用最简单的，下划线连接模式的入参和出参
 /// CC对应ChatCompletions => CCMessage = ChatCompletionsMessage
-///
-/// 因为付费，为了省钱，就统一使用非流式的，节约token
-///
 ///
 class CCMessage<T> {
   String role;
@@ -27,49 +24,29 @@ class CCMessage<T> {
 }
 
 ///
-/// yi-vision 图像理解时，需要的类型
+/// delta和message是否类似，不过role和content都可选
+/// 第一条只有role，中间的只有content，最后一条两者都没有，就只`{}`
 ///
-// "content": [
-//   {
-//     "type": "image_url",
-//     "image_url": {
-//       "url": "https://platform.lingyiwanwu.com/assets/sample-table.jpg"
-//     }
-//   },
-//   {
-//     "type": "text",
-//     "text": "请详细描述一下这张图片。"
-//   }
-// ]
-// 2024-07-12 暂时不使用这个class，直接在调用处手动拼接上面的json
-class VisionContent {
-  String? type;
-  ImageUrl? imageUrl;
-  String? text;
+class CCDelta {
+  String? role;
+  String? content;
+  List<CCQuote>? quote;
 
-  VisionContent({this.type, this.imageUrl, this.text});
+  CCDelta({
+    this.role,
+    this.content,
+    this.quote,
+  });
 
-  factory VisionContent.fromJson(Map<String, dynamic> json) => VisionContent(
-        type: json["type"],
-        imageUrl: json["image_url"] == null
-            ? null
-            : ImageUrl.fromJson(json["image_url"]),
-        text: json["text"],
-      );
+  // 从字符串转
+  factory CCDelta.fromRawJson(String str) => CCDelta.fromJson(json.decode(str));
+  // 转为字符串
+  String toRawJson() => json.encode(toJson());
 
-  Map<String, dynamic> toJson() =>
-      {"type": type, "image_url": imageUrl?.toJson(), "text": text};
-}
+  factory CCDelta.fromJson(Map<String, dynamic> json) =>
+      CCDelta(role: json["role"], content: json["content"]);
 
-class ImageUrl {
-  String? url;
-
-  ImageUrl({this.url});
-
-  factory ImageUrl.fromJson(Map<String, dynamic> json) =>
-      ImageUrl(url: json["url"]);
-
-  Map<String, dynamic> toJson() => {"url": url};
+  Map<String, dynamic> toJson() => {"role": role, "content": content};
 }
 
 ///
@@ -142,20 +119,27 @@ class CCUsage {
 ///
 class CCChoice {
   int? index;
-  CCMessage message;
+  CCMessage? message;
+  CCDelta? delta;
   List<CCQuote>? quote;
-  String finishReason;
+  String? finishReason;
 
   CCChoice({
     this.index,
-    required this.message,
+    this.message,
+    this.delta,
     this.quote,
-    required this.finishReason,
+    this.finishReason,
   });
 
   factory CCChoice.fromJson(Map<String, dynamic> json) => CCChoice(
         index: json["index"],
-        message: CCMessage.fromJson(json["message"]),
+        message: json["message"] == null
+            ? null
+            : CCMessage.fromJson(json["message"] as Map<String, dynamic>),
+        delta: json["delta"] == null
+            ? null
+            : CCDelta.fromJson(json["delta"] as Map<String, dynamic>),
         quote: json["quote"] == null
             ? []
             : List<CCQuote>.from(
@@ -166,7 +150,8 @@ class CCChoice {
 
   Map<String, dynamic> toJson() => {
         "index": index,
-        "message": message.toJson(),
+        "message": message?.toJson(),
+        "delta": delta?.toJson(),
         "quote": quote == null
             ? []
             : List<dynamic>.from(quote!.map((x) => x.toJson())),
@@ -284,7 +269,7 @@ class CCRespBody {
   RespError? error;
 
   /// 2024-06-06 3个不同的搞成一样的显示文本，我现在是需要用到显示的值，其他的都暂时不考虑
-  String customReplyText;
+  String? customReplyText;
 
   CCRespBody({
     this.id,
@@ -294,22 +279,24 @@ class CCRespBody {
     this.choices,
     this.usage,
     this.error,
-    required this.customReplyText,
-  });
+    String? customReplyText,
+  }) : customReplyText = customReplyText ?? _generatecusText(choices);
 
-  factory CCRespBody.fromJson(Map<String, dynamic> json) {
-    var customReplyText = "<未取得数据……>";
-
-    // 直接显示答案
-    if (json["choices"] != null) {
-      var temp = List<CCChoice>.from(
-        json["choices"]!.map((x) => CCChoice.fromJson(x)),
-      );
-      if (temp.isNotEmpty) {
-        customReplyText = temp.first.message.content;
-      }
+  // 自定义的响应文本(比如流式返回最后是个[DONE]没法转型，但可以自行设定；而正常响应时可以从其他值中得到)
+  static String _generatecusText(List<CCChoice>? choices) {
+    // 非流式的
+    if (choices != null && choices.isNotEmpty && choices[0].message != null) {
+      return choices[0].message?.content ?? "";
+    }
+    // 流式的
+    if (choices != null && choices.isNotEmpty && choices[0].delta != null) {
+      return choices[0].delta?.content ?? "";
     }
 
+    return '';
+  }
+
+  factory CCRespBody.fromJson(Map<String, dynamic> json) {
     return CCRespBody(
       id: json["id"],
       object: json["object"],
@@ -320,9 +307,9 @@ class CCRespBody {
           : List<CCChoice>.from(
               json["choices"]!.map((x) => CCChoice.fromJson(x)),
             ),
-      usage: CCUsage.fromJson(json["usage"]),
+      usage: json["usage"] == null ? null : CCUsage.fromJson(json["usage"]),
       error: json["error"] == null ? null : RespError.fromJson(json["error"]),
-      customReplyText: customReplyText,
+      customReplyText: json['customReplyText'] as String?,
     );
   }
 
@@ -336,6 +323,7 @@ class CCRespBody {
             : List<dynamic>.from(choices!.map((x) => x.toJson())),
         "usage": usage?.toJson(),
         "error": error?.toJson(),
+        "customReplyText": customReplyText,
       };
 }
 

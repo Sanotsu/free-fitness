@@ -10,27 +10,27 @@ ThemeData lightTheme = ThemeData(
   // 文本主题
   // 定制好一些文本样式，后续直接使用,例如：`style: Theme.of(context).textTheme.bodySmall`
   // 否则就是默认的
-  textTheme: const TextTheme(
+  textTheme: TextTheme(
     displayLarge: TextStyle(
-        fontSize: 96, fontWeight: FontWeight.w300, color: Colors.black),
+        fontSize: 96.sp, fontWeight: FontWeight.w300, color: Colors.black),
     displayMedium: TextStyle(
-        fontSize: 60, fontWeight: FontWeight.w400, color: Colors.black),
+        fontSize: 60.sp, fontWeight: FontWeight.w400, color: Colors.black),
     displaySmall: TextStyle(
-        fontSize: 48, fontWeight: FontWeight.w400, color: Colors.black),
+        fontSize: 48.sp, fontWeight: FontWeight.w400, color: Colors.black),
     headlineMedium: TextStyle(
-        fontSize: 34, fontWeight: FontWeight.w400, color: Colors.black),
+        fontSize: 34.sp, fontWeight: FontWeight.w400, color: Colors.black),
     headlineSmall: TextStyle(
-        fontSize: 24, fontWeight: FontWeight.w400, color: Colors.black),
+        fontSize: 24.sp, fontWeight: FontWeight.w400, color: Colors.black),
     titleLarge: TextStyle(
-        fontSize: 20, fontWeight: FontWeight.w500, color: Colors.black),
+        fontSize: 20.sp, fontWeight: FontWeight.w500, color: Colors.black),
     bodyLarge: TextStyle(
-        fontSize: 16, fontWeight: FontWeight.w400, color: Colors.black87),
+        fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.black87),
     bodyMedium: TextStyle(
-        fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black87),
+        fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.black87),
     bodySmall: TextStyle(
-        fontSize: 12, fontWeight: FontWeight.w400, color: Colors.black54),
+        fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.black54),
     labelLarge: TextStyle(
-        fontSize: 14, fontWeight: FontWeight.w500, color: Colors.white),
+        fontSize: 14.sp, fontWeight: FontWeight.w500, color: Colors.white),
   ),
   // appbar主题
   appBarTheme: AppBarTheme(
@@ -61,11 +61,11 @@ final ThemeData darkTheme = ThemeData(
   cardColor: Colors.black,
   secondaryHeaderColor: Colors.grey,
   primarySwatch: Colors.red,
-  textTheme: const TextTheme(
+  textTheme: TextTheme(
     displayLarge: TextStyle(
-      fontSize: 52.0,
+      fontSize: 52.sp,
       fontWeight: FontWeight.w500,
     ),
-    bodyLarge: TextStyle(fontSize: 18),
+    bodyLarge: TextStyle(fontSize: 18.sp),
   ),
 );

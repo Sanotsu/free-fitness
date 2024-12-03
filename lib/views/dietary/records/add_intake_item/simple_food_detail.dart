@@ -65,10 +65,8 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   void initState() {
     super.initState();
 
-    setState(() {
-      // 因为有新增单位，可能需要修改食物详情信息，所以使用单独的变量
-      fsInfo = widget.foodItem;
-    });
+    // 因为有新增单位，可能需要修改食物详情信息，所以使用单独的变量
+    fsInfo = widget.foodItem;
 
     // ---这里显示的摄入量和单位（营养素的食物单份数据）根据来源不同，取值也不同
     // 新增的时候，一个食物有多种单份营养素，默认取第一个
@@ -210,6 +208,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           onlyNotDeleted: false,
         );
 
+        if (!mounted) return;
         if (newItem != null) {
           setState(() {
             // 更新当前食物的单份营养素列表
@@ -244,7 +243,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
         ),
       ),
       body: Padding(
-        padding: EdgeInsets.all(10.sp),
+        padding: EdgeInsets.all(5.sp),
         child: ListView(
           children: [
             // 修改数量和单位
@@ -252,9 +251,10 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
             SizedBox(height: 10.sp),
             // 饮食日记主界面点击知道item进来有“移除”和“修改”，点指定餐次新增进来则显示“新增”
             buildButtonsRowArea(),
-            SizedBox(height: 10.sp),
+            SizedBox(height: 20.sp),
             // 主要营养素表格
             buildNutrientTableArea(),
+            SizedBox(height: 20.sp),
             // 详细营养素区域
             buildAllNutrientTableArea(),
           ],
@@ -418,13 +418,13 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
         DecoratedBox(
           // 设置背景色
           decoration: BoxDecoration(
-            color: Theme.of(context).disabledColor,
+            color: Theme.of(context).hoverColor,
             border: Border.all(
               color: Theme.of(context).colorScheme.tertiaryContainer,
             ),
           ),
           child: Table(
-            border: TableBorder.all(),
+            // border: TableBorder.all(),
             columnWidths: const <int, TableColumnWidth>{
               1: FlexColumnWidth(),
               2: FlexColumnWidth(),
@@ -475,14 +475,14 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
                 TextSpan(
                   text: '$title\n',
                   style: TextStyle(
-                    // color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).primaryColor,
                     fontSize: CusFontSizes.itemContent,
                   ),
                 ),
                 TextSpan(
                   text: value,
                   style: TextStyle(
-                    // color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).primaryColor,
                     fontSize: CusFontSizes.itemTitle,
                     fontWeight: FontWeight.bold,
                   ),
@@ -601,6 +601,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
               ),
           ],
         ),
+        SizedBox(height: 20.sp),
       ],
     );
   }

@@ -32,9 +32,6 @@ class HttpRequest {
       sendTimeout: HttpOptions.sendTimeout,
       baseUrl: HttpOptions.baseUrl,
       contentType: HttpOptions.contentType,
-      // 2024-03-12 目前需要用的接口就 login成功的返回时text/html,其他的都是application/json。
-      // 所以暂时就不全部拍成文本格式了
-      // responseType: ResponseType.plain,
     );
 
     dio = Dio(options);
@@ -78,6 +75,7 @@ class HttpRequest {
     required String path, //接口地址
     required HttpMethod method, //请求方式
     Map<String, dynamic>? headers, // 可以自定义一些header
+    CusRespType? responseType, // 可以自定义返回类型(默认是json)
     dynamic data, //数据
     Map<String, dynamic>? queryParameters,
     bool showLoading = true, //加载过程
@@ -99,12 +97,14 @@ class HttpRequest {
     Options options = Options(
       method: methodValues[method],
       headers: headers,
+      responseType: responseTypeValues[responseType],
     );
 
     try {
       if (showLoading) {
-        //EasyLoading.show(status: 'loading...');
+        EasyLoading.show(status: 'loading...');
       }
+
       Response response = await HttpRequest.dio.request(
         path,
         data: data,
@@ -150,3 +150,17 @@ enum HttpMethod {
   patch,
   head,
 }
+
+enum CusRespType {
+  bytes,
+  json,
+  plain,
+  stream,
+}
+
+const Map responseTypeValues = {
+  CusRespType.bytes: ResponseType.bytes,
+  CusRespType.json: ResponseType.json,
+  CusRespType.plain: ResponseType.plain,
+  CusRespType.stream: ResponseType.stream,
+};

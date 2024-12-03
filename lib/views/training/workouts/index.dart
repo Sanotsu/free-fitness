@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -17,7 +15,7 @@ import 'action_list.dart';
 class TrainingWorkouts extends StatefulWidget {
   // 2023-11-15 这个页面复用，直接看【训练】模块不会传东西，
   // 但在【计划】模块，指定计划的训练列表中新增时，则传一个标志过来。
-  // 当检测到这个标志时，点击指定行数据后就把这行数据返回到计划的新增页面去。
+  //    当检测到这个标志时，点击指定行数据后就把这行数据返回到计划的新增页面去。
   // 不是指定计划的新增，则使用正常逻辑。
   final bool? isPlanAdd;
   const TrainingWorkouts({super.key, this.isPlanAdd});
@@ -31,7 +29,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
   // 查询表单的key
   final _queryFormKey = GlobalKey<FormBuilderState>();
   // 新增表单的key
-  final _groupFormKey = GlobalKey<FormBuilderState>();
+  final _addFormKey = GlobalKey<FormBuilderState>();
 
   // 展示训练列表(训练列表一次性查询所有，应该不会太多)
   List<GroupWithActions> groupList = [];
@@ -47,20 +45,15 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
   void initState() {
     super.initState();
 
-    setState(() {
-      getGroupList();
-      // 如果没有传这个标志，则不是计划新增训练调过来的；如果有传，取其bool值
-      isPlanAddGroup = (widget.isPlanAdd == null) ? false : widget.isPlanAdd!;
-    });
+    getGroupList();
+    // 如果没有传这个标志，则不是计划新增训练调过来的；如果有传，取其bool值
+    isPlanAddGroup = (widget.isPlanAdd == null) ? false : widget.isPlanAdd!;
   }
 
   // 查询已有的训练
   getGroupList() async {
     // 如果已经在查询数据中，则忽略此次新的查询
     if (isLoading) return;
-
-    print(DateTime.now());
-    var a = DateTime.now().microsecondsSinceEpoch;
 
     // 如果没在查询中，设置状态为查询中
     setState(() {
@@ -87,17 +80,12 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
       groupList = temp;
       // 重置状态为查询完成
       isLoading = false;
-
-      var b = DateTime.now().microsecondsSinceEpoch;
-      print(DateTime.now());
-      print('训练查询耗时，微秒: ${b - a}');
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true, // 打开键盘不重置按钮布局
       appBar: AppBar(
         title: RichText(
           text: TextSpan(
@@ -138,7 +126,16 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
               ),
             ),
           ),
-          isLoading ? buildLoader(isLoading) : Expanded(child: _buildList()),
+          isLoading
+              ? buildLoader(isLoading)
+              : Expanded(
+                  child: ListView.builder(
+                  itemCount: groupList.length,
+                  itemBuilder: (context, index) {
+                    final groupItem = groupList[index];
+                    return _buildGroupCard(groupItem);
+                  },
+                )),
         ],
       ),
     );
@@ -173,11 +170,12 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                               ?.didChange(null);
                           _queryFormKey.currentState?.fields['group_level']
                               ?.didChange(null);
+
                           conditionMap = {};
                           getGroupList();
                         });
                         // 如果有键盘就收起键盘
-                        FocusScope.of(context).focusedChild?.unfocus();
+                        unfocusHandle();
                       },
                       child: Text(
                         CusAL.of(context).resetLabel,
@@ -225,7 +223,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                 });
               }
               // 如果有键盘就收起键盘
-              FocusScope.of(context).focusedChild?.unfocus();
+              unfocusHandle();
             },
           ),
         )
@@ -233,154 +231,145 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
     );
   }
 
-  // 数据列表区域
-  _buildList() {
-    return ListView.builder(
-      itemCount: groupList.length,
-      itemBuilder: (context, index) {
-        final groupItem = groupList[index];
-
-        return Card(
-          elevation: 5.sp,
-          child: ListTile(
-            leading: Icon(Icons.alarm_on, size: CusIconSizes.iconLarge),
-            title: Text(
-              groupItem.group.groupName,
-              style: TextStyle(
-                fontSize: CusFontSizes.itemTitle,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-            subtitle: RichText(
-              textAlign: TextAlign.left,
-              maxLines: 2,
-              softWrap: true,
-              overflow: TextOverflow.ellipsis,
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text:
-                        '${groupItem.actionDetailList.length} ${CusAL.of(context).exercise}',
-                    // 这里只是取text的默认颜色，避免浅主题时文字不显示(好像默认是白色，反正看不到)
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                    ),
-                  ),
-                  TextSpan(
-                    text:
-                        '  ${getCusLabelText(groupItem.group.groupLevel, levelOptions)}  ',
-                    style: TextStyle(color: Colors.green[500]),
-                  ),
-                  TextSpan(
-                    text:
-                        '${getCusLabelText(groupItem.group.groupCategory, categoryOptions)}',
-                    style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyMedium?.color,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // 2023-11-23 如果是计划新增训练跳转来的,则不允许修改已有的训练或者新增训练，还是严格各自模块去完成各自的内容。
-            // 如果说需要计划新增训练时可以再新增训练或者修改指定训练，则不做下面这个限制
-            trailing: isPlanAddGroup
-                ? null
-                : SizedBox(
-                    width: 30.sp,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.edit,
-                        size: CusIconSizes.iconNormal,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      onPressed: () {
-                        _modifyGroupInfo(groupItem: groupItem.group);
-                      },
-                    ),
-                  ),
-            onTap: () {
-              // 如果是计划新增训练跳转过来的，点击条目直接带值返回
-              // (类型要一致，是GroupWithActions就好)
-              if (isPlanAddGroup) {
-                Navigator.pop(context, groupItem);
-              } else {
-                //  不传 GroupWithActions 类数据给 action list是因为：
-                // 1 新增训练时，还没有group；2 而且进入action list页面后，还是会不时修改其实。
-                // 所以还是直接传TrainingGroup，主要给子组件group id即可
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ActionList(
-                      groupItem: groupItem.group,
-                    ),
-                  ),
-                ).then((value) {
-                  // ？？？暂时返回这个页面时都重新加载最新的训练列表数据
-                  setState(() {
-                    getGroupList();
-                  });
-                });
-              }
-            },
-            // 长按点击弹窗提示是否删除
-            onLongPress: () async {
-              // 如果该训练有被使用，则不允许直接删除
-              var list = await _dbHelper.isGroupUsed(groupItem.group.groupId!);
-
-              if (!context.mounted) return;
-              if (list.isNotEmpty) {
-                commonExceptionDialog(
-                  context,
-                  CusAL.of(context).exceptionWarningTitle,
-                  CusAL.of(context).groupInUse(groupItem.group.groupName),
-                );
-              } else {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: Text(CusAL.of(context).deleteConfirm),
-                      content: Text(CusAL.of(context)
-                          .groupDeleteAlert(groupItem.group.groupName)),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context, false);
-                          },
-                          child: Text(CusAL.of(context).cancelLabel),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context, true);
-                          },
-                          child: Text(CusAL.of(context).confirmLabel),
-                        ),
-                      ],
-                    );
-                  },
-                ).then((value) async {
-                  if (value != null && value) {
-                    try {
-                      await _dbHelper.deleteGroupById(groupItem.group.groupId!);
-
-                      // 删除后重新查询
-                      getGroupList();
-                    } catch (e) {
-                      if (!context.mounted) return;
-                      commonExceptionDialog(
-                        context,
-                        CusAL.of(context).exceptionWarningTitle,
-                        e.toString(),
-                      );
-                    }
-                  }
-                });
-              }
-            },
+  // 训练组数据卡片
+  _buildGroupCard(GroupWithActions groupItem) {
+    return Card(
+      elevation: 2.sp,
+      child: ListTile(
+        leading: Icon(Icons.alarm_on, size: CusIconSizes.iconLarge),
+        title: Text(
+          groupItem.group.groupName,
+          style: TextStyle(
+            fontSize: CusFontSizes.itemTitle,
+            color: Theme.of(context).primaryColor,
           ),
-        );
-      },
+        ),
+        subtitle: RichText(
+          textAlign: TextAlign.left,
+          maxLines: 2,
+          softWrap: true,
+          overflow: TextOverflow.ellipsis,
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text:
+                    '${groupItem.actionDetailList.length} ${CusAL.of(context).exercise}',
+                // 这里只是取text的默认颜色，避免浅主题时文字不显示(好像默认是白色，反正看不到)
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                ),
+              ),
+              TextSpan(
+                text:
+                    '  ${getCusLabelText(groupItem.group.groupLevel, levelOptions)}  ',
+                style: TextStyle(color: Colors.green[500]),
+              ),
+              TextSpan(
+                text:
+                    '${getCusLabelText(groupItem.group.groupCategory, categoryOptions)}',
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyMedium?.color,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // 2023-11-23 如果是计划新增训练跳转来的,则不允许修改已有的训练或者新增训练，还是严格各自模块去完成各自的内容。
+        // 如果说需要计划新增训练时可以再新增训练或者修改指定训练，则不做下面这个限制
+        trailing: isPlanAddGroup
+            ? null
+            : SizedBox(
+                width: 30.sp,
+                child: IconButton(
+                  icon: Icon(
+                    Icons.edit,
+                    size: CusIconSizes.iconNormal,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                  onPressed: () {
+                    _modifyGroupInfo(groupItem: groupItem.group);
+                  },
+                ),
+              ),
+        onTap: () {
+          // 如果是计划新增训练跳转过来的，点击条目直接带值返回
+          // (类型要一致，是GroupWithActions就好)
+          if (isPlanAddGroup) {
+            Navigator.pop(context, groupItem);
+          } else {
+            //  不传 GroupWithActions 类数据给 action list是因为：
+            // 1 新增训练时，还没有group；2 而且进入action list页面后，还是会不时修改其实。
+            // 所以还是直接传TrainingGroup，主要给子组件group id即可
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ActionList(
+                  groupItem: groupItem.group,
+                ),
+              ),
+            ).then((value) {
+              // ？？？暂时返回这个页面时都重新加载最新的训练列表数据
+              getGroupList();
+            });
+          }
+        },
+        // 长按点击弹窗提示是否删除
+        onLongPress: () async {
+          // 如果该训练有被使用，则不允许直接删除
+          var list = await _dbHelper.isGroupUsed(groupItem.group.groupId!);
+
+          if (!mounted) return;
+          if (list.isNotEmpty) {
+            commonExceptionDialog(
+              context,
+              CusAL.of(context).exceptionWarningTitle,
+              CusAL.of(context).groupInUse(groupItem.group.groupName),
+            );
+          } else {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text(CusAL.of(context).deleteConfirm),
+                  content: Text(CusAL.of(context)
+                      .groupDeleteAlert(groupItem.group.groupName)),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context, false);
+                      },
+                      child: Text(CusAL.of(context).cancelLabel),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context, true);
+                      },
+                      child: Text(CusAL.of(context).confirmLabel),
+                    ),
+                  ],
+                );
+              },
+            ).then((value) async {
+              if (value != null && value) {
+                try {
+                  await _dbHelper.deleteGroupById(groupItem.group.groupId!);
+
+                  // 删除后重新查询
+                  getGroupList();
+                } catch (e) {
+                  if (!mounted) return;
+                  commonExceptionDialog(
+                    context,
+                    CusAL.of(context).exceptionWarningTitle,
+                    e.toString(),
+                  );
+                }
+              }
+            });
+          }
+        },
+      ),
     );
   }
 
@@ -395,35 +384,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                 ? CusAL.of(context).modifyGroupLabels('1')
                 : CusAL.of(context).modifyGroupLabels('0'),
           ),
-          content: FormBuilder(
-            key: _groupFormKey,
-            initialValue: groupItem != null ? groupItem.toMap() : {},
-            // autovalidateMode: AutovalidateMode.always,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  cusFormBuilerTextField(
-                    "group_name",
-                    labelText: '*${CusAL.of(context).workoutQuerys('0')}',
-                    validator: FormBuilderValidators.required(),
-                  ),
-                  cusFormBuilerDropdown(
-                    "group_category",
-                    categoryOptions,
-                    labelText: '*${CusAL.of(context).workoutQuerys('1')}',
-                    validator: FormBuilderValidators.required(),
-                  ),
-                  cusFormBuilerDropdown(
-                    "group_level",
-                    levelOptions,
-                    labelText: '*${CusAL.of(context).workoutQuerys('2')}',
-                    validator: FormBuilderValidators.required(),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          content: _buildGroupModifyForm(groupItem),
           actions: <Widget>[
             TextButton(
               child: Text(CusAL.of(context).cancelLabel),
@@ -432,55 +393,96 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
               },
             ),
             TextButton(
-              child: Text(CusAL.of(context).confirmLabel),
-              onPressed: () async {
-                if (_groupFormKey.currentState!.saveAndValidate()) {
-                  // 获取表单数值
-                  Map<String, dynamic> formData =
-                      _groupFormKey.currentState!.value;
-                  // 处理数据提交逻辑
-                  var temp = TrainingGroup.fromMap(formData);
-
-                  // 如果是新增
-                  if (groupItem == null) {
-                    // ？？？这里应该验证是否新增成功
-                    var groupId = await _dbHelper.insertTrainingGroup(temp);
-                    temp.groupId = groupId;
-
-                    if (!context.mounted) return;
-                    Navigator.of(context).pop();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ActionList(groupItem: temp),
-                      ),
-                    ).then((value) {
-                      setState(() {
-                        getGroupList();
-                      });
-                    });
-                  } else {
-                    // 如果是修改
-                    // ？？？这里应该验证是否修成功
-                    temp.groupId = groupItem.groupId!;
-                    await _dbHelper.updateTrainingGroup(
-                      groupItem.groupId!,
-                      temp,
-                    );
-
-                    // 如果是修改就返回训练组列表，而不是进入动作列表
-                    if (!context.mounted) return;
-                    Navigator.of(context).pop();
-                    setState(() {
-                      getGroupList();
-                    });
-                  }
-                }
+              onPressed: () {
+                _clickGroupModifyButton(groupItem);
               },
+              child: Text(CusAL.of(context).confirmLabel),
             ),
           ],
         );
       },
     );
+  }
+
+  // 构建训练做主修改表单
+  _buildGroupModifyForm(TrainingGroup? groupItem) {
+    return FormBuilder(
+      key: _addFormKey,
+      initialValue: groupItem != null ? groupItem.toMap() : {},
+      // autovalidateMode: AutovalidateMode.always,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            cusFormBuilerTextField(
+              "group_name",
+              labelText: '*${CusAL.of(context).workoutQuerys('0')}',
+              validator: FormBuilderValidators.required(),
+            ),
+            cusFormBuilerDropdown(
+              "group_category",
+              categoryOptions,
+              labelText: '*${CusAL.of(context).workoutQuerys('1')}',
+              validator: FormBuilderValidators.required(),
+            ),
+            cusFormBuilerDropdown(
+              "group_level",
+              levelOptions,
+              labelText: '*${CusAL.of(context).workoutQuerys('2')}',
+              validator: FormBuilderValidators.required(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 构建确认编辑的回调
+  _clickGroupModifyButton(TrainingGroup? groupItem) async {
+    if (_addFormKey.currentState!.saveAndValidate()) {
+      // 获取表单数值
+      Map<String, dynamic> formData = _addFormKey.currentState!.value;
+      // 处理数据提交逻辑
+      var temp = TrainingGroup.fromMap(formData);
+      try {
+        // 如果是新增
+        if (groupItem == null) {
+          // ？？？这里应该验证是否新增成功
+          var groupId = await _dbHelper.insertTrainingGroup(temp);
+          temp.groupId = groupId;
+
+          if (!mounted) return;
+          Navigator.of(context).pop();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ActionList(groupItem: temp),
+            ),
+          ).then((value) {
+            getGroupList();
+          });
+        } else {
+          // 如果是修改
+          // ？？？这里应该验证是否修成功
+          temp.groupId = groupItem.groupId!;
+          await _dbHelper.updateTrainingGroup(
+            groupItem.groupId!,
+            temp,
+          );
+
+          // 如果是修改就返回训练组列表，而不是进入动作列表
+          if (!mounted) return;
+          Navigator.of(context).pop();
+          getGroupList();
+        }
+      } catch (e) {
+        if (!mounted) return;
+        commonExceptionDialog(
+          context,
+          CusAL.of(context).exceptionWarningTitle,
+          e.toString(),
+        );
+      }
+    }
   }
 }

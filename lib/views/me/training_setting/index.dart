@@ -50,7 +50,7 @@ class _TrainingSettingState extends State<TrainingSetting> {
 
   Widget _buildListItem(String title, dynamic value, VoidCallback onTap) {
     return Card(
-      elevation: 5,
+      elevation: 2.sp,
       child: ListTile(
         title: Text(title),
         subtitle: Text(value.toString()),

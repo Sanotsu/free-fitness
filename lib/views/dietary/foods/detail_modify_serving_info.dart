@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -135,7 +133,7 @@ class _DetailModifyServingInfoState extends State<DetailModifyServingInfo> {
       body: ListView(
         children: [
           Padding(
-            padding: EdgeInsets.all(10.sp),
+            padding: EdgeInsets.all(5.sp),
             child: SingleChildScrollView(
               child: FormBuilder(
                 key: _servingInfoformKey,

@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -67,6 +65,7 @@ class _HomePageState extends State<HomePage> {
         },
       ).then((value) {
         if (value == false) {
+          if (!mounted) return;
           EasyLoading.showToast(CusAL.of(context).noStorageHint);
         }
       });
@@ -84,8 +83,7 @@ class _HomePageState extends State<HomePage> {
     return PopScope(
       // 点击返回键时暂停返回
       canPop: false,
-      onPopInvoked: (didPop) async {
-        print("didPop-----------$didPop");
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) {
           return;
         }

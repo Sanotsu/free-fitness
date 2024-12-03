@@ -42,11 +42,17 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
 
   final _formKey = GlobalKey<FormBuilderState>();
 
+  // 传入的餐次条目不会改变，这个变量只是为了减少 widget.mealItems 的使用
   late List<DailyFoodItemWithFoodServing> items;
 
-  // 默认显示的图片列表
+  // 2024-12-02 因为传入餐次的饮食记录和图片，在这里虽然不能改变餐次条目，但可以改变图片
+  // 如果改过图片，再次修改，没有使用更新后的餐次记录，还是传入时的记录，数据就会出错
+  late MealPhoto? inputPhotos;
+
+  // 默认显示的图片列表(输入框展示的)
   List<PlatformFile>? initImages;
 
+  // 用于显示的图片 地址(和上面两者类型不一样)
   List<String> imagesUrls = [];
 
   bool isLoading = false;
@@ -57,20 +63,50 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
   @override
   void initState() {
     super.initState();
+
+    items = widget.mealItems;
+    inputPhotos = widget.mealPhoto;
+
+    getImageByPhotos();
+  }
+
+  getImageByPhotos() {
+    // 如果有照片，则先显示照片
+    if (inputPhotos != null) {
+      String paths = inputPhotos!.photos;
+
+      initImages = convertStringToPlatformFiles(paths);
+      // 先排除照片路径是空字符串，再分割
+      if (paths.trim().isNotEmpty) {
+        imagesUrls = paths.trim().split(",");
+      }
+    } else {
+      initImages = [];
+      imagesUrls = [];
+    }
+  }
+
+  // 2024-12-02 因为存在删除餐次图片的情况，所以删除之后再新增，图片编号就变了。
+  // 删除之后、新增了，再修改，就要用新的编号了
+  rebuildMealPhoto() async {
+    List<MealPhoto> temp = await _dietaryHelper.queryMealPhotoList(
+      CacheUser.userId, // userId是必传的
+      startDate: widget.date,
+      endDate: widget.date,
+      mealCategory: widget.mealtime.enLabel,
+    );
+
+    if (!mounted) return;
     setState(() {
-      items = widget.mealItems;
-
-      // 如果有照片，则先显示照片
-      if (widget.mealPhoto != null) {
-        String paths = widget.mealPhoto!.photos;
-
-        initImages = convertStringToPlatformFiles(paths);
-        // 先排除照片路径是空字符串，再分割
-        if (paths.trim().isNotEmpty) {
-          imagesUrls = paths.trim().split(",");
+      inputPhotos = null;
+      for (var e in temp) {
+        if (e.mealCategory == widget.mealtime.enLabel) {
+          inputPhotos = e;
         }
       }
     });
+
+    getImageByPhotos();
   }
 
   @override
@@ -164,8 +200,8 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
 
                   try {
                     // 如果有照片，则是修改
-                    if (widget.mealPhoto != null) {
-                      tempMp.mealPhotoId = widget.mealPhoto!.mealPhotoId!;
+                    if (inputPhotos != null) {
+                      tempMp.mealPhotoId = inputPhotos!.mealPhotoId!;
 
                       // 如果有传照片，但现在没有照片了，就是删除该条记录；否则就是修改
                       if (photos.trim().isEmpty || photos.split(",").isEmpty) {
@@ -180,13 +216,6 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                       await _dietaryHelper.insertMealPhoto(tempMp);
                     }
 
-                    if (!mounted) return;
-                    setState(() {
-                      isLoading = false;
-                      isEditing = !isEditing;
-                      imagesUrls =
-                          photos.trim().isEmpty ? [] : photos.split(",");
-                    });
                     // 父组件应该重新加载(传参到父组件中重新加载)
                     // 强行返回前一页为了加载新数据，不返回的话这里轮播图是删除修改之前的
                     // Navigator.pop(context, true);
@@ -198,14 +227,14 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
                       CusAL.of(context).exceptionWarningTitle,
                       e.toString(),
                     );
-
+                  } finally {
                     setState(() {
                       isLoading = false;
                       isEditing = !isEditing;
-                      imagesUrls =
-                          photos.trim().isEmpty ? [] : photos.split(",");
+
+                      // 2024-12-02 新增或删除了餐次图片后，更新当前的餐次相关图片信息
+                      rebuildMealPhoto();
                     });
-                    return;
                   }
                 }
               },
@@ -218,7 +247,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
           SizedBox(height: 10.sp),
           if (imagesUrls.isNotEmpty && !isEditing)
             buildImageCarouselSlider(imagesUrls),
-          const SizedBox(height: 10),
+          SizedBox(height: 10.sp),
           // 上传活动示例图片（静态图或者gif）
           if (isEditing)
             FormBuilder(
@@ -226,7 +255,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
               child: Column(
                 children: [
                   Padding(
-                    padding: EdgeInsets.all(20.sp),
+                    padding: EdgeInsets.all(5.sp),
                     child: FormBuilderFilePicker(
                       name: 'images',
                       initialValue: initImages,
@@ -345,6 +374,7 @@ void handleImageAnalysis(BuildContext context, List<String> imagesUrls) {
         );
       },
     ).then((value) {
+      if (!context.mounted) return;
       navigateToOneChatScreen(context, imagesUrls.first);
     });
   } else {

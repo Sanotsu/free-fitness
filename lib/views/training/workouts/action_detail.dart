@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -150,27 +148,20 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(right: 10.sp),
-            child: Text(
-              (_currentItem.exercise.countingMode ==
-                      countingOptions.first.value)
-                  ? '${CusAL.of(context).actionDetailLabel('0')} ${_currentItem.action.duration}'
-                  : '${CusAL.of(context).actionDetailLabel('1')} ${_currentItem.action.frequency}',
-              style: TextStyle(fontSize: CusFontSizes.flagMedium),
-              textAlign: TextAlign.end,
-            ),
+          child: Text(
+            (_currentItem.exercise.countingMode == countingOptions.first.value)
+                ? '${CusAL.of(context).actionDetailLabel('0')} ${_currentItem.action.duration}'
+                : '${CusAL.of(context).actionDetailLabel('1')} ${_currentItem.action.frequency}',
+            style: TextStyle(fontSize: CusFontSizes.flagMedium),
+            textAlign: TextAlign.center,
           ),
         ),
         if (_currentItem.action.equipmentWeight != null)
           Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(left: 10.sp),
-              child: Text(
-                '${CusAL.of(context).actionDetailLabel('2')} ${cusDoubleTryToIntString(_currentItem.action.equipmentWeight!)}',
-                style: TextStyle(fontSize: CusFontSizes.flagMedium),
-                textAlign: TextAlign.start,
-              ),
+            child: Text(
+              '${CusAL.of(context).actionDetailLabel('2')} ${cusDoubleTryToIntString(_currentItem.action.equipmentWeight!)}',
+              style: TextStyle(fontSize: CusFontSizes.flagMedium),
+              textAlign: TextAlign.center,
             ),
           ),
       ],

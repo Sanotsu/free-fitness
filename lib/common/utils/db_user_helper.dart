@@ -334,7 +334,6 @@ class DBUserHelper {
       return rst;
     } catch (e) {
       // Handle the error
-      print('Error at updateIntakeDailyGoalByUser: $e');
       // 抛出异常来触发回滚的方式是 sqflite 中常用的做法
       rethrow;
     }

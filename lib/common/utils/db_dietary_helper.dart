@@ -143,8 +143,6 @@ class DBDietaryHelper {
 
       // 将JSON字符串写入临时文件
       await tempFile.writeAsString(jsonStr);
-
-      // print('表 $tableName 已成功导出到：$tempFilePath');
     }
   }
 
@@ -254,9 +252,6 @@ class DBDietaryHelper {
         }
       });
     } catch (e) {
-      // Handle the error
-      print('Error inserting food with serving info: $e');
-      // 抛出异常来触发回滚的方式是 sqflite 中常用的做法
       rethrow;
     }
     // 返回成功插入的食品编号和营养素编号列表
@@ -298,8 +293,6 @@ class DBDietaryHelper {
         );
       });
     } catch (e) {
-      // Handle the error
-      print('Error updating food with serving info: $e');
       rethrow;
     }
   }
@@ -386,7 +379,6 @@ class DBDietaryHelper {
         whereArgs: [id],
       );
 
-      print("删除食物营养素 $itemRows");
       // 如果没有被使用，则物理删除;否则就逻辑删除
       if (itemRows.isEmpty) {
         batch.delete(
@@ -462,8 +454,6 @@ class DBDietaryHelper {
         ['%$keyword%', '%$keyword%', 0],
       ),
     );
-
-    print('Total count: $totalCount');
 
     // 查询每页指定数量的数据，但带上总条数
     return CusDataResult(data: foods, total: totalCount ?? 0);

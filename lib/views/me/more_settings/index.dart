@@ -92,7 +92,14 @@ class _MoreSettingsState extends State<MoreSettings> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Expanded(flex: 1, child: Text("Author")),
-                      Expanded(flex: 3, child: Text("SanotSu")),
+                      Expanded(flex: 2, child: Text("SanotSu")),
+                    ],
+                  ),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Expanded(flex: 1, child: Text("Wechat")),
+                      Expanded(flex: 2, child: Text("SanotSu")),
                     ],
                   ),
                   Row(

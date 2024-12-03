@@ -128,7 +128,7 @@ _buildPdfPage(
   return pw.Page(
     // 两者不能同时存在
     pageTheme: pw.PageTheme(
-      margin: pw.EdgeInsets.all(10.sp),
+      margin: pw.EdgeInsets.all(5.sp),
     ),
     // 页面展示横向显示
     // pageFormat: PdfPageFormat.a4.landscape,
@@ -272,8 +272,8 @@ _buildMealSubBodyTable(
   var tempSugar = 0.0;
 
   return pw.Table(
-    // 字数据可以不显示边框，更方便看？
-    // border: pw.TableBorder.all(color: PdfColors.black),
+    // 子数据可以不显示边框，更方便看？
+    border: pw.TableBorder.all(color: PdfColors.black),
     children: [
       ...mealData.map((e) {
         var food = e.food;

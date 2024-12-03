@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -314,6 +315,20 @@ Future<bool> requestStoragePermission() async {
         statuses[Permission.storage]!.isGranted);
   } else {
     // 除了安卓和ios其他先不考虑
+    return false;
+  }
+}
+
+/// 判断字符串是否为json字符串
+bool isJsonString(String str) {
+  // 去除字符串中的空白字符和注释
+  final cleanedStr =
+      str.replaceAll(RegExp(r'\s+'), '').replaceAll(RegExp(r'//.*'), '');
+
+  try {
+    json.decode(cleanedStr);
+    return true;
+  } on FormatException {
     return false;
   }
 }

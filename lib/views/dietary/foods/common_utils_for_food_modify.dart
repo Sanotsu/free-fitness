@@ -1,8 +1,7 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
@@ -273,7 +272,7 @@ buildFoodModifyFormColumns(
       labelText: CusAL.of(context).foodLabels("4"),
     ),
 
-    const SizedBox(height: 10),
+    SizedBox(height: 10.sp),
     // 上传活动示例图片（静态图或者gif）
     FormBuilderFilePicker(
       name: 'images',

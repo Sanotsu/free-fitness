@@ -54,7 +54,7 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
         if (didPop) return;
         Navigator.pop(context, modifiedFlag);
       },
@@ -64,15 +64,18 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
           mainAxisSize: MainAxisSize.min,
           // 从上到下依次为关闭按钮、图片、动作名称及其技术要点、详情和修改按钮、翻页按钮
           children: [
+            /// 关闭按钮
             // ？？？关闭按钮考虑和下面的修改和详情放一起，但3个按钮怎么排都显示很奇怪
             // _buildCloseButton(),
             SizedBox(
-                height: 40.sp,
-                child: buildCloseButton(
-                  context,
-                  popValue: modifiedFlag,
-                )),
+              height: 40.sp,
+              child: buildCloseButton(context, popValue: modifiedFlag),
+            ),
+
+            /// 图片
             Expanded(flex: 2, child: _buildExerciseImageArea(_currentItem)),
+
+            /// 动作名称及其技术要点、详情和修改按钮
             Expanded(
               flex: 3,
               child: buildTitleAndDescription(
@@ -80,7 +83,8 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
                 _currentItem.instructions ?? "",
               ),
             ),
-            // 固定高度更好看
+
+            /// 翻页按钮(固定高度更好看)
             SizedBox(height: 60.sp, child: _buildPageButton())
           ],
         ),
@@ -105,17 +109,17 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
       child: Row(
         children: [
           Expanded(
-            flex: 10,
+            flex: 4,
             child: Text(
               '${_currentIndex + 1} ${_currentItem.exerciseName}',
-              // 限制只显示一行，多的用省略号
+              // 限制只显示两行，多的用省略号
               overflow: TextOverflow.ellipsis,
               maxLines: 2,
               style: TextStyle(fontSize: CusFontSizes.itemTitle),
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 1,
             child: TextButton(
               child: Text(
                 CusAL.of(context).detailLabel,
@@ -137,7 +141,7 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 1,
             child: TextButton(
               child: Text(
                 CusAL.of(context).eidtLabel(""),
@@ -159,6 +163,7 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
                   _currentItem.exerciseId!,
                 );
 
+                if (!mounted) return;
                 setState(() {
                   modifiedFlag = result;
                   _currentItem = exercise;

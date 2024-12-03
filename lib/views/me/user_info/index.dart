@@ -41,7 +41,7 @@ class _UserInfoState extends State<UserInfo> {
 
     // 查询登录用户的信息一定会有的
     var tempUser = (await _userHelper.queryUser(userId: CacheUser.userId))!;
-
+    if (!mounted) return;
     setState(() {
       user = tempUser;
       if (tempUser.avatar != null) {
@@ -57,23 +57,6 @@ class _UserInfoState extends State<UserInfo> {
       appBar: AppBar(
         title: Text(CusAL.of(context).settingLabels("0")),
         actions: [
-          // TextButton(
-          //   onPressed: () {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(
-          //         builder: (context) => ModifyUserPage(user: user),
-          //       ),
-          //     ).then((value) {
-          //       // 确认新增成功后重新加载当前日期的条目数据
-          //       _queryLoginedUserInfo();
-          //     });
-          //   },
-          //   child: Text(
-          //     CusAL.of(context).eidtLabel(""),
-          //     style: const TextStyle(color: Colors.white),
-          //   ),
-          // ),
           IconButton(
             onPressed: () {
               Navigator.push(
@@ -82,7 +65,6 @@ class _UserInfoState extends State<UserInfo> {
                   builder: (context) => ModifyUserPage(user: user),
                 ),
               ).then((value) {
-                // 确认新增成功后重新加载当前日期的条目数据
                 _queryLoginedUserInfo();
               });
             },

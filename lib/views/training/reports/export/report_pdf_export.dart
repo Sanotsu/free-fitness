@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart' show rootBundle;
@@ -104,7 +102,7 @@ _buildPdfPage(
   var trainedDate = DateTime.parse(date);
   return pw.Page(
     // theme和format两者不能同时存在
-    pageTheme: pw.PageTheme(margin: pw.EdgeInsets.all(10.sp)),
+    pageTheme: pw.PageTheme(margin: pw.EdgeInsets.all(5.sp)),
     // 页面展示横向显示
     // pageFormat: PdfPageFormat.a4.landscape,
     build: (context) {
@@ -202,7 +200,7 @@ _buildBodyTable(List<TrainedDetailLog> trainedData, String lang) {
       trainedData.fold(0, (prev, item) => prev + item.trainedDuration);
 
   return pw.Table(
-    // 字数据可以不显示边框，更方便看？
+    // 子数据可以不显示边框，更方便看？
     border: pw.TableBorder.all(color: PdfColors.black),
     children: [
       ...trainedData.map((e) {

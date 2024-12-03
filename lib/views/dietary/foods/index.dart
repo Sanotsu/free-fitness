@@ -66,6 +66,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
 
     var newData = temp.data as List<FoodAndServingInfo>;
 
+    if (!mounted) return;
     setState(() {
       foodItems.addAll(newData);
       itemsCount = temp.total;
@@ -93,7 +94,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
       query = searchController.text;
     });
     // 在当前上下文中查找最近的 FocusScope 并使其失去焦点，从而收起键盘。
-    FocusScope.of(context).unfocus();
+    unfocusHandle();
 
     _loadFoodData();
   }
@@ -189,38 +190,12 @@ class _DietaryFoodsState extends State<DietaryFoods> {
               });
             },
           ),
-          // Row(
-          //   children: [
-          //     TextButton(
-          //       onPressed: () {
-          //         Navigator.push(
-          //           context,
-          //           MaterialPageRoute(
-          //               builder: (context) => const AddfoodWithServing()),
-          //         ).then((value) {
-          //           // 不管是否新增成功，这里都重新加载；因为没有清空查询条件，所以新增的食物关键字不包含查询条件中，不会显示
-          //           if (value != null) {
-          //             setState(() {
-          //               foodItems.clear();
-          //               currentPage = 1;
-          //             });
-          //             _loadFoodData();
-          //           }
-          //         });
-          //       },
-          //       child: Text(
-          //         CusAL.of(context).notFound,
-          //         style: TextStyle(fontSize: 14.sp, color: Colors.white),
-          //       ),
-          //     ),
-          //   ],
-          // ),
         ],
       ),
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(8.sp),
+            padding: EdgeInsets.all(5.sp),
             child: Row(
               children: [
                 Expanded(
@@ -263,6 +238,79 @@ class _DietaryFoodsState extends State<DietaryFoods> {
     );
   }
 
+  // 点击跳转到营养素详情页
+  void _onItemTap(FoodAndServingInfo fsi) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => FoodNutrientDetail(
+          foodItem: fsi,
+        ),
+      ),
+    ).then((value) {
+      // 从详情页返回后需要重新查询，因为不知道在内部是不是有变动单份营养素。
+      // 有变动，退出不刷新，再次进入还是能看到旧的；但是返回就刷新对于只是浏览数据不友好。
+      // 因此，详情页会有一个是否被异动的标志，返回true则重新查询；否则就不更新
+      if (value != null && value) {
+        setState(() {
+          foodItems.clear();
+          currentPage = 1;
+        });
+        _loadFoodData();
+      }
+    });
+  }
+
+  // 长按显示删除弹窗
+  void _onItemLongPress(Food food) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(CusAL.of(context).deleteConfirm),
+          content: Text(
+            CusAL.of(context).deleteNote('\n${food.product}(${food.brand})'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: Text(CusAL.of(context).cancelLabel),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: Text(CusAL.of(context).confirmLabel),
+            ),
+          ],
+        );
+      },
+    ).then((value) async {
+      if (value != null && value) {
+        try {
+          await _dietaryHelper.deleteFoodWithServingInfo(food.foodId!);
+
+          if (!mounted) return;
+          // 删除后重新查询
+          setState(() {
+            foodItems.clear();
+            currentPage = 1;
+          });
+          _loadFoodData();
+        } catch (e) {
+          if (!mounted) return;
+          commonExceptionDialog(
+            context,
+            CusAL.of(context).exceptionWarningTitle,
+            e.toString(),
+          );
+        }
+      }
+    });
+  }
+
   _buildSimpleFoodTile(FoodAndServingInfo fsi, int index) {
     var food = fsi.food;
     var servingList = fsi.servingInfoList;
@@ -286,7 +334,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
         "${CusAL.of(context).mainNutrients('2')} ${formatDoubleToString(firstServing?.protein ?? 0)} ${CusAL.of(context).unitLabels('0')}";
 
     return Card(
-      elevation: 5,
+      elevation: 2.sp,
       child: ListTile(
         // 食物名称
         title: Text(
@@ -307,77 +355,11 @@ class _DietaryFoodsState extends State<DietaryFoods> {
           softWrap: true,
           overflow: TextOverflow.ellipsis,
         ),
+        // 点击显示营养素详情
+        onTap: () => _onItemTap(fsi),
 
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FoodNutrientDetail(
-                foodItem: fsi,
-              ),
-            ),
-          ).then((value) {
-            // 从详情页返回后需要重新查询，因为不知道在内部是不是有变动单份营养素。
-            // 有变动，退出不刷新，再次进入还是能看到旧的；但是返回就刷新对于只是浏览数据不友好。
-            // 因此，详情页会有一个是否被异动的标志，返回true则重新查询；否则就不更新
-            if (value != null && value) {
-              setState(() {
-                foodItems.clear();
-                currentPage = 1;
-              });
-              _loadFoodData();
-            }
-          });
-        },
         // 长按点击弹窗提示是否删除
-        onLongPress: () {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: Text(CusAL.of(context).deleteConfirm),
-                content: Text(
-                  CusAL.of(context)
-                      .deleteNote('\n${food.product}(${food.brand})'),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context, false);
-                    },
-                    child: Text(CusAL.of(context).cancelLabel),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context, true);
-                    },
-                    child: Text(CusAL.of(context).confirmLabel),
-                  ),
-                ],
-              );
-            },
-          ).then((value) async {
-            if (value != null && value) {
-              try {
-                await _dietaryHelper.deleteFoodWithServingInfo(food.foodId!);
-
-                // 删除后重新查询
-                setState(() {
-                  foodItems.clear();
-                  currentPage = 1;
-                });
-                _loadFoodData();
-              } catch (e) {
-                if (!mounted) return;
-                commonExceptionDialog(
-                  context,
-                  CusAL.of(context).exceptionWarningTitle,
-                  e.toString(),
-                );
-              }
-            }
-          });
-        },
+        onLongPress: () => _onItemLongPress(food),
       ),
     );
   }
@@ -387,8 +369,8 @@ class _DietaryFoodsState extends State<DietaryFoods> {
     var servingList = fsi.servingInfoList;
     var foodName = "${food.product} (${food.brand})";
 
-    return Card(
-      elevation: 5,
+    var card = Card(
+      elevation: 2.sp,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -397,12 +379,12 @@ class _DietaryFoodsState extends State<DietaryFoods> {
             width: 1.sw,
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5.0), // 设置所有圆角的大小
+                borderRadius: BorderRadius.circular(5.sp), // 设置所有圆角的大小
                 // 设置展开前的背景色
                 // color: const Color.fromARGB(255, 195, 198, 201),
               ),
               child: Padding(
-                padding: EdgeInsets.all(10.sp),
+                padding: EdgeInsets.all(5.sp),
                 child: RichText(
                   textAlign: TextAlign.start,
                   maxLines: 2,
@@ -486,6 +468,12 @@ class _DietaryFoodsState extends State<DietaryFoods> {
           ),
         ],
       ),
+    );
+
+    return GestureDetector(
+      onTap: () => _onItemTap(fsi),
+      onLongPress: () => _onItemLongPress(food),
+      child: card,
     );
   }
 

@@ -1,8 +1,8 @@
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:free_fitness/models/training_state.dart';
 import 'package:path/path.dart' as p;
 import 'package:archive/archive_io.dart';
@@ -25,6 +25,9 @@ import '../../../models/user_state.dart';
 ///
 /// 2023-12-26 备份恢复还可以优化，就暂时不做
 ///
+/// 2024-11-26 备份文件前缀
+const bakPrefix = "FreeFitness-FullBackup_";
+
 class BackupAndRestore extends StatefulWidget {
   const BackupAndRestore({super.key});
 
@@ -54,6 +57,8 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
     // 用户选择指定文件夹
     String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
     // 如果有选中文件夹，执行导出数据库的json文件，并添加到压缩档。
+
+    if (!mounted) return;
     if (selectedDirectory != null) {
       if (isLoading) return;
 
@@ -67,8 +72,7 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
       var tempZipDir =
           await Directory(p.join(appDocDir.path, "temp_zip")).create();
       // zip 文件的名称
-      String zipName =
-          "free-fitness-full-bak-${DateTime.now().millisecondsSinceEpoch}.zip";
+      String zipName = "$bakPrefix${DateTime.now().millisecondsSinceEpoch}.zip";
 
       // 执行讲db数据导出到临时json路径和构建临时zip文件(？？？应该有错误检查)
       await backupDbData(zipName, tempZipDir.path);
@@ -84,7 +88,9 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
 
       // 把文件从缓存的位置放到用户选择的位置
       sourceFile.copySync(p.join(selectedDirectory, zipName));
-      print('文件已成功复制到：${p.join(selectedDirectory, zipName)}');
+      if (kDebugMode) {
+        print('文件已成功复制到：${p.join(selectedDirectory, zipName)}');
+      }
 
       // 删除临时zip文件
       if (sourceFile.existsSync()) {
@@ -92,18 +98,20 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
         sourceFile.deleteSync();
       }
 
+      if (!mounted) return;
       setState(() {
         isLoading = false;
       });
 
-      if (!mounted) return;
       showSnackMessage(
         context,
         CusAL.of(context).bakSuccessNote(selectedDirectory),
         backgroundColor: Colors.green,
       );
     } else {
-      print('保存操作已取消');
+      if (kDebugMode) {
+        print('保存操作已取消');
+      }
       return;
     }
   }
@@ -173,25 +181,34 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
           outFile = await outFile.create(recursive: true);
           await outFile.writeAsBytes(file.content);
 
-          print("解压时的outFile$outFile");
+          if (kDebugMode) {
+            print("解压时的outFile$outFile");
+          }
         } else {
           Directory dir = Directory(filename);
           await dir.create(recursive: true);
         }
       }
-      print('解压完成');
+      if (kDebugMode) {
+        print('解压完成');
+      }
 
       return tempPath;
     } catch (e) {
-      print('解压失败: $e');
+      if (kDebugMode) {
+        print('解压失败: $e');
+      }
       throw Exception(e);
     }
   }
 
   // 2023-12-11 恢复的话，简单需要导出时同名的zip压缩包
   Future<void> restoreDataFromBackup() async {
-    FilePickerResult? result =
-        await FilePicker.platform.pickFiles(allowMultiple: false);
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowMultiple: false,
+      type: FileType.custom,
+      allowedExtensions: ['zip', 'ZIP'],
+    );
     if (result != null) {
       if (isLoading) return;
 
@@ -202,14 +219,13 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
       // 不允许多选，理论就是第一个文件，且不为空
       File file = File(result.files.first.path!);
 
-      print("获取的上传zip文件路径${p.basename(file.path)}");
-      print("获取的上传zip文件路径 result $result");
+      if (kDebugMode) {
+        print("获取的上传zip文件路径${p.basename(file.path)}");
+        print("获取的上传zip文件路径 result $result");
+      }
 
       // 这个判断虽然不准确，但先这样
-      if (p
-              .basename(file.path)
-              .toLowerCase()
-              .startsWith('free-fitness-full-bak-') &&
+      if (p.basename(file.path).startsWith(bakPrefix) &&
           p.basename(file.path).toLowerCase().endsWith('.zip')) {
         try {
           // 等待解压完成
@@ -221,7 +237,9 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
               .map((entity) => entity as File)
               .toList();
 
-          print("jsonFiles---$jsonFiles");
+          if (kDebugMode) {
+            print("jsonFiles---$jsonFiles");
+          }
 
           /// 删除前可以先备份一下到临时文件，避免出错后完成无法使用(最多确认恢复成功之后再删除就好了)
 
@@ -232,7 +250,7 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
               await Directory(p.join(appDocDir.path, "temp_auto_zip")).create();
           // zip 文件的名称
           String zipName =
-              "free-fitness-full-bak-${DateTime.now().millisecondsSinceEpoch}.zip";
+              "$bakPrefix${DateTime.now().millisecondsSinceEpoch}.zip";
           // 执行讲db数据导出到临时json路径和构建临时zip文件(？？？应该有错误检查)
           await backupDbData(zipName, tempZipDir.path);
 
@@ -253,11 +271,11 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
             sourceFile.deleteSync();
           }
 
+          if (!mounted) return;
           setState(() {
             isLoading = false;
           });
 
-          if (!mounted) return;
           showSnackMessage(
             context,
             CusAL.of(context).resSuccessNote,
@@ -266,7 +284,6 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
         } catch (e) {
           // 弹出报错提示框
           if (!mounted) return;
-
           commonExceptionDialog(
             context,
             CusAL.of(context).importJsonError,
@@ -279,9 +296,11 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
           // 中止操作
           return;
         }
+      } else {
+        EasyLoading.showInfo("Not a backup file exported from the app");
       }
       // 这个判断不准确，但先这样
-
+      if (!mounted) return;
       setState(() {
         isLoading = false;
       });
@@ -295,7 +314,9 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
   _saveJsonFileDataToDb(List<File> jsonFiles) async {
     // 解压之后获取到所有的json文件，逐个添加到数据库，会先清空数据库的数据
     for (File file in jsonFiles) {
-      print("_saveJsonFileDataToDb---${file.path}");
+      if (kDebugMode) {
+        print("_saveJsonFileDataToDb---${file.path}");
+      }
 
       String jsonData = await file.readAsString();
       // db导出时json文件是列表

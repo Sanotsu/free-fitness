@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -99,6 +97,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
         .where((e) => e.dayOfWeek == DateTime.now().weekday.toString())
         .toList();
 
+    if (!mounted) return;
     setState(() {
       // 如果有对应的星期几的摄入目标，则使用该值
       if (dailyGoal.isNotEmpty) {
@@ -124,6 +123,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     // 查询餐次照片数量
     _queryMealPhotoNums();
 
+    if (!mounted) return;
     setState(() {
       dfiwfsList = temp;
 
@@ -147,6 +147,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       mealCategory: mealEnLabel,
     );
 
+    if (!mounted) return;
     setState(() {
       // 2023-12-31 需要先清空之前的，否则即便没有也会展示旧的数据
       // mealPhotoNums = {
@@ -379,44 +380,43 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                         //     title: Text('其他选项功能区(暂留)'),
                         //   ),
                         // ),
+                        SizedBox(height: 20.sp),
                       ],
                     ),
                   ),
                 ),
               ],
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (dfiwfsList.isEmpty) {
-            commonExceptionDialog(
-              context,
-              "提示",
-              "本日暂无食物摄入信息，无须AI助手给出分析建议。",
-            );
-          } else {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) =>
-                    OneChatScreen(intakeInfo: buildSuggestionString()),
-              ),
-            );
-          }
-        },
-        tooltip: box.read('language') == "en" ? "AI Assistant" : 'AI分析对话助手',
-        child: const Icon(Icons.chat),
-        // child: Text(
-        //   box.read('language') == "en" ? "AIA" : "AI\n助手",
-        //   style: TextStyle(fontSize: 12.sp),
-        //   textAlign: TextAlign.center,
-        // ),
-      ),
+      floatingActionButton: dfiwfsList.isEmpty
+          ? null
+          : FloatingActionButton(
+              onPressed: () {
+                if (dfiwfsList.isEmpty) {
+                  commonExceptionDialog(
+                    context,
+                    "提示",
+                    "本日暂无食物摄入信息，无须AI助手给出分析建议。",
+                  );
+                } else {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          OneChatScreen(intakeInfo: buildSuggestionString()),
+                    ),
+                  );
+                }
+              },
+              tooltip:
+                  box.read('language') == "en" ? "AI Assistant" : 'AI分析对话助手',
+              child: const Icon(Icons.chat),
+            ),
     );
   }
 
   /// 最上面的每日概述卡片
   Widget buildDailyOverviewCard() {
     return Card(
-      elevation: 4,
+      elevation: 5.sp,
       color: Theme.of(context).secondaryHeaderColor,
       child: GestureDetector(
         onTap: () {
@@ -576,7 +576,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
     bool showExpansionTile = dfiwfsMealItems.isNotEmpty;
 
     return Card(
-      elevation: 5, // 设置阴影的程度
+      elevation: 2.sp, // 设置阴影的程度
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10.sp), // 设置圆角的大小
       ),
@@ -963,9 +963,9 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   /// 绘制营养素占比卡片区域
   buildNutrientProportionCard() {
     return Card(
-      elevation: 10,
+      elevation: 2.sp,
       child: Padding(
-        padding: EdgeInsets.all(10.sp),
+        padding: EdgeInsets.all(5.sp),
         child: SizedBox(
           height: 450.sp,
           child: Column(
@@ -1037,7 +1037,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           padding: EdgeInsets.symmetric(vertical: 4.sp),
           child: Row(
             children: [
-              Container(width: 14, height: 14, color: data.color),
+              Container(width: 14.sp, height: 14.sp, color: data.color),
               SizedBox(width: 8.sp),
               // 将百分比数据添加到标题后面
               Expanded(
@@ -1085,7 +1085,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
           padding: EdgeInsets.symmetric(vertical: 4.sp),
           child: Row(
             children: [
-              Container(width: 14, height: 14, color: data.color),
+              Container(width: 14.sp, height: 14.sp, color: data.color),
               SizedBox(width: 8.sp),
               // 将百分比数据添加到标题后面
               Expanded(

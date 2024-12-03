@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -13,8 +11,10 @@ import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 import 'common_utils_for_food_modify.dart';
 
-// 新增的时候用旧的food_modify和food_serving_info_modify_form。
-// 而在食物成分的详情页面进行修改时，是食物基本信息和指定单份营养素分开修改，所以有_base关键字
+// 新增的时候用 add_food_with_serving (新增食物必须有至少一份营养素信息)
+// 而在食物成分的详情页面进行修改时，是食物基本信息和指定单份营养素分开修改
+//  detail_modify_food 修改食物基本信息
+//  detail_modify_serving_info 修改(新增+删除)指定单份营养素信息
 class DetailModifyFood extends StatefulWidget {
   // 专门在食物详情中修改食物基本信息
   final Food food;
@@ -39,11 +39,9 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
     super.initState();
 
     // 如果有食物有图片，则显示图片(不能放在下面那个callback中，会在表单初始化完成之后再赋值，那就没有意义了)
-    setState(() {
-      if (widget.food.photos != null && widget.food.photos != "") {
-        initImages = convertStringToPlatformFiles(widget.food.photos!);
-      }
-    });
+    if (widget.food.photos != null && widget.food.photos != "") {
+      initImages = convertStringToPlatformFiles(widget.food.photos!);
+    }
 
     // 这是在表单初始化之后再赋值给栏位
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -134,7 +132,7 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
     return ListView(
       children: [
         Padding(
-          padding: EdgeInsets.all(10.sp),
+          padding: EdgeInsets.all(5.sp),
           child: SingleChildScrollView(
             child: FormBuilder(
               key: _foodFormKey,
@@ -150,7 +148,7 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
           ),
         ),
         Padding(
-          padding: EdgeInsets.only(left: 20.sp, right: 20.sp, top: 20.sp),
+          padding: EdgeInsets.all(20.sp),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [

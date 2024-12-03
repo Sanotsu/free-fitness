@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
@@ -62,11 +60,9 @@ class _ReportPdfViewerState extends State<ReportPdfViewer> {
       withDetail: true,
     ) as List<DailyFoodItemWithFoodServing>);
 
-    print("导出pdf查询到的饮食数据数量${temp.length}");
-
+    if (!mounted) return;
     setState(() {
       dfiwfsList = temp;
-
       isLoading = false;
     });
   }
@@ -88,6 +84,9 @@ class _ReportPdfViewerState extends State<ReportPdfViewer> {
                 widget.endDate.split(" ")[0],
                 lang: box.read('language'),
               ),
+              pdfFileName: box.read('language') == "en"
+                  ? "DietaryLogExport_${DateTime.now().millisecondsSinceEpoch}"
+                  : "饮食日志导出_${DateTime.now().millisecondsSinceEpoch}",
             ),
     );
   }

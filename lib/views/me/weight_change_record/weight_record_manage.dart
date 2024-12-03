@@ -57,6 +57,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
       gmtCreateSort: 'DESC',
     );
 
+    if (!mounted) return;
     setState(() {
       weightTrends.clear();
       weightTrends.addAll(tempList);
@@ -77,6 +78,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
       ),
     );
 
+    if (!mounted) return;
     if (picked != null) {
       setState(() {
         _startDate = picked.start;
@@ -176,6 +178,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
               // ？？？应该有成功的判断
               await _userHelper.deleteWeightTrendList(toDeletedWT);
 
+              if (!mounted) return;
               setState(() {
                 // 从列表中移除
                 // 倒序遍历需要移除的索引列表，以避免索引变化导致的问题

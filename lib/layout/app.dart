@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -26,8 +24,8 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
   // 应用程序的根部件
   @override
   Widget build(BuildContext context) {
-    print("getUserId---${box.read(LocalStorageKey.userId)}");
-    print("language mode---${box.read('language')} ${box.read('mode')}");
+    debugPrint("getUserId--${box.read(LocalStorageKey.userId)}");
+    debugPrint("language--${box.read('language')}; mode--${box.read('mode')}");
 
     return ScreenUtilInit(
       designSize: const Size(360, 640), // 1080p / 3 ,单位dp
@@ -79,10 +77,20 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
           /// 跟随系统的浅色和深色和手动选择的一样
           theme: box.read('mode') == 'system'
               // 跟随系统的默认浅色是一个绿色主题
-              ? FlexThemeData.light(scheme: FlexScheme.greenM3)
+              ? FlexThemeData.light(
+                  scheme: FlexScheme.greenM3,
+                  // 2024-11-11 flutter更新到3.24.4、对应插件更新到最新版本时，不添加这个为false效果和之前不一样了
+                  useMaterial3: false,
+                )
               : box.read('mode') == 'dark'
-                  ? FlexThemeData.dark(scheme: FlexScheme.mandyRed)
-                  : FlexThemeData.light(scheme: FlexScheme.aquaBlue),
+                  ? FlexThemeData.dark(
+                      scheme: FlexScheme.mandyRed,
+                      useMaterial3: false,
+                    )
+                  : FlexThemeData.light(
+                      scheme: FlexScheme.aquaBlue,
+                      useMaterial3: false,
+                    ),
 
           // 使用了initalRoute就不能使用home了，参看文档：
           // https://flutter.cn/docs/cookbook/navigation/named-routes#2-define-the-routes

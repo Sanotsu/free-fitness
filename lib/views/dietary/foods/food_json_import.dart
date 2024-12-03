@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -15,6 +13,11 @@ import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/food_composition.dart';
 
+///
+/// 2024-11-14
+/// 为了减少干扰信息，只支持单个(其实也可以多个)json导入
+/// 不再处理json文件夹的导入
+///
 class FoodJsonImport extends StatefulWidget {
   const FoodJsonImport({super.key});
 
@@ -29,87 +32,21 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
   bool isLoading = false;
   // 解析后的食物营养素列表(文件和食物都不支持移除)
   List<FoodComposition> foodComps = [];
-  // 上传的json文件列表
-  List<File> jsons = [];
 
   // 构建json文件加载成功后的锻炼数据表格要用到
   // 待上传的动作数量已经每个动作的选中状态
   int exerciseItemsNum = 0;
   List<bool> exerciseSelectedList = [false];
 
-  /// ？？？可以考虑在打开文件夹或者文件时，删除已选择的文件夹或文件(现在是追加，不会去重)
-  // 上传指定文件夹，处理里面所有指定格式的json
-  Future<void> _openFileExplorer() async {
-    // 用户选择指定文件夹
-    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
-    // 如果有选中文件夹，遍历出里面所有json结尾的文件
-    if (selectedDirectory != null) {
-      setState(() {
-        isLoading = true;
-      });
-
-      Directory directory = Directory(selectedDirectory);
-      List<File> jsonFiles = directory
-          .listSync()
-          .where((entity) => entity.path.toLowerCase().endsWith('.json'))
-          .map((entity) => File(entity.path))
-          .toList();
-
-      setState(() {
-        jsons.addAll(jsonFiles);
-      });
-
-      for (File file in jsonFiles) {
-        try {
-          String jsonData = await file.readAsString();
-
-          // 如果一个json文件只是一个动作，那就加上中括号；如果本身就是带了中括号的多个，就不再加
-          List foodEnergyMapList =
-              jsonData.trim().startsWith("[") && jsonData.trim().endsWith("]")
-                  ? json.decode(jsonData)
-                  : json.decode("[$jsonData]");
-
-          var temp = foodEnergyMapList
-              .map((e) => FoodComposition.fromJson(e))
-              .toList();
-
-          setState(() {
-            foodComps.addAll(temp);
-            // 更新需要构建的表格的长度和每条数据的可选中状态
-            exerciseItemsNum = foodComps.length;
-            exerciseSelectedList =
-                List<bool>.generate(exerciseItemsNum, (int index) => false);
-          });
-        } catch (e) {
-          // 弹出报错提示框
-          if (!mounted) return;
-
-          commonExceptionDialog(
-            context,
-            CusAL.of(context).importJsonError,
-            CusAL.of(context).importJsonErrorText(file.path, e.toString),
-          );
-
-          setState(() {
-            isLoading = false;
-          });
-          // 中止操作
-          return;
-        }
-      }
-      setState(() {
-        isLoading = false;
-      });
-    } else {
-      // User canceled the picker
-      return;
-    }
-  }
-
   // 用户可以选择多个json文件
   Future<void> _openJsonFiles() async {
-    FilePickerResult? result =
-        await FilePicker.platform.pickFiles(allowMultiple: true);
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json', 'JSON'],
+      allowMultiple: true,
+    );
+
+    if (!mounted) return;
     if (result != null) {
       setState(() {
         isLoading = true;
@@ -130,6 +67,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
                 .map((e) => FoodComposition.fromJson(e))
                 .toList();
 
+            if (!mounted) return;
             setState(() {
               foodComps.addAll(temp);
               // 更新需要构建的表格的长度和每条数据的可选中状态
@@ -140,7 +78,6 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
           } catch (e) {
             // 弹出报错提示框
             if (!mounted) return;
-
             commonExceptionDialog(
               context,
               CusAL.of(context).importJsonError,
@@ -230,19 +167,16 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
       }
     }
     // 保存完了，情况数据，并弹窗提示。
+    if (!mounted) return;
     setState(() {
-      setState(() {
-        jsons = [];
-        foodComps = [];
-        // 更新需要构建的表格的长度和每条数据的可选中状态
-        exerciseItemsNum = 0;
-        exerciseSelectedList = [false];
+      foodComps = [];
+      // 更新需要构建的表格的长度和每条数据的可选中状态
+      exerciseItemsNum = 0;
+      exerciseSelectedList = [false];
 
-        isLoading = false;
-      });
+      isLoading = false;
     });
 
-    if (!mounted) return;
     showDialog(
       context: context,
       builder: (context) {
@@ -289,9 +223,6 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
                 /// 最上方的功能按钮区域
                 _buildButtonsArea(),
 
-                /// json文件列表不为空才显示对应区域
-                if (jsons.isNotEmpty) ..._buildJsonFileInfoArea(),
-
                 /// 食物组成列表不为空且大于50条，简单的列表展示
                 if (foodComps.isNotEmpty && foodComps.length > 50)
                   ..._buildFoodServingListArea(),
@@ -312,73 +243,35 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           Expanded(
-            child: IconButton(
-              onPressed: _openFileExplorer,
-              icon: Icon(
-                Icons.drive_folder_upload,
-                size: CusIconSizes.iconMedium,
-                color: Theme.of(context).primaryColor,
-              ),
-            ),
-          ),
-          Expanded(
-            child: IconButton(
+            child: TextButton(
               onPressed: _openJsonFiles,
-              icon: Icon(
-                Icons.file_upload,
-                size: CusIconSizes.iconMedium,
-                color: Theme.of(context).primaryColor,
+              child: Text(
+                CusAL.of(context).importJsonButtons('0'),
+                style: TextStyle(fontSize: CusFontSizes.flagSmall),
               ),
             ),
           ),
           Expanded(
-            child: IconButton(
-              onPressed: () {
-                setState(() {
-                  jsons = [];
-                  foodComps = [];
-                  // 更新需要构建的表格的长度和每条数据的可选中状态
-                  exerciseItemsNum = 0;
-                  exerciseSelectedList = [false];
-                });
-              },
-              icon: Icon(
-                Icons.clear,
-                size: CusIconSizes.iconMedium,
-                color: foodComps.isNotEmpty
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).disabledColor,
+            child: TextButton(
+              onPressed: foodComps.isNotEmpty
+                  ? () {
+                      setState(() {
+                        foodComps = [];
+                        // 更新需要构建的表格的长度和每条数据的可选中状态
+                        exerciseItemsNum = 0;
+                        exerciseSelectedList = [false];
+                      });
+                    }
+                  : null,
+              child: Text(
+                CusAL.of(context).importJsonButtons('1'),
+                style: TextStyle(fontSize: CusFontSizes.flagSmall),
               ),
             ),
           ),
         ],
       ),
     );
-  }
-
-  // 构建json文件列表区
-  _buildJsonFileInfoArea() {
-    return [
-      Text(
-        CusAL.of(context).jsonFiles,
-        style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
-        textAlign: TextAlign.start,
-      ),
-      SizedBox(
-        height: 100.sp,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: jsons.length,
-          itemBuilder: (context, index) {
-            return Text(
-              jsons[index].path,
-              style: TextStyle(fontSize: CusFontSizes.itemContent),
-              textAlign: TextAlign.start,
-            );
-          },
-        ),
-      ),
-    ];
   }
 
   // 当上传的食物营养素信息超过50条，就单纯的列表展示
@@ -414,40 +307,29 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
               verticalDirection: VerticalDirection.up,
               children: [
                 Expanded(
-                  child: RichText(
-                    textAlign: TextAlign.start,
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: '${index + 1} - ',
-                          style: TextStyle(
-                            fontSize: CusFontSizes.itemSubTitle,
-                            color: Colors.green,
-                          ),
-                        ),
-                        TextSpan(
-                          text: "${foodComps[index].foodCode} - ",
-                          style: TextStyle(
-                            fontSize: CusFontSizes.itemSubTitle,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        TextSpan(
-                          text: "${foodComps[index].foodName} - ",
-                          style: TextStyle(
-                            fontSize: CusFontSizes.itemSubTitle,
-                            color: Colors.red,
-                          ),
-                        ),
-                        TextSpan(
-                          text: "${foodComps[index].energyKCal}",
-                          style: TextStyle(
-                            fontSize: CusFontSizes.itemSubTitle,
-                            color: Colors.lightBlue,
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: buildRichTextItem(
+                    '${index + 1}',
+                    Colors.green,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Expanded(
+                  child: buildRichTextItem(
+                    '${foodComps[index].foodCode}',
+                    Colors.grey,
+                  ),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: buildRichTextItem(
+                    '${foodComps[index].foodName}',
+                    Colors.red,
+                  ),
+                ),
+                Expanded(
+                  child: buildRichTextItem(
+                    '${foodComps[index].energyKCal}',
+                    Colors.lightBlue,
                   ),
                 ),
               ],

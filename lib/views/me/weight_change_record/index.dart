@@ -33,13 +33,38 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
   // 查询数据的时候不显示图表
   bool isLoading = false;
 
+  // 用于强制更新体重趋势图组件
+  Key _lineChartKey = UniqueKey();
+
   @override
   void initState() {
     super.initState();
+
+    user = widget.userInfo;
+    _currentWeight = user.currentWeight ?? 70;
+    _currentHeight = user.height ?? 170;
+  }
+
+  // 刷新用户信息，以便能重新加载最新的当前体重身高
+  Future<void> _refreshUser() async {
     setState(() {
-      user = widget.userInfo;
+      isLoading = true;
+    });
+
+    var tempUser = (await _userHelper.queryUser(
+      userId: CacheUser.userId,
+    ))!;
+
+    if (!mounted) return;
+    setState(() {
+      user = tempUser;
+
       _currentWeight = user.currentWeight ?? 70;
       _currentHeight = user.height ?? 170;
+      isLoading = false;
+
+      // 强制更新体重趋势图组件
+      _lineChartKey = UniqueKey();
     });
   }
 
@@ -49,171 +74,128 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
       appBar: AppBar(
         title: Text(CusAL.of(context).settingLabels('1')),
       ),
-      body: ListView(
-        children: [
-          /// 体重趋势折线图区域
-          /// 修改成功之后应该要重新刷新数据？？？
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(5.sp),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              /// 体重趋势折线图区域
+              ...buildWeghtLineArea(),
 
-          Card(
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      CusAL.of(context).weightLabel(''),
-                      style: TextStyle(
-                        fontSize: CusFontSizes.flagMedium,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            // 这里只显示修改体重
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    WeightRecordManage(user: user),
-                              ),
-                            ).then(
-                              (value) async {
-                                // 强制重新加载体重变化图表
-                                setState(() {
-                                  isLoading = true;
-                                });
-                                var tempUser = (await _userHelper.queryUser(
-                                  userId: CacheUser.userId,
-                                ))!;
+              /// BMI区域
+              ...buildBmiArea(),
 
-                                setState(() {
-                                  user = tempUser;
-                                  _currentWeight = user.currentWeight ?? 70;
-                                  _currentHeight = user.height ?? 170;
-                                  isLoading = false;
-                                });
-                              },
-                            );
-                          },
-                          child: Text(CusAL.of(context).manageLabel),
-                        ),
-                        SizedBox(width: 10.sp),
-                        ElevatedButton(
-                          onPressed: () {
-                            // 这里只显示修改体重
-                            _buildModifyWeightOrBmiDialog(onlyWeight: true)
-                                .then(
-                              (value) async {
-                                // 强制重新加载体重变化图表
-                                setState(() {
-                                  isLoading = true;
-                                });
-                                var tempUser = (await _userHelper.queryUser(
-                                  userId: CacheUser.userId,
-                                ))!;
-
-                                setState(() {
-                                  user = tempUser;
-                                  _currentWeight = user.currentWeight ?? 70;
-                                  _currentHeight = user.height ?? 170;
-                                  isLoading = false;
-                                });
-                              },
-                            );
-                          },
-                          child: Text(CusAL.of(context).recordLabel),
-                        ),
-                      ],
-                    )
-                  ],
-                ),
-                if (!isLoading) WeightChangeLineChart(user: user),
-              ],
-            ),
+              SizedBox(height: 20.sp),
+            ],
           ),
-
-          /// BMI区域
-          Center(
-            child: Card(
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      RichText(
-                        textAlign: TextAlign.left,
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: "BMI",
-                              style: TextStyle(
-                                fontSize: CusFontSizes.flagMedium,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                            const TextSpan(
-                              text: " (15 ~ 40)",
-                              style: TextStyle(color: Colors.green),
-                            ),
-                          ],
-                        ),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          // 这里要显示修改身高和体重
-                          _buildModifyWeightOrBmiDialog(onlyWeight: false).then(
-                            (value) async {
-                              // 强制重新加载体重变化图表
-                              setState(() {
-                                isLoading = true;
-                              });
-                              var tempUser = (await _userHelper.queryUser(
-                                userId: CacheUser.userId,
-                              ))!;
-
-                              setState(() {
-                                user = tempUser;
-                                _currentWeight = user.currentWeight ?? 70;
-                                _currentHeight = user.height ?? 170;
-                                isLoading = false;
-                              });
-                            },
-                          );
-                        },
-                        child: Text(CusAL.of(context).recordLabel),
-                      ),
-                    ],
-                  ),
-                  _buildBmiArea(context),
-                ],
-              ),
-            ),
-          ),
-
-          /// 占位的
-          // SizedBox(
-          //   height: 30,
-          //   child: Row(
-          //     children: [
-          //       Expanded(child: Container(color: Colors.grey)),
-          //       Expanded(child: Container(color: Colors.green)),
-          //       Expanded(child: Container(color: Colors.blue)),
-          //       Expanded(child: Container(color: Colors.yellow)),
-          //       Expanded(child: Container(color: Colors.red)),
-          //     ],
-          //   ),
-          // ),
-          SizedBox(height: 20.sp),
-        ],
+        ),
       ),
     );
   }
 
-  _buildBmiArea(BuildContext context) {
+  List<Widget> buildWeghtLineArea() {
+    return [
+      // 体重区块的标题和按钮
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            CusAL.of(context).weightLabel(''),
+            style: TextStyle(
+              fontSize: CusFontSizes.flagMedium,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          Row(
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  // 这里只显示修改体重
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => WeightRecordManage(user: user),
+                    ),
+                  ).then(
+                    (value) async {
+                      await _refreshUser();
+                    },
+                  );
+                },
+                child: Text(CusAL.of(context).manageLabel),
+              ),
+              SizedBox(width: 10.sp),
+              ElevatedButton(
+                onPressed: () {
+                  // 这里只显示修改体重
+                  _buildModifyWeightOrBmiDialog(onlyWeight: true).then(
+                    (value) async {
+                      // 强制重新加载体重变化图表
+                      await _refreshUser();
+                    },
+                  );
+                },
+                child: Text(CusAL.of(context).recordLabel),
+              ),
+            ],
+          )
+        ],
+      ),
+      // 显示体重趋势图
+      isLoading
+          ? buildLoader(isLoading)
+          : WeightChangeLineChart(key: _lineChartKey, user: user),
+    ];
+  }
+
+  List<Widget> buildBmiArea() {
+    return [
+      // BMI标题和按钮行
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          RichText(
+            textAlign: TextAlign.left,
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: "BMI",
+                  style: TextStyle(
+                    fontSize: CusFontSizes.flagMedium,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+                const TextSpan(
+                  text: " (15 ~ 40)",
+                  style: TextStyle(color: Colors.green),
+                ),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              // 这里要显示修改身高和体重
+              _buildModifyWeightOrBmiDialog(onlyWeight: false).then(
+                (value) async {
+                  // 强制重新加载体重变化图表
+                  await _refreshUser();
+                },
+              );
+            },
+            child: Text(CusAL.of(context).recordLabel),
+          ),
+        ],
+      ),
+      // BMI分段区间容器
+      Center(child: _buildBmiRangeContainer(context)),
+    ];
+  }
+
+  // 构建bmi色块容器
+  SizedBox _buildBmiRangeContainer(BuildContext context) {
     // 存的是kg
     var tempWeight = user.currentWeight ?? 0;
     // 存的是cm，所以要/100
@@ -340,6 +322,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
     );
   }
 
+  // 输入体重或bmi值的弹窗
   Future _buildModifyWeightOrBmiDialog({bool onlyWeight = true}) async {
     await showModalBottomSheet(
       isScrollControlled: true,
@@ -363,7 +346,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                         ),
                         DecimalNumberPicker(
                           value: _currentWeight,
-                          minValue: 10,
+                          minValue: 5,
                           maxValue: 300,
                           decimalPlaces: 1,
                           itemHeight: 40,
@@ -383,7 +366,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                           ),
                           DecimalNumberPicker(
                             value: _currentHeight,
-                            minValue: 50,
+                            minValue: 30,
                             maxValue: 240,
                             decimalPlaces: 1,
                             itemHeight: 40,
@@ -444,6 +427,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
   }
 }
 
+// 构建bmi文字
 buildWeightBmiText(double bmi, BuildContext context) {
   if (bmi < 18.4) {
     return Text(
