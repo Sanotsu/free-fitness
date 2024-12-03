@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print,
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -13,6 +11,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../apis/paid_llm_apis.dart';
 import '../../../../common/components/dialog_widgets.dart';
 import '../../../../common/global/constants.dart';
+import '../../../../common/utils/tool_widgets.dart';
 import '../../../../models/cus_app_localizations.dart';
 import '../../../../models/paid_llm/common_chat_completion_state.dart';
 import '../../../../models/paid_llm/llm_chat.dart';
@@ -43,12 +42,8 @@ class _OneChatScreenState extends State<OneChatScreen> {
   // AI是否在思考中(如果是，则不允许再次发送)
   bool isBotThinking = false;
 
-  /// 2024-06-11 默认使用流式请求，更快;但是同样的问题，流式使用的token会比非流式更多
-  /// 2024-06-15 限时限量的可能都是收费的，本来就慢，所以默认就流式，不用切换
-  /// 2024-06-20 流式使用的token太多了，还是默认更省的
-  bool isStream = false;
-
   // 默认进入对话页面应该就是啥都没有，然后根据这空来显示预设对话
+  // 2024-12-03 不再需要占位的，是因为请求中时 http 客户端有加载中弹窗
   List<ChatMessage> messages = [
     // 预设第一个role为system，指定系统角色
     ChatMessage(
@@ -58,29 +53,19 @@ class _OneChatScreenState extends State<OneChatScreen> {
           : "你是一名资深且优秀的营养学、健康学、养生学专家。",
       role: "system",
       dateTime: DateTime.now(),
-      isPlaceholder: false,
     ),
   ];
-
-  // 等待AI响应时的占位的消息，在构建真实对话的list时要删除
-  var placeholderMessage = ChatMessage(
-    messageId: "placeholderMessage",
-    content: box.read('language') == "en"
-        ? "thinking(longer wait,more replies)  "
-        : "努力思考中(等待越久,回复内容越多)  ",
-    role: "assistant",
-    dateTime: DateTime.now(),
-    isPlaceholder: true,
-  );
 
   // 如果是图片分析，还需要传入参数，图片base64
   String? imageBase64String;
   // 图像理解就第一次需要传图片
   bool? isFirstSendImage;
 
-  // 2024-07-12 因为等到AI响应是异步的，可能会出现等待中此页面被用户关闭，此时再调用setstate就会报错
-  // 所以在dispose的时候设定标记，如果已经被销毁，则不执行setstate
-  bool _isDisposed = false;
+  // 2024-12-03 虽然暂时有这个设定，但没有切换的地方。所以总是流式响应
+  bool isStream = true;
+
+  // 当前正在响应的api返回流(放在全局为了可以手动取消)
+  StreamWithCancel<CCRespBody> respStream = StreamWithCancel.empty();
 
   @override
   void initState() {
@@ -92,12 +77,6 @@ class _OneChatScreenState extends State<OneChatScreen> {
     });
   }
 
-  @override
-  void dispose() {
-    _isDisposed = true;
-    super.dispose();
-  }
-
   // 2024-07-12 如果是餐次相册的图片分析，那么进入这个页面需要先处理图片数据
   initSend() async {
     if (widget.imageUrl != null) {
@@ -105,6 +84,8 @@ class _OneChatScreenState extends State<OneChatScreen> {
       try {
         // 可能会出现不存在的图片路径，那边这里转base64就会报错，那么就返回上一页了
         var tempBase64Str = base64Encode((await selectedImage.readAsBytes()));
+
+        if (!mounted) return;
         setState(() {
           imageBase64String = "data:image/jpeg;base64,$tempBase64Str";
 
@@ -114,8 +95,6 @@ class _OneChatScreenState extends State<OneChatScreen> {
           // 初始化提交之后，就不再发送图片了
           isFirstSendImage = false;
         });
-
-        print(imageBase64String);
       } catch (e) {
         // 图片数据不能转base64,就弹窗提示，并返回上一页
         if (!mounted) return;
@@ -150,73 +129,63 @@ class _OneChatScreenState extends State<OneChatScreen> {
     }
   }
 
-  // 这个发送消息实际是将对话文本添加到对话列表中
-  // 但是在用户发送消息之后，需要等到AI响应，成功响应之后将响应加入对话中
-  _sendMessage(String text, {String role = "user", CCUsage? usage}) {
-    // 发送消息的逻辑，这里只是简单地将消息添加到列表中
-    var temp = ChatMessage(
-      messageId: const Uuid().v4(),
-      content: text,
-      role: role,
-      dateTime: DateTime.now(),
-      promptTokens: usage?.promptTokens, // prompt 使用的token数(输入)
-      completionTokens: usage?.completionTokens, // 内容生成的token数(输出)
-      totalTokens: usage?.totalTokens,
+  // 在用户输入或者AI响应后，需要把对话列表滚动到最下面
+  // 调用时放在状态改变函数中
+  chatListScrollToBottom() {
+    // 每收到一点新的响应文本，就都滚动到ListView的底部
+    // 注意：ai响应的消息卡片下方还有一行功能按钮，这里滚动了那个还没显示的话是看不到的
+    // 所以滚动到最大还加一点高度（大于实际功能按钮高度也没问题）
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent + 80,
+      curve: Curves.easeOut,
+      // 注意：sse的间隔比较短，这个滚动也要快一点
+      duration: const Duration(milliseconds: 50),
     );
+  }
 
-    // 注意：如果在AI异步回复前，用户返回到其他页面，这里就不存在状态了，就会报错
-    if (_isDisposed) return;
+  // 2024-12-02 改为仅用户可以发送消息，AI响应直接在响应函数中处理
+  _sendMessage(String text, {CCUsage? usage}) {
     setState(() {
-      // AI思考和用户输入是相反的(如果角色是用户，那就是在等到机器回复了)
-      isBotThinking = (role == "user");
-
-      messages.add(temp);
+      messages.add(ChatMessage(
+        messageId: const Uuid().v4(),
+        content: text,
+        role: "user",
+        dateTime: DateTime.now(),
+        promptTokens: usage?.promptTokens, // prompt 使用的token数(输入)
+        completionTokens: usage?.completionTokens, // 内容生成的token数(输出)
+        totalTokens: usage?.totalTokens,
+      ));
 
       _userInputController.clear();
       // 滚动到ListView的底部
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        curve: Curves.easeOut,
-        duration: const Duration(milliseconds: 300),
-      );
+      chatListScrollToBottom();
 
-      // 如果是用户发送了消息，则开始等到AI响应(如果不是用户提问，则不会去调用接口)
-      if (role == "user") {
-        // 如果是用户输入时，在列表中添加一个占位的消息，以便思考时的装圈和已加载的消息可以放到同一个list进行滑动
-        // 一定注意要记得AI响应后要删除此占位的消息
-        placeholderMessage.dateTime = DateTime.now();
-        messages.add(placeholderMessage);
-
-        // 获取大模型应答
-        _getLlmResponse();
-      }
+      // 获取大模型应答
+      _getLlmResponse();
     });
   }
 
-  // 根据不同的平台、选中的不同模型，调用对应的接口，得到回复
-  // 虽然返回的响应通用了，但不同的平台和模型实际取值还是没有抽出来的
+  // 得到模型响应
   _getLlmResponse() async {
-    // 将已有的消息处理成Ernie支出的消息列表格式(构建查询条件时要删除占位的消息)
+    // 在调用前，不会设置响应状态
+    if (isBotThinking) return;
+    setState(() {
+      isBotThinking = true;
+    });
+
+    // 将已有的消息处理成支持的消息列表格式(构建查询条件时要删除占位的消息)
     List<CCMessage> msgs = messages
-        .where((e) => e.isPlaceholder != true)
-        .map((e) => CCMessage(
-              content: e.content,
-              role: e.role,
-            ))
+        .map((e) => CCMessage(content: e.content, role: e.role))
         .toList();
 
-    // 2024-07-12 如果有图片，content结构会不一样.
-    // 看多伦对话的示例，似乎只需要第一次时传图片数据，后面不必再传
+    // 如果是图片，图片要单独处理下
     if (imageBase64String != null) {
-      // yi-vision 暂不支持设置系统消息。
       msgs = messages
-          .where((e) => e.isPlaceholder != true && e.role != "system")
           .map((e) => CCMessage(
-                content: (e.role == "assistant")
+                content: (e.role == "assistant" || e.role == "system")
                     ? e.content
                     : isFirstSendImage == true
                         ? [
-                            // 2024-07-12 这里就不使用VisionContent，直接拼接json
                             {
                               "type": "image_url",
                               "image_url": {"url": imageBase64String}
@@ -231,59 +200,99 @@ class _OneChatScreenState extends State<OneChatScreen> {
           .toList();
     }
 
-    // 等待请求响应
-    // 这里一定要确保存在模型名称，因为要作为http请求参数
-    List<CCRespBody> temp;
+    // 流式响应处理
+    StreamWithCancel<CCRespBody> stream;
     if (imageBase64String != null) {
-      temp = await getChatResp(
+      stream = await getChatRespStream(
         ApiPlatform.lingyiwanwu,
         msgs,
         model: ccmSpecList[CCM.YiVision]!.model,
+        stream: isStream,
       );
     } else {
-      temp = await getChatResp(
+      stream = await getChatRespStream(
         ApiPlatform.lingyiwanwu,
         msgs,
         model: ccmSpecList[CCM.YiSpark]!.model,
+        stream: isStream,
       );
     }
 
-    // 得到回复后要删除表示加载中的占位消息
-    // 注意：如果在AI回复时，用户返回到其他页面，这里就不存在状态了，就会报错
-    if (!_isDisposed) {
-      setState(() {
-        messages.removeWhere((e) => e.isPlaceholder == true);
-      });
-    }
+    // 保存流以便可以取消
+    if (!mounted) return;
+    setState(() {
+      respStream = stream;
+    });
 
-    // 得到AI回复之后，添加到列表中，也注明不是用户提问
-    var tempText = temp.map((e) => e.customReplyText).join();
-    if (temp.isNotEmpty && temp.first.error?.code != null) {
-      if (!mounted) return;
-      tempText = """${CusAL.of(context).apiErrorHint}:
-\ncode: ${temp.first.error?.code} 
-\ntype: ${temp.first.error?.type} 
-\nmessage: ${temp.first.error?.message}
-""";
-    }
-
-    // 每次对话的结果流式返回，所以是个列表，就需要累加起来
-    int inputTokens = 0;
-    int outputTokens = 0;
-    int totalTokens = 0;
-    for (var e in temp) {
-      inputTokens += e.usage?.promptTokens ?? 0;
-      outputTokens += e.usage?.completionTokens ?? 0;
-      totalTokens += e.usage?.totalTokens ?? 0;
-    }
-    // 里面的promptTokens和completionTokens是百度这个特立独行的，在上面拼到一起了
-    var a = CCUsage(
-      promptTokens: inputTokens,
-      completionTokens: outputTokens,
-      totalTokens: totalTokens,
+    ChatMessage? csMsg = ChatMessage(
+      messageId: const Uuid().v4(),
+      role: "assistant",
+      content: "",
+      dateTime: DateTime.now(),
     );
 
-    _sendMessage(tempText, role: "assistant", usage: a);
+    setState(() {
+      messages.add(csMsg!);
+    });
+
+    respStream.stream.listen(
+      (crb) {
+        // 如果返回了[DONE]，则表示响应结束
+        if ((crb.customReplyText ?? "").contains('[DONE]')) {
+          setState(() {
+            csMsg = null;
+            isBotThinking = false;
+          });
+        } else {
+          // 为了每次有消息都能更新页面状态
+          setState(() {
+            isBotThinking = true;
+          });
+
+          // 更新响应文本
+          // 2024-11-04 讯飞星火，虽然成功返回，还是会有message栏位，其他的是出错了才有该栏位
+          // 所以需要判断该errorMsg的值
+          if ((crb.error != null)) {
+            csMsg?.content += """后台响应报错:
+          \n\n错误代码: ${crb.error?.code}
+          \n\n错误原因: ${crb.error?.message}
+          """;
+
+            if (!mounted) return;
+            setState(() {
+              csMsg = null;
+              isBotThinking = false;
+            });
+          } else {
+            csMsg?.content += crb.customReplyText ?? "";
+          }
+
+          // 更新token信息
+          csMsg?.promptTokens = (crb.usage?.promptTokens ?? 0);
+          csMsg?.completionTokens = (crb.usage?.completionTokens ?? 0);
+          csMsg?.totalTokens = (crb.usage?.totalTokens ?? 0);
+
+          chatListScrollToBottom();
+        }
+      },
+      onDone: () {
+        // 如果是流式响应，最后一条会带有[DNOE]关键字，所以在上面处理最后响应结束的操作
+        // 如果不是流式，响应流就只有1条数据，那么就只有在这里才能得到流结束了，所以需要在这里完成后的操作
+        // 但是如果是流式，还在这里处理结束操作的话会出问题(实测在数据还在推送的时候，这个ondone就触发了)
+        if (!isStream) {
+          if (!mounted) return;
+          // 流式响应结束了，就保存数据到db，并重置流式变量和aip响应标志
+          setState(() {
+            csMsg = null;
+            isBotThinking = false;
+          });
+        }
+      },
+      onError: (error) {
+        if (!mounted) return;
+        commonExceptionDialog(context, "异常提示", error.toString());
+      },
+    );
   }
 
   /// 最后一条大模型回复如果不满意，可以重新生成(中间的不行，因为后续的问题是关联上下文的)
@@ -292,10 +301,15 @@ class _OneChatScreenState extends State<OneChatScreen> {
     setState(() {
       // 将最后一条消息删除，并添加占位消息，重新发送
       messages.removeLast();
-      placeholderMessage.dateTime = DateTime.now();
-      messages.add(placeholderMessage);
 
-      _getLlmResponse();
+      // 2024-12-03 如果删除最后一条，消息列表只剩2条了(system和user)，
+      // 那表明其实是初始化的提问，需要带上图片
+      if (messages.length <= 2) {
+        messages.clear();
+        initSend();
+      } else {
+        _getLlmResponse();
+      }
     });
   }
 
@@ -313,7 +327,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
         behavior: HitTestBehavior.translucent,
         onTap: () {
           // 点击空白处可以移除焦点，关闭键盘
-          FocusScope.of(context).unfocus();
+          unfocusHandle();
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -356,23 +370,24 @@ class _OneChatScreenState extends State<OneChatScreen> {
             padding: EdgeInsets.all(5.sp),
             child: Column(
               children: [
-                // 如果是最后一个回复的文本，使用打字机特效
-                // if (index == messages.length - 1)
-                //   TypewriterText(text: messages[index].text),
-
                 // 如果是预设的system信息，则不显示
                 if (messages[index].role != "system")
-                  MessageItem(message: messages[index]),
+                  MessageItem(
+                    message: messages[index],
+                    // 只有最后一个才显示圈圈
+                    isBotThinking:
+                        index == messages.length - 1 ? isBotThinking : false,
+                  ),
 
-                // 如果是大模型回复，可以有一些功能按钮
-                if (messages[index].role == "assistant")
+                // 如果是大模型回复且回复完了，可以有一些功能按钮
+                if (messages[index].role == "assistant" &&
+                    isBotThinking != true)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       // 其中，是大模型最后一条回复，则可以重新生成
                       // 注意，还要排除占位消息
-                      if ((index == messages.length - 1) &&
-                          messages[index].isPlaceholder != true)
+                      if ((index == messages.length - 1))
                         TextButton(
                           onPressed: () {
                             regenerateLatestQuestion();
@@ -380,28 +395,26 @@ class _OneChatScreenState extends State<OneChatScreen> {
                           child: Text(CusAL.of(context).regeneration),
                         ),
                       //
-                      // 如果不是等待响应才可以点击复制该条回复
-                      if (messages[index].isPlaceholder != true)
-                        IconButton(
-                          onPressed: () {
-                            Clipboard.setData(
-                              ClipboardData(text: messages[index].content),
-                            );
 
-                            EasyLoading.showToast(
-                              CusAL.of(context).copiedHint,
-                              duration: const Duration(seconds: 3),
-                              toastPosition: EasyLoadingToastPosition.center,
-                            );
-                          },
-                          icon: Icon(Icons.copy, size: 20.sp),
-                        ),
-                      // 如果不是等待响应才显示token数量
-                      if (messages[index].isPlaceholder != true)
-                        Text(
-                          "tokens 输入:${messages[index].promptTokens} 输出:${messages[index].completionTokens} 总计:${messages[index].totalTokens}",
-                          style: TextStyle(fontSize: 10.sp),
-                        ),
+                      IconButton(
+                        onPressed: () {
+                          Clipboard.setData(
+                            ClipboardData(text: messages[index].content),
+                          );
+
+                          EasyLoading.showToast(
+                            CusAL.of(context).copiedHint,
+                            duration: const Duration(seconds: 3),
+                            toastPosition: EasyLoadingToastPosition.center,
+                          );
+                        },
+                        icon: Icon(Icons.copy, size: 20.sp),
+                      ),
+
+                      Text(
+                        "tokens 输入:${messages[index].promptTokens} 输出:${messages[index].completionTokens} 总计:${messages[index].totalTokens}",
+                        style: TextStyle(fontSize: 10.sp),
+                      ),
                       SizedBox(width: 10.sp),
                     ],
                   )
@@ -438,24 +451,40 @@ class _OneChatScreenState extends State<OneChatScreen> {
               },
             ),
           ),
-          IconButton(
-            // 如果AI正在响应，或者输入框没有任何文字，不让点击发送
-            onPressed: isBotThinking || userInput.isEmpty
-                ? null
-                : () {
-                    // 在当前上下文中查找最近的 FocusScope 并使其失去焦点，从而收起键盘。
-                    FocusScope.of(context).unfocus();
 
-                    // 用户发送消息
-                    _sendMessage(userInput);
-
-                    // 发送完要清空记录用户输的入变量
+          // 如果是API响应中，可以点击终止
+          isBotThinking
+              ? IconButton(
+                  onPressed: () async {
+                    await respStream.cancel();
+                    if (!mounted) return;
                     setState(() {
-                      userInput = "";
+                      _userInputController.clear();
+                      chatListScrollToBottom();
+                      isBotThinking = false;
                     });
                   },
-            icon: const Icon(Icons.send),
-          ),
+                  icon: const Icon(Icons.stop),
+                )
+              : IconButton(
+                  // 如果AI正在响应，或者输入框没有任何文字，不让点击发送
+                  onPressed: isBotThinking || userInput.isEmpty
+                      ? null
+                      : () {
+                          // 失去焦点，从而收起键盘。
+                          unfocusHandle();
+
+                          // 用户发送消息
+                          _sendMessage(userInput);
+
+                          // 发送完要清空记录用户输的入变量
+                          if (!mounted) return;
+                          setState(() {
+                            userInput = "";
+                          });
+                        },
+                  icon: const Icon(Icons.send),
+                ),
         ],
       ),
     );

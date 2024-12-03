@@ -14,14 +14,14 @@ class ChatMessage {
   // 之前是 isFromUser 是否来自用户，但角色有3种：system、user、assistant
   // 所以改判断，role!=user就不是来自用户
   final String role;
-  final String content; // 文本内容
+  String content; // 文本内容
   // 有可能对话存在输入图片(假如后续一个用户对话中存在图片切来切去，就最后每个问答来回都存上图片)
   final String? imageUrl;
-  final bool? isPlaceholder; // 是否是等待响应时的占位消息
+
   /// 2024-06-15 限时限量有token限制，所以存放每次对话的token消耗
-  final int? promptTokens; // 输入的token数
-  final int? completionTokens; // 输出的token数
-  final int? totalTokens;
+  int? promptTokens; // 输入的token数
+  int? completionTokens; // 输出的token数
+  int? totalTokens;
 
   ChatMessage({
     required this.messageId,
@@ -29,7 +29,6 @@ class ChatMessage {
     required this.role,
     required this.content,
     this.imageUrl,
-    this.isPlaceholder,
     this.promptTokens,
     this.completionTokens,
     this.totalTokens,
@@ -42,7 +41,6 @@ class ChatMessage {
       'role': role,
       'content': content,
       'image_url': imageUrl,
-      'is_placeholder': isPlaceholder,
       'prompt_tokens': promptTokens,
       'completion_tokens': completionTokens,
       'total_tokens': totalTokens,
@@ -60,7 +58,6 @@ class ChatMessage {
       role: map['role'] as String,
       content: map['content'] as String,
       imageUrl: map['image_url'] as String?,
-      isPlaceholder: bool.tryParse(map['is_placeholder']),
       promptTokens: int.tryParse(map['prompt_tokens']),
       completionTokens: int.tryParse(map['completion_tokens']),
       totalTokens: int.tryParse(map['total_tokens']),
@@ -73,7 +70,6 @@ class ChatMessage {
         role: json["role"],
         content: json["content"],
         imageUrl: json["image_url"],
-        isPlaceholder: bool.tryParse(json["is_placeholder"]),
         promptTokens: int.tryParse(json["prompt_tokens"]),
         completionTokens: int.tryParse(json["completion_tokens"]),
         totalTokens: int.tryParse(json["total_tokens"]),
@@ -85,7 +81,6 @@ class ChatMessage {
         "role": role,
         "content": content,
         "image_url": imageUrl,
-        "is_placeholder": isPlaceholder,
         "prompt_tokens": promptTokens,
         "completion_tokens": completionTokens,
         "total_tokens": totalTokens,
@@ -102,7 +97,6 @@ class ChatMessage {
      "role": "$role", 
      "content": ${jsonEncode(content)}, 
      "image_url": "$imageUrl", 
-     "is_placeholder":"$isPlaceholder",
      "prompt_tokens":"$promptTokens",
      "completion_tokens":"$completionTokens",
      "total_tokens":"$totalTokens"

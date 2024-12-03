@@ -374,7 +374,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             controller: _scrollController,
             child: GestureDetector(
               onTap: () {
-                FocusScope.of(context).unfocus();
+                unfocusHandle();
               },
               child: Padding(
                 padding: EdgeInsets.fromLTRB(5.sp, 5.sp, 10.sp, 5.sp),

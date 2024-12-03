@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.1-beta.1
+
+- refactor:
+  - 饮食模块中 AI 大模型响应改为流式，可以更快看到结果输出
+  - 稍微简化了动作和食物的 json 文件导入
+- chore:
+  - 升级到 flutter3.24.4，同步更新工具依赖库到最新
+  - 移除 Android 外其他平台环境内容
+- fix:
+  - 修正饮食记录页面，指定餐次图片更新页面重复异动未按预期执行的问题
+  - 检查大部分地方的 setState 前是否已经挂载
+  - Card 的阴影样式稍微统一
+  - 减少了一些无意义的 print 输出
+
 ## 0.2.0-beta.1
 
 - feat:

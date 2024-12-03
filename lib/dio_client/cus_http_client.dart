@@ -11,6 +11,7 @@ class HttpUtils {
   static Future get({
     required String path,
     Map<String, dynamic>? queryParameters,
+    CusRespType? responseType,
     bool showLoading = true,
     bool showErrorMessage = true,
   }) {
@@ -18,6 +19,7 @@ class HttpUtils {
       path: path,
       method: HttpMethod.get,
       queryParameters: queryParameters,
+      responseType: responseType,
       showLoading: showLoading,
       showErrorMessage: showErrorMessage,
     );
@@ -28,6 +30,7 @@ class HttpUtils {
     required String path,
     required HttpMethod method,
     dynamic headers,
+    CusRespType? responseType, // 可以自定义返回类型(默认是json)
     dynamic data,
     bool showLoading = true,
     bool showErrorMessage = true,
@@ -36,6 +39,7 @@ class HttpUtils {
       path: path,
       method: HttpMethod.post,
       headers: headers,
+      responseType: responseType,
       data: data,
       showLoading: showLoading,
       showErrorMessage: showErrorMessage,

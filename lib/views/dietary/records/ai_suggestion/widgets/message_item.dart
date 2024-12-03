@@ -8,8 +8,14 @@ import '../../../../../models/paid_llm/llm_chat.dart';
 
 class MessageItem extends StatelessWidget {
   final ChatMessage message;
+  // 2024-08-12 流式响应时，数据是逐步增加的，如果还在响应中加个符号
+  final bool? isBotThinking;
 
-  const MessageItem({super.key, required this.message});
+  const MessageItem({
+    super.key,
+    required this.message,
+    this.isBotThinking = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -51,57 +57,38 @@ class MessageItem extends StatelessWidget {
                   style: TextStyle(fontSize: 12.sp, color: textColor),
                 ),
               ),
-              // 如果是占位的消息，则显示装圈圈
-              if (message.isPlaceholder == true)
-                Card(
-                  elevation: 3,
-                  child: Padding(
-                    padding: EdgeInsets.all(5.sp),
-                    child: Row(
-                      crossAxisAlignment: crossAlignment,
+
+              Card(
+                elevation: 3,
+                child: Padding(
+                  padding: EdgeInsets.all(5.sp),
+
+                  /// 这里考虑根据 格式等格式化显示内容
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          message.content,
-                          style: const TextStyle(color: Colors.black),
+                        // 显示对话正文内容
+                        MarkdownBody(
+                          data: message.content,
+                          selectable: true,
+                          styleSheet: MarkdownStyleSheet(
+                            p: TextStyle(color: textColor),
+                          ),
                         ),
-                        SizedBox(
-                          height: 20.sp,
-                          width: 20.sp,
-                          child: const CircularProgressIndicator(),
-                        ),
+                        // 如果是流式加载中，显示一个加载圈
+                        if (message.role != "user" && isBotThinking == true)
+                          SizedBox(
+                            width: 16.sp,
+                            height: 16.sp,
+                            child: CircularProgressIndicator(strokeWidth: 2.sp),
+                          ),
                       ],
                     ),
                   ),
                 ),
-
-              // 如果不是占位的消息，则正常显示
-              if (message.isPlaceholder != true)
-                Card(
-                  elevation: 3,
-                  child: Padding(
-                    padding: EdgeInsets.all(5.sp),
-
-                    /// 这里考虑根据 格式等格式化显示内容
-                    child: SingleChildScrollView(
-                      child: MarkdownBody(
-                        data: message.content,
-                        selectable: true,
-                        // 设置Markdown文本全局样式
-                        styleSheet: MarkdownStyleSheet(
-                          // 普通段落文本颜色(假定用户输入就是普通段落文本)
-                          p: TextStyle(color: textColor),
-                          // ... 其他级别的标题样式
-                          // 可以继续添加更多Markdown元素的样式
-                        ),
-                      ),
-                      // Text(
-                      //   message.text,
-                      //   // 根据来源设置不同颜色
-                      //   style: TextStyle(color: textColor),
-                      // ),
-                    ),
-                  ),
-                ),
+              ),
             ],
           ),
         ),
