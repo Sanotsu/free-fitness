@@ -45,7 +45,7 @@ class _InitGuidePageState extends State<InitGuidePage> {
     userName: "FF-user",
     userCode: "FF-user",
     gender: genderOptions.first.value,
-    description: "一位富有爱心的free-fitness用户",
+    description: "一位富有爱心的 free-fitness 用户",
     password: "123456",
     dateOfBirth: "1994-07-02",
     height: 170,
@@ -233,7 +233,7 @@ class _InitGuidePageState extends State<InitGuidePage> {
 
     defaultUser.userName = "$deviceName 用户";
     defaultUser.userName = deviceName;
-    defaultUser.description = "一位在使用free-fitness的$deviceName用户";
+    defaultUser.description = "一位在使用 free-fitness 的$deviceName用户";
 
     // ？？？这里应该检查保存是否成功
     await _userHelper.insertUserList([defaultUser]);
