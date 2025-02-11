@@ -35,9 +35,20 @@ Free-Fitness 是使用 flutter 3.x 开发的集运动训练、饮食记录、日
 
 ## 版本更新
 
-- 2024-07-13 `0.2.0-beta.1`
+- 2024-12-03 `0.2.1-beta.1`
   - 主要接入零一万物 AI 大模型，对饮食记录进行 AI 分析和问答式提供建议。
-  - 更多改动参看[CHANGELOG](CHANGELOG.md)
+  - 更多改动参看 [CHANGELOG](CHANGELOG.md)
+
+_2025-02-11_
+
+当然，如果对 [硅基流动平台](https://siliconflow.cn/zh-cn/models) 感兴趣，还能用下我的邀请码注册，那就更好了，谢谢：
+
+```
+https://cloud.siliconflow.cn/i/tRIcST68
+```
+
+该平台有很多不同的大模型 API 可以调用，比如最新版本的 DeepSeek、Qwen、Llama、stable-diffusion 等。
+很多轻量级的模型可以免费使用，一些小需求可以节约时间，不必频繁切换。
 
 ## 功能说明
 
