@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/views/training/workouts/action_list.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_training_helper.dart';
@@ -9,6 +8,7 @@ import '../../../common/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
+import '../workouts/action_list.dart';
 import '../workouts/index.dart';
 
 ///
@@ -56,7 +56,7 @@ class _GroupListState extends State<GroupList> {
   }
 
   // 查询指定训练中的动作列表
-  _getGroupListByPlanId() async {
+  Future<void> _getGroupListByPlanId() async {
     // 如果已经在查询数据中，则忽略此次新的查询
     if (isLoading) return;
 
@@ -312,7 +312,8 @@ class _GroupListState extends State<GroupList> {
   }
 
   // 构建训练条目瓦片
-  _buildGroupItemListTile(List<GroupWithActions> groupList, int index) {
+  ListTile _buildGroupItemListTile(
+      List<GroupWithActions> groupList, int index) {
     GroupWithActions gwaItem = groupList[index];
     TrainingGroup groupItem = gwaItem.group;
 

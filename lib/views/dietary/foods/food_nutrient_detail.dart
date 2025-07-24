@@ -62,7 +62,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   //
 
   // 在修改了食物基本信息或者单份营养素之和，重新查询该食物信息
-  refreshFoodAndServing() async {
+  Future<void> refreshFoodAndServing() async {
     var newItem = await _dietaryHelper.searchFoodWithServingInfoByFoodId(
       widget.foodItem.food.foodId!,
     );
@@ -175,7 +175,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
 
   // todo 2023-12-05 因为单份营养素基础表没有是否标准的栏位，所以没法传servingType。
   // 所以以新增+删除代替修改
-  clickServingInfoModify() {
+  void clickServingInfoModify() {
     // 先找到被选中的索引，应该只有一个
     int trueIndices =
         List.generate(servingSelectedList.length, (index) => index)
@@ -212,7 +212,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     });
   }
 
-  clickServingInfoDelete() {
+  void clickServingInfoDelete() {
     if (servingSelectedList.where((e) => e == true).length == servingItemsNum) {
       showDialog(
         context: context,
@@ -281,7 +281,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     }
   }
 
-  clickServingInfoAdd() {
+  void clickServingInfoAdd() {
     showDialog(
       context: context,
       builder: (ctx) {
@@ -349,7 +349,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   }
 
   /// 表格显示食物基本信息
-  buildFoodTable(FoodAndServingInfo info) {
+  List<Widget> buildFoodTable(FoodAndServingInfo info) {
     var food = info.food;
     List<String> imageList = [];
     // 先要排除image是个空字符串在分割
@@ -413,7 +413,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   }
 
   // 构建食物基本信息表格的行数据
-  _buildTableRow(String label, String value) {
+  TableRow _buildTableRow(String label, String value) {
     return TableRow(
       children: [
         Padding(
@@ -443,7 +443,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   }
 
   /// 表格展示单份营养素信息
-  buildFoodServingDataTable(FoodAndServingInfo fsi) {
+  Scrollbar buildFoodServingDataTable(FoodAndServingInfo fsi) {
     var servingList = fsi.servingInfoList;
 
     return buildDataTableWithHorizontalScrollbar(
@@ -465,11 +465,14 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
               (Set<WidgetState> states) {
             // 所有行被选中后都使用统一的背景
             if (states.contains(WidgetState.selected)) {
-              return Theme.of(context).colorScheme.primary.withOpacity(0.08);
+              return Theme.of(context)
+                  .colorScheme
+                  .primary
+                  .withValues(alpha: 0.08);
             }
             // 偶数行使用灰色背景
             if (index.isEven) {
-              return Colors.grey.withOpacity(0.3);
+              return Colors.grey.withValues(alpha: 0.3);
             }
             // 对其他状态和奇数行使用默认值。
             return null;
@@ -510,7 +513,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   }
 
   // 表格的标题和单元格样式
-  _buildDataColumn(String text) {
+  DataColumn _buildDataColumn(String text) {
     return DataColumn(
       label: Text(
         text,
@@ -523,14 +526,14 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   }
 
   // 构建单个值的单元格
-  _buildDataCell(String text) {
+  DataCell _buildDataCell(String text) {
     return DataCell(
       Text(text, style: TextStyle(fontSize: CusFontSizes.itemSubTitle)),
     );
   }
 
   // 脂肪、碳水、蛋白质单元格有多个不同的值，要单独构建
-  _buildFatDataCell(
+  DataCell _buildFatDataCell(
     String totalFat,
     String transFat,
     String saturatedFat,
@@ -580,7 +583,8 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     );
   }
 
-  _buildChoDataCell(String totalCho, String sugar, String dietaryFiber) {
+  DataCell _buildChoDataCell(
+      String totalCho, String sugar, String dietaryFiber) {
     return DataCell(
       Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -613,7 +617,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
     );
   }
 
-  _buildMicroDataCell(
+  DataCell _buildMicroDataCell(
     String sodium,
     String potassium,
     String cholesterol,
@@ -669,7 +673,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   }
 
   // 单元格中有多个值，每个值都还有label和value
-  _buildDetailRowCellText(String label, String value) {
+  Row _buildDetailRowCellText(String label, String value) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [

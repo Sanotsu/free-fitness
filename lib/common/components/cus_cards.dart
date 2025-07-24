@@ -7,7 +7,7 @@ import '../utils/tools.dart';
 
 /// 子组件是带listtile和图片的一行row容器的卡片
 /// 用于显示模块首页一排一个带封面图的标题
-buildCoverCard(
+Card buildCoverCard(
   BuildContext context,
   Widget widget,
   String title,

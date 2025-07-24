@@ -33,7 +33,7 @@ class _UserInfoState extends State<UserInfo> {
     _queryLoginedUserInfo();
   }
 
-  _queryLoginedUserInfo() async {
+  Future<void> _queryLoginedUserInfo() async {
     if (isLoading) return;
     setState(() {
       isLoading = true;

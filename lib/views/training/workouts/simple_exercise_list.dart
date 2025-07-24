@@ -156,7 +156,7 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
     );
   }
 
-  _buildQueryAreaRow() {
+  Row _buildQueryAreaRow() {
     return Row(
       children: [
         Expanded(
@@ -254,7 +254,7 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
     );
   }
 
-  _buildListArea() {
+  ListView _buildListArea() {
     return ListView.builder(
       itemCount: exerciseItems.length + 1,
       controller: scrollController,

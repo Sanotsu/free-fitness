@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/models/dietary_state.dart';
 
 import '../../../../common/global/constants.dart';
 import '../../../../common/utils/db_dietary_helper.dart';
@@ -8,6 +7,7 @@ import '../../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
+import '../../../models/dietary_state.dart';
 import 'food_json_import.dart';
 import 'add_food_with_serving.dart';
 import 'food_nutrient_detail.dart';
@@ -311,7 +311,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
     });
   }
 
-  _buildSimpleFoodTile(FoodAndServingInfo fsi, int index) {
+  Card _buildSimpleFoodTile(FoodAndServingInfo fsi, int index) {
     var food = fsi.food;
     var servingList = fsi.servingInfoList;
     var foodName = "${food.product} (${food.brand})";
@@ -364,7 +364,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
     );
   }
 
-  _buildSimpleFoodTable(FoodAndServingInfo fsi) {
+  GestureDetector _buildSimpleFoodTable(FoodAndServingInfo fsi) {
     var food = fsi.food;
     var servingList = fsi.servingInfoList;
     var foodName = "${food.product} (${food.brand})";
@@ -477,7 +477,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
     );
   }
 
-  _buildDataCell(String text) {
+  DataCell _buildDataCell(String text) {
     return DataCell(
       Text(
         text,

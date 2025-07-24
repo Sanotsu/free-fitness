@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/models/paid_llm/common_chat_model_spec.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../apis/paid_llm_apis.dart';
@@ -14,6 +13,7 @@ import '../../../../common/global/constants.dart';
 import '../../../../common/utils/tool_widgets.dart';
 import '../../../../models/cus_app_localizations.dart';
 import '../../../../models/paid_llm/common_chat_completion_state.dart';
+import '../../../../models/paid_llm/common_chat_model_spec.dart';
 import '../../../../models/paid_llm/llm_chat.dart';
 import 'widgets/message_item.dart';
 
@@ -78,7 +78,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
   }
 
   // 2024-07-12 如果是餐次相册的图片分析，那么进入这个页面需要先处理图片数据
-  initSend() async {
+  Future<void> initSend() async {
     if (widget.imageUrl != null) {
       var selectedImage = File(widget.imageUrl!);
       try {
@@ -131,7 +131,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
 
   // 在用户输入或者AI响应后，需要把对话列表滚动到最下面
   // 调用时放在状态改变函数中
-  chatListScrollToBottom() {
+  void chatListScrollToBottom() {
     // 每收到一点新的响应文本，就都滚动到ListView的底部
     // 注意：ai响应的消息卡片下方还有一行功能按钮，这里滚动了那个还没显示的话是看不到的
     // 所以滚动到最大还加一点高度（大于实际功能按钮高度也没问题）
@@ -144,7 +144,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
   }
 
   // 2024-12-02 改为仅用户可以发送消息，AI响应直接在响应函数中处理
-  _sendMessage(String text, {CCUsage? usage}) {
+  void _sendMessage(String text, {CCUsage? usage}) {
     setState(() {
       messages.add(ChatMessage(
         messageId: const Uuid().v4(),
@@ -166,7 +166,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
   }
 
   // 得到模型响应
-  _getLlmResponse() async {
+  Future<void> _getLlmResponse() async {
     // 在调用前，不会设置响应状态
     if (isBotThinking) return;
     setState(() {
@@ -206,14 +206,14 @@ class _OneChatScreenState extends State<OneChatScreen> {
       stream = await getChatRespStream(
         ApiPlatform.lingyiwanwu,
         msgs,
-        model: ccmSpecList[CCM.YiVision]!.model,
+        model: ccmSpecList[CCM.YiVision2]!.model,
         stream: isStream,
       );
     } else {
       stream = await getChatRespStream(
         ApiPlatform.lingyiwanwu,
         msgs,
-        model: ccmSpecList[CCM.YiSpark]!.model,
+        model: ccmSpecList[CCM.YiLightning]!.model,
         stream: isStream,
       );
     }
@@ -297,7 +297,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
 
   /// 最后一条大模型回复如果不满意，可以重新生成(中间的不行，因为后续的问题是关联上下文的)
   /// 2024-06-20 限量的要计算token数量，所以不让重新生成(？？？但实际也没做累加的token的逻辑)
-  regenerateLatestQuestion() {
+  void regenerateLatestQuestion() {
     setState(() {
       // 将最后一条消息删除，并添加占位消息，重新发送
       messages.removeLast();
@@ -358,7 +358,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
   }
 
   /// 构建对话列表主体
-  buildChatListArea() {
+  Expanded buildChatListArea() {
     return Expanded(
       child: ListView.builder(
         controller: _scrollController, // 设置ScrollController
@@ -427,7 +427,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
   }
 
   /// 用户发送消息的区域
-  buildUserSendArea() {
+  Padding buildUserSendArea() {
     return Padding(
       padding: EdgeInsets.all(5.sp),
       child: Row(

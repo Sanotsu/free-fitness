@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gpt_markdown/gpt_markdown.dart';
 import 'dart:math' as math;
 
 import '../../layout/themes/cus_font_size.dart';
@@ -16,7 +16,9 @@ import 'tools.dart';
 MaterialColor buildMaterialColor(Color color) {
   List strengths = <double>[.05];
   Map<int, Color> swatch = {};
-  final int r = color.red, g = color.green, b = color.blue;
+  final int r = (color.r * 255.0).round() & 0xff,
+      g = (color.g * 255.0).round() & 0xff,
+      b = (color.b * 255.0).round() & 0xff;
 
   for (int i = 1; i < 10; i++) {
     strengths.add(0.1 * i);
@@ -30,12 +32,12 @@ MaterialColor buildMaterialColor(Color color) {
       1,
     );
   }
-  return MaterialColor(color.value, swatch);
+  return MaterialColor(color.toARGB32(), swatch);
 }
 
 // 生成随机颜色
-Color genRandomColor() =>
-    Color((math.Random().nextDouble() * 0xFFFFFF).toInt()).withOpacity(1.0);
+Color genRandomColor() => Color((math.Random().nextDouble() * 0xFFFFFF).toInt())
+    .withValues(alpha: 1.0);
 
 // 随机icon（可能没效果）
 final List<int> points = <int>[0xe0b0, 0xe0b1, 0xe0b2, 0xe0b3, 0xe0b4];
@@ -203,7 +205,7 @@ InputDecoration _buildInputDecoration(
   );
 }
 
-commonExceptionDialog(BuildContext context, String title, String message) {
+void commonExceptionDialog(BuildContext context, String title, String message) {
   showDialog(
     context: context,
     builder: (context) {
@@ -223,7 +225,7 @@ commonExceptionDialog(BuildContext context, String title, String message) {
   );
 }
 
-buildSmallChip(
+Chip buildSmallChip(
   String labelText, {
   Color? bgColor,
   double? labelTextSize,
@@ -240,7 +242,7 @@ buildSmallChip(
 }
 
 // 用一个按钮假装是一个标签，用来展示
-buildSmallButtonTag(
+RawMaterialButton buildSmallButtonTag(
   String labelText, {
   Color? bgColor,
   double? labelTextSize,
@@ -262,7 +264,7 @@ buildSmallButtonTag(
 
 // 一般当做标签用，比上面个还小
 // 传入的字体最好不超过10
-buildTinyButtonTag(
+SizedBox buildTinyButtonTag(
   String labelText, {
   Color? bgColor,
   double? labelTextSize,
@@ -295,7 +297,7 @@ buildTinyButtonTag(
 }
 
 // 带有横线滚动条的datatable
-buildDataTableWithHorizontalScrollbar({
+Scrollbar buildDataTableWithHorizontalScrollbar({
   required ScrollController scrollController,
   required List<DataColumn> columns,
   required List<DataRow> rows,
@@ -344,7 +346,7 @@ void showSnackMessage(
 }
 
 /// 强制收起键盘
-unfocusHandle() {
+void unfocusHandle() {
   // 这个不一定有用，比如下面原本键盘弹出来了，跳到历史记录页面，回来之后还是弹出来的
   // FocusScope.of(context).unfocus();
 
@@ -354,7 +356,7 @@ unfocusHandle() {
 }
 
 /// 通用的底部信息弹窗
-commonMDHintModalBottomSheet(
+void commonMDHintModalBottomSheet(
   BuildContext context,
   String title,
   String message, {
@@ -397,15 +399,12 @@ commonMDHintModalBottomSheet(
               child: SingleChildScrollView(
                 child: Padding(
                   padding: EdgeInsets.all(10.sp),
-                  child: MarkdownBody(
-                    data: message,
-                    selectable: true,
+                  child: GptMarkdown(
+                    message,
                     // 设置Markdown文本全局样式
-                    styleSheet: MarkdownStyleSheet(
-                      // 普通段落文本颜色(假定用户输入就是普通段落文本)
-                      p: TextStyle(fontSize: msgFontSize, color: Colors.black),
-                      // ... 其他级别的标题样式
-                      // 可以继续添加更多Markdown元素的样式
+                    style: TextStyle(
+                      fontSize: msgFontSize,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -419,7 +418,7 @@ commonMDHintModalBottomSheet(
 }
 
 /// json文件导入时显示的行中文本
-buildRichTextItem(
+RichText buildRichTextItem(
   String text,
   Color? color, {
   TextAlign textAlign = TextAlign.start,

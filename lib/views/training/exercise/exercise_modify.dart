@@ -88,7 +88,7 @@ class _ExerciseModifyState extends State<ExerciseModify> {
     return selectedLabels;
   }
 
-  _saveNewExercise() async {
+  Future<void> _saveNewExercise() async {
     var flag1 = _multiPrimarySelectKey.currentState?.validate();
     var flag2 = _multiSecondarySelectKey.currentState?.validate();
     var flag3 = _formKey.currentState!.saveAndValidate();
@@ -187,7 +187,7 @@ class _ExerciseModifyState extends State<ExerciseModify> {
     );
   }
 
-  _buildFormBuilder() {
+  FormBuilder _buildFormBuilder() {
     return FormBuilder(
       key: _formKey,
       child: Column(
@@ -351,7 +351,7 @@ class _ExerciseModifyState extends State<ExerciseModify> {
   }
 
   // 图片文件选择器
-  _buildFilePicker(
+  Padding _buildFilePicker(
     String name, {
     List<PlatformFile>? initialValue,
     String? labelText,
@@ -397,7 +397,7 @@ class _ExerciseModifyState extends State<ExerciseModify> {
   }
 
   // 构建下拉多选弹窗模块栏位(主要为了样式统一)
-  _buildModifyMultiSelectDialogField({
+  Padding _buildModifyMultiSelectDialogField({
     required List<CusLabel> items,
     GlobalKey<FormFieldState<dynamic>>? key,
     List<dynamic> initialValue = const [],

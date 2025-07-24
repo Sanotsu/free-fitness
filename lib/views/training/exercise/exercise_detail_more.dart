@@ -27,7 +27,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
   }
 
   // 根据数据库值从预设选项中显示对应标签
-  _getLabel(String? value, List<CusLabel> options) {
+  String _getLabel(String? value, List<CusLabel> options) {
     // 没有传值，返回空字符串
     if (value == null) return "";
 
@@ -42,7 +42,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
   }
 
   // 肌肉这个有多项，所以从预设选项中显示对应标签略有不同
-  _genMuscleOptionLabel(String? muscleStr) {
+  String _genMuscleOptionLabel(String? muscleStr) {
     if (muscleStr == null || muscleStr.trim().isEmpty) {
       return "";
     }
@@ -98,7 +98,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
     );
   }
 
-  buildTableData() {
+  List<Padding> buildTableData() {
     return [
       Padding(
         padding: EdgeInsets.all(5.sp),
@@ -181,7 +181,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
   }
 
   // 构建表格行数据
-  _buildTableRow(String label, String value) {
+  TableRow _buildTableRow(String label, String value) {
     return TableRow(
       children: [
         Padding(

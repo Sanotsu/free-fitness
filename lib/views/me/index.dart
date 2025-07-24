@@ -51,7 +51,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
   }
 
   // 查询登录用户的信息
-  _queryLoginedUserInfo() async {
+  Future<void> _queryLoginedUserInfo() async {
     if (isLoading) return;
     setState(() {
       isLoading = true;
@@ -74,7 +74,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
   }
 
   // 弹窗切换用户
-  _switchUser() async {
+  Future<void> _switchUser() async {
     var userList = await _userHelper.queryUserList();
 
     if (!mounted) return;
@@ -225,7 +225,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
   }
 
   // 用户基本信息展示区域
-  _buildBaseUserInfoArea(User userInfo) {
+  List<RenderObjectWidget> _buildBaseUserInfoArea(User userInfo) {
     return [
       SizedBox(height: 10.sp),
 
@@ -403,7 +403,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
     ];
   }
 
-  _buildInfoAndWeightChangeRow() {
+  Row _buildInfoAndWeightChangeRow() {
     return Row(
       children: [
         Expanded(
@@ -444,7 +444,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
     );
   }
 
-  _buildIntakeGoalAndRestTimeRow() {
+  Row _buildIntakeGoalAndRestTimeRow() {
     return Row(
       children: [
         Expanded(
@@ -483,7 +483,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
     );
   }
 
-  _buildBakAndRestoreAndMoreSettingRow() {
+  Row _buildBakAndRestoreAndMoreSettingRow() {
     return Row(
       children: [
         Expanded(

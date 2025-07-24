@@ -92,7 +92,7 @@ Future<Uint8List> makeTrainedReportPdf(
 }
 
 // 构建pdf的页面
-_buildPdfPage(
+pw.Page _buildPdfPage(
   List<TrainedDetailLog> logData,
   String date,
   String startDate,
@@ -153,7 +153,7 @@ _buildPdfPage(
 }
 
 // 构建pdf统计页面的标题部分(只有一行数据的表格当做标题)
-_buildHeaderTable(String lang) {
+pw.Table _buildHeaderTable(String lang) {
   return pw.Table(
     // 表格的边框设置
     border: pw.TableBorder.all(color: PdfColors.black),
@@ -190,7 +190,7 @@ _buildHeaderTable(String lang) {
 }
 
 // 构建每餐的子表格数据部分
-_buildBodyTable(List<TrainedDetailLog> trainedData, String lang) {
+pw.Table _buildBodyTable(List<TrainedDetailLog> trainedData, String lang) {
   // 计算所有训练日志的累加时间
   int totalRest =
       trainedData.fold(0, (prev, item) => prev + item.totalRestTime);

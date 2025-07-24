@@ -69,7 +69,7 @@ class _DetailModifyServingInfoState extends State<DetailModifyServingInfo> {
     });
   }
 
-  _modifyServingInfo() async {
+  Future<void> _modifyServingInfo() async {
     if (_servingInfoformKey.currentState!.saveAndValidate()) {
       // 营养素表单保存验证通过后，要先格式化成指定类型数据，再才能保持到db
       var servingList = parseServingInfo(

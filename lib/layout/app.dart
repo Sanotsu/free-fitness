@@ -1,17 +1,16 @@
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:free_fitness/layout/init_guide_page.dart';
-
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:free_fitness/models/cus_app_localizations.dart';
 
 import '../common/global/constants.dart';
-
+import '../l10n/app_localizations.dart';
+import '../models/cus_app_localizations.dart';
 import 'home.dart';
+import 'init_guide_page.dart';
 
 class FreeFitnessApp extends StatefulWidget {
   const FreeFitnessApp({super.key});
@@ -44,6 +43,8 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
             GlobalCupertinoLocalizations.delegate,
             // form builder表单验证的多国语言
             FormBuilderLocalizations.delegate,
+            // flutter_quill多国语言
+            FlutterQuillLocalizations.delegate,
           ],
           supportedLocales: const [
             Locale('zh', 'CH'),

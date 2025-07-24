@@ -116,7 +116,7 @@ Future<Uint8List> makeReportPdf(
 }
 
 // 构建pdf的页面
-_buildPdfPage(
+pw.Page _buildPdfPage(
   List<DailyFoodItemWithFoodServing> logData,
   Map<String, List<DailyFoodItemWithFoodServing>> logGroupedByMeal,
   String date,
@@ -184,7 +184,7 @@ _buildPdfPage(
 }
 
 // 构建pdf统计页面的标题部分(只有一行数据的表格当做标题)
-_buildMealHeaderTable(String lang) {
+pw.Table _buildMealHeaderTable(String lang) {
   return pw.Table(
     // 表格的边框设置
     border: pw.TableBorder.all(color: PdfColors.black),
@@ -211,7 +211,7 @@ _buildMealHeaderTable(String lang) {
 }
 
 // 构建pdf统计页面的数据表格数据部分(每餐都算一个子表格，多个子表格组合当做数据表格部分)
-_buildMealBodyTable(
+List<pw.Widget> _buildMealBodyTable(
   Map<String, List<DailyFoodItemWithFoodServing>> mealMap,
   String lang,
 ) {
@@ -256,7 +256,7 @@ _buildMealBodyTable(
 }
 
 // 构建每餐的子表格数据部分
-_buildMealSubBodyTable(
+pw.Table _buildMealSubBodyTable(
   List<DailyFoodItemWithFoodServing> mealData,
   String lang,
 ) {
@@ -370,7 +370,7 @@ _buildMealSubBodyTable(
 }
 
 // 构建当日总计的子表格数据部分
-_buildTotalCountSubBodyTable(
+pw.Table _buildTotalCountSubBodyTable(
   List<DailyFoodItemWithFoodServing> logData,
   String lang,
 ) {
@@ -459,7 +459,7 @@ pw.Widget expandedSubCountText(
       ),
     );
 
-dailyFoodItemAccumulate(List<DailyFoodItemWithFoodServing> list) {
+List<double> dailyFoodItemAccumulate(List<DailyFoodItemWithFoodServing> list) {
   var tempEnergy = 0.0;
   var tempProtein = 0.0;
   var tempFat = 0.0;

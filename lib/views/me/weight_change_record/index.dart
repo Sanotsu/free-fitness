@@ -361,7 +361,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                       child: Column(
                         children: [
                           Text(
-                            CusAL.of(context).weightLabel('(cm)'),
+                            CusAL.of(context).heightLabel('(cm)'),
                             style: TextStyle(fontSize: CusFontSizes.flagMedium),
                           ),
                           DecimalNumberPicker(
@@ -428,7 +428,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
 }
 
 // 构建bmi文字
-buildWeightBmiText(double bmi, BuildContext context) {
+Text buildWeightBmiText(double bmi, BuildContext context) {
   if (bmi < 18.4) {
     return Text(
       CusAL.of(context).bmiLabels("0"),

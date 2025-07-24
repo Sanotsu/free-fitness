@@ -128,10 +128,10 @@ class _ActionFollowPracticeWithTTSState
 
   TtsState ttsState = TtsState.stopped;
 
-  get isPlaying => ttsState == TtsState.playing;
-  get isStopped => ttsState == TtsState.stopped;
-  get isPaused => ttsState == TtsState.paused;
-  get isContinued => ttsState == TtsState.continued;
+  bool get isPlaying => ttsState == TtsState.playing;
+  bool get isStopped => ttsState == TtsState.stopped;
+  bool get isPaused => ttsState == TtsState.paused;
+  bool get isContinued => ttsState == TtsState.continued;
 
   bool get isIOS => !kIsWeb && Platform.isIOS;
   bool get isAndroid => !kIsWeb && Platform.isAndroid;
@@ -210,7 +210,7 @@ class _ActionFollowPracticeWithTTSState
   }
 
   /// 获取指定动作的次数或者持续时间(休息或者跟练的页面显示有用)
-  String _getActionCountString(index) {
+  String _getActionCountString(int index) {
     // currentActionDetail
     var curAd = actions[index];
     // currentExercisecountingMode
@@ -257,7 +257,7 @@ class _ActionFollowPracticeWithTTSState
   ///
 
   // 初始化tts服务
-  initTts() {
+  void initTts() {
     flutterTts = FlutterTts();
 
     _setAwaitOptions();
@@ -315,12 +315,12 @@ class _ActionFollowPracticeWithTTSState
     if (engine != null) {
     } else {
       if (!mounted) return;
-      // EasyLoading.showToast(CusAL.of(context).noTtsEngine);
+      // EasyLoading.showError(CusAL.of(context).noTtsEngine);
       toastification.show(
         context: context,
         type: ToastificationType.warning,
         style: ToastificationStyle.fillColored,
-        alignment: Alignment.center,
+        alignment: Alignment.topCenter,
         title: Text(CusAL.of(context).noTtsEngine),
         autoCloseDuration: const Duration(seconds: 5),
       );
@@ -499,7 +499,7 @@ class _ActionFollowPracticeWithTTSState
   }
 
   /// 预备时的主要部件
-  _buildPrepareScreen() {
+  List<Expanded> _buildPrepareScreen() {
     return [
       Expanded(
         // 这里的盒子，只是单纯区分休息时显示下一个要小点，跟练时图片大点
@@ -613,7 +613,7 @@ class _ActionFollowPracticeWithTTSState
   }
 
   /// 跟练时的主要部件
-  _buildFollowScreen() {
+  List<Widget> _buildFollowScreen() {
     return [
       Expanded(
         // 这里的盒子，只是单纯区分休息时显示下一个要小点，跟练时图片大点
@@ -980,7 +980,7 @@ class _ActionFollowPracticeWithTTSState
   }
 
   /// 休息时的主要部件
-  _buildRestScreen() {
+  List<Expanded> _buildRestScreen() {
     return [
       Expanded(
         flex: 1,
@@ -1198,7 +1198,7 @@ class _ActionFollowPracticeWithTTSState
   }
 
   // 跟练完成时的弹窗(有再来一次和跳到报告页面，并保存数据到数据库)
-  _showFinishedDialog() async {
+  Future<void> _showFinishedDialog() async {
     var endTime = DateTime.now();
     var tempTime =
         endTime.millisecondsSinceEpoch - startedMoment.millisecondsSinceEpoch;

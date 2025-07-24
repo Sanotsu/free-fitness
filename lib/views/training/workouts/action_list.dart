@@ -52,7 +52,7 @@ class _ActionListState extends State<ActionList> {
   }
 
   // 查询指定训练中的动作列表
-  _getActionListByGroupId() async {
+  Future<void> _getActionListByGroupId() async {
     // 如果已经在查询数据中，则忽略此次新的查询
     if (isLoading) return;
 
@@ -77,7 +77,7 @@ class _ActionListState extends State<ActionList> {
   }
 
 // 保存现有的动作列表到当前训练中
-  _saveActionList() async {
+  Future<void> _saveActionList() async {
     // 必须要把原本的action id置为空，然后让数据库设定的自增生效，否则显示的结果默认以主键排序，和实际显示的结果可能不一致。
     List<TrainingAction> tempList =
         actionList.map((e) => e.action..actionId = null).toList();
@@ -278,7 +278,7 @@ class _ActionListState extends State<ActionList> {
   }
 
   // 构建可以重新排序的动作列表
-  _buildReorderableList() {
+  ReorderableListView _buildReorderableList() {
     return ReorderableListView.builder(
       // 如果是修改，才允许长按进行拖拽
       buildDefaultDragHandles: _isEditing,
@@ -397,7 +397,7 @@ class _ActionListState extends State<ActionList> {
   }
 
   /// 动作列表中新增动作，会查询简单exercise列表，选中某个exercise之后带回本页面，加入到action list中
-  _buildAddActionButton() {
+  FloatingActionButton _buildAddActionButton() {
     return FloatingActionButton(
       onPressed: () {
         Navigator.push(

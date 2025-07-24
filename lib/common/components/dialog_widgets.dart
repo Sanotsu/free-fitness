@@ -12,7 +12,7 @@ import '../global/constants.dart';
 
 /// 弹窗中的关闭按钮
 /// 目前在基础运动详情弹窗、动作详情弹窗、动作配置弹窗中可复用
-buildCloseButton(
+Container buildCloseButton(
   BuildContext context, {
   dynamic popValue, // 需要继续往上pop的数据
 }) {
@@ -40,7 +40,7 @@ buildCloseButton(
 /// 弹窗中的标题部分
 /// 主体是个ListTile，但有的地方其title只是显示文本，有的可能会是按钮，所以title部分保留传入部件
 /// 目前在基础运动详情弹窗、动作详情弹窗、动作配置弹窗中可复用
-buildTitleAndDescription(Widget? title, String subtitle) {
+Padding buildTitleAndDescription(Widget? title, String subtitle) {
   // color: const Color.fromARGB(255, 239, 243, 244),
   // 2023-12-25 因为有设计深色模式，所以不能固定为白色
   return Padding(
@@ -82,7 +82,7 @@ Image buildExerciseImage(Exercise exercise) {
 }
 
 // 图片轮播
-buildImageCarouselSlider(
+CarouselSlider buildImageCarouselSlider(
   List<String> imageList, {
   bool isNoImage = false, // 是否不显示图片，默认就算无图片也显示占位图片
   int type = 3, // 轮播图是否可以点击预览图片，预设为3(具体类型参看下方实现方法)
@@ -122,7 +122,7 @@ buildImageCarouselSlider(
 ///   2 点击某张图片，可以跳转新页面对该图片并进行缩放预览
 ///   3 点击某张图片，可以弹窗对该图片所在整个列表进行缩放预览(默认选项)
 ///   default 单纯的轮播展示,点击图片无动作
-_buildImageCarouselSliderType(
+StatelessWidget _buildImageCarouselSliderType(
   int type,
   BuildContext context,
   String imageUrl,
@@ -214,7 +214,7 @@ _buildImageCarouselSliderType(
   }
 }
 
-buildImageCarouselSliderTypeOld(
+StatelessWidget buildImageCarouselSliderTypeOld(
   int type,
   BuildContext context,
   String imageUrl,

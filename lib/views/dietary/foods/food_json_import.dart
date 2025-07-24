@@ -3,14 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/common/utils/tools.dart';
-import 'package:free_fitness/models/dietary_state.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
+import '../../../models/dietary_state.dart';
 import '../../../models/food_composition.dart';
 
 ///
@@ -102,7 +102,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
   }
 
   // 讲json数据保存到数据库中
-  _saveToDb() async {
+  Future<void> _saveToDb() async {
     if (isLoading) return;
 
     setState(() {
@@ -236,7 +236,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
   }
 
   // 构建功能按钮区
-  _buildButtonsArea() {
+  Card _buildButtonsArea() {
     return Card(
       elevation: 5,
       child: Row(
@@ -275,7 +275,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
   }
 
   // 当上传的食物营养素信息超过50条，就单纯的列表展示
-  _buildFoodServingListArea() {
+  List<Widget> _buildFoodServingListArea() {
     return [
       RichText(
         textAlign: TextAlign.left,
@@ -341,7 +341,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
   }
 
   // 当上传的食物营养素信息不超过50条，可以表格管理
-  _buildFoodServingDataTable() {
+  List<Widget> _buildFoodServingDataTable() {
     return [
       Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.sp),
@@ -410,11 +410,11 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
                     return Theme.of(context)
                         .colorScheme
                         .primary
-                        .withOpacity(0.08);
+                        .withValues(alpha: 0.08);
                   }
                   // Even rows will have a grey color.
                   if (index.isEven) {
-                    return Colors.grey.withOpacity(0.3);
+                    return Colors.grey.withValues(alpha: 0.3);
                   }
                   return null; // Use default value for other states and odd rows.
                 }),

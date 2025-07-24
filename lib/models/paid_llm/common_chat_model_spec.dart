@@ -36,6 +36,10 @@ class CusUrlSpec {
 
 // 对话模型列表(chat completion model)
 enum CCM {
+  // 2025-07-24 下面的版本都没有了，现在只有这两个了
+  YiVision2,
+  YiLightning,
+
   // Yi前缀，零一万物中，全都收费的
   YiLarge,
   YiMedium,
@@ -77,6 +81,14 @@ class CCMSpec {
 
 /// 具体的模型信息
 final Map<CCM, CCMSpec> ccmSpecList = {
+  CCM.YiVision2: CCMSpec(
+      ApiPlatform.lingyiwanwu, "yi-vision-2", 'YiVision2', 16000, false, 6, 6,
+      feature: " ", useCase: " "),
+  CCM.YiLightning: CCMSpec(ApiPlatform.lingyiwanwu, "yi-lightning",
+      'YiLightning', 16000, false, 0.99, 0.99,
+      feature: " ", useCase: ""),
+
+  /// 下面的虽然官方已经没有了，但实际还能用的
   CCM.YiLarge: CCMSpec(
       ApiPlatform.lingyiwanwu, "yi-large", 'YiLarge', 32000, false, 20, 20,
       feature: """最新版本的yi-large模型。

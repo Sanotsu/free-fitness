@@ -70,7 +70,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
     getImageByPhotos();
   }
 
-  getImageByPhotos() {
+  void getImageByPhotos() {
     // 如果有照片，则先显示照片
     if (inputPhotos != null) {
       String paths = inputPhotos!.photos;
@@ -88,7 +88,7 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
 
   // 2024-12-02 因为存在删除餐次图片的情况，所以删除之后再新增，图片编号就变了。
   // 删除之后、新增了，再修改，就要用新的编号了
-  rebuildMealPhoto() async {
+  Future<void> rebuildMealPhoto() async {
     List<MealPhoto> temp = await _dietaryHelper.queryMealPhotoList(
       CacheUser.userId, // userId是必传的
       startDate: widget.date,

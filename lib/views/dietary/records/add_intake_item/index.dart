@@ -105,7 +105,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   }
 
   /// 滚动到底部加载更多数据
-  _scrollListener() {
+  void _scrollListener() {
     if (isFoodLoading) return;
 
     final maxScrollExtent = scrollController.position.maxScrollExtent;
@@ -118,7 +118,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   }
 
   /// 处理点击了搜索按钮
-  _handleSearch() {
+  void _handleSearch() {
     // 取消键盘输入框聚焦
     unfocusHandle();
     setState(() {
@@ -130,7 +130,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   }
 
   /// 加载食物数据，每次10条
-  _loadFoodListData() async {
+  Future<void> _loadFoodListData() async {
     if (isFoodLoading) return;
 
     setState(() {
@@ -158,7 +158,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   ///
   /// 处理Tab切换
   ///
-  _handleTabSelection() {
+  void _handleTabSelection() {
     // 暂时当tab切换到食物列表时，选中的最近摄入条目清空
     // 因为tab的切换最近摄入的饮食条目的数据不会变化，所以不用重新查询
     if (_tabController.index == 1) {
@@ -174,7 +174,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   }
 
   /// 有指定日期查询指定日期的饮食记录条目，没有就当前日期
-  _queryRecentDailyFoodItemList({String? mealEnLabel}) async {
+  Future<void> _queryRecentDailyFoodItemList({String? mealEnLabel}) async {
     if (isRecentLoading) return;
 
     setState(() {
@@ -217,7 +217,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   }
 
   /// 将选择的最近摄入数据保存到数据库
-  _saveSelectedRecentListToDb() async {
+  Future<void> _saveSelectedRecentListToDb() async {
     if (isRecentLoading) return;
 
     setState(() {
@@ -302,7 +302,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   ///
   /// appbar 标题
   ///
-  buildAppBarTitle() {
+  ListTile buildAppBarTitle() {
     return ListTile(
       // 这里使用DropdownButton可以控制显示的大小，用DropdownMenu暂时没搞定，会挤掉子标题文字
       title: SizedBox(
@@ -360,7 +360,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   ///
   /// appbar 动作按钮
   ///
-  buildAppBarActions() {
+  List<Widget> buildAppBarActions() {
     return [
       /// 当tab是最近饮食记录且有选中摄入条目，才显示添加按钮
       if (_tabController.index == 0 && selectedIndexes.isNotEmpty)
@@ -404,7 +404,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   ///
   /// 构建最近30天对应餐次摄入的条目数据
   ///
-  buildRecentFoodListTabView() {
+  ListView buildRecentFoodListTabView() {
     return ListView.builder(
       itemCount: dfiwfsList.length,
       itemBuilder: (BuildContext context, int index) {
@@ -466,7 +466,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   ///
   /// 构建简单食物列表条目数据
   ///
-  buildSimpleFoodListTabView() {
+  Padding buildSimpleFoodListTabView() {
     return Padding(
       padding: EdgeInsets.all(5.sp),
       child: Column(
@@ -495,7 +495,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   }
 
   /// 查询条件输入行
-  _buildSearchRowArea() {
+  Padding _buildSearchRowArea() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 5.sp),
       child: Row(
@@ -520,7 +520,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   }
 
   /// 食物列表区域
-  _buildFoodItemCard(FoodAndServingInfo item) {
+  Card _buildFoodItemCard(FoodAndServingInfo item) {
     var food = item.food;
     var foodName = "${food.product} (${food.brand})";
 

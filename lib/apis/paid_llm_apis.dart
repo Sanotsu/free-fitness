@@ -11,6 +11,7 @@ import '_self_keys.dart';
 
 ///
 /// 这里 _self_keys 都是用自己的账号,要付费的
+// ignore: unintended_html_in_doc_comment
 /// final Map<ApiPlatform, String> cusAKMap = {
 ///   ApiPlatform.lingyiwanwu: 'xxxxx',
 /// };

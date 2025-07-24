@@ -16,7 +16,7 @@ void main() {
 
 //全局异常的捕捉
 class AppCatchError {
-  run() {
+  void run() {
     ///Flutter 框架异常
     FlutterError.onError = (FlutterErrorDetails details) async {
       ///线上环境 todo
@@ -50,7 +50,7 @@ class AppCatchError {
   }
 
   ///对搜集的 异常进行处理  上报等等
-  catchError(Object error, StackTrace stack) async {
+  Future<void> catchError(Object error, StackTrace stack) async {
     //是否是 Release版本
     debugPrint("AppCatchError>>>>>>>>>> [ kReleaseMode ] $kReleaseMode");
     debugPrint('AppCatchError>>>>>>>>>> [ Message ] $error');

@@ -56,7 +56,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
 
   // 初始化事件，以当前日查询对应的手记数据
   // 因为不能再改变state中用await，所以单独一个函数
-  _queryDairyList(DateTime datetime) async {
+  Future<void> _queryDairyList(DateTime datetime) async {
     if (isLoading) return;
 
     setState(() {
@@ -86,14 +86,14 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
   }
 
   // 获取指定某一天的手记列表
-  List<Diary> _getDiarysForADay(day) {
+  List<Diary> _getDiarysForADay(DateTime day) {
     return diaryList
         .where((e) => e.date == DateFormat(constDateFormat).format(day))
         .toList();
   }
 
   // 当某一天被选中时的回调
-  _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, selectedDay)) {
       setState(() {
         _selectedDay = selectedDay;
@@ -108,12 +108,12 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
   }
 
   // 当某个日期被长按可以新增备注？？？
-  _onDayLongPressed(DateTime selectedDay, DateTime focusedDay) {
+  void _onDayLongPressed(DateTime selectedDay, DateTime focusedDay) {
     debugPrint("日期被长按了---$selectedDay --$focusedDay");
   }
 
   // 当日期范围被选中时
-  _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
+  void _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
     setState(() {
       _selectedDay = null;
       _focusedDay = focusedDay;
@@ -207,7 +207,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
     );
   }
 
-  _buildDiaryCalender() {
+  TableCalendar<Object?> _buildDiaryCalender() {
     return TableCalendar(
       locale: box.read('language') == "en" ? "en_US" : 'zh_CN',
       firstDay: kFirstDay,
@@ -276,7 +276,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
     );
   }
 
-  _buildDiaryList(List<Diary> diarys) {
+  ListView _buildDiaryList(List<Diary> diarys) {
     return ListView.builder(
       itemCount: diarys.length,
       itemBuilder: (context, index) {

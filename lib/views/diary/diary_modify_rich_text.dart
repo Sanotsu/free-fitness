@@ -7,7 +7,6 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/models/diary_state.dart';
 
 import '../../common/global/constants.dart';
 import '../../common/utils/db_diary_helper.dart';
@@ -15,6 +14,7 @@ import '../../common/utils/tool_widgets.dart';
 import '../../common/utils/tools.dart';
 import '../../layout/themes/cus_font_size.dart';
 import '../../models/cus_app_localizations.dart';
+import '../../models/diary_state.dart';
 
 ///
 /// 2023-11-23 不是很完善，但基本能用。
@@ -108,7 +108,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
   // 除了初始化的时候，如果要重置修改，也可能需要调用这个函数
   // ？？？但修改已经保存过几次，再重置也不会是上次保存的结果了。
   // 所以本次修改不管保存了多少次，点击重置之后都恢复到最初传过来的这个数据，还是查询数据库现存的数据？
-  initFormatData(Diary item) {
+  void initFormatData(Diary item) {
     setState(() {
       // ？？？这里应该考虑转型失败的问题
       var diaryContent = json.decode(item.content);
@@ -136,7 +136,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
   }
 
   // 新增手记时，在没有保存的情况下点击重置，则不将修改状态改为false，只是清空当前的内容；只有点击返回时才退出当前页面。
-  resetInitData() {
+  void resetInitData() {
     // 标签清空(心情可以多选，分类只能单选)
     _formKey.currentState?.fields['mood']?.didChange([]);
     _formKey.currentState?.fields['category']?.didChange("");
@@ -156,7 +156,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
     FocusScope.of(context).requestFocus(titleTextFocusNode);
   }
 
-  _handleSaveButtonClick() async {
+  Future<void> _handleSaveButtonClick() async {
     FocusScope.of(context).requestFocus(FocusNode());
 
     // 没有标题则不行
@@ -393,7 +393,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
   }
 
   // 标题和标签选择放在一个折叠栏中，方便修改正文时折叠起来能显示更多内容
-  _buildTitleAndTags() {
+  Card _buildTitleAndTags() {
     return Card(
       elevation: 2.sp,
       child: ExpansionTile(
@@ -422,7 +422,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
 
   /// 主体从上到下应该是:标题和各项标签选择折叠框、富文本工具框折叠框、富文本编辑器。
   /// 当在预览时，只有：标题、标签、富文本编辑器，都是只读
-  buildTitleArea() {
+  Row buildTitleArea() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -458,7 +458,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
   }
 
   // 预览时显示各个标签
-  buildTagsArea() {
+  List buildTagsArea() {
     // 标签、心情、分类不同样式显示
     return [
       if (isEditing) ...buildTagSelectArea(),
@@ -492,7 +492,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
   }
 
   // 编辑时各个标签分类选择
-  buildTagSelectArea() {
+  List buildTagSelectArea() {
     return [
       // 这个只能单选，表现类似 radio
       _buildSingleSelectRow(
@@ -525,7 +525,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
   }
 
   // 富文本编辑预览区域
-  buildRichTextArea() {
+  GestureDetector buildRichTextArea() {
     return GestureDetector(
       onTap: () {
         /// 不这样手动跳转，编辑时焦点可能会冲突
@@ -565,46 +565,18 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
 
                     SizedBox(
                       width: 1.sw,
-                      child: QuillToolbar.simple(
+                      child: QuillSimpleToolbar(
                         controller: _controller,
-                        configurations: const QuillSimpleToolbarConfigurations(
-                            // 这几个默认没开启
-                            // showSmallButton: true,
-                            // showAlignmentButtons: true,
-                            // showDirection: true,
-                            ),
-                      ),
-                    ),
-
-                    /// 使用自定义工具栏的话，那些功能需要自己添加。
-                    // 比如要嵌入：视频、图片、摄像头、多媒体，需要自己指定
-                    // 具体参看 https://github.com/singerdmx/flutter-quill/blob/master/example/lib/screens/quill/my_quill_toolbar.dart#L103
-                    // 我这里只保留多媒体文件的几个
-                    QuillToolbar(
-                      configurations: QuillToolbarConfigurations(
-                        sharedConfigurations: QuillSharedConfigurations(
-                          locale: box.read('language') == 'system'
-                              ? null
-                              : Locale(box.read('language')),
-                        ),
-                      ),
-                      child: QuillToolbar(
-                        configurations: const QuillToolbarConfigurations(),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Wrap(
-                            children: [
-                              QuillToolbarImageButton(
-                                controller: _controller,
-                              ),
-                              QuillToolbarCameraButton(
-                                controller: _controller,
-                              ),
-                              QuillToolbarVideoButton(
-                                controller: _controller,
-                              ),
-                            ],
-                          ),
+                        config: QuillSimpleToolbarConfig(
+                          embedButtons: FlutterQuillEmbeds.toolbarButtons(),
+                          // 这几个默认是false所以改为true，其他未列出来的都是默认true
+                          showSmallButton: true,
+                          showLineHeightButton: true,
+                          showAlignmentButtons: true,
+                          showDirection: true,
+                          showClipboardCut: true,
+                          showClipboardCopy: true,
+                          showClipboardPaste: true,
                         ),
                       ),
                     ),
@@ -629,7 +601,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                   child: QuillEditor.basic(
                     focusNode: quillFocusNode,
                     controller: _controller,
-                    configurations: QuillEditorConfigurations(
+                    config: QuillEditorConfig(
                       autoFocus: false,
                       scrollable: true,
                       expands: true,
@@ -666,7 +638,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
   }
 
   // 心情多选行
-  _buildMultiSelectRow(
+  Row _buildMultiSelectRow(
     String title,
     String name,
     List<FormBuilderChipOption> options, {
@@ -679,7 +651,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
         // Center(child: Text(title)),
         // 这个可以单选选，表现类似 radio
         Expanded(
-          child: FormBuilderFilterChip(
+          child: FormBuilderFilterChips(
             autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: const InputDecoration(
               // 设置透明底色
@@ -715,7 +687,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
   }
 
   // 分类单选行
-  _buildSingleSelectRow(
+  Row _buildSingleSelectRow(
     String title,
     String name,
     List<FormBuilderChipOption> options, {
@@ -728,7 +700,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
         // Center(child: Text(title)),
         // 这个可以单选选，表现类似 radio
         Expanded(
-          child: FormBuilderChoiceChip(
+          child: FormBuilderChoiceChips(
             autovalidateMode: AutovalidateMode.onUserInteraction,
             decoration: const InputDecoration(
               // 设置透明底色
@@ -762,7 +734,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
   }
 
   // 用户指定输入标签，用逗号分割
-  _buildInputTagsArea() {
+  Column _buildInputTagsArea() {
     // 当用户输入以下列表中的符号时，自动切分成标签。
     List<String> endingSymbols = [',', '，', ';', "；", "。"];
 

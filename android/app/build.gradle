@@ -34,9 +34,13 @@ android {
     namespace "com.swm.free_fitness"
     // compileSdkVersion flutter.compileSdkVersion
     // 安卓14(API 34) - java17 - AGP8
-    compileSdkVersion 34
+    // compileSdkVersion 34
     // ndkVersion flutter.ndkVersion
-     ndkVersion = "26.1.10909125"
+    //  ndkVersion "26.1.10909125"
+
+    // Android 15(API 35)
+    compileSdk 35
+    ndkVersion "27.2.12479018"
 
     // 2024-11-16 升级到java 17
     compileOptions {

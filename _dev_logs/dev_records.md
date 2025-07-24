@@ -22,6 +22,10 @@
 
 - perf: 基本就是清除 print 语句，检查 setState 前是否已经挂载，Card 的阴影大小，Padding 的边距值大小，和少量的 bug 修复。
 
+#### 2025-07-22
+
+- perf: 更新使用的依赖和 flutter 到最新版本
+
 #### 2024-12-03
 
 - refactor: 重构调用大模型 API 为流式响应。

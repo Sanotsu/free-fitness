@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:free_fitness/models/user_state.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_user_helper.dart';
@@ -11,6 +10,7 @@ import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
+import '../../../models/user_state.dart';
 import 'week_intake_bar_chart.dart';
 
 class IntakeTargetPage extends StatefulWidget {
@@ -79,7 +79,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
   }
 
   // 格式化已经存在的每日卡路里和营养素目标
-  formatDailyIntakeMap() async {
+  Future<void> formatDailyIntakeMap() async {
     var temp = await _userHelper.queryUserWithIntakeDailyGoal(
       userId: CacheUser.userId,
     );
@@ -121,7 +121,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
   }
 
   // 当每日营养素目标切换了星期几的时候，要更新显示的表单为新的日期的数据
-  refreshWeekMacrosData() {
+  void refreshWeekMacrosData() {
     setState(() {
       // 给每日营养素目标设置初始值
       initialWeekMacrosMap = {
@@ -159,7 +159,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
     );
   }
 
-  buildWeekMacrosBarChartCard() {
+  Card buildWeekMacrosBarChartCard() {
     return Card(
       elevation: 5.sp,
       child: Padding(
@@ -215,7 +215,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
   }
 
   /// 构建修改整体宏量素目标的卡片
-  buildEditMacrosCard() {
+  Card buildEditMacrosCard() {
     return Card(
       elevation: 5.sp,
       child: Padding(
@@ -386,7 +386,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
   }
 
   /// 构建修改每日卡路里和宏量素目标的卡片
-  buildEditWeekMacrosCard() {
+  Card buildEditWeekMacrosCard() {
     return Card(
       elevation: 5.sp,
       child: Padding(
@@ -416,7 +416,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
   }
 
   // 上方的星期切换tab
-  _buildWeekTab() {
+  Row _buildWeekTab() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: List.generate(7, (index) {
@@ -450,7 +450,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
   }
 
   // 下方的每日营养素详情
-  _buildWeekTabView() {
+  SingleChildScrollView _buildWeekTabView() {
     return SingleChildScrollView(
       child: FormBuilder(
         key: _weekMacrosFormKey,
@@ -538,7 +538,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
   }
 
   // 点击保存修改数据
-  _updateWeekMacroData() async {
+  Future<void> _updateWeekMacroData() async {
     // 先保存到数据库，然后再显示非修改画面
     if (_isWeekdayEditing) {
       if (_weekMacrosFormKey.currentState!.saveAndValidate()) {

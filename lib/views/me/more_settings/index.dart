@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../layout/app.dart';
-// import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 
 class MoreSettings extends StatefulWidget {

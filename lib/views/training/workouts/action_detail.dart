@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -81,13 +82,13 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
   }
 
   // 动作的图片
-  _buildExerciseImageArea(Exercise item) {
+  CarouselSlider _buildExerciseImageArea(Exercise item) {
     List<String> imageList =
         (item.images?.trim().isNotEmpty == true) ? item.images!.split(",") : [];
     return buildImageCarouselSlider(imageList);
   }
 
-  _buildCountArea() {
+  Row _buildCountArea() {
     // 两行
     // return Padding(
     //   padding: EdgeInsets.only(left: 0.2.sw),
@@ -170,7 +171,7 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
 
 // ======== ？？？这个翻页部件，action config dialog和exercise detail的弹窗也有。
 // 因为有状态改变，估计要回调函数之类的，暂时不知道怎么抽出来复用
-  _buildPageButton() {
+  Container _buildPageButton() {
     return Container(
       color: CusColors.pageChangeBg,
       child: Row(

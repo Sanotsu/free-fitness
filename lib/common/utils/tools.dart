@@ -31,7 +31,7 @@ String formatTimestampToString(int timestamp) {
 }
 
 // 格式化Duration为 HH:MM:SS格式
-formatDurationToString(Duration d) =>
+String formatDurationToString(Duration d) =>
     d.toString().split('.').first.padLeft(8, "0");
 
 String formatDurationToString2(Duration duration) {
@@ -106,7 +106,7 @@ String generateRandomString(int minLength, int maxLength) {
 }
 
 // 获取文件大小（长度额bytes -> 字符串表示）
-getFileSize(int bytes, int decimals) {
+String getFileSize(int bytes, int decimals) {
   if (bytes <= 0) return "0 B";
   const suffixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   var i = (log(bytes) / log(1024)).floor();
@@ -282,7 +282,7 @@ String showCusLable(CusLabel cusLable) {
 }
 
 // 根据传入的值和对应的自定义标签列表，显示对应语言的标签
-getCusLabelText(String item, List<CusLabel> options) {
+String getCusLabelText(String item, List<CusLabel> options) {
   // 才根据数据库存的是英文，这里找到对应的中英文文显示
   var op = options.firstWhere(
     (element) => element.value == item,

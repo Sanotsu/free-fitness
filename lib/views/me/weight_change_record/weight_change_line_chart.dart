@@ -58,7 +58,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
     getWeightData();
   }
 
-  getWeightData({String? startDate, String? endDate}) async {
+  Future<void> getWeightData({String? startDate, String? endDate}) async {
     if (isLoading) return;
 
     setState(() {
@@ -127,7 +127,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
     }
     var unit = "kg";
     return SideTitleWidget(
-      axisSide: meta.axisSide,
+      meta: meta,
       child: Text(
         "${meta.formattedValue}$unit",
         style: TextStyle(fontSize: CusFontSizes.flagTiny),
@@ -158,7 +158,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
     }
 
     return SideTitleWidget(
-      axisSide: AxisSide.top,
+      meta: meta,
       fitInside: SideTitleFitInsideData.disable(),
       child: Text(
         text,
@@ -169,7 +169,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
   }
 
   // 将折线图保存到本地图片
-  saveChartImage() async {
+  Future<void> saveChartImage() async {
     try {
       // 2024-11-18 直接保存文件到指定位置
       var dir = Directory('/storage/emulated/0/free-fitness/images');
@@ -314,7 +314,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
           );
   }
 
-  _buildLineChart() {
+  SingleChildScrollView _buildLineChart() {
     // 折线的数据和配置
     final lineBarsData = [
       LineChartBarData(
@@ -450,7 +450,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
                   },
                   touchTooltipData: LineTouchTooltipData(
                     getTooltipColor: (_) => Colors.pink,
-                    tooltipRoundedRadius: 8.sp,
+                    tooltipBorderRadius: BorderRadius.circular(8.sp),
                     getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
                       return lineBarsSpot.map((lineBarSpot) {
                         return LineTooltipItem(

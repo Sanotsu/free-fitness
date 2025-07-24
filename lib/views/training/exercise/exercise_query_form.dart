@@ -48,7 +48,7 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
   }
 
   // 默认的简单首行，下拉选择锻炼部位和一些按钮
-  _genSimpleQueryArea() {
+  Card _genSimpleQueryArea() {
     return Card(
       elevation: 5.sp,
       child: Padding(
@@ -194,7 +194,7 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
   }
 
   // 展开更多查询条件
-  _genMoreQueryArea() {
+  StatelessWidget _genMoreQueryArea() {
     // 如果不展开更多查询条件，返回空数组
     if (!_showAdvancedOptions) return Container();
 

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
-import 'package:free_fitness/common/utils/tools.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
+import '../../../common/utils/tools.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 import 'common_utils_for_food_modify.dart';
@@ -52,7 +52,7 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
     });
   }
 
-  _updateFoodInfo() async {
+  Future<void> _updateFoodInfo() async {
     if (_foodFormKey.currentState!.saveAndValidate()) {
       var temp = _foodFormKey.currentState?.value;
       var food = Food(
@@ -128,7 +128,7 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
     );
   }
 
-  _buildFoodForm() {
+  ListView _buildFoodForm() {
     return ListView(
       children: [
         Padding(

@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
     initPermission();
   }
 
-  initPermission() async {
+  Future<void> initPermission() async {
     var state = await requestStoragePermission();
 
     if (!state) {

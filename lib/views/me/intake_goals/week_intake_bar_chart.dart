@@ -125,7 +125,7 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
   // 底部的标签
   Widget _bottomTitles(double value, TitleMeta meta) {
     return SideTitleWidget(
-      axisSide: meta.axisSide,
+      meta: meta,
       child: Text(
         showCusLableMapLabel(context, weekdayStringMap[value.toInt() + 1]),
         style: TextStyle(fontSize: CusFontSizes.flagTiny),
@@ -140,7 +140,7 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
     }
 
     return SideTitleWidget(
-      axisSide: meta.axisSide,
+      meta: meta,
       child: Text(
         "${meta.formattedValue} ${CusAL.of(context).unitLabels('0')}",
         style: TextStyle(fontSize: CusFontSizes.flagTiny),

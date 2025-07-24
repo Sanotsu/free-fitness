@@ -1,6 +1,6 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/views/training/exercise/exercise_modify.dart';
 
 import '../../../common/components/dialog_widgets.dart';
 import '../../../common/utils/db_training_helper.dart';
@@ -8,6 +8,7 @@ import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
 import 'exercise_detail_more.dart';
+import 'exercise_modify.dart';
 
 class ExerciseDetailDialog extends StatefulWidget {
   final List<Exercise> exerciseItems;
@@ -93,7 +94,7 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
   }
 
   // 动作的图片
-  _buildExerciseImageArea(Exercise item) {
+  CarouselSlider _buildExerciseImageArea(Exercise item) {
     List<String> imageList = [];
     // 先要排除image是个空字符串
     if (item.images != null && item.images!.trim().isNotEmpty) {
@@ -103,7 +104,7 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
   }
 
   // 更多和修改按钮
-  _buildMoreAndEditButton() {
+  SizedBox _buildMoreAndEditButton() {
     return SizedBox(
       height: 50.sp,
       child: Row(
@@ -178,7 +179,7 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
   }
 
   // 分页按钮行
-  _buildPageButton() {
+  Container _buildPageButton() {
     return Container(
       color: CusColors.pageChangeBg,
       child: Padding(

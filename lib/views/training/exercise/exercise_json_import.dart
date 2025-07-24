@@ -154,7 +154,7 @@ Ab_Roller.json:
   }
 
   // 讲json数据保存到数据库中
-  _saveToDb() async {
+  Future<void> _saveToDb() async {
     // 已经在保存中路，再点击保存直接返回即可
     if (isLoading) return;
 
@@ -293,7 +293,7 @@ Ab_Roller.json:
   }
 
   /// 上方的功能按钮区域
-  _buildButtonsArea() {
+  Card _buildButtonsArea() {
     return Card(
       elevation: 5.sp,
       child: Column(
@@ -355,7 +355,7 @@ Ab_Roller.json:
   }
 
   // 构建图片公共文件夹提示按钮
-  _buildHelpButton() {
+  IconButton _buildHelpButton() {
     return IconButton(
       icon: const Icon(Icons.help_outline, color: Colors.lightGreen),
       onPressed: () {
@@ -421,7 +421,7 @@ Ab_Roller.json:
   }
 
   // 构建上传文件或文件夹时显示锻炼的数据概要和文件列表信息
-  _buildExerciseListArea() {
+  List<Widget> _buildExerciseListArea() {
     return [
       RichText(
         textAlign: TextAlign.left,
@@ -490,7 +490,7 @@ Ab_Roller.json:
     ];
   }
 
-  _buildExerciseDataTable() {
+  List<Widget> _buildExerciseDataTable() {
     return [
       Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.sp),
@@ -559,11 +559,11 @@ Ab_Roller.json:
                     return Theme.of(context)
                         .colorScheme
                         .primary
-                        .withOpacity(0.08);
+                        .withValues(alpha: 0.08);
                   }
                   // Even rows will have a grey color.
                   if (index.isEven) {
-                    return Colors.grey.withOpacity(0.3);
+                    return Colors.grey.withValues(alpha: 0.3);
                   }
                   return null; // Use default value for other states and odd rows.
                 }),

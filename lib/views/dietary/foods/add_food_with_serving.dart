@@ -3,11 +3,11 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:free_fitness/common/utils/tools.dart';
 
 import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
+import '../../../common/utils/tools.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 import 'add_food_serving_info.dart';
@@ -43,7 +43,7 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
   bool isLoading = false;
 
   /// 食物和单份营养素存入数据库
-  _addFoodAndServingList() async {
+  Future<void> _addFoodAndServingList() async {
     var flag = _foodFormKey.currentState!.saveAndValidate();
 
     if (flag && inputServingInfos.isNotEmpty) {
@@ -114,7 +114,7 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  _formatTempServingFormDate() {
+  void _formatTempServingFormDate() {
     // 在完成添加/修改单份营养素详情的表单之后，点击保存会把填入的营养素信息传回食物修改页面。
     // 为了更加可视化这些用户填入的营养素，需要对其进行一些格式化之后显示文本
 
@@ -150,7 +150,7 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
     );
   }
 
-  _buildFoodForm() {
+  ListView _buildFoodForm() {
     return ListView(
       children: [
         Padding(
@@ -205,7 +205,7 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
   }
 
   // 构建单份营养素的类型单选框
-  _buildServingTypeRadio() {
+  FormBuilderRadioGroup<String> _buildServingTypeRadio() {
     return FormBuilderRadioGroup(
       decoration: InputDecoration(
         labelText: CusAL.of(context).nutrientLabel,
@@ -268,7 +268,7 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
   }
 
   // 单份营养素详情页面返回后的处理逻辑
-  _handleServingFormCallback(value) {
+  void _handleServingFormCallback(dynamic value) {
     // 从编辑单份营养素详情回来不要聚焦输入框
     unfocusHandle();
 

@@ -1,17 +1,16 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/common/global/constants.dart';
-import 'package:free_fitness/models/dietary_state.dart';
-
 import 'package:intl/intl.dart';
 
+import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/db_user_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
+import '../../../models/dietary_state.dart';
 import '../reports/index.dart';
 import 'add_intake_item/index.dart';
 import 'ai_suggestion/ai_suggestion_page.dart';
@@ -80,7 +79,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   }
 
   // 有指定日期查询指定日期的饮食记录条目，没有就当前日期
-  _queryDailyFoodItemList({String? mealEnLabel}) async {
+  Future<void> _queryDailyFoodItemList({String? mealEnLabel}) async {
     if (isLoading) return;
 
     setState(() {
@@ -137,7 +136,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   }
 
   // 有指定日期查询指定日期的饮食记录条目，没有就当前日期
-  _queryMealPhotoNums({String? mealEnLabel}) async {
+  Future<void> _queryMealPhotoNums({String? mealEnLabel}) async {
     // 理论上是默认查询当日的，有选择其他日期则查询指定日期
 
     List<MealPhoto> temp = await _dietaryHelper.queryMealPhotoList(
@@ -732,7 +731,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   }
 
   // 获取指定餐次的照片数量
-  _getPhotoCount(CusLabel mealtime) {
+  int _getPhotoCount(CusLabel mealtime) {
     return ((mealPhotoNums[mealtime.enLabel]?.photos != null &&
                 mealPhotoNums[mealtime.enLabel]!.photos.trim().isNotEmpty)
             ? mealPhotoNums[mealtime.enLabel]!.photos.trim().split(",")
@@ -741,7 +740,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   }
 
   // 餐次展开的文本样式基本都一样的
-  _buildListTileText(
+  Text _buildListTileText(
     String text, {
     double fontSize = 14,
     TextAlign textAlign = TextAlign.left,
@@ -961,7 +960,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   }
 
   /// 绘制营养素占比卡片区域
-  buildNutrientProportionCard() {
+  Card buildNutrientProportionCard() {
     return Card(
       elevation: 2.sp,
       child: Padding(
@@ -1015,7 +1014,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   }
 
   // 当日主要营养素图例
-  _buildMainNutrientsPieLegend() {
+  Column _buildMainNutrientsPieLegend() {
     // 绘图只是三大营养素
     var tempList = mainNutrientsChartData
         .where(
@@ -1053,7 +1052,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   }
 
   // 当日主要营养素饼图
-  _buildMainNutrientsPieChart() {
+  PieChart _buildMainNutrientsPieChart() {
     var temp = mainNutrientsChartData
         .where(
             (e) => e.label == "cho" || e.label == "protein" || e.label == "fat")
@@ -1074,7 +1073,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   }
 
   // 当日主要营养素图例
-  _buildMainNutrientsList() {
+  Column _buildMainNutrientsList() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,

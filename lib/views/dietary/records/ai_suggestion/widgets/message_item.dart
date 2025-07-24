@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../common/global/constants.dart';
@@ -70,12 +70,9 @@ class MessageItem extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // 显示对话正文内容
-                        MarkdownBody(
-                          data: message.content,
-                          selectable: true,
-                          styleSheet: MarkdownStyleSheet(
-                            p: TextStyle(color: textColor),
-                          ),
+                        GptMarkdown(
+                          message.content,
+                          style: TextStyle(color: textColor),
                         ),
                         // 如果是流式加载中，显示一个加载圈
                         if (message.role != "user" && isBotThinking == true)

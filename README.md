@@ -1,32 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-
-- [说明](#%E8%AF%B4%E6%98%8E)
-  - [版本更新](#%E7%89%88%E6%9C%AC%E6%9B%B4%E6%96%B0)
-  - [功能说明](#%E5%8A%9F%E8%83%BD%E8%AF%B4%E6%98%8E)
-    - [运动模块](#%E8%BF%90%E5%8A%A8%E6%A8%A1%E5%9D%97)
-      - [基础动作](#%E5%9F%BA%E7%A1%80%E5%8A%A8%E4%BD%9C)
-      - [训练做组](#%E8%AE%AD%E7%BB%83%E5%81%9A%E7%BB%84)
-      - [周期计划](#%E5%91%A8%E6%9C%9F%E8%AE%A1%E5%88%92)
-      - [跟练训练的页面](#%E8%B7%9F%E7%BB%83%E8%AE%AD%E7%BB%83%E7%9A%84%E9%A1%B5%E9%9D%A2)
-      - [运动报告](#%E8%BF%90%E5%8A%A8%E6%8A%A5%E5%91%8A)
-    - [饮食模块](#%E9%A5%AE%E9%A3%9F%E6%A8%A1%E5%9D%97)
-      - [食物成分](#%E9%A3%9F%E7%89%A9%E6%88%90%E5%88%86)
-      - [饮食日记](#%E9%A5%AE%E9%A3%9F%E6%97%A5%E8%AE%B0)
-      - [餐食相册](#%E9%A4%90%E9%A3%9F%E7%9B%B8%E5%86%8C)
-      - [饮食报告](#%E9%A5%AE%E9%A3%9F%E6%8A%A5%E5%91%8A)
-    - [手记模块](#%E6%89%8B%E8%AE%B0%E6%A8%A1%E5%9D%97)
-    - [用户与设置](#%E7%94%A8%E6%88%B7%E4%B8%8E%E8%AE%BE%E7%BD%AE)
-  - [使用说明](#%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E)
-    - [少量权限](#%E5%B0%91%E9%87%8F%E6%9D%83%E9%99%90)
-    - [敏感信息](#%E6%95%8F%E6%84%9F%E4%BF%A1%E6%81%AF)
-    - [数据格式](#%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F)
-  - [其他说明](#%E5%85%B6%E4%BB%96%E8%AF%B4%E6%98%8E)
-    - [仅 Android](#%E4%BB%85-android)
-    - [其实还存在很多的问题](#%E5%85%B6%E5%AE%9E%E8%BF%98%E5%AD%98%E5%9C%A8%E5%BE%88%E5%A4%9A%E7%9A%84%E9%97%AE%E9%A2%98)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 # 说明
 
 Free-Fitness 是使用 flutter 3.x 开发的集运动训练、饮食记录、日记编写等功能为一体的健身饮食记录管理 App。

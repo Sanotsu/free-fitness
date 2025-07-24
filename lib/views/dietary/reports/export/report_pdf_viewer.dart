@@ -45,7 +45,7 @@ class _ReportPdfViewerState extends State<ReportPdfViewer> {
   }
 
   /// 有指定日期查询指定日期的饮食记录条目，没有就当前日期
-  _queryDailyFoodItemList() async {
+  Future<void> _queryDailyFoodItemList() async {
     if (isLoading) return;
 
     setState(() {
@@ -75,19 +75,23 @@ class _ReportPdfViewerState extends State<ReportPdfViewer> {
       ),
       body: isLoading
           ? buildLoader(isLoading)
-          : PdfPreview(
-              initialPageFormat: PdfPageFormat.a4,
-              build: (context) => makeReportPdf(
-                dfiwfsList,
-                // 在pdf页首会显示查询数据的日期
-                widget.startDate.split(" ")[0],
-                widget.endDate.split(" ")[0],
-                lang: box.read('language'),
-              ),
-              pdfFileName: box.read('language') == "en"
-                  ? "DietaryLogExport_${DateTime.now().millisecondsSinceEpoch}"
-                  : "饮食日志导出_${DateTime.now().millisecondsSinceEpoch}",
-            ),
+          : dfiwfsList.isEmpty
+              ? Center(
+                  child: Text(CusAL.of(context).noRecordNote),
+                )
+              : PdfPreview(
+                  initialPageFormat: PdfPageFormat.a4,
+                  build: (context) => makeReportPdf(
+                    dfiwfsList,
+                    // 在pdf页首会显示查询数据的日期
+                    widget.startDate.split(" ")[0],
+                    widget.endDate.split(" ")[0],
+                    lang: box.read('language'),
+                  ),
+                  pdfFileName: box.read('language') == "en"
+                      ? "DietaryLogExport_${DateTime.now().millisecondsSinceEpoch}"
+                      : "饮食日志导出_${DateTime.now().millisecondsSinceEpoch}",
+                ),
     );
   }
 }

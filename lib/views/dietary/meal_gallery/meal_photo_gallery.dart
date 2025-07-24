@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/common/global/constants.dart';
 
 import '../../../common/components/dialog_widgets.dart';
+import '../../../common/global/constants.dart';
 import '../../../common/utils/db_dietary_helper.dart';
 import '../../../common/utils/tool_widgets.dart';
 import '../../../common/utils/tools.dart';
@@ -99,7 +99,7 @@ class _MealPhotoGalleryState extends State<MealPhotoGallery> {
     );
   }
 
-  _buildMealPhotoCard(MealPhoto mp) {
+  Widget _buildMealPhotoCard(MealPhoto mp) {
     if (mp.photos.trim().isEmpty) {
       return Container();
     }
@@ -137,6 +137,8 @@ class _MealPhotoGalleryState extends State<MealPhotoGallery> {
           ],
         ),
       );
+    } else {
+      return SizedBox.shrink();
     }
   }
 }

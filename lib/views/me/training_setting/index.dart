@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/models/user_state.dart';
 import 'package:numberpicker/numberpicker.dart';
 
 import '../../../common/utils/db_user_helper.dart';
 import '../../../models/cus_app_localizations.dart';
+import '../../../models/user_state.dart';
 
 class TrainingSetting extends StatefulWidget {
   final User userInfo;

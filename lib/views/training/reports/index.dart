@@ -63,7 +63,7 @@ class _TrainingReportsState extends State<TrainingReports> {
 
   // 初始化事件，以当前日查询对应的手记数据
   // 因为不能再改变state中用await，所以单独一个函数
-  _getEventsForInitDay() async {
+  Future<void> _getEventsForInitDay() async {
     if (isLoading) return;
 
     setState(() {
@@ -88,7 +88,7 @@ class _TrainingReportsState extends State<TrainingReports> {
   }
 
   // 获取指定某一天的手记列表
-  List<TrainedDetailLog> _getLogsForADay(day) {
+  List<TrainedDetailLog> _getLogsForADay(DateTime day) {
     // 训练记录的训练日志存入的是完整的datetime，这里只取date部分
     return tdlList
         .where((e) =>
@@ -98,7 +98,7 @@ class _TrainingReportsState extends State<TrainingReports> {
   }
 
   // 当某一天被选中时的回调
-  _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
+  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     debugPrint("某天被选中--------$selectedDay $focusedDay");
 
     if (!isSameDay(_selectedDay, selectedDay)) {
@@ -116,13 +116,13 @@ class _TrainingReportsState extends State<TrainingReports> {
   }
 
   // 当某个日期被长按
-  _onDayLongPressed(DateTime selectedDay, DateTime focusedDay) {
+  void _onDayLongPressed(DateTime selectedDay, DateTime focusedDay) {
     debugPrint("日期被长按了---$selectedDay --$focusedDay");
     // 长按某一天，可以新增备注？？？
   }
 
   // 当日期范围被选中时
-  _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
+  void _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
     debugPrint("日期被_onRangeSelected了---$start --$end $focusedDay");
 
     setState(() {
@@ -223,7 +223,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                     [tempStart, tempEnd] = getStartEndDateString(365 * 20);
                   }
 
-                  if (!mounted) return;
+                  if (!context.mounted) return;
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -255,7 +255,7 @@ class _TrainingReportsState extends State<TrainingReports> {
   ///
   /// 绘制训练统计的tab
   ///
-  buildReportsView() {
+  FutureBuilder<List<TrainedDetailLog>> buildReportsView() {
     // 统计的是所有的运动次数和总的运动时间
     return FutureBuilder(
       future: _trainingHelper.queryTrainedDetailLog(
@@ -501,7 +501,7 @@ class _TrainingReportsState extends State<TrainingReports> {
   ///
   /// 绘制训练历史日历表格tab
   ///
-  buildHistoryView() {
+  Column buildHistoryView() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -597,7 +597,7 @@ class _TrainingReportsState extends State<TrainingReports> {
   ///
   /// 绘制最近锻炼日志tab
   ///
-  buildRecentView() {
+  FutureBuilder<List<TrainedDetailLog>> buildRecentView() {
     var [start, end] = getStartEndDateString(30);
 
     return FutureBuilder(
@@ -710,7 +710,7 @@ class _TrainingReportsState extends State<TrainingReports> {
   }
 
   // 日历表格和最近30天记录的tab都可复用
-  _buildTrainedDetailLogListTile(TrainedDetailLog log) {
+  ListTile _buildTrainedDetailLogListTile(TrainedDetailLog log) {
     return ListTile(
       title: _buildWorkoutNameText(log),
       subtitle: Column(
@@ -738,7 +738,7 @@ class _TrainingReportsState extends State<TrainingReports> {
     );
   }
 
-  _buildWorkoutNameText(TrainedDetailLog log) {
+  RichText _buildWorkoutNameText(TrainedDetailLog log) {
     var planName = log.planName;
     return planName != null
         ? RichText(
@@ -798,7 +798,7 @@ class _TrainingReportsState extends State<TrainingReports> {
           );
   }
 
-  _buildTileRow(String label, String value) {
+  Row _buildTileRow(String label, String value) {
     return Row(
       children: [
         Expanded(flex: 2, child: Text(label)),

@@ -37,7 +37,8 @@ class _IndexTimelineState extends State<IndexTimeline> {
   String query = '';
 
   // 时间线连接线的颜色
-  Color borderColor = const Color.fromARGB(255, 112, 78, 78).withOpacity(0.5);
+  Color borderColor =
+      const Color.fromARGB(255, 112, 78, 78).withValues(alpha: 0.5);
 
   @override
   void initState() {
@@ -68,7 +69,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
   }
 
   // 加载更多
-  loadMoreDiary() async {
+  Future<void> loadMoreDiary() async {
     // 如果已经在查询数据中，则忽略此次新的查询
     if (isLoading) return;
 
@@ -110,7 +111,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
   }
 
   /// 处理点击了搜索按钮
-  _handleSearch() {
+  void _handleSearch() {
     // 取消键盘输入框聚焦
     unfocusHandle();
     setState(() {
@@ -178,7 +179,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
   }
 
   /// 查询条件输入行
-  _buildSearchRowArea() {
+  Padding _buildSearchRowArea() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.sp),
       child: Row(
@@ -205,7 +206,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
     );
   }
 
-  _buildListArea() {
+  ListView _buildListArea() {
     return ListView.builder(
       itemCount: diaryList.length + 1,
       controller: scrollController,
@@ -242,7 +243,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
     );
   }
 
-  _buildListStartChild(Diary diaryItem) {
+  Container _buildListStartChild(Diary diaryItem) {
     // 创建时间(不使用最后修改时间是避免时间线显示出现时间不连续的尴尬)
     var createTime = DateFormat(constTimeFormat).format(
       DateTime.parse(diaryItem.gmtCreate ?? unknownDateTimeString),
@@ -274,7 +275,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
     );
   }
 
-  _buildListEndChild(Diary diaryItem) {
+  GestureDetector _buildListEndChild(Diary diaryItem) {
     return GestureDetector(
       child: Card(
         elevation: 4,

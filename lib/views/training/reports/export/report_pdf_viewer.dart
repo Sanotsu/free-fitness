@@ -45,7 +45,7 @@ class _TrainedReportPdfViewerState extends State<TrainedReportPdfViewer> {
   }
 
   /// 有指定日期查询指定日期的饮食记录条目，没有就当前日期
-  _queryTrainedDetailLogList() async {
+  Future<void> _queryTrainedDetailLogList() async {
     if (isLoading) return;
 
     setState(() {
@@ -75,21 +75,25 @@ class _TrainedReportPdfViewerState extends State<TrainedReportPdfViewer> {
       ),
       body: isLoading
           ? buildLoader(isLoading)
-          : PdfPreview(
-              initialPageFormat: PdfPageFormat.a4,
-              build: (context) => makeTrainedReportPdf(
-                tdlList,
-                // 在pdf页首会显示查询数据的日期
-                widget.startDate.split(" ")[0],
-                widget.endDate.split(" ")[0],
-                lang: box.read('language'),
-              ),
-              pdfFileName: box.read('language') == "en"
-                  // ? "TrainedRecords_${widget.startDate}~${widget.endDate}"
-                  // : "训练日志导出_${widget.startDate}~${widget.endDate}"),
-                  ? "TrainingLogExport_${DateTime.now().millisecondsSinceEpoch}"
-                  : "训练日志导出_${DateTime.now().millisecondsSinceEpoch}",
-            ),
+          : tdlList.isEmpty
+              ? Center(
+                  child: Text(CusAL.of(context).noRecordNote),
+                )
+              : PdfPreview(
+                  initialPageFormat: PdfPageFormat.a4,
+                  build: (context) => makeTrainedReportPdf(
+                    tdlList,
+                    // 在pdf页首会显示查询数据的日期
+                    widget.startDate.split(" ")[0],
+                    widget.endDate.split(" ")[0],
+                    lang: box.read('language'),
+                  ),
+                  pdfFileName: box.read('language') == "en"
+                      // ? "TrainedRecords_${widget.startDate}~${widget.endDate}"
+                      // : "训练日志导出_${widget.startDate}~${widget.endDate}"),
+                      ? "TrainingLogExport_${DateTime.now().millisecondsSinceEpoch}"
+                      : "训练日志导出_${DateTime.now().millisecondsSinceEpoch}",
+                ),
     );
   }
 }

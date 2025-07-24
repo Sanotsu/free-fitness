@@ -51,7 +51,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
   }
 
   // 查询已有的训练
-  getGroupList() async {
+  Future<void> getGroupList() async {
     // 如果已经在查询数据中，则忽略此次新的查询
     if (isLoading) return;
 
@@ -142,7 +142,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
   }
 
   // 条件查询区域
-  _buildQueryAreaRow() {
+  Row _buildQueryAreaRow() {
     return Row(
       children: [
         Expanded(
@@ -232,7 +232,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
   }
 
   // 训练组数据卡片
-  _buildGroupCard(GroupWithActions groupItem) {
+  Card _buildGroupCard(GroupWithActions groupItem) {
     return Card(
       elevation: 2.sp,
       child: ListTile(
@@ -265,8 +265,8 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                 style: TextStyle(color: Colors.green[500]),
               ),
               TextSpan(
-                text:
-                    '${getCusLabelText(groupItem.group.groupCategory, categoryOptions)}',
+                text: getCusLabelText(
+                    groupItem.group.groupCategory, categoryOptions),
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
@@ -374,7 +374,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
   }
 
   // 弹窗新增训练组信息
-  _modifyGroupInfo({TrainingGroup? groupItem}) {
+  void _modifyGroupInfo({TrainingGroup? groupItem}) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -405,7 +405,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
   }
 
   // 构建训练做主修改表单
-  _buildGroupModifyForm(TrainingGroup? groupItem) {
+  FormBuilder _buildGroupModifyForm(TrainingGroup? groupItem) {
     return FormBuilder(
       key: _addFormKey,
       initialValue: groupItem != null ? groupItem.toMap() : {},
@@ -438,7 +438,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
   }
 
   // 构建确认编辑的回调
-  _clickGroupModifyButton(TrainingGroup? groupItem) async {
+  Future<void> _clickGroupModifyButton(TrainingGroup? groupItem) async {
     if (_addFormKey.currentState!.saveAndValidate()) {
       // 获取表单数值
       Map<String, dynamic> formData = _addFormKey.currentState!.value;

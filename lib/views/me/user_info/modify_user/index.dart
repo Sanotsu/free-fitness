@@ -42,7 +42,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
     });
   }
 
-  _saveUser() async {
+  Future<void> _saveUser() async {
     if (_formKey.currentState!.saveAndValidate()) {
       if (isLoading) return;
       setState(() {
@@ -133,7 +133,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
     );
   }
 
-  buildFormDataColumns() {
+  List<Widget> buildFormDataColumns() {
     return [
       FormBuilderTextField(
         name: "user_name",
@@ -274,7 +274,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
     ];
   }
 
-  _buildDoubleTextField(
+  FormBuilderTextField _buildDoubleTextField(
     String name,
     String labelText,
     String suffixText, {

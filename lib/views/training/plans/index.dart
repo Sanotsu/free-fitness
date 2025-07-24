@@ -46,7 +46,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
   }
 
   // 查询已有的训练
-  getPlanList() async {
+  Future<void> getPlanList() async {
     // 如果已经在查询数据中，则忽略此次新的查询
     if (isLoading) return;
 
@@ -132,7 +132,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
   }
 
   // 条件查询区域(和action list一模一样)
-  _buildQueryArea() {
+  Row _buildQueryArea() {
     return Row(
       children: [
         Expanded(
@@ -221,7 +221,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
   }
 
   // 计划数据卡片(和action list几乎一模一样)
-  _buildPlanCard(PlanWithGroups planItem) {
+  Card _buildPlanCard(PlanWithGroups planItem) {
     return Card(
       elevation: 2.sp,
       child: ListTile(
@@ -249,8 +249,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
                 ),
               ),
               TextSpan(
-                text:
-                    '${getCusLabelText(planItem.plan.planLevel, levelOptions)}',
+                text: getCusLabelText(planItem.plan.planLevel, levelOptions),
                 style: TextStyle(color: Colors.green[500]),
               ),
               TextSpan(
@@ -338,7 +337,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
 
   // 修改计划基本信息的弹窗
   // ？？？这和训练的基本信息修改也一样，但弹窗的宽度可以想办法在自定义下
-  _modifyPlanInfo({TrainingPlan? planItem}) {
+  void _modifyPlanInfo({TrainingPlan? planItem}) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -369,7 +368,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
   }
 
   // 构建计划修改表单
-  _buildPlanModifyForm(TrainingPlan? planItem) {
+  FormBuilder _buildPlanModifyForm(TrainingPlan? planItem) {
     return FormBuilder(
       key: _addFormKey,
       child: SingleChildScrollView(
@@ -432,7 +431,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
   }
 
   // 构建确认编辑的回调
-  _clickPlanModifyButton(TrainingPlan? planItem) async {
+  Future<void> _clickPlanModifyButton(TrainingPlan? planItem) async {
     if (_addFormKey.currentState!.saveAndValidate()) {
       // 获取表单数值
       Map<String, dynamic> formData = _addFormKey.currentState!.value;

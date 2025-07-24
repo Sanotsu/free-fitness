@@ -53,7 +53,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
 
   // 查询指定月份的饮食日志，需要传入当前月任何一天的时间即可。
   // 并且显示默认聚焦日期的饮食条目数据
-  _queryDailyFoodItemList(DateTime datetime) async {
+  Future<void> _queryDailyFoodItemList(DateTime datetime) async {
     if (isLoading) return;
 
     setState(() {
@@ -86,7 +86,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
   }
 
   // 获取指定某一天的饮食条目列表
-  List<DailyFoodItemWithFoodServing> _getDialyItemsForADay(day) {
+  List<DailyFoodItemWithFoodServing> _getDialyItemsForADay(DateTime day) {
     return dfiwfsList
         .where((e) =>
             e.dailyFoodItem.date == DateFormat(constDateFormat).format(day))
@@ -162,7 +162,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
   }
 
   /// 构建当月每天摄入卡路里的日历
-  _buildTableCalendar() {
+  TableCalendar<DailyFoodItemWithFoodServing> _buildTableCalendar() {
     return TableCalendar<DailyFoodItemWithFoodServing>(
       locale: box.read('language') == "en" ? "en_US" : 'zh_CN',
       firstDay: kFirstDay,

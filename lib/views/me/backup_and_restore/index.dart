@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:archive/archive_io.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:free_fitness/models/training_state.dart';
 import 'package:path/path.dart' as p;
-import 'package:archive/archive_io.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -20,6 +19,7 @@ import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/diary_state.dart';
 import '../../../models/dietary_state.dart';
+import '../../../models/training_state.dart';
 import '../../../models/user_state.dart';
 
 ///
@@ -44,7 +44,7 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
   bool isLoading = false;
 
   // 导出db中所有的数据
-  _exportAllData() async {
+  Future<void> _exportAllData() async {
     final status = await requestStoragePermission();
 
     // 用户没有授权，简单提示一下
@@ -138,67 +138,42 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
     // 临时存放所有json文件的文件夹
     Directory tempDirectory = Directory(tempJsonsPath);
 
-    // 创建压缩文件
-    final encoder = ZipFileEncoder();
-    encoder.create(p.join(tempZipDir.path, zipName));
+    // 创建Archive对象
+    final archive = Archive();
 
-    // 遍历临时文件夹中的所有文件和子文件夹，并将它们添加到压缩文件中
+    // 遍历临时文件夹中的所有文件和子文件夹，并将它们添加到archive中
     await for (FileSystemEntity entity in tempDirectory.list(recursive: true)) {
       if (entity is File) {
-        encoder.addFile(entity);
-      } else if (entity is Directory) {
-        encoder.addDirectory(entity);
+        // 读取文件内容
+        final bytes = await entity.readAsBytes();
+        // 获取相对路径（相对于tempJsonsPath）
+        final relativePath = p.relative(entity.path, from: tempJsonsPath);
+        // 添加到archive
+        archive.addFile(ArchiveFile(relativePath, bytes.length, bytes));
       }
     }
 
-    // 完成并关闭压缩文件
-    encoder.close();
+    // 使用ZipEncoder编码archive为zip文件
+    final encoder = ZipEncoder();
+    final zipBytes = encoder.encode(archive);
+
+    // 写入zip文件
+    final zipFile = File(p.join(tempZipDir.path, zipName));
+    await zipFile.writeAsBytes(zipBytes);
 
     // 压缩完成后，清空临时json文件夹中文件
     await deleteFilesInDirectory(tempJsonsPath);
   }
 
-  // 解压zip文件
-  Future<String> unzipFile(String zipFilePath) async {
-    try {
-      // 获取临时目录路径
-      Directory tempDir = await getTemporaryDirectory();
-
-      // 创建或检索压缩包临时存放的文件夹
-      String tempPath =
-          (await Directory(p.join(tempDir.path, "temp_de_zip")).create()).path;
-
-      // 读取zip文件
-      File file = File(zipFilePath);
-      List<int> bytes = file.readAsBytesSync();
-
-      // 解压缩
-      Archive archive = ZipDecoder().decodeBytes(bytes);
-      for (ArchiveFile file in archive) {
-        String filename = '$tempPath/${file.name}';
-        if (file.isFile) {
-          File outFile = File(filename);
-          outFile = await outFile.create(recursive: true);
-          await outFile.writeAsBytes(file.content);
-
-          if (kDebugMode) {
-            print("解压时的outFile$outFile");
-          }
-        } else {
-          Directory dir = Directory(filename);
-          await dir.create(recursive: true);
+  // 删除指定文件夹下所有文件
+  Future<void> _deleteFilesInDirectory(String directoryPath) async {
+    final directory = Directory(directoryPath);
+    if (await directory.exists()) {
+      await for (var file in directory.list()) {
+        if (file is File) {
+          await file.delete();
         }
       }
-      if (kDebugMode) {
-        print('解压完成');
-      }
-
-      return tempPath;
-    } catch (e) {
-      if (kDebugMode) {
-        print('解压失败: $e');
-      }
-      throw Exception(e);
     }
   }
 
@@ -228,9 +203,23 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
       if (p.basename(file.path).startsWith(bakPrefix) &&
           p.basename(file.path).toLowerCase().endsWith('.zip')) {
         try {
+          // 获取临时目录路径
+          Directory tempDir = await getTemporaryDirectory();
+
+          // 创建或检索压缩包临时存放的文件夹
+          String unzipPath =
+              (await Directory(p.join(tempDir.path, "temp_de_zip")).create())
+                  .path;
+
+          // 先清空临时目录避免旧解压文件残留
+          await _deleteFilesInDirectory(unzipPath);
+
+          // 解压文件到指定位置
+          await extractFileToDisk(file.path, unzipPath);
+
           // 等待解压完成
           // 遍历解压后的文件，取得里面的文件(可能会有嵌套文件夹和其他格式的文件，不过这里没有)
-          List<File> jsonFiles = Directory(await unzipFile(file.path))
+          List<File> jsonFiles = Directory(unzipPath)
               .listSync()
               .where(
                   (entity) => entity is File && entity.path.endsWith('.json'))
@@ -311,7 +300,7 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
   }
 
   // 将恢复的json数据存入db中
-  _saveJsonFileDataToDb(List<File> jsonFiles) async {
+  Future<void> _saveJsonFileDataToDb(List<File> jsonFiles) async {
     // 解压之后获取到所有的json文件，逐个添加到数据库，会先清空数据库的数据
     for (File file in jsonFiles) {
       if (kDebugMode) {
@@ -379,7 +368,7 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
     );
   }
 
-  buildBackupButton() {
+  Center buildBackupButton() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

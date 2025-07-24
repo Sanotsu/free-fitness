@@ -24,7 +24,8 @@ import '../../../models/dietary_state.dart';
 ///
 
 /// 构建食物的单份营养素使用formbuilder的表单栏位
-buildServingModifyFormColumn(BuildContext context, CusLabel servingType) {
+Column buildServingModifyFormColumn(
+    BuildContext context, CusLabel servingType) {
   return Column(
     children: [
       if (servingType.value == "metric")
@@ -171,7 +172,7 @@ buildServingModifyFormColumn(BuildContext context, CusLabel servingType) {
 }
 
 // 标准单份和客制化单份时的单位下拉选择框，只有名称不一样
-_buildUnitDropdown(String name) {
+Flexible _buildUnitDropdown(String name) {
   return Flexible(
     flex: 1,
     child: Center(
@@ -196,7 +197,7 @@ _buildUnitDropdown(String name) {
 }
 
 // 这个修改的表单栏位，大部分都是文本输入框，且要求输入数字
-_cusNumberTextField(
+FormBuilderTextField _cusNumberTextField(
   BuildContext context,
   String name,
   String labelText, {
@@ -228,7 +229,7 @@ _cusNumberTextField(
 }
 
 // 像脂肪还有细分像，是个row，前面有空白。单位都是克，只需要name和名称即可
-_cusSubTextFieldRow(BuildContext context, String name, String labelText) {
+Row _cusSubTextFieldRow(BuildContext context, String name, String labelText) {
   return Row(
     children: [
       const Expanded(flex: 1, child: SizedBox()),
@@ -242,7 +243,7 @@ _cusSubTextFieldRow(BuildContext context, String name, String labelText) {
 
 /// 修改食物基本信息时表单所需栏位
 /// 新增的时候还有标准单份和客制化单份单选框等其他内容，所以这里只是column的值
-buildFoodModifyFormColumns(
+List<Widget> buildFoodModifyFormColumns(
   BuildContext context, {
   List<PlatformFile>? initImages,
 }) {
