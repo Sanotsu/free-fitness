@@ -3,18 +3,18 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:path/path.dart' as p;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../../../common/utils/db_diary_helper.dart';
-import '../../../common/utils/db_dietary_helper.dart';
-import '../../../common/utils/db_training_helper.dart';
-import '../../../common/utils/db_user_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/storage/db_diary_helper.dart';
+import '../../../core/storage/db_dietary_helper.dart';
+import '../../../core/storage/db_training_helper.dart';
+import '../../../core/storage/db_user_helper.dart';
+import '../../../core/utils/toast_utils.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/diary_state.dart';
@@ -69,8 +69,9 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
       // 获取应用文档目录路径
       Directory appDocDir = await getApplicationDocumentsDirectory();
       // 临时存放zip文件的路径
-      var tempZipDir =
-          await Directory(p.join(appDocDir.path, "temp_zip")).create();
+      var tempZipDir = await Directory(
+        p.join(appDocDir.path, "temp_zip"),
+      ).create();
       // zip 文件的名称
       String zipName = "$bakPrefix${DateTime.now().millisecondsSinceEpoch}.zip";
 
@@ -207,9 +208,9 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
           Directory tempDir = await getTemporaryDirectory();
 
           // 创建或检索压缩包临时存放的文件夹
-          String unzipPath =
-              (await Directory(p.join(tempDir.path, "temp_de_zip")).create())
-                  .path;
+          String unzipPath = (await Directory(
+            p.join(tempDir.path, "temp_de_zip"),
+          ).create()).path;
 
           // 先清空临时目录避免旧解压文件残留
           await _deleteFilesInDirectory(unzipPath);
@@ -222,7 +223,8 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
           List<File> jsonFiles = Directory(unzipPath)
               .listSync()
               .where(
-                  (entity) => entity is File && entity.path.endsWith('.json'))
+                (entity) => entity is File && entity.path.endsWith('.json'),
+              )
               .map((entity) => entity as File)
               .toList();
 
@@ -235,8 +237,9 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
           // 获取应用文档目录路径
           Directory appDocDir = await getApplicationDocumentsDirectory();
           // 临时存放zip文件的路径
-          var tempZipDir =
-              await Directory(p.join(appDocDir.path, "temp_auto_zip")).create();
+          var tempZipDir = await Directory(
+            p.join(appDocDir.path, "temp_auto_zip"),
+          ).create();
           // zip 文件的名称
           String zipName =
               "$bakPrefix${DateTime.now().millisecondsSinceEpoch}.zip";
@@ -286,7 +289,7 @@ class _BackupAndRestoreState extends State<BackupAndRestore> {
           return;
         }
       } else {
-        EasyLoading.showInfo("Not a backup file exported from the app");
+        ToastUtils.showInfo("Not a backup file exported from the app");
       }
       // 这个判断不准确，但先这样
       if (!mounted) return;

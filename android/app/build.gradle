@@ -23,7 +23,7 @@ if (flutterVersionName == null) {
 }
 
 // 在 gradle 中配置签名
-// 1. 在 android 代码块之前将你 properties 文件的密钥库信息添加进去
+// 1. 在 android 代码块之前将 properties 文件的密钥库信息添加进去
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
    if (keystorePropertiesFile.exists()) {

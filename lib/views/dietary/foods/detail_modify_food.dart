@@ -4,9 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_dietary_helper.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_dietary_helper.dart';
+import '../../../core/utils/tools.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 import 'common_utils_for_food_modify.dart';

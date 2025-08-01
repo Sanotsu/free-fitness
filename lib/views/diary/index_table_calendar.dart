@@ -3,10 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import '../../common/global/constants.dart';
-import '../../common/utils/db_diary_helper.dart';
-import '../../common/utils/tool_widgets.dart';
-import '../../common/utils/tools.dart';
+import '../../core/constants/constants.dart';
+import '../../core/storage/db_diary_helper.dart';
+import '../../core/utils/tool_widgets.dart';
+import '../../core/utils/tools.dart';
 import '../../layout/themes/cus_font_size.dart';
 import '../../models/cus_app_localizations.dart';
 import '../../models/diary_state.dart';
@@ -209,7 +209,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
 
   TableCalendar<Object?> _buildDiaryCalender() {
     return TableCalendar(
-      locale: box.read('language') == "en" ? "en_US" : 'zh_CN',
+      locale: box.read('language') == 'en' ? "en_US" : 'zh_CN',
       firstDay: kFirstDay,
       lastDay: kLastDay,
       focusedDay: _focusedDay,

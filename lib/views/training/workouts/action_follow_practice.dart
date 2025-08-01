@@ -9,12 +9,12 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:toastification/toastification.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import '../../../common/components/dialog_widgets.dart';
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_training_helper.dart';
-import '../../../common/utils/db_user_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_training_helper.dart';
+import '../../../core/storage/db_user_helper.dart';
+import '../../../core/utils/image_preview_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
@@ -249,8 +249,8 @@ class _ActionFollowPracticeWithTTSState
   // 从基础动作获取其图片列表(要排除images是个空字符串)
   List<String> _getExerciseImageList(Exercise exercise) =>
       (exercise.images?.trim().isNotEmpty == true)
-          ? exercise.images!.split(",")
-          : [];
+      ? exercise.images!.split(",")
+      : [];
 
   ///
   /// TTS 相关的操作===============
@@ -464,7 +464,8 @@ class _ActionFollowPracticeWithTTSState
             if (!mounted) return;
             setState(() {
               // 点击继续时需要统计该次暂停的时间
-              totalPausedTimes += DateTime.now().millisecondsSinceEpoch -
+              totalPausedTimes +=
+                  DateTime.now().millisecondsSinceEpoch -
                   pausedMoment.millisecondsSinceEpoch;
               // 统计完重置一下(也可能没必要)
               pausedMoment = DateTime.now();
@@ -504,7 +505,7 @@ class _ActionFollowPracticeWithTTSState
       Expanded(
         // 这里的盒子，只是单纯区分休息时显示下一个要小点，跟练时图片大点
         flex: 5,
-        child: buildImageCarouselSlider(
+        child: buildImageViewCarouselSlider(
           _getExerciseImageList(actions[0].exercise),
         ),
       ),
@@ -618,7 +619,7 @@ class _ActionFollowPracticeWithTTSState
       Expanded(
         // 这里的盒子，只是单纯区分休息时显示下一个要小点，跟练时图片大点
         flex: 4,
-        child: buildImageCarouselSlider(
+        child: buildImageViewCarouselSlider(
           _getExerciseImageList(actions[_currentIndex].exercise),
         ),
       ),
@@ -696,7 +697,7 @@ class _ActionFollowPracticeWithTTSState
                                 // 点击继续时需要统计该次暂停的时间
                                 totalPausedTimes +=
                                     DateTime.now().millisecondsSinceEpoch -
-                                        pausedMoment.millisecondsSinceEpoch;
+                                    pausedMoment.millisecondsSinceEpoch;
                                 // 统计完重置一下(也可能没必要)
                                 pausedMoment = DateTime.now();
 
@@ -842,44 +843,44 @@ class _ActionFollowPracticeWithTTSState
               child:
                   // 不是暂停状态，才可以点击暂停按钮，并开始暂停时间的及时
                   (!isActionPause)
-                      ? ElevatedButton.icon(
-                          onPressed: () {
-                            _actionController.pause();
-                            setState(() {
-                              pausedMoment = DateTime.now();
-                              isActionPause = true;
-                            });
-                          },
-                          icon: const Icon(Icons.pause),
-                          label: Text(CusAL.of(context).pauseLabel),
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        )
-                      : ElevatedButton.icon(
-                          onPressed: () {
-                            _actionController.resume();
-                            setState(() {
-                              // 点击继续时需要统计该次暂停的时间
-                              totalPausedTimes +=
-                                  DateTime.now().millisecondsSinceEpoch -
-                                      pausedMoment.millisecondsSinceEpoch;
-                              // 统计完重置一下(也可能没必要)
-                              pausedMoment = DateTime.now();
-
-                              isActionPause = false;
-                            });
-                          },
-                          icon: const Icon(Icons.play_arrow),
-                          label: Text(CusAL.of(context).resumeLabel),
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
+                  ? ElevatedButton.icon(
+                      onPressed: () {
+                        _actionController.pause();
+                        setState(() {
+                          pausedMoment = DateTime.now();
+                          isActionPause = true;
+                        });
+                      },
+                      icon: const Icon(Icons.pause),
+                      label: Text(CusAL.of(context).pauseLabel),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
+                      ),
+                    )
+                  : ElevatedButton.icon(
+                      onPressed: () {
+                        _actionController.resume();
+                        setState(() {
+                          // 点击继续时需要统计该次暂停的时间
+                          totalPausedTimes +=
+                              DateTime.now().millisecondsSinceEpoch -
+                              pausedMoment.millisecondsSinceEpoch;
+                          // 统计完重置一下(也可能没必要)
+                          pausedMoment = DateTime.now();
+
+                          isActionPause = false;
+                        });
+                      },
+                      icon: const Icon(Icons.play_arrow),
+                      label: Text(CusAL.of(context).resumeLabel),
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
             ),
           ],
         ),
@@ -915,7 +916,7 @@ class _ActionFollowPracticeWithTTSState
                         if (isActionPause) {
                           totalPausedTimes +=
                               DateTime.now().millisecondsSinceEpoch -
-                                  pausedMoment.millisecondsSinceEpoch;
+                              pausedMoment.millisecondsSinceEpoch;
                           // 统计完重置一下(也可能没必要)
                           pausedMoment = DateTime.now();
                         }
@@ -963,7 +964,7 @@ class _ActionFollowPracticeWithTTSState
                         if (isActionPause) {
                           totalPausedTimes +=
                               DateTime.now().millisecondsSinceEpoch -
-                                  pausedMoment.millisecondsSinceEpoch;
+                              pausedMoment.millisecondsSinceEpoch;
                           // 统计完重置一下(也可能没必要)
                           pausedMoment = DateTime.now();
                         }
@@ -1004,7 +1005,8 @@ class _ActionFollowPracticeWithTTSState
                   // 如果点击了+10s休息时间或者预设的休息时间，要做倒计时在完成时才累加。
                   //    注意：在休息已经进行了一段时间后再+10s，因为有restart，所以还要在+10s前累加已经休息的时间
                   setState(() {
-                    totalRestTimes += _cusRestTime -
+                    totalRestTimes +=
+                        _cusRestTime -
                         (int.tryParse(_restController.getTime() ?? "0") ?? 0);
                   });
 
@@ -1012,7 +1014,7 @@ class _ActionFollowPracticeWithTTSState
                   // _controller.getTime() 如果是倒计时，就是剩下的时间；如果是正计时，就是已经运行的时间
                   var newtime =
                       (int.tryParse(_restController.getTime() ?? "0") ?? 0) +
-                          10;
+                      10;
 
                   setState(() {
                     _cusRestTime = newtime;
@@ -1066,9 +1068,8 @@ class _ActionFollowPracticeWithTTSState
                 onStart: () {
                   // 只有正常进入休息倒计时才发tts，点击了+10s后的restart不发语音
                   if (!isClickPlusRestTime) {
-                    var restText = "${CusAL.of(context).followTtsLabel(
-                      '4',
-                    )} ${actions[_currentIndex].exercise.exerciseName}";
+                    var restText =
+                        "${CusAL.of(context).followTtsLabel('4')} ${actions[_currentIndex].exercise.exerciseName}";
 
                     _speak(restText);
                   }
@@ -1090,8 +1091,8 @@ class _ActionFollowPracticeWithTTSState
                 },
               ),
             ),
-            // 出现休息倒计时一定是在跟练中间的(最后一个跟练结束就跳弹窗了),所以不用判断按钮
 
+            // 出现休息倒计时一定是在跟练中间的(最后一个跟练结束就跳弹窗了),所以不用判断按钮
             Expanded(
               flex: 1,
               child: ElevatedButton(
@@ -1102,7 +1103,8 @@ class _ActionFollowPracticeWithTTSState
                   // _controller.getTime() 如果是倒计时，就是剩下的时间；如果是正计时，就是已经运行的时间
 
                   setState(() {
-                    totalRestTimes += _cusRestTime -
+                    totalRestTimes +=
+                        _cusRestTime -
                         (int.tryParse(_restController.getTime() ?? "0") ?? 0);
                   });
 
@@ -1190,7 +1192,7 @@ class _ActionFollowPracticeWithTTSState
 
       Expanded(
         flex: 3,
-        child: buildImageCarouselSlider(
+        child: buildImageViewCarouselSlider(
           _getExerciseImageList(actions[_currentIndex].exercise),
         ),
       ),

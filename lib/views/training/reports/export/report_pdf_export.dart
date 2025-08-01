@@ -8,37 +8,56 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';
 // import 'package:printing/printing.dart';
 
-import '../../../../common/global/constants.dart';
-import '../../../../common/utils/tools.dart';
+import '../../../../core/constants/constants.dart';
+import '../../../../core/utils/tools.dart';
 import '../../../../models/training_state.dart';
 
 Map<String, CusLabel> _pdfLabelMap = {
   "title": CusLabel(
-      enLabel: 'Export trained records', cnLabel: "运动日志条目导出", value: null),
-  "headerLeft":
-      CusLabel(enLabel: 'trained records', cnLabel: "运动条目记录", value: null),
+    enLabel: 'Export trained records',
+    cnLabel: "运动日志条目导出",
+    value: null,
+  ),
+  "headerLeft": CusLabel(
+    enLabel: 'trained records',
+    cnLabel: "运动条目记录",
+    value: null,
+  ),
   "headerRight": CusLabel(
-      enLabel: 'exported by free-fitness',
-      cnLabel: "由free-fitness导出",
-      value: null),
+    enLabel: 'exported by free-fitness',
+    cnLabel: "由free-fitness导出",
+    value: null,
+  ),
   "number": CusLabel(enLabel: 'Page', cnLabel: "第", value: null),
   "page": CusLabel(enLabel: '', cnLabel: "页", value: null),
   "name": CusLabel(enLabel: 'Name', cnLabel: "训练名称", value: null),
   "dayNumber": CusLabel(enLabel: 'Day', cnLabel: "训练日", value: null),
-  "startAndEnd":
-      CusLabel(enLabel: 'Start & End Time', cnLabel: "训练起止时间", value: null),
+  "startAndEnd": CusLabel(
+    enLabel: 'Start & End Time',
+    cnLabel: "训练起止时间",
+    value: null,
+  ),
   "trainedDuration": CusLabel(
-      enLabel: 'Trained Dur. \n(mins)', cnLabel: "训练耗时(分钟)", value: null),
-  "restDuration":
-      CusLabel(enLabel: 'Rest Dur. \n(mins)', cnLabel: "休息耗时(分钟)", value: null),
+    enLabel: 'Trained Dur. \n(mins)',
+    cnLabel: "训练耗时(分钟)",
+    value: null,
+  ),
+  "restDuration": CusLabel(
+    enLabel: 'Rest Dur. \n(mins)',
+    cnLabel: "休息耗时(分钟)",
+    value: null,
+  ),
   "pausedDuration": CusLabel(
-      enLabel: 'Paused Dur. \n(mins)', cnLabel: "暂停耗时(分钟)", value: null),
+    enLabel: 'Paused Dur. \n(mins)',
+    cnLabel: "暂停耗时(分钟)",
+    value: null,
+  ),
   "total": CusLabel(enLabel: 'Total', cnLabel: "合计", value: null),
 };
 
 // 根据当前语言显示 CusLabel 的 中文或者英文
 String _showLabel(String lang, CusLabel cusLable) {
-  return lang == "en" ? cusLable.enLabel : cusLable.cnLabel;
+  return lang == 'en' ? cusLable.enLabel : cusLable.cnLabel;
 }
 
 Future<Uint8List> makeTrainedReportPdf(
@@ -57,10 +76,10 @@ Future<Uint8List> makeTrainedReportPdf(
       // https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
       // base: await PdfGoogleFonts.notoSerifHKRegular(),
       // bold: await PdfGoogleFonts.notoSerifHKBold(),
-      // 但是使用知道的本地字体，会增加app体积
+      // 但是使用预设的本地字体，会增加app体积
       base: Font.ttf(await rootBundle.load("assets/MiSans-Regular.ttf")),
       fontFallback: [
-        pw.Font.ttf(await rootBundle.load('assets/MiSans-Regular.ttf'))
+        pw.Font.ttf(await rootBundle.load('assets/MiSans-Regular.ttf')),
       ],
     ),
   );
@@ -184,7 +203,7 @@ pw.Table _buildHeaderTable(String lang) {
             flex: 2,
           ),
         ],
-      )
+      ),
     ],
   );
 }
@@ -192,12 +211,18 @@ pw.Table _buildHeaderTable(String lang) {
 // 构建每餐的子表格数据部分
 pw.Table _buildBodyTable(List<TrainedDetailLog> trainedData, String lang) {
   // 计算所有训练日志的累加时间
-  int totalRest =
-      trainedData.fold(0, (prev, item) => prev + item.totalRestTime);
-  int totolPaused =
-      trainedData.fold(0, (prev, item) => prev + item.totolPausedTime);
-  int totalTrained =
-      trainedData.fold(0, (prev, item) => prev + item.trainedDuration);
+  int totalRest = trainedData.fold(
+    0,
+    (prev, item) => prev + item.totalRestTime,
+  );
+  int totolPaused = trainedData.fold(
+    0,
+    (prev, item) => prev + item.totolPausedTime,
+  );
+  int totalTrained = trainedData.fold(
+    0,
+    (prev, item) => prev + item.trainedDuration,
+  );
 
   return pw.Table(
     // 子数据可以不显示边框，更方便看？
@@ -254,7 +279,7 @@ pw.Table _buildBodyTable(List<TrainedDetailLog> trainedData, String lang) {
           expandedCountText(cusDoubleTryToIntString(totalRest / 60)),
           expandedCountText(cusDoubleTryToIntString(totolPaused / 60)),
         ],
-      )
+      ),
     ],
   );
 }
@@ -264,36 +289,35 @@ pw.Widget expandedHeadText(
   final String text, {
   final pw.TextAlign align = pw.TextAlign.center,
   int? flex = 1,
-}) =>
-    pw.Expanded(
-      flex: flex ?? 1,
-      child: pw.Text(
-        text,
-        style: pw.TextStyle(fontSize: 12.sp, fontWeight: pw.FontWeight.bold),
-        textAlign: align,
-      ),
-    );
+}) => pw.Expanded(
+  flex: flex ?? 1,
+  child: pw.Text(
+    text,
+    style: pw.TextStyle(fontSize: 12.sp, fontWeight: pw.FontWeight.bold),
+    textAlign: align,
+  ),
+);
 
 // 表格正文表格的文本
 pw.Widget expandedSubText(final String text, {int? flex = 1}) => pw.Expanded(
-      flex: flex ?? 1,
-      child: pw.Text(
-        text,
-        style: pw.TextStyle(fontSize: 10.sp),
-        textAlign: pw.TextAlign.center,
-      ),
-    );
+  flex: flex ?? 1,
+  child: pw.Text(
+    text,
+    style: pw.TextStyle(fontSize: 10.sp),
+    textAlign: pw.TextAlign.center,
+  ),
+);
 
 // 表格正文总计部分文字
 pw.Widget expandedCountText(String text, {int? flex = 1}) => pw.Expanded(
-      flex: flex ?? 1,
-      child: pw.Text(
-        text,
-        style: pw.TextStyle(
-          fontSize: 12.sp,
-          fontWeight: pw.FontWeight.bold,
-          color: PdfColors.black,
-        ),
-        textAlign: pw.TextAlign.center,
-      ),
-    );
+  flex: flex ?? 1,
+  child: pw.Text(
+    text,
+    style: pw.TextStyle(
+      fontSize: 12.sp,
+      fontWeight: pw.FontWeight.bold,
+      color: PdfColors.black,
+    ),
+    textAlign: pw.TextAlign.center,
+  ),
+);

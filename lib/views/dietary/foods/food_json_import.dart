@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_dietary_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_dietary_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
@@ -60,8 +60,8 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
             // 如果一个json文件只是一个动作，那就加上中括号；如果本身就是带了中括号的多个，就不再加
             List foodEnergyMapList =
                 jsonData.trim().startsWith("[") && jsonData.trim().endsWith("]")
-                    ? json.decode(jsonData)
-                    : json.decode("[$jsonData]");
+                ? json.decode(jsonData)
+                : json.decode("[$jsonData]");
 
             var temp = foodEnergyMapList
                 .map((e) => FoodComposition.fromJson(e))
@@ -72,8 +72,10 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
               foodComps.addAll(temp);
               // 更新需要构建的表格的长度和每条数据的可选中状态
               exerciseItemsNum = foodComps.length;
-              exerciseSelectedList =
-                  List<bool>.generate(exerciseItemsNum, (int index) => false);
+              exerciseSelectedList = List<bool>.generate(
+                exerciseItemsNum,
+                (int index) => false,
+              );
             });
           } catch (e) {
             // 弹出报错提示框
@@ -209,8 +211,9 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
             onPressed: foodComps.isNotEmpty ? _saveToDb : null,
             icon: Icon(
               Icons.save,
-              color:
-                  foodComps.isNotEmpty ? null : Theme.of(context).disabledColor,
+              color: foodComps.isNotEmpty
+                  ? null
+                  : Theme.of(context).disabledColor,
             ),
           ),
         ],
@@ -358,9 +361,9 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
                 setState(() {
                   // 先找到被选中的索引
                   List<int> trueIndices = List.generate(
-                          exerciseSelectedList.length, (index) => index)
-                      .where((i) => exerciseSelectedList[i])
-                      .toList();
+                    exerciseSelectedList.length,
+                    (index) => index,
+                  ).where((i) => exerciseSelectedList[i]).toList();
 
                   // 从列表中移除
                   // 倒序遍历需要移除的索引列表，以避免索引变化导致的问题
@@ -403,14 +406,14 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
             rows: List<DataRow>.generate(
               exerciseItemsNum,
               (int index) => DataRow(
-                color: WidgetStateProperty.resolveWith<Color?>(
-                    (Set<WidgetState> states) {
+                color: WidgetStateProperty.resolveWith<Color?>((
+                  Set<WidgetState> states,
+                ) {
                   // All rows will have the same selected color.
                   if (states.contains(WidgetState.selected)) {
-                    return Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withValues(alpha: 0.08);
+                    return Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.08);
                   }
                   // Even rows will have a grey color.
                   if (index.isEven) {
@@ -468,7 +471,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
             ),
           ),
         ),
-      )
+      ),
     ];
   }
 }

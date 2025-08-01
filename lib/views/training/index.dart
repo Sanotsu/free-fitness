@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../common/components/cus_cards.dart';
-import '../../common/global/constants.dart';
+import '../../core/widgets/cus_cards.dart';
+import '../../core/constants/constants.dart';
 import '../../models/cus_app_localizations.dart';
 import 'exercise/index.dart';
 import 'plans/index.dart';

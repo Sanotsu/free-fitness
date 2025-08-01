@@ -3,10 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_dietary_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_dietary_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
@@ -66,11 +66,12 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
     // 理论上是默认查询当日的，有选择其他日期则查询指定日期
     List<DailyFoodItemWithFoodServing> temp =
         (await _dietaryHelper.queryDailyFoodItemListWithDetail(
-      userId: CacheUser.userId,
-      startDate: startDate,
-      endDate: endDate,
-      withDetail: true,
-    ) as List<DailyFoodItemWithFoodServing>);
+              userId: CacheUser.userId,
+              startDate: startDate,
+              endDate: endDate,
+              withDetail: true,
+            )
+            as List<DailyFoodItemWithFoodServing>);
 
     if (!mounted) return;
     setState(() {
@@ -88,15 +89,15 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
   // 获取指定某一天的饮食条目列表
   List<DailyFoodItemWithFoodServing> _getDialyItemsForADay(DateTime day) {
     return dfiwfsList
-        .where((e) =>
-            e.dailyFoodItem.date == DateFormat(constDateFormat).format(day))
+        .where(
+          (e) =>
+              e.dailyFoodItem.date == DateFormat(constDateFormat).format(day),
+        )
         .toList();
   }
 
   // 当某一天被选中，获取该天的数据
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    debugPrint("某天被选中--------$selectedDay $focusedDay");
-
     if (!isSameDay(_selectedDay, selectedDay)) {
       setState(() {
         _selectedDay = selectedDay;
@@ -109,26 +110,18 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(CusAL.of(context).dietaryCalendar),
-      ),
+      appBar: AppBar(title: Text(CusAL.of(context).dietaryCalendar)),
       body: SingleChildScrollView(
         child: isLoading
             ? buildLoader(isLoading)
             : Column(
                 children: [
                   /// 日历显示每日的卡路里数量
-                  SizedBox(
-                    height: 0.7.sh,
-                    child: _buildTableCalendar(),
-                  ),
+                  SizedBox(height: 0.7.sh, child: _buildTableCalendar()),
                   SizedBox(height: 8.sp),
 
                   /// 总计本月摄入量和平均到每天的摄入量
-                  SizedBox(
-                    width: 1.sw,
-                    child: _buildDailyAverageCount(),
-                  ),
+                  SizedBox(width: 1.sw, child: _buildDailyAverageCount()),
 
                   SizedBox(height: 8.sp),
 
@@ -164,7 +157,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
   /// 构建当月每天摄入卡路里的日历
   TableCalendar<DailyFoodItemWithFoodServing> _buildTableCalendar() {
     return TableCalendar<DailyFoodItemWithFoodServing>(
-      locale: box.read('language') == "en" ? "en_US" : 'zh_CN',
+      locale: box.read('language') == 'en' ? "en_US" : 'zh_CN',
       firstDay: kFirstDay,
       lastDay: kLastDay,
       focusedDay: _focusedDay,
@@ -217,9 +210,10 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
         markerBuilder: (context, date, list) {
           if (list.isEmpty) return Container();
 
-          var tempCalories = formatIntakeItemListForMarker(context, list)
-              .firstWhere((e) => e.label == "calorie")
-              .value;
+          var tempCalories = formatIntakeItemListForMarker(
+            context,
+            list,
+          ).firstWhere((e) => e.label == "calorie").value;
 
           return Align(
             alignment: Alignment.bottomCenter,
@@ -284,48 +278,49 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
-                dataRowMinHeight: 30.sp, // 设置行高范围
-                dataRowMaxHeight: 50.sp,
-                headingRowHeight: 40, // 设置表头行高
-                horizontalMargin: 10, // 设置水平边距
-                columnSpacing: 10.sp, // 设置列间距
-                columns: [
-                  const DataColumn(label: Text(''), numeric: true),
-                  _buildDataColumn(1),
-                  _buildDataColumn(2),
-                  _buildDataColumn(3),
-                  _buildDataColumn(4),
-                ],
-                rows: [
-                  DataRow(
-                    cells: [
-                      DataCell(
-                        Text(
-                          CusAL.of(context).countLabels('0'),
-                          style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
-                        ),
+              dataRowMinHeight: 30.sp, // 设置行高范围
+              dataRowMaxHeight: 50.sp,
+              headingRowHeight: 40, // 设置表头行高
+              horizontalMargin: 10, // 设置水平边距
+              columnSpacing: 10.sp, // 设置列间距
+              columns: [
+                const DataColumn(label: Text(''), numeric: true),
+                _buildDataColumn(1),
+                _buildDataColumn(2),
+                _buildDataColumn(3),
+                _buildDataColumn(4),
+              ],
+              rows: [
+                DataRow(
+                  cells: [
+                    DataCell(
+                      Text(
+                        CusAL.of(context).countLabels('0'),
+                        style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                       ),
-                      _buildDataCell(totalCalorie),
-                      _buildDataCell(totalProtein),
-                      _buildDataCell(totalFat),
-                      _buildDataCell(totalCho),
-                    ],
-                  ),
-                  DataRow(
-                    cells: [
-                      DataCell(
-                        Text(
-                          CusAL.of(context).countLabels('1'),
-                          style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
-                        ),
+                    ),
+                    _buildDataCell(totalCalorie),
+                    _buildDataCell(totalProtein),
+                    _buildDataCell(totalFat),
+                    _buildDataCell(totalCho),
+                  ],
+                ),
+                DataRow(
+                  cells: [
+                    DataCell(
+                      Text(
+                        CusAL.of(context).countLabels('1'),
+                        style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
                       ),
-                      _buildDataCell(totalCalorie / days),
-                      _buildDataCell(totalProtein / days),
-                      _buildDataCell(totalFat / days),
-                      _buildDataCell(totalCho / days),
-                    ],
-                  )
-                ]),
+                    ),
+                    _buildDataCell(totalCalorie / days),
+                    _buildDataCell(totalProtein / days),
+                    _buildDataCell(totalFat / days),
+                    _buildDataCell(totalCho / days),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -383,7 +378,7 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
                 fontWeight: FontWeight.bold,
                 color: Colors.green,
               ),
-            )
+            ),
           ],
         ),
         ListView.builder(
@@ -431,38 +426,41 @@ class _ReportCalendarSummaryState extends State<ReportCalendarSummary> {
     );
 
     return DataTable(
-        dataRowMinHeight: 40.sp, // 设置行高范围
-        dataRowMaxHeight: 50.sp,
-        headingRowHeight: 40.sp, // 设置表头行高
-        horizontalMargin: 10.sp, // 设置水平边距
-        columnSpacing: 20.sp, // 设置列间距
-        columns: [
-          _buildDataColumn(1),
-          _buildDataColumn(2),
-          _buildDataColumn(3),
-          _buildDataColumn(4),
-        ],
-        rows: [
-          DataRow(
-            cells: [
-              DataCell(Text(
+      dataRowMinHeight: 40.sp, // 设置行高范围
+      dataRowMaxHeight: 50.sp,
+      headingRowHeight: 40.sp, // 设置表头行高
+      horizontalMargin: 10.sp, // 设置水平边距
+      columnSpacing: 20.sp, // 设置列间距
+      columns: [
+        _buildDataColumn(1),
+        _buildDataColumn(2),
+        _buildDataColumn(3),
+        _buildDataColumn(4),
+      ],
+      rows: [
+        DataRow(
+          cells: [
+            DataCell(
+              Text(
                 calorie,
                 style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
-              )),
-              DataCell(Text(
+              ),
+            ),
+            DataCell(
+              Text(
                 protein,
                 style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
-              )),
-              DataCell(Text(
-                fat,
-                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
-              )),
-              DataCell(Text(
-                cho,
-                style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
-              )),
-            ],
-          )
-        ]);
+              ),
+            ),
+            DataCell(
+              Text(fat, style: TextStyle(fontSize: CusFontSizes.itemSubTitle)),
+            ),
+            DataCell(
+              Text(cho, style: TextStyle(fontSize: CusFontSizes.itemSubTitle)),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 }

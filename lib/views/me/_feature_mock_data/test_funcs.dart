@@ -4,13 +4,13 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:intl/intl.dart';
 
-import '../../../../../common/utils/db_dietary_helper.dart';
-import '../../../../../common/utils/tools.dart';
+import '../../../core/storage/db_dietary_helper.dart';
+import '../../../core/utils/tools.dart';
 import '../../../../../models/dietary_state.dart';
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_diary_helper.dart';
-import '../../../common/utils/db_training_helper.dart';
-import '../../../common/utils/db_user_helper.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_diary_helper.dart';
+import '../../../core/storage/db_training_helper.dart';
+import '../../../core/storage/db_user_helper.dart';
 import '../../../models/diary_state.dart';
 import '../../../models/training_state.dart';
 import '../../../models/user_state.dart';
@@ -518,7 +518,7 @@ Future<void> insertOneQuillDemo() async {
   for (var i = 0; i < tempNum; i++) {
     var mood = diaryMoodList[Random().nextInt(diaryMoodList.length)];
     tempMoods.add(
-      box.read('language') == "en" ? mood.enLabel : mood.cnLabel,
+      box.read('language') == 'en' ? mood.enLabel : mood.cnLabel,
     );
   }
 
@@ -540,7 +540,7 @@ Future<void> insertOneQuillDemo() async {
     content: jsonString,
     tags: tempTags.join(","),
     mood: tempMoods.join(","),
-    category: box.read('language') == "en" ? cate.enLabel : cate.cnLabel,
+    category: box.read('language') == 'en' ? cate.enLabel : cate.cnLabel,
     userId: Random().nextInt(3) + 1,
     gmtCreate: getCurrentDateTime(),
   );

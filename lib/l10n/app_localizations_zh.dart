@@ -9,104 +9,86 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appTitle => '健康追踪';
+  String get appTitle => '悦动健康';
 
   @override
   String get report => '报告';
 
   @override
   String mainNutrients(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '能量',
-        '1': '卡路里',
-        '2': '蛋白质',
-        '3': '脂肪',
-        '4': '碳水',
-        '5': 'RDI',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '能量',
+      '1': '卡路里',
+      '2': '蛋白质',
+      '3': '脂肪',
+      '4': '碳水',
+      '5': 'RDI',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String fatNutrients(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '总脂肪',
-        '1': '饱和脂肪',
-        '2': '反式脂肪',
-        '3': '多不饱和脂肪',
-        '4': '单不饱和脂肪',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '总脂肪',
+      '1': '饱和脂肪',
+      '2': '反式脂肪',
+      '3': '多不饱和脂肪',
+      '4': '单不饱和脂肪',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String choNutrients(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '总碳水化合物',
-        '1': '糖',
-        '2': '膳食纤维',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '总碳水化合物',
+      '1': '糖',
+      '2': '膳食纤维',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String microNutrients(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '钠',
-        '1': '钾',
-        '2': '胆固醇',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '钠',
+      '1': '钾',
+      '2': '胆固醇',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String unitLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '克',
-        '1': '毫克',
-        '2': '大卡',
-        '3': '千焦',
-        '4': '公分',
-        '5': '公斤',
-        '6': '秒',
-        '7': '次',
-        '8': '分钟',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '克',
+      '1': '毫克',
+      '2': '大卡',
+      '3': '千焦',
+      '4': '公分',
+      '5': '公斤',
+      '6': '秒',
+      '7': '次',
+      '8': '分钟',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String boolLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '是',
-        '1': '否',
-        '2': '真',
-        '3': '假',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '是',
+      '1': '否',
+      '2': '真',
+      '3': '假',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -121,45 +103,36 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String moduleTitles(String titles) {
-    String _temp0 = intl.Intl.selectLogic(
-      titles,
-      {
-        '0': '运动',
-        '1': '饮食',
-        '2': '手记日历',
-        '3': '用户与设置',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(titles, {
+      '0': '运动',
+      '1': '饮食',
+      '2': '手记日历',
+      '3': '用户与设置',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String changeAvatarLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '切换头像',
-        '1': '指定选项',
-        '2': '拍照',
-        '3': '相册',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '切换头像',
+      '1': '指定选项',
+      '2': '拍照',
+      '3': '相册',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String bakLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '备份恢复',
-        '1': '全量备份',
-        '2': '覆写恢复',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '备份恢复',
+      '1': '全量备份',
+      '2': '覆写恢复',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -182,17 +155,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String bmiLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '偏瘦',
-        '1': '正常',
-        '2': '超重',
-        '3': '肥胖',
-        '4': '过胖',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '偏瘦',
+      '1': '正常',
+      '2': '超重',
+      '3': '肥胖',
+      '4': '过胖',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -201,32 +171,26 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String userInfoLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '用户名称',
-        '1': '用户代号',
-        '2': '性别',
-        '3': '出生年月',
-        '4': '身高',
-        '5': '体重',
-        '6': '简述',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '用户名称',
+      '1': '用户代号',
+      '2': '性别',
+      '3': '出生年月',
+      '4': '身高',
+      '5': '体重',
+      '6': '简述',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String userGoalLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'RDA',
-        '1': '锻炼休息时间',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'RDA',
+      '1': '锻炼休息时间',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -241,38 +205,32 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String trainedReportLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '总锻炼次数',
-        '1': '总锻炼时间',
-        '2': '总休息时间',
-        '3': '总暂停时间',
-        '4': '总时间(分钟)',
-        '5': '上次运动',
-        '6': '日期',
-        '7': '名称',
-        '8': '用时',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '总锻炼次数',
+      '1': '总锻炼时间',
+      '2': '总休息时间',
+      '3': '总暂停时间',
+      '4': '总时间(分钟)',
+      '5': '上次运动',
+      '6': '日期',
+      '7': '名称',
+      '8': '用时',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String trainedCalendarLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '开始时间',
-        '1': '结束时间',
-        '2': '锻炼时长',
-        '3': '暂停时长',
-        '4': '休息时长',
-        '5': '锻炼时间',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '开始时间',
+      '1': '结束时间',
+      '2': '锻炼时长',
+      '3': '暂停时长',
+      '4': '休息时长',
+      '5': '锻炼时间',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -305,39 +263,33 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String exerciseQuerys(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '训练部位',
-        '1': '代号',
-        '2': '名称',
-        '3': '级别',
-        '4': '类型',
-        '5': '分类',
-        '6': '器械',
-        '7': '计量',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '训练部位',
+      '1': '代号',
+      '2': '名称',
+      '3': '级别',
+      '4': '类型',
+      '5': '分类',
+      '6': '器械',
+      '7': '计量',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String exerciseLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '发力',
-        '1': '标准动作耗时',
-        '2': '主要肌肉',
-        '3': '次要肌肉',
-        '4': '技术要点',
-        '5': '语音提示要点',
-        '6': '动作图片',
-        '7': '用户上传',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '发力',
+      '1': '标准动作耗时',
+      '2': '主要肌肉',
+      '3': '次要肌肉',
+      '4': '技术要点',
+      '5': '语音提示要点',
+      '6': '动作图片',
+      '7': '用户上传',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -364,20 +316,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String workoutQuerys(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '名称',
-        '1': '分类',
-        '2': '难度',
-        '3': '级别',
-        '4': '类型',
-        '5': '分类',
-        '6': '器械',
-        '7': '计量',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '名称',
+      '1': '分类',
+      '2': '难度',
+      '3': '级别',
+      '4': '类型',
+      '5': '分类',
+      '6': '器械',
+      '7': '计量',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -393,77 +342,62 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String modifyGroupLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '新建训练',
-        '1': '修改训练',
-        '2': '主要肌肉',
-        '3': '次要肌肉',
-        '4': '技术要点',
-        '5': '语音提示要点',
-        '6': '动作图片',
-        '7': '用户上传',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '新建训练',
+      '1': '修改训练',
+      '2': '主要肌肉',
+      '3': '次要肌肉',
+      '4': '技术要点',
+      '5': '语音提示要点',
+      '6': '动作图片',
+      '7': '用户上传',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String actionLabel(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '动作',
-        '1': '动作',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '动作',
+      '1': '动作',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String actionDetailLabel(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '时长(秒)',
-        '1': '重复(次)',
-        '2': '器械(公斤)',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '时长(秒)',
+      '1': '重复(次)',
+      '2': '器械(公斤)',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String actionConfigLabel(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '动作配置弹窗',
-        '1': '器械重量(公斤)',
-        '2': '点击选择指定动作',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '动作配置弹窗',
+      '1': '器械重量(公斤)',
+      '2': '点击选择指定动作',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String workoutFollowLabel(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '开始锻炼',
-        '1': '预备开始',
-        '2': '休息',
-        '3': '下一个',
-        '4': '祝贺',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '开始锻炼',
+      '1': '预备开始',
+      '2': '休息',
+      '3': '下一个',
+      '4': '祝贺',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -472,30 +406,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String followTtsLabel(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '预备开始，下一个动作：',
-        '1': '一半时间了',
-        '2': '开始',
-        '3': '祝贺，锻炼已结束',
-        '4': '休息一下，下一个动作：',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '预备开始，下一个动作：',
+      '1': '一半时间了',
+      '2': '开始',
+      '3': '祝贺，锻炼已结束',
+      '4': '休息一下，下一个动作：',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String quitFollowNotes(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '跟练中止',
-        '1': '你确定要退出跟练吗？',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '跟练中止',
+      '1': '你确定要退出跟练吗？',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -513,15 +441,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String planQuerys(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '名称',
-        '1': '分类',
-        '2': '难度',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '名称',
+      '1': '分类',
+      '2': '难度',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -537,20 +462,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String modifyPlanLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '新建计划',
-        '1': '修改计划',
-        '2': '名称',
-        '3': '代号',
-        '4': '分类',
-        '5': '级别',
-        '6': '训练周期',
-        '7': '概述',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '新建计划',
+      '1': '修改计划',
+      '2': '名称',
+      '3': '代号',
+      '4': '分类',
+      '5': '级别',
+      '6': '训练周期',
+      '7': '概述',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -604,16 +526,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String mealLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '早餐',
-        '1': '午餐',
-        '2': '晚餐',
-        '3': '小食',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '早餐',
+      '1': '午餐',
+      '2': '晚餐',
+      '3': '小食',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -658,49 +577,40 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String foodTableMainLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '单份',
-        '1': '能量(大卡)',
-        '2': '蛋白质(克)',
-        '3': '脂肪(克)',
-        '4': '碳水(克)',
-        '5': '微量元素(毫克)',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '单份',
+      '1': '能量(大卡)',
+      '2': '蛋白质(克)',
+      '3': '脂肪(克)',
+      '4': '碳水(克)',
+      '5': '微量元素(毫克)',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String foodLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '名称',
-        '1': '品牌',
-        '2': '标签',
-        '3': '分类',
-        '4': '概述',
-        '5': '图片',
-        '6': '代号',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '名称',
+      '1': '品牌',
+      '2': '标签',
+      '3': '分类',
+      '4': '概述',
+      '5': '图片',
+      '6': '代号',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String countLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '总计',
-        '1': '平均',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '总计',
+      '1': '平均',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -723,45 +633,36 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String rangeLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '昨天',
-        '1': '今天',
-        '2': '明天',
-        '3': '上周',
-        '4': '本周',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '昨天',
+      '1': '今天',
+      '2': '明天',
+      '3': '上周',
+      '4': '本周',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String calorieLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '剩余的卡路里',
-        '1': '消耗的卡路里',
-        '2': '卡路里',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '剩余的卡路里',
+      '1': '消耗的卡路里',
+      '2': '卡路里',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String illustratedDesc(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '当日三大营养素占比',
-        '1': '主要营养素摄入量',
-        '2': '卡路里',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '当日三大营养素占比',
+      '1': '主要营养素摄入量',
+      '2': '卡路里',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -775,47 +676,38 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String dietaryAddTabs(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '最近记录',
-        '1': '食物列表',
-        '2': '数量',
-        '3': '单位',
-        '4': '添加新单位?',
-        '5': '餐次',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '最近记录',
+      '1': '食物列表',
+      '2': '数量',
+      '3': '单位',
+      '4': '添加新单位?',
+      '5': '餐次',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String dietaryReportTabs(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '卡路里',
-        '1': '宏量素',
-        '2': '营养素',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '卡路里',
+      '1': '宏量素',
+      '2': '营养素',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String intakeLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '食物摄入',
-        '1': '宏量素摄入',
-        '2': '摄入次数',
-        '3': '摄入大卡',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '食物摄入',
+      '1': '宏量素摄入',
+      '2': '摄入次数',
+      '3': '摄入大卡',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -834,15 +726,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String dietaryCalendarLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '当月摄入统计',
-        '1': '当日摄入总量',
-        '2': '详细摄入数据',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '当月摄入统计',
+      '1': '当日摄入总量',
+      '2': '详细摄入数据',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -863,30 +752,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String diaryLables(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '手记日历',
-        '1': '手记时间线',
-        '2': '手记标题',
-        '3': '手记正文',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '手记日历',
+      '1': '手记时间线',
+      '2': '手记标题',
+      '3': '手记正文',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String calenderLables(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '展示整月',
-        '1': '展示两周',
-        '2': '展示一周',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '展示整月',
+      '1': '展示两周',
+      '2': '展示一周',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -1103,18 +986,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String settingLabels(String setting) {
-    String _temp0 = intl.Intl.selectLogic(
-      setting,
-      {
-        '0': '基本信息',
-        '1': '体重趋势',
-        '2': '摄入目标',
-        '3': '运动设置',
-        '4': '备份恢复',
-        '5': '更多设置',
-        'other': '未知设置',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(setting, {
+      '0': '基本信息',
+      '1': '体重趋势',
+      '2': '摄入目标',
+      '3': '运动设置',
+      '4': '备份恢复',
+      '5': '更多设置',
+      'other': '未知设置',
+    });
     return '$_temp0';
   }
 
@@ -1123,14 +1003,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String importJsonButtons(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': '选择文件',
-        '1': '清空数据',
-        'other': '未知设置',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': '选择文件',
+      '1': '清空数据',
+      'other': '未知设置',
+    });
     return '$_temp0';
   }
 
@@ -1164,7 +1041,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get aiSuggestionTitle => '问答式饮食健康分析';
+  String get aiSuggestionTitle => 'AI饮食健康分析';
 
   @override
   String get aiSuggestionHint => '可以向我提问，获取健康饮食相关建议';
@@ -1190,4 +1067,29 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get appNote => '注意事项';
+
+  @override
+  String get initFinished => '初始化完成';
+
+  @override
+  String get initializing => '正在初始化应用，请耐心等待几分钟...';
+
+  @override
+  String get initializingFood => '正在初始化“食物成分”数据...';
+
+  @override
+  String get initializingExercise => '正在初始化“基础动作”数据...';
+
+  @override
+  String get loadEmbeddedExercise => '加载内置基础动作数据';
+
+  @override
+  String get confirmLoadEmbeddedExercise => '是否加载内置基础动作？同名动作会被覆盖';
+
+  @override
+  String get loadEmbeddedFood => '加载内置食物成分数据';
+
+  @override
+  String get confirmLoadEmbeddedFood =>
+      '是否加载内置食物成分？同名《中国食物成分标准》“食物代号”或者“品牌+产品”的食品会被覆盖';
 }

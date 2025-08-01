@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/global/constants.dart';
+import '../../../core/constants/constants.dart';
 import '../../../models/cus_app_localizations.dart';
 import 'common_utils_for_food_modify.dart';
 

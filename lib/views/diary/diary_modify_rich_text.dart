@@ -8,10 +8,10 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../common/global/constants.dart';
-import '../../common/utils/db_diary_helper.dart';
-import '../../common/utils/tool_widgets.dart';
-import '../../common/utils/tools.dart';
+import '../../core/constants/constants.dart';
+import '../../core/storage/db_diary_helper.dart';
+import '../../core/utils/tool_widgets.dart';
+import '../../core/utils/tools.dart';
 import '../../layout/themes/cus_font_size.dart';
 import '../../models/cus_app_localizations.dart';
 import '../../models/diary_state.dart';

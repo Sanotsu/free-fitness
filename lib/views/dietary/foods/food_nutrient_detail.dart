@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../common/global/constants.dart';
+import '../../../core/constants/constants.dart';
 import '../../../../models/dietary_state.dart';
-import '../../../common/components/dialog_widgets.dart';
-import '../../../common/utils/db_dietary_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/storage/db_dietary_helper.dart';
+import '../../../core/utils/image_preview_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import 'detail_modify_food.dart';
@@ -55,8 +55,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
 
     // 更新需要构建的表格的长度和每条数据的可选中状态(初始状态是都未选中)
     servingItemsNum = fsInfo.servingInfoList.length;
-    servingSelectedList =
-        List<bool>.generate(servingItemsNum, (int index) => false);
+    servingSelectedList = List<bool>.generate(
+      servingItemsNum,
+      (int index) => false,
+    );
   }
 
   //
@@ -74,8 +76,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
 
         // 重新查询后也要更新单份营养素的列表复选框数量及其状态
         servingItemsNum = fsInfo.servingInfoList.length;
-        servingSelectedList =
-            List<bool>.generate(servingItemsNum, (int index) => false);
+        servingSelectedList = List<bool>.generate(
+          servingItemsNum,
+          (int index) => false,
+        );
       });
     }
   }
@@ -162,10 +166,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
             ),
 
             SizedBox(height: 10.sp),
-            Card(
-              elevation: 2.sp,
-              child: buildFoodServingDataTable(fsInfo),
-            ),
+            Card(elevation: 2.sp, child: buildFoodServingDataTable(fsInfo)),
             SizedBox(height: 10.sp),
           ],
         ),
@@ -177,9 +178,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   // 所以以新增+删除代替修改
   void clickServingInfoModify() {
     // 先找到被选中的索引，应该只有一个
-    int trueIndices =
-        List.generate(servingSelectedList.length, (index) => index)
-            .firstWhere((i) => servingSelectedList[i]);
+    int trueIndices = List.generate(
+      servingSelectedList.length,
+      (index) => index,
+    ).firstWhere((i) => servingSelectedList[i]);
 
     var servingInfo = fsInfo.servingInfoList[trueIndices];
 
@@ -189,7 +191,8 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
         builder: (context) => DetailModifyServingInfo(
           /// 这个值真没地方取啊
           /// 2023-12-06 简单判断是否是标准度量
-          servingType: (servingInfo.servingUnit.toLowerCase() == "100ml" ||
+          servingType:
+              (servingInfo.servingUnit.toLowerCase() == "100ml" ||
                   servingInfo.servingUnit.toLowerCase() == "100g" ||
                   servingInfo.servingUnit.toLowerCase() == "1mg" ||
                   servingInfo.servingUnit.toLowerCase() == "1g")
@@ -219,11 +222,9 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
         builder: (context) {
           return AlertDialog(
             title: Text(CusAL.of(context).alertTitle),
-            content: const Text(
-              '''至少保留一个单份营养素信息。
+            content: const Text('''至少保留一个单份营养素信息。
               \n若要删除所有数据，请考虑删除该条食物信息。
-              \n若要更新全部单份营养素，请先新增完成后，再删除旧的数据。''',
-            ),
+              \n若要更新全部单份营养素，请先新增完成后，再删除旧的数据。'''),
             actions: [
               TextButton(
                 onPressed: () {
@@ -253,9 +254,9 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
                 onPressed: () async {
                   // 先找到被选中的索引
                   List<int> trueIndices = List.generate(
-                          servingSelectedList.length, (index) => index)
-                      .where((i) => servingSelectedList[i])
-                      .toList();
+                    servingSelectedList.length,
+                    (index) => index,
+                  ).where((i) => servingSelectedList[i]).toList();
 
                   // 找到选择的索引对应的营养素列表
                   List<int> selecteds = [];
@@ -297,11 +298,12 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
             },
             dropdownMenuEntries: servingTypeList
                 .map<DropdownMenuEntry<CusLabel>>((CusLabel value) {
-              return DropdownMenuEntry<CusLabel>(
-                value: value,
-                label: showCusLable(value),
-              );
-            }).toList(),
+                  return DropdownMenuEntry<CusLabel>(
+                    value: value,
+                    label: showCusLable(value),
+                  );
+                })
+                .toList(),
             textStyle: TextStyle(fontSize: CusFontSizes.itemContent),
           ),
           actions: [
@@ -374,9 +376,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
         padding: EdgeInsets.all(5.sp),
         child: Table(
           // 设置表格边框
-          border: TableBorder.all(
-            color: Theme.of(context).disabledColor,
-          ),
+          border: TableBorder.all(color: Theme.of(context).disabledColor),
           // 设置每列的宽度占比
           columnWidths: {
             0: FixedColumnWidth(100.sp),
@@ -384,18 +384,9 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           },
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           children: [
-            _buildTableRow(
-              CusAL.of(context).foodLabels("0"),
-              food.product,
-            ),
-            _buildTableRow(
-              CusAL.of(context).foodLabels("1"),
-              food.brand,
-            ),
-            _buildTableRow(
-              CusAL.of(context).foodLabels("2"),
-              food.tags ?? "",
-            ),
+            _buildTableRow(CusAL.of(context).foodLabels("0"), food.product),
+            _buildTableRow(CusAL.of(context).foodLabels("1"), food.brand),
+            _buildTableRow(CusAL.of(context).foodLabels("2"), food.tags ?? ""),
             _buildTableRow(
               CusAL.of(context).foodLabels("3"),
               food.category ?? "",
@@ -407,7 +398,7 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           ],
         ),
       ),
-      buildImageCarouselSlider(imageList),
+      buildImageViewCarouselSlider(imageList),
       SizedBox(height: 10.sp),
     ];
   }
@@ -461,14 +452,14 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
 
         return DataRow(
           // 偶数行(算上标题行)添加灰色背景色，和选中时的背景色
-          color: WidgetStateProperty.resolveWith<Color?>(
-              (Set<WidgetState> states) {
+          color: WidgetStateProperty.resolveWith<Color?>((
+            Set<WidgetState> states,
+          ) {
             // 所有行被选中后都使用统一的背景
             if (states.contains(WidgetState.selected)) {
-              return Theme.of(context)
-                  .colorScheme
-                  .primary
-                  .withValues(alpha: 0.08);
+              return Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.08);
             }
             // 偶数行使用灰色背景
             if (index.isEven) {
@@ -487,7 +478,13 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
           },
           cells: [
             _buildDataCell(serving.servingUnit),
-            _buildDataCell(cusDoubleToString(serving.energy / oneCalToKjRatio)),
+            // _buildDataCell(
+            //   "${cusDoubleToString(serving.energy / oneCalToKjRatio)}(${serving.energy.toStringAsFixed(0)}${CusAL.of(context).unitLabels('3')})",
+            // ),
+            _buildDataCell(
+              "${cusDoubleToString(serving.energyKCal ?? serving.energy / oneCalToKjRatio)} ",
+            ),
+
             _buildDataCell(cusDoubleToString(serving.protein)),
             _buildFatDataCell(
               cusDoubleToString(serving.totalFat),
@@ -503,8 +500,8 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
             ),
             _buildMicroDataCell(
               cusDoubleToString(serving.sodium),
-              cusDoubleToString(serving.cholesterol),
               cusDoubleToString(serving.potassium),
+              cusDoubleToString(serving.cholesterol),
             ),
           ],
         );
@@ -584,7 +581,10 @@ class _FoodNutrientDetailState extends State<FoodNutrientDetail> {
   }
 
   DataCell _buildChoDataCell(
-      String totalCho, String sugar, String dietaryFiber) {
+    String totalCho,
+    String sugar,
+    String dietaryFiber,
+  ) {
     return DataCell(
       Column(
         mainAxisAlignment: MainAxisAlignment.center,

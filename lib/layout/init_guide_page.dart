@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:numberpicker/numberpicker.dart';
 
-import '../common/global/constants.dart';
-import '../common/utils/db_user_helper.dart';
-import '../common/utils/tools.dart';
+import '../core/constants/constants.dart';
+import '../core/storage/db_user_helper.dart';
+import '../core/utils/tools.dart';
 import '../models/cus_app_localizations.dart';
 import '../models/user_state.dart';
 import 'home.dart';
@@ -95,7 +95,7 @@ class _InitGuidePageState extends State<InitGuidePage> {
                   return DropdownMenuItem<CusLabel>(
                     value: gender,
                     child: Text(
-                      currentLanguage == "zh" ? gender.cnLabel : gender.enLabel,
+                      currentLanguage == 'zh' ? gender.cnLabel : gender.enLabel,
                     ),
                   );
                 }).toList(),
@@ -233,7 +233,7 @@ class _InitGuidePageState extends State<InitGuidePage> {
 
     defaultUser.userName = "$deviceName 用户";
     defaultUser.userName = deviceName;
-    defaultUser.description = "一位在使用 free-fitness 的$deviceName用户";
+    defaultUser.description = "一位正在使用 Free-Fitness 的$deviceName用户";
 
     // ？？？这里应该检查保存是否成功
     await _userHelper.insertUserList([defaultUser]);

@@ -16,97 +16,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String mainNutrients(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Energy',
-        '1': 'Calorie',
-        '2': 'Protein',
-        '3': 'Fat',
-        '4': 'CHO',
-        '5': 'RDI',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Energy',
+      '1': 'Calorie',
+      '2': 'Protein',
+      '3': 'Fat',
+      '4': 'CHO',
+      '5': 'RDI',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String fatNutrients(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'TotalFat',
-        '1': 'SaturatedFat',
-        '2': 'TransFat',
-        '3': 'puFat',
-        '4': 'muFat',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'TotalFat',
+      '1': 'SaturatedFat',
+      '2': 'TransFat',
+      '3': 'puFat',
+      '4': 'muFat',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String choNutrients(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'TotalCHO',
-        '1': 'Sugar',
-        '2': 'DietaryFiber',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'TotalCHO',
+      '1': 'Sugar',
+      '2': 'DietaryFiber',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String microNutrients(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Sodium',
-        '1': 'Potassium',
-        '2': 'Cholesterol',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Sodium',
+      '1': 'Potassium',
+      '2': 'Cholesterol',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String unitLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'g',
-        '1': 'mg',
-        '2': 'kcal',
-        '3': 'kj',
-        '4': 'cm',
-        '5': 'kg',
-        '6': 's',
-        '7': 'time(s)',
-        '8': 'minutes',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'g',
+      '1': 'mg',
+      '2': 'kcal',
+      '3': 'kj',
+      '4': 'cm',
+      '5': 'kg',
+      '6': 's',
+      '7': 'time(s)',
+      '8': 'minutes',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String boolLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Yes',
-        '1': 'No',
-        '2': 'True',
-        '3': 'False',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Yes',
+      '1': 'No',
+      '2': 'True',
+      '3': 'False',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -121,45 +103,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String moduleTitles(String titles) {
-    String _temp0 = intl.Intl.selectLogic(
-      titles,
-      {
-        '0': 'Training',
-        '1': 'Dietary',
-        '2': 'Daily Calendar',
-        '3': 'User & Settings',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(titles, {
+      '0': 'Training',
+      '1': 'Dietary',
+      '2': 'Daily Calendar',
+      '3': 'User & Settings',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String changeAvatarLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Change Avatar',
-        '1': 'Options',
-        '2': 'Camera',
-        '3': 'Gallery',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Change Avatar',
+      '1': 'Options',
+      '2': 'Camera',
+      '3': 'Gallery',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String bakLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Backup & Restore',
-        '1': 'Full Backup',
-        '2': 'Overwrite Restore',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Backup & Restore',
+      '1': 'Full Backup',
+      '2': 'Overwrite Restore',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -183,17 +156,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String bmiLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'UWT',
-        '1': 'NWT',
-        '2': 'OWT',
-        '3': 'Fat',
-        '4': 'Obesity',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'UWT',
+      '1': 'NWT',
+      '2': 'OWT',
+      '3': 'Fat',
+      '4': 'Obesity',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -202,32 +172,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String userInfoLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'UserName',
-        '1': 'UserCode',
-        '2': 'Gender',
-        '3': 'DateOfBirth',
-        '4': 'Height',
-        '5': 'Weight',
-        '6': 'Description',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'UserName',
+      '1': 'UserCode',
+      '2': 'Gender',
+      '3': 'DateOfBirth',
+      '4': 'Height',
+      '5': 'Weight',
+      '6': 'Description',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String userGoalLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'RDA',
-        '1': 'RestIntervals',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'RDA',
+      '1': 'RestIntervals',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -242,38 +206,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String trainedReportLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Total Workouts',
-        '1': 'Trained Time',
-        '2': 'Rest Time',
-        '3': 'Paused Time',
-        '4': 'Total (minutes)',
-        '5': 'LastTrained',
-        '6': 'Date',
-        '7': 'Name',
-        '8': 'Duration',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Total Workouts',
+      '1': 'Trained Time',
+      '2': 'Rest Time',
+      '3': 'Paused Time',
+      '4': 'Total (minutes)',
+      '5': 'LastTrained',
+      '6': 'Date',
+      '7': 'Name',
+      '8': 'Duration',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String trainedCalendarLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Start Time',
-        '1': 'End Time',
-        '2': 'Trained Duration',
-        '3': 'Paused Duration',
-        '4': 'Rest Duration',
-        '5': 'Start & End Time',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Start Time',
+      '1': 'End Time',
+      '2': 'Trained Duration',
+      '3': 'Paused Duration',
+      '4': 'Rest Duration',
+      '5': 'Start & End Time',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -306,39 +264,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String exerciseQuerys(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Muscles',
-        '1': 'Code',
-        '2': 'Name',
-        '3': 'Level',
-        '4': 'Mechanic',
-        '5': 'Category',
-        '6': 'Equipment',
-        '7': 'Counting',
-        'other': 'other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Muscles',
+      '1': 'Code',
+      '2': 'Name',
+      '3': 'Level',
+      '4': 'Mechanic',
+      '5': 'Category',
+      '6': 'Equipment',
+      '7': 'Counting',
+      'other': 'other',
+    });
     return '$_temp0';
   }
 
   @override
   String exerciseLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Force',
-        '1': 'Std. Duration',
-        '2': 'Primary Muscles',
-        '3': 'Secondary Muscles',
-        '4': 'Instructions',
-        '5': 'TTS Notes',
-        '6': 'Exercise Images',
-        '7': 'isCustom',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Force',
+      '1': 'Std. Duration',
+      '2': 'Primary Muscles',
+      '3': 'Secondary Muscles',
+      '4': 'Instructions',
+      '5': 'TTS Notes',
+      '6': 'Exercise Images',
+      '7': 'isCustom',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -365,20 +317,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String workoutQuerys(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Name',
-        '1': 'Category',
-        '2': 'Level',
-        '3': '级别',
-        '4': '类型',
-        '5': '分类',
-        '6': '器械',
-        '7': '计量',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Name',
+      '1': 'Category',
+      '2': 'Level',
+      '3': '级别',
+      '4': '类型',
+      '5': '分类',
+      '6': '器械',
+      '7': '计量',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -394,77 +343,62 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String modifyGroupLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Workout Add',
-        '1': 'Workout Modify',
-        '2': '主要肌肉',
-        '3': '次要肌肉',
-        '4': '技术要点',
-        '5': '语音提示要点',
-        '6': '动作图片',
-        '7': '用户上传',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Workout Add',
+      '1': 'Workout Modify',
+      '2': '主要肌肉',
+      '3': '次要肌肉',
+      '4': '技术要点',
+      '5': '语音提示要点',
+      '6': '动作图片',
+      '7': '用户上传',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String actionLabel(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Action',
-        '1': 'Actions',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Action',
+      '1': 'Actions',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String actionDetailLabel(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Dur.(s)',
-        '1': 'Rpt. (times)',
-        '2': 'Eqpt. (kg)',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Dur.(s)',
+      '1': 'Rpt. (times)',
+      '2': 'Eqpt. (kg)',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String actionConfigLabel(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Action Configuration Dialog',
-        '1': 'Eqpt.Wgt.(kg)',
-        '2': 'Click to select exercise',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Action Configuration Dialog',
+      '1': 'Eqpt.Wgt.(kg)',
+      '2': 'Click to select exercise',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String workoutFollowLabel(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Follow Workout',
-        '1': 'Ready',
-        '2': 'REST',
-        '3': 'Next',
-        '4': 'Congratulations',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Follow Workout',
+      '1': 'Ready',
+      '2': 'REST',
+      '3': 'Next',
+      '4': 'Congratulations',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -473,30 +407,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String followTtsLabel(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Ready, the next action is ',
-        '1': 'It\'s half the time.',
-        '2': 'Start',
-        '3': 'Congratulations,the workout is over.',
-        '4': 'Take a break, the next action',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Ready, the next action is ',
+      '1': 'It\'s half the time.',
+      '2': 'Start',
+      '3': 'Congratulations,the workout is over.',
+      '4': 'Take a break, the next action',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
   @override
   String quitFollowNotes(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Workout Pause ',
-        '1': 'Are you sure want to quit this workout?',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Workout Pause ',
+      '1': 'Are you sure want to quit this workout?',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -514,15 +442,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String planQuerys(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Name',
-        '1': 'Category',
-        '2': 'Level',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Name',
+      '1': 'Category',
+      '2': 'Level',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -538,20 +463,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String modifyPlanLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Plan Add',
-        '1': 'Plan Modify',
-        '2': 'Name',
-        '3': 'Code',
-        '4': 'Category',
-        '5': 'Level',
-        '6': 'Plan Period',
-        '7': 'Description',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Plan Add',
+      '1': 'Plan Modify',
+      '2': 'Name',
+      '3': 'Code',
+      '4': 'Category',
+      '5': 'Level',
+      '6': 'Plan Period',
+      '7': 'Description',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -605,16 +527,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String mealLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Breakfast',
-        '1': 'Lunch',
-        '2': 'Dinner',
-        '3': 'Other',
-        'other': '其他',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Breakfast',
+      '1': 'Lunch',
+      '2': 'Dinner',
+      '3': 'Other',
+      'other': '其他',
+    });
     return '$_temp0';
   }
 
@@ -659,49 +578,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String foodTableMainLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Unit',
-        '1': 'Energy(kcal)',
-        '2': 'Protein(g)',
-        '3': 'Fat(g)',
-        '4': 'CHO(g)',
-        '5': 'Micronutrient(mg)',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Unit',
+      '1': 'Energy(kcal)',
+      '2': 'Protein(g)',
+      '3': 'Fat(g)',
+      '4': 'CHO(g)',
+      '5': 'Micronutrient(mg)',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String foodLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Product',
-        '1': 'Brand',
-        '2': 'Tags',
-        '3': 'Category',
-        '4': 'Description',
-        '5': 'Images',
-        '6': 'Code',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Product',
+      '1': 'Brand',
+      '2': 'Tags',
+      '3': 'Category',
+      '4': 'Description',
+      '5': 'Images',
+      '6': 'Code',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String countLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Total',
-        '1': 'AVG',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Total',
+      '1': 'AVG',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -724,45 +634,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String rangeLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Yesterday',
-        '1': 'Today',
-        '2': 'Tomorrow',
-        '3': 'LastWeek',
-        '4': 'ThisWeek',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Yesterday',
+      '1': 'Today',
+      '2': 'Tomorrow',
+      '3': 'LastWeek',
+      '4': 'ThisWeek',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String calorieLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Calories Remaining',
-        '1': 'Calories Consumed',
-        '2': 'Calories',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Calories Remaining',
+      '1': 'Calories Consumed',
+      '2': 'Calories',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String illustratedDesc(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'The Proportion',
-        '1': 'Main Nutrient Intake',
-        '2': 'Calories',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'The Proportion',
+      '1': 'Main Nutrient Intake',
+      '2': 'Calories',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -776,47 +677,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String dietaryAddTabs(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Recently Eaten',
-        '1': 'Food List',
-        '2': 'Size',
-        '3': 'Unit',
-        '4': 'New Unit?',
-        '5': 'Meal',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Recently Eaten',
+      '1': 'Food List',
+      '2': 'Size',
+      '3': 'Unit',
+      '4': 'New Unit?',
+      '5': 'Meal',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String dietaryReportTabs(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Calories',
-        '1': 'Macros',
-        '2': 'Nutrients',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Calories',
+      '1': 'Macros',
+      '2': 'Nutrients',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String intakeLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Foods Eaten',
-        '1': 'Macros Eaten',
-        '2': 'Times Eaten',
-        '3': 'Cals(kcal)',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Foods Eaten',
+      '1': 'Macros Eaten',
+      '2': 'Times Eaten',
+      '3': 'Cals(kcal)',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -835,15 +727,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String dietaryCalendarLabels(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Month Intake',
-        '1': 'Today Intake',
-        '2': 'Detailed Intake',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Month Intake',
+      '1': 'Today Intake',
+      '2': 'Detailed Intake',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -864,30 +753,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String diaryLables(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Diary Calendar',
-        '1': 'Timeline',
-        '2': 'Title',
-        '3': 'Content',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Diary Calendar',
+      '1': 'Timeline',
+      '2': 'Title',
+      '3': 'Content',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
   @override
   String calenderLables(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Month',
-        '1': '2 weeks',
-        '2': 'Week',
-        'other': 'Other',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Month',
+      '1': '2 weeks',
+      '2': 'Week',
+      'other': 'Other',
+    });
     return '$_temp0';
   }
 
@@ -1105,18 +988,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String settingLabels(String setting) {
-    String _temp0 = intl.Intl.selectLogic(
-      setting,
-      {
-        '0': 'Basic Info',
-        '1': 'Weight Trend',
-        '2': 'Intake Goal',
-        '3': 'Training Setting',
-        '4': 'Backup & Restore',
-        '5': 'More Settings',
-        'other': 'Unknown Setting',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(setting, {
+      '0': 'Basic Info',
+      '1': 'Weight Trend',
+      '2': 'Intake Goal',
+      '3': 'Training Setting',
+      '4': 'Backup & Restore',
+      '5': 'More Settings',
+      'other': 'Unknown Setting',
+    });
     return '$_temp0';
   }
 
@@ -1125,14 +1005,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String importJsonButtons(String num) {
-    String _temp0 = intl.Intl.selectLogic(
-      num,
-      {
-        '0': 'Select Json',
-        '1': 'Clear Data',
-        'other': 'Unknown Setting',
-      },
-    );
+    String _temp0 = intl.Intl.selectLogic(num, {
+      '0': 'Select Json',
+      '1': 'Clear Data',
+      'other': 'Unknown Setting',
+    });
     return '$_temp0';
   }
 
@@ -1196,4 +1073,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appNote => 'Note';
+
+  @override
+  String get initFinished => 'InitFinished';
+
+  @override
+  String get initializing => 'Initializing, please wait for 3 minutes';
+
+  @override
+  String get initializingFood => 'Initializing Food Composition Data...';
+
+  @override
+  String get initializingExercise => 'Initializing Exercise Data...';
+
+  @override
+  String get loadEmbeddedExercise => 'Load embedded exercise';
+
+  @override
+  String get confirmLoadEmbeddedExercise =>
+      'Load embedded exercise? This will overwrite duplicates.';
+
+  @override
+  String get loadEmbeddedFood => 'Load embedded Food';
+
+  @override
+  String get confirmLoadEmbeddedFood =>
+      'Load embedded food? This will overwrite duplicates.';
 }

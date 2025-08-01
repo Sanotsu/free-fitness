@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../../common/global/constants.dart';
-import '../../../../common/utils/db_dietary_helper.dart';
-import '../../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_dietary_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
+import '../../../services/food_importer_service.dart';
 import 'food_json_import.dart';
 import 'add_food_with_serving.dart';
 import 'food_nutrient_detail.dart';
@@ -99,6 +100,52 @@ class _DietaryFoodsState extends State<DietaryFoods> {
     _loadFoodData();
   }
 
+  // 加载内置数据
+  Future<void> loadEmbeddedFoodComposition() async {
+    final result = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(CusAL.of(context).tipLabel),
+          content: Text(CusAL.of(context).confirmLoadEmbeddedFood),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: Text(CusAL.of(context).cancelLabel),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: Text(CusAL.of(context).confirmLabel),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result != true) return;
+
+    // 先将初始化标志置为false
+    box.write(LocalStorageKey.foodDataImported, false);
+
+    if (!mounted) return;
+    Locale currentLocale = Localizations.localeOf(context);
+    String languageCode = currentLocale.languageCode;
+
+    // 再执行初始化操作
+    await FoodImporterService().importEmbeddedFoods(languageCode);
+
+    if (!mounted) return;
+    setState(() {
+      foodItems.clear();
+      currentPage = 1;
+    });
+    _loadFoodData();
+  }
+
   // 进入json文件导入前，先获取权限
   Future<void> clickFoodImport() async {
     final status = await requestStoragePermission();
@@ -146,7 +193,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
         actions: [
           isSimpleMode
               ? // 展示更多内容
-              IconButton(
+                IconButton(
                   icon: const Icon(Icons.expand_more),
                   onPressed: () {
                     setState(() {
@@ -163,6 +210,12 @@ class _DietaryFoodsState extends State<DietaryFoods> {
                     });
                   },
                 ),
+
+          IconButton(
+            icon: const Icon(Icons.flash_on),
+            onPressed: loadEmbeddedFoodComposition,
+            tooltip: CusAL.of(context).loadEmbeddedFood,
+          ),
 
           // 导入
           IconButton(
@@ -202,9 +255,9 @@ class _DietaryFoodsState extends State<DietaryFoods> {
                   child: TextField(
                     controller: searchController,
                     decoration: InputDecoration(
-                      hintText: CusAL.of(context).queryKeywordHintText(
-                        CusAL.of(context).food,
-                      ),
+                      hintText: CusAL.of(
+                        context,
+                      ).queryKeywordHintText(CusAL.of(context).food),
                       // 设置透明底色
                       filled: true,
                       fillColor: Colors.transparent,
@@ -243,9 +296,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => FoodNutrientDetail(
-          foodItem: fsi,
-        ),
+        builder: (context) => FoodNutrientDetail(foodItem: fsi),
       ),
     ).then((value) {
       // 从详情页返回后需要重新查询，因为不知道在内部是不是有变动单份营养素。
@@ -319,10 +370,12 @@ class _DietaryFoodsState extends State<DietaryFoods> {
     var firstServing = servingList.isNotEmpty ? servingList[0] : null;
     var foodUnit = firstServing?.servingUnit;
     var foodEnergy =
-        (firstServing?.energy ?? 0 / oneCalToKjRatio).toStringAsFixed(0);
+        firstServing?.energyKCal ??
+        (firstServing?.energy ?? 0 / oneCalToKjRatio);
 
     // 能量文字
-    var text1 = "$foodUnit - $foodEnergy ${CusAL.of(context).unitLabels('2')}";
+    var text1 =
+        "$foodUnit - ${cusDoubleToString(foodEnergy)} ${CusAL.of(context).unitLabels('2')}";
     // 碳水文字
     var text2 =
         "${CusAL.of(context).mainNutrients('4')} ${formatDoubleToString(firstServing?.totalCarbohydrate ?? 0)} ${CusAL.of(context).unitLabels('0')}";
@@ -456,11 +509,13 @@ class _DietaryFoodsState extends State<DietaryFoods> {
                   cells: [
                     _buildDataCell(serving.servingUnit),
                     _buildDataCell(
-                        formatDoubleToString(serving.energy / oneCalToKjRatio)),
+                      "${cusDoubleToString(serving.energyKCal ?? serving.energy / oneCalToKjRatio)} ",
+                    ),
                     _buildDataCell(formatDoubleToString(serving.protein)),
                     _buildDataCell(formatDoubleToString(serving.totalFat)),
                     _buildDataCell(
-                        formatDoubleToString(serving.totalCarbohydrate)),
+                      formatDoubleToString(serving.totalCarbohydrate),
+                    ),
                   ],
                 );
               }),
@@ -479,10 +534,7 @@ class _DietaryFoodsState extends State<DietaryFoods> {
 
   DataCell _buildDataCell(String text) {
     return DataCell(
-      Text(
-        text,
-        style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
-      ),
+      Text(text, style: TextStyle(fontSize: CusFontSizes.itemSubTitle)),
     );
   }
 }

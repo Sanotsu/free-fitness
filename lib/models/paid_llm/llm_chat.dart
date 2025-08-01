@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:intl/intl.dart';
 
-import '../../common/global/constants.dart';
+import '../../core/constants/constants.dart';
 
 ///
 /// 用于构建对话列表的“对话信息类”
@@ -15,6 +15,7 @@ class ChatMessage {
   // 所以改判断，role!=user就不是来自用户
   final String role;
   String content; // 文本内容
+  String? reasoningContent; // 推理内容
   // 有可能对话存在输入图片(假如后续一个用户对话中存在图片切来切去，就最后每个问答来回都存上图片)
   final String? imageUrl;
 
@@ -28,6 +29,7 @@ class ChatMessage {
     required this.dateTime,
     required this.role,
     required this.content,
+    this.reasoningContent,
     this.imageUrl,
     this.promptTokens,
     this.completionTokens,
@@ -40,6 +42,7 @@ class ChatMessage {
       'date_time': dateTime,
       'role': role,
       'content': content,
+      'reasoning_content': reasoningContent,
       'image_url': imageUrl,
       'prompt_tokens': promptTokens,
       'completion_tokens': completionTokens,
@@ -47,16 +50,17 @@ class ChatMessage {
     };
   }
 
-// fromMap 一般是数据库读取时用到
-// fromJson 一般是从接口或者其他文本转换时用到
-//    2024-06-03 使用parse而不是tryParse就可能会因为格式不对抛出异常
-//    但是存入数据不对就是逻辑实现哪里出了问题。使用后者默认值也不知道该使用哪个。
+  // fromMap 一般是数据库读取时用到
+  // fromJson 一般是从接口或者其他文本转换时用到
+  //    2024-06-03 使用parse而不是tryParse就可能会因为格式不对抛出异常
+  //    但是存入数据不对就是逻辑实现哪里出了问题。使用后者默认值也不知道该使用哪个。
   factory ChatMessage.fromMap(Map<String, dynamic> map) {
     return ChatMessage(
       messageId: map['message_id'] as String,
       dateTime: DateTime.tryParse(map['date_time']) ?? DateTime.now(),
       role: map['role'] as String,
       content: map['content'] as String,
+      reasoningContent: map['reasoning_content'] as String?,
       imageUrl: map['image_url'] as String?,
       promptTokens: int.tryParse(map['prompt_tokens']),
       completionTokens: int.tryParse(map['completion_tokens']),
@@ -65,26 +69,28 @@ class ChatMessage {
   }
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) => ChatMessage(
-        messageId: json["message_id"],
-        dateTime: DateTime.parse(json["date_time"]),
-        role: json["role"],
-        content: json["content"],
-        imageUrl: json["image_url"],
-        promptTokens: int.tryParse(json["prompt_tokens"]),
-        completionTokens: int.tryParse(json["completion_tokens"]),
-        totalTokens: int.tryParse(json["total_tokens"]),
-      );
+    messageId: json["message_id"],
+    dateTime: DateTime.parse(json["date_time"]),
+    role: json["role"],
+    content: json["content"],
+    reasoningContent: json["reasoning_content"],
+    imageUrl: json["image_url"],
+    promptTokens: int.tryParse(json["prompt_tokens"]),
+    completionTokens: int.tryParse(json["completion_tokens"]),
+    totalTokens: int.tryParse(json["total_tokens"]),
+  );
 
   Map<String, dynamic> toJson() => {
-        "message_id": messageId,
-        "date_time": dateTime,
-        "role": role,
-        "content": content,
-        "image_url": imageUrl,
-        "prompt_tokens": promptTokens,
-        "completion_tokens": completionTokens,
-        "total_tokens": totalTokens,
-      };
+    "message_id": messageId,
+    "date_time": dateTime,
+    "role": role,
+    "content": content,
+    "reasoning_content": reasoningContent,
+    "image_url": imageUrl,
+    "prompt_tokens": promptTokens,
+    "completion_tokens": completionTokens,
+    "total_tokens": totalTokens,
+  };
 
   @override
   String toString() {
@@ -95,7 +101,8 @@ class ChatMessage {
      "message_id": "$messageId", 
      "date_time": "$dateTime", 
      "role": "$role", 
-     "content": ${jsonEncode(content)}, 
+      "content": ${jsonEncode(content)}, 
+     "reasoning_content": ${jsonEncode(reasoningContent)},
      "image_url": "$imageUrl", 
      "prompt_tokens":"$promptTokens",
      "completion_tokens":"$completionTokens",
@@ -145,8 +152,10 @@ class ChatSession {
       title: map['title'] as String,
       gmtCreate: DateTime.tryParse(map['gmt_create']) ?? DateTime.now(),
       messages: (jsonDecode(map['messages'] as String) as List<dynamic>)
-          .map((messageMap) =>
-              ChatMessage.fromMap(messageMap as Map<String, dynamic>))
+          .map(
+            (messageMap) =>
+                ChatMessage.fromMap(messageMap as Map<String, dynamic>),
+          )
           .toList(),
       llmName: map['llm_name'] as String,
       cloudPlatformName: map['yun_platform_name'] as String?,
@@ -169,28 +178,28 @@ class ChatSession {
   }
 
   factory ChatSession.fromJson(Map<String, dynamic> json) => ChatSession(
-        uuid: json["uuid"],
-        messages: List<ChatMessage>.from(
-          json["messages"].map((x) => ChatMessage.fromJson(x)),
-        ),
-        title: json["title"],
-        gmtCreate: json["gmt_create"],
-        llmName: json["llm_name"],
-        cloudPlatformName: json["yun_platform_name"],
-        chatType: json["chat_type"],
-        i2tImagePath: json["i2t_image_path"],
-      );
+    uuid: json["uuid"],
+    messages: List<ChatMessage>.from(
+      json["messages"].map((x) => ChatMessage.fromJson(x)),
+    ),
+    title: json["title"],
+    gmtCreate: json["gmt_create"],
+    llmName: json["llm_name"],
+    cloudPlatformName: json["yun_platform_name"],
+    chatType: json["chat_type"],
+    i2tImagePath: json["i2t_image_path"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "uuid": uuid,
-        "messages": List<dynamic>.from(messages.map((x) => x.toJson())),
-        "title": title,
-        "gmt_create": gmtCreate,
-        "llm_name": llmName,
-        "yun_platform_name": cloudPlatformName,
-        "i2t_image_path": i2tImagePath,
-        'chat_type': chatType,
-      };
+    "uuid": uuid,
+    "messages": List<dynamic>.from(messages.map((x) => x.toJson())),
+    "title": title,
+    "gmt_create": gmtCreate,
+    "llm_name": llmName,
+    "yun_platform_name": cloudPlatformName,
+    "i2t_image_path": i2tImagePath,
+    'chat_type': chatType,
+  };
 
   @override
   String toString() {

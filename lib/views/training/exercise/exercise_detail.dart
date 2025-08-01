@@ -1,9 +1,10 @@
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/components/dialog_widgets.dart';
-import '../../../common/utils/db_training_helper.dart';
+import '../../../core/widgets/dialog_widgets.dart';
+import '../../../core/storage/db_training_helper.dart';
+import '../../../core/utils/image_preview_helper.dart';
+
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
@@ -86,7 +87,7 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
             ),
 
             /// 翻页按钮(固定高度更好看)
-            SizedBox(height: 60.sp, child: _buildPageButton())
+            SizedBox(height: 60.sp, child: _buildPageButton()),
           ],
         ),
       ),
@@ -94,13 +95,13 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
   }
 
   // 动作的图片
-  CarouselSlider _buildExerciseImageArea(Exercise item) {
+  Widget _buildExerciseImageArea(Exercise item) {
     List<String> imageList = [];
     // 先要排除image是个空字符串
     if (item.images != null && item.images!.trim().isNotEmpty) {
       imageList = item.images!.split(",");
     }
-    return buildImageCarouselSlider(imageList);
+    return buildImageViewCarouselSlider(imageList);
   }
 
   // 更多和修改按钮
@@ -133,9 +134,8 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ExerciseDetailMore(
-                      exerciseItem: _currentItem,
-                    ),
+                    builder: (context) =>
+                        ExerciseDetailMore(exerciseItem: _currentItem),
                   ),
                 );
               },
@@ -220,9 +220,7 @@ class _ExerciseDetailDialogState extends State<ExerciseDetailDialog> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  TextSpan(
-                    text: '/$_totalSize',
-                  ),
+                  TextSpan(text: '/$_totalSize'),
                 ],
               ),
             ),

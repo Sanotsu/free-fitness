@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 
-import '../../../../common/global/constants.dart';
-import '../../../../common/utils/db_dietary_helper.dart';
-import '../../../../common/utils/tool_widgets.dart';
+import '../../../../core/constants/constants.dart';
+import '../../../../core/storage/db_dietary_helper.dart';
+import '../../../../core/utils/tool_widgets.dart';
 import '../../../../models/cus_app_localizations.dart';
 import '../../../../models/dietary_state.dart';
 import 'report_pdf_export.dart';
@@ -88,7 +88,7 @@ class _ReportPdfViewerState extends State<ReportPdfViewer> {
                     widget.endDate.split(" ")[0],
                     lang: box.read('language'),
                   ),
-                  pdfFileName: box.read('language') == "en"
+                  pdfFileName: box.read('language') == 'en'
                       ? "DietaryLogExport_${DateTime.now().millisecondsSinceEpoch}"
                       : "饮食日志导出_${DateTime.now().millisecondsSinceEpoch}",
                 ),

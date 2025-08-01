@@ -4,10 +4,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_dietary_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_dietary_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 import 'add_food_serving_info.dart';
@@ -25,7 +25,7 @@ class AddfoodWithServing extends StatefulWidget {
 class _AddfoodWithServingState extends State<AddfoodWithServing> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
 
-//  食物添加的表单key
+  //  食物添加的表单key
   final _foodFormKey = GlobalKey<FormBuilderState>();
   // 要添加的食物信息和单份营养素信息
   late Food inputFood;
@@ -57,9 +57,9 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
         category: temp?["category"],
         photos: temp?["images"] != null
             ? (temp?["images"] as List<PlatformFile>)
-                .map((e) => e.path)
-                .toList()
-                .join(",")
+                  .map((e) => e.path)
+                  .toList()
+                  .join(",")
             : null,
         contributor: CacheUser.userName,
         gmtCreate: getCurrentDateTime(),
@@ -119,9 +119,11 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
     // 为了更加可视化这些用户填入的营养素，需要对其进行一些格式化之后显示文本
 
     if (tempServingFormData != null) {
-      var filteredData = Map.fromEntries(tempServingFormData!.entries
-          .where((entry) => entry.value != null)
-          .map((entry) => entry));
+      var filteredData = Map.fromEntries(
+        tempServingFormData!.entries
+            .where((entry) => entry.value != null)
+            .map((entry) => entry),
+      );
 
       var tempList = [];
 
@@ -157,21 +159,22 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
           padding: EdgeInsets.all(5.sp),
           child: SingleChildScrollView(
             child: FormBuilder(
-                key: _foodFormKey,
-                child: Column(
-                  children: [
-                    // 食物的品牌和产品名称(没有对应数据库，没法更人性化的筛选，都是用户输入)
-                    ...buildFoodModifyFormColumns(context),
-                    // 单份营养素类型
-                    _buildServingTypeRadio(),
-                    // 单份营养素数据简单显示
-                    Text(
-                      formattedTempServingFormData,
-                      maxLines: 4,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                )),
+              key: _foodFormKey,
+              child: Column(
+                children: [
+                  // 食物的品牌和产品名称(没有对应数据库，没法更人性化的筛选，都是用户输入)
+                  ...buildFoodModifyFormColumns(context),
+                  // 单份营养素类型
+                  _buildServingTypeRadio(),
+                  // 单份营养素数据简单显示
+                  Text(
+                    formattedTempServingFormData,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
         Padding(
@@ -225,7 +228,9 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
               child: GestureDetector(
                 onTap: () {
                   final currentValue = _foodFormKey
-                      .currentState?.fields['serving_info_type']?.value;
+                      .currentState
+                      ?.fields['serving_info_type']
+                      ?.value;
 
                   if (currentValue ==
                       showCusLableMapLabel(context, servingType)) {
@@ -258,9 +263,8 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => FoodServingInfoModify(
-              servingType: servingType,
-            ),
+            builder: (context) =>
+                FoodServingInfoModify(servingType: servingType),
           ),
         ).then(_handleServingFormCallback);
       },
@@ -274,10 +278,7 @@ class _AddfoodWithServingState extends State<AddfoodWithServing> {
 
     if (value != null) {
       // 此页面是新增食物带营养素，所以没有食物信息
-      var servingList = parseServingInfo(
-        value,
-        servingType.value,
-      );
+      var servingList = parseServingInfo(value, servingType.value);
 
       setState(() {
         // 把单份营养素表单页面返回的数据全局保存，方便格式化显示

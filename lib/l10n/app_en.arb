@@ -34,9 +34,6 @@
   "dailyGoal": "Daily Goals",
   "dailyGoalBars": "Daily Goals Chart",
 
-
-
-
   "moduleTitles": "{ titles, select, 0{Training} 1{Dietary} 2{Daily Calendar} 3{User & Settings} other{Other} }",
   "@moduleTitles": {
   "description": "各个模块主页appbar的标题文字"
@@ -419,6 +416,16 @@
   "permissionRequest":"Permission Request",
   "featuresRestrictionNote":"The features of display images, import exercise, import food composition, and data backup in the application require file management permissions. Please allow them.",
 
-  "appNote":"Note"
+  "appNote":"Note",
+
+  "initFinished":"InitFinished",
+  "initializing":"Initializing, please wait for 3 minutes",
+  "initializingFood":"Initializing Food Composition Data...",
+  "initializingExercise":"Initializing Exercise Data...",
+  "loadEmbeddedExercise":"Load embedded exercise",
+  "confirmLoadEmbeddedExercise":"Load embedded exercise? This will overwrite duplicates.",
+  "loadEmbeddedFood":"Load embedded Food",
+  "confirmLoadEmbeddedFood":"Load embedded food? This will overwrite duplicates."
+
 
 }

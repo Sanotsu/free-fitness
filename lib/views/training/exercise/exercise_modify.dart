@@ -5,10 +5,10 @@ import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_training_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_training_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
@@ -55,14 +55,16 @@ class _ExerciseModifyState extends State<ExerciseModify> {
       // 有主要肌肉，显示主要肌肉
       if (updateTarget?.primaryMuscles != null &&
           updateTarget?.primaryMuscles != "") {
-        selectedPrimaryMuscles =
-            _genSelectedMuscleOptions(updateTarget?.primaryMuscles);
+        selectedPrimaryMuscles = _genSelectedMuscleOptions(
+          updateTarget?.primaryMuscles,
+        );
       }
       // 有次要肌肉，显示次要肌肉
       if (updateTarget?.secondaryMuscles != null &&
           updateTarget?.secondaryMuscles != "") {
-        selectedSecondaryMuscles =
-            _genSelectedMuscleOptions(updateTarget?.secondaryMuscles);
+        selectedSecondaryMuscles = _genSelectedMuscleOptions(
+          updateTarget?.secondaryMuscles,
+        );
       }
     }
   }
@@ -115,16 +117,17 @@ class _ExerciseModifyState extends State<ExerciseModify> {
             : null,
         secondaryMuscles: selectedSecondaryMuscles.isNotEmpty
             ? (selectedSecondaryMuscles)
-                .map((opt) => opt.value)
-                .toList()
-                .join(',')
+                  .map((opt) => opt.value)
+                  .toList()
+                  .join(',')
             : null,
-        images: (temp?.fields['images']?.value != null) &&
+        images:
+            (temp?.fields['images']?.value != null) &&
                 temp?.fields['images']?.value != ""
             ? (temp?.fields['images']?.value as List<PlatformFile>)
-                .map((e) => e.path)
-                .toList()
-                .join(",")
+                  .map((e) => e.path)
+                  .toList()
+                  .join(",")
             : null,
         isCustom: true,
         contributor: CacheUser.userName,
@@ -174,7 +177,7 @@ class _ExerciseModifyState extends State<ExerciseModify> {
           style: TextStyle(fontSize: CusFontSizes.pageTitle),
         ),
         actions: [
-          IconButton(onPressed: _saveNewExercise, icon: const Icon(Icons.save))
+          IconButton(onPressed: _saveNewExercise, icon: const Icon(Icons.save)),
         ],
       ),
       body: Padding(
@@ -327,6 +330,7 @@ class _ExerciseModifyState extends State<ExerciseModify> {
           ),
 
           const SizedBox(height: 10),
+
           // 语音提醒文本
           // 2023-12-30 这个栏位目前无实际意义
           // cusFormBuilerTextField(
@@ -336,7 +340,6 @@ class _ExerciseModifyState extends State<ExerciseModify> {
           //   maxLines: 5,
           //   isOutline: true,
           // ),
-
           const SizedBox(height: 10),
           // 上传活动示例图片（静态图或者gif）
           _buildFilePicker(
@@ -372,7 +375,8 @@ class _ExerciseModifyState extends State<ExerciseModify> {
         maxFiles: null,
         allowMultiple: true,
         previewImages: true,
-        onChanged: (val) => debugPrint(val.toString()),
+        // onChanged: (val) => debugPrint(val.toString()),
+        // onFileLoading: (val) => debugPrint(val.toString()),
         typeSelectors: [
           TypeSelector(
             type: FileType.image,
@@ -385,13 +389,10 @@ class _ExerciseModifyState extends State<ExerciseModify> {
                 ),
               ],
             ),
-          )
+          ),
         ],
         customTypeViewerBuilder: (children) =>
             Row(mainAxisAlignment: MainAxisAlignment.end, children: children),
-        onFileLoading: (val) {
-          debugPrint(val.toString());
-        },
       ),
     );
   }
@@ -409,7 +410,8 @@ class _ExerciseModifyState extends State<ExerciseModify> {
     // 把预设的基础活动选项列表转化为 MultiSelectDialogField 支持的列表
     final muscleItems = musclesOptions
         .map<MultiSelectItem<CusLabel>>(
-            (opt) => MultiSelectItem<CusLabel>(opt, showCusLable(opt)))
+          (opt) => MultiSelectItem<CusLabel>(opt, showCusLable(opt)),
+        )
         .toList();
 
     return Padding(

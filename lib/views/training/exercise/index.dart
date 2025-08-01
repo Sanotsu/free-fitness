@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/components/dialog_widgets.dart';
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_training_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_training_helper.dart';
+import '../../../core/utils/image_preview_helper.dart';
+import '../../../core/utils/toast_utils.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
+import '../../../services/exercise_importer_service.dart';
 import 'exercise_detail.dart';
 import 'exercise_json_import.dart';
 import 'exercise_modify.dart';
@@ -70,7 +71,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
 
     if (!state) {
       if (!mounted) return;
-      EasyLoading.showToast(CusAL.of(context).noStorageHint);
+      ToastUtils.showToast(CusAL.of(context).noStorageHint);
     }
 
     _loadExerciseData();
@@ -159,6 +160,52 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     _loadExerciseData();
   }
 
+  // 加载内置数据
+  Future<void> loadEmbeddedExercise() async {
+    final result = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(CusAL.of(context).tipLabel),
+          content: Text(CusAL.of(context).confirmLoadEmbeddedExercise),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: Text(CusAL.of(context).cancelLabel),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: Text(CusAL.of(context).confirmLabel),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result != true) return;
+
+    // 先将初始化标志置为false
+    box.write(LocalStorageKey.exerciseDataImported, false);
+
+    if (!mounted) return;
+    Locale currentLocale = Localizations.localeOf(context);
+    String languageCode = currentLocale.languageCode;
+
+    // 再执行初始化操作
+    await ExerciseImporterService().importEmbeddedExercises(languageCode);
+
+    if (!mounted) return;
+    setState(() {
+      exerciseItems.clear();
+      currentPage = 1;
+    });
+    _loadExerciseData();
+  }
+
   // 进入json文件导入前，先获取权限
   Future<void> clickExerciseImport() async {
     final status = await requestStoragePermission();
@@ -173,9 +220,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     if (!mounted) return;
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const ExerciseJsonImport(),
-      ),
+      MaterialPageRoute(builder: (context) => const ExerciseJsonImport()),
     ).then((value) {
       setState(() {
         exerciseItems.clear();
@@ -205,6 +250,12 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.flash_on),
+            onPressed: loadEmbeddedExercise,
+            tooltip: CusAL.of(context).loadEmbeddedExercise,
+          ),
+
           /// 导入json文件
           IconButton(
             icon: const Icon(Icons.import_export),
@@ -232,7 +283,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                 _loadExerciseData();
               }
             },
-          )
+          ),
         ],
       ),
       body: SafeArea(
@@ -300,8 +351,11 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text(CusAL.of(context).deleteConfirm),
-              content: Text(CusAL.of(context)
-                  .exerciseDeleteAlert(exerciseItem.exerciseName)),
+              content: Text(
+                CusAL.of(
+                  context,
+                ).exerciseDeleteAlert(exerciseItem.exerciseName),
+              ),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
@@ -375,10 +429,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              flex: 3,
-              child: buildImageCarouselSlider(imageList),
-            ),
+            Expanded(flex: 3, child: buildImageViewCarouselSlider(imageList)),
             Expanded(
               flex: 5,
               child: Column(

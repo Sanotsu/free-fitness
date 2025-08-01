@@ -63,7 +63,7 @@ import 'app_localizations_zh.dart';
 /// property.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -86,16 +86,16 @@ abstract class AppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('zh')
+    Locale('zh'),
   ];
 
   /// No description provided for @appTitle.
@@ -1309,6 +1309,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Note'**
   String get appNote;
+
+  /// No description provided for @initFinished.
+  ///
+  /// In en, this message translates to:
+  /// **'InitFinished'**
+  String get initFinished;
+
+  /// No description provided for @initializing.
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing, please wait for 3 minutes'**
+  String get initializing;
+
+  /// No description provided for @initializingFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing Food Composition Data...'**
+  String get initializingFood;
+
+  /// No description provided for @initializingExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Initializing Exercise Data...'**
+  String get initializingExercise;
+
+  /// No description provided for @loadEmbeddedExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Load embedded exercise'**
+  String get loadEmbeddedExercise;
+
+  /// No description provided for @confirmLoadEmbeddedExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'Load embedded exercise? This will overwrite duplicates.'**
+  String get confirmLoadEmbeddedExercise;
+
+  /// No description provided for @loadEmbeddedFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Load embedded Food'**
+  String get loadEmbeddedFood;
+
+  /// No description provided for @confirmLoadEmbeddedFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Load embedded food? This will overwrite duplicates.'**
+  String get confirmLoadEmbeddedFood;
 }
 
 class _AppLocalizationsDelegate
@@ -1338,8 +1386,9 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
 }

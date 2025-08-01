@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/global/constants.dart';
-import '../../../common/utils/tool_widgets.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/utils/tool_widgets.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 
 class ExerciseQueryForm extends StatefulWidget {
-  final Function(Map<String, dynamic>) onQuery; // 定义回调函数属性
+  final Function(Map<String, dynamic>) onQuery;
 
   const ExerciseQueryForm({super.key, required this.onQuery});
 
@@ -120,12 +120,15 @@ class _ExerciseQueryFormState extends State<ExerciseQueryForm> {
                       _formKey.currentState?.fields['primary_muscles']
                           ?.didChange(null);
                       _formKey.currentState?.fields['level']?.didChange(null);
-                      _formKey.currentState?.fields['mechanic']
-                          ?.didChange(null);
-                      _formKey.currentState?.fields['category']
-                          ?.didChange(null);
-                      _formKey.currentState?.fields['equipment']
-                          ?.didChange(null);
+                      _formKey.currentState?.fields['mechanic']?.didChange(
+                        null,
+                      );
+                      _formKey.currentState?.fields['category']?.didChange(
+                        null,
+                      );
+                      _formKey.currentState?.fields['equipment']?.didChange(
+                        null,
+                      );
                     });
 
                     // 失去焦点

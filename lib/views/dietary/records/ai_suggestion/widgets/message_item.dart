@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../../common/global/constants.dart';
+import '../../../../../core/constants/constants.dart';
 import '../../../../../models/paid_llm/llm_chat.dart';
 
 class MessageItem extends StatelessWidget {
@@ -23,8 +23,9 @@ class MessageItem extends StatelessWidget {
     bool isFromUser = message.role == 'user';
 
     // 如果是用户输入，头像显示在右边
-    CrossAxisAlignment crossAlignment =
-        isFromUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
+    CrossAxisAlignment crossAlignment = isFromUser
+        ? CrossAxisAlignment.end
+        : CrossAxisAlignment.start;
 
     // 所有的文字颜色，暂定用户蓝色AI黑色
     // Color textColor = isFromUser ? Colors.blue : Colors.black;
@@ -69,6 +70,11 @@ class MessageItem extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        // 显示推理内容
+                        if (message.reasoningContent != null &&
+                            message.reasoningContent!.isNotEmpty)
+                          _buildThinkingProcess(),
+
                         // 显示对话正文内容
                         GptMarkdown(
                           message.content,
@@ -97,6 +103,37 @@ class MessageItem extends StatelessWidget {
             child: const Icon(Icons.person),
           ),
       ],
+    );
+  }
+
+  // DS 的 R 系列有深度思考部分，单独展示
+  Widget _buildThinkingProcess() {
+    final thinkingColor = Colors.grey;
+
+    return Container(
+      padding: EdgeInsets.only(bottom: 8),
+      child: ExpansionTile(
+        title: Text(
+          message.content.trim().isEmpty ? '思考中' : '已深度思考',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black54,
+          ),
+        ),
+        initiallyExpanded: true,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(left: 24),
+            // 使用高性能MarkdownRenderer来渲染深度思考内容，可以利用缓存机制
+            child: RepaintBoundary(
+              child: GptMarkdown(
+                message.reasoningContent!,
+                style: TextStyle(color: thinkingColor, fontSize: 13),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
