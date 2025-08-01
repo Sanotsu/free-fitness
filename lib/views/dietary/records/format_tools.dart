@@ -1,7 +1,7 @@
 // 格式化带营养素详情的饮食记录条目数据列表
 import 'package:flutter/material.dart';
 
-import '../../../common/global/constants.dart';
+import '../../../core/constants/constants.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 

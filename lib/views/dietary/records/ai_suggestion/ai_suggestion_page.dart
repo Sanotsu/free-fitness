@@ -1,19 +1,19 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/models/paid_llm/common_chat_model_spec.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../../apis/paid_llm_apis.dart';
-import '../../../../common/components/dialog_widgets.dart';
-import '../../../../common/global/constants.dart';
-import '../../../../common/utils/tool_widgets.dart';
+import '../../../../core/apis/llm_apis.dart';
+import '../../../../core/constants/constants.dart';
+import '../../../../core/utils/image_compressor.dart';
+import '../../../../core/utils/image_preview_helper.dart';
+import '../../../../core/utils/toast_utils.dart';
+import '../../../../core/utils/tool_widgets.dart';
 import '../../../../models/cus_app_localizations.dart';
 import '../../../../models/paid_llm/common_chat_completion_state.dart';
+import '../../../../models/paid_llm/common_chat_model_spec.dart';
 import '../../../../models/paid_llm/llm_chat.dart';
 import 'widgets/message_item.dart';
 
@@ -48,7 +48,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
     // 预设第一个role为system，指定系统角色
     ChatMessage(
       messageId: const Uuid().v4(),
-      content: box.read('language') == "en"
+      content: box.read('language') == 'en'
           ? "You are a senior and excellent expert in nutrition, health, and wellness."
           : "你是一名资深且优秀的营养学、健康学、养生学专家。",
       role: "system",
@@ -78,12 +78,18 @@ class _OneChatScreenState extends State<OneChatScreen> {
   }
 
   // 2024-07-12 如果是餐次相册的图片分析，那么进入这个页面需要先处理图片数据
-  initSend() async {
+  Future<void> initSend() async {
     if (widget.imageUrl != null) {
       var selectedImage = File(widget.imageUrl!);
+
       try {
         // 可能会出现不存在的图片路径，那边这里转base64就会报错，那么就返回上一页了
-        var tempBase64Str = base64Encode((await selectedImage.readAsBytes()));
+        // var tempBase64Str = base64Encode((await selectedImage.readAsBytes()));
+
+        // 2025-07-30压缩图片并转换为base64
+        var tempBase64Str = await ImageCompressor.compressAndConvertImage(
+          selectedImage,
+        );
 
         if (!mounted) return;
         setState(() {
@@ -102,19 +108,14 @@ class _OneChatScreenState extends State<OneChatScreen> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: Text(
-                box.read('language') == "en" ? "Exception" : "异常提示",
-              ),
-              content: Text(
-                e.toString(),
-                style: TextStyle(fontSize: 15.sp),
-              ),
+              title: Text(box.read('language') == 'en' ? "Exception" : "异常提示"),
+              content: Text(e.toString(), style: TextStyle(fontSize: 15.sp)),
               actions: [
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text(box.read('language') == "en" ? "confirm" : "确认"),
+                  child: Text(box.read('language') == 'en' ? "confirm" : "确认"),
                 ),
               ],
             );
@@ -131,7 +132,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
 
   // 在用户输入或者AI响应后，需要把对话列表滚动到最下面
   // 调用时放在状态改变函数中
-  chatListScrollToBottom() {
+  void chatListScrollToBottom() {
     // 每收到一点新的响应文本，就都滚动到ListView的底部
     // 注意：ai响应的消息卡片下方还有一行功能按钮，这里滚动了那个还没显示的话是看不到的
     // 所以滚动到最大还加一点高度（大于实际功能按钮高度也没问题）
@@ -144,17 +145,19 @@ class _OneChatScreenState extends State<OneChatScreen> {
   }
 
   // 2024-12-02 改为仅用户可以发送消息，AI响应直接在响应函数中处理
-  _sendMessage(String text, {CCUsage? usage}) {
+  void _sendMessage(String text, {CCUsage? usage}) {
     setState(() {
-      messages.add(ChatMessage(
-        messageId: const Uuid().v4(),
-        content: text,
-        role: "user",
-        dateTime: DateTime.now(),
-        promptTokens: usage?.promptTokens, // prompt 使用的token数(输入)
-        completionTokens: usage?.completionTokens, // 内容生成的token数(输出)
-        totalTokens: usage?.totalTokens,
-      ));
+      messages.add(
+        ChatMessage(
+          messageId: const Uuid().v4(),
+          content: text,
+          role: "user",
+          dateTime: DateTime.now(),
+          promptTokens: usage?.promptTokens, // prompt 使用的token数(输入)
+          completionTokens: usage?.completionTokens, // 内容生成的token数(输出)
+          totalTokens: usage?.totalTokens,
+        ),
+      );
 
       _userInputController.clear();
       // 滚动到ListView的底部
@@ -166,7 +169,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
   }
 
   // 得到模型响应
-  _getLlmResponse() async {
+  Future<void> _getLlmResponse() async {
     // 在调用前，不会设置响应状态
     if (isBotThinking) return;
     setState(() {
@@ -181,22 +184,24 @@ class _OneChatScreenState extends State<OneChatScreen> {
     // 如果是图片，图片要单独处理下
     if (imageBase64String != null) {
       msgs = messages
-          .map((e) => CCMessage(
-                content: (e.role == "assistant" || e.role == "system")
-                    ? e.content
-                    : isFirstSendImage == true
-                        ? [
-                            {
-                              "type": "image_url",
-                              "image_url": {"url": imageBase64String}
-                            },
-                            {"type": "text", "text": e.content},
-                          ]
-                        : [
-                            {"type": "text", "text": e.content}
-                          ],
-                role: e.role,
-              ))
+          .map(
+            (e) => CCMessage(
+              content: (e.role == "assistant" || e.role == "system")
+                  ? e.content
+                  : isFirstSendImage == true
+                  ? [
+                      {
+                        "type": "image_url",
+                        "image_url": {"url": imageBase64String},
+                      },
+                      {"type": "text", "text": e.content},
+                    ]
+                  : [
+                      {"type": "text", "text": e.content},
+                    ],
+              role: e.role,
+            ),
+          )
           .toList();
     }
 
@@ -206,14 +211,14 @@ class _OneChatScreenState extends State<OneChatScreen> {
       stream = await getChatRespStream(
         ApiPlatform.lingyiwanwu,
         msgs,
-        model: ccmSpecList[CCM.YiVision]!.model,
+        model: ccmSpecList[CCM.YiVision2]!.model,
         stream: isStream,
       );
     } else {
       stream = await getChatRespStream(
         ApiPlatform.lingyiwanwu,
         msgs,
-        model: ccmSpecList[CCM.YiSpark]!.model,
+        model: ccmSpecList[CCM.YiLightning]!.model,
         stream: isStream,
       );
     }
@@ -228,6 +233,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
       messageId: const Uuid().v4(),
       role: "assistant",
       content: "",
+      reasoningContent: "",
       dateTime: DateTime.now(),
     );
 
@@ -253,10 +259,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
           // 2024-11-04 讯飞星火，虽然成功返回，还是会有message栏位，其他的是出错了才有该栏位
           // 所以需要判断该errorMsg的值
           if ((crb.error != null)) {
-            csMsg?.content += """后台响应报错:
-          \n\n错误代码: ${crb.error?.code}
-          \n\n错误原因: ${crb.error?.message}
-          """;
+            csMsg?.content += "${crb.error?.code}${crb.error?.message}";
 
             if (!mounted) return;
             setState(() {
@@ -265,6 +268,8 @@ class _OneChatScreenState extends State<OneChatScreen> {
             });
           } else {
             csMsg?.content += crb.customReplyText ?? "";
+            csMsg?.reasoningContent =
+                (csMsg!.reasoningContent!) + (crb.cusReasoningContent ?? "");
           }
 
           // 更新token信息
@@ -291,13 +296,17 @@ class _OneChatScreenState extends State<OneChatScreen> {
       onError: (error) {
         if (!mounted) return;
         commonExceptionDialog(context, "异常提示", error.toString());
+        setState(() {
+          csMsg = null;
+          isBotThinking = false;
+        });
       },
     );
   }
 
   /// 最后一条大模型回复如果不满意，可以重新生成(中间的不行，因为后续的问题是关联上下文的)
   /// 2024-06-20 限量的要计算token数量，所以不让重新生成(？？？但实际也没做累加的token的逻辑)
-  regenerateLatestQuestion() {
+  void regenerateLatestQuestion() {
     setState(() {
       // 将最后一条消息删除，并添加占位消息，重新发送
       messages.removeLast();
@@ -340,7 +349,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
                   padding: EdgeInsets.all(5.sp),
                   child: SizedBox(
                     width: 100.sp,
-                    child: buildImageCarouselSlider([widget.imageUrl!]),
+                    child: buildImageViewCarouselSlider([widget.imageUrl!]),
                   ),
                 ),
               ),
@@ -358,7 +367,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
   }
 
   /// 构建对话列表主体
-  buildChatListArea() {
+  Expanded buildChatListArea() {
     return Expanded(
       child: ListView.builder(
         controller: _scrollController, // 设置ScrollController
@@ -375,8 +384,9 @@ class _OneChatScreenState extends State<OneChatScreen> {
                   MessageItem(
                     message: messages[index],
                     // 只有最后一个才显示圈圈
-                    isBotThinking:
-                        index == messages.length - 1 ? isBotThinking : false,
+                    isBotThinking: index == messages.length - 1
+                        ? isBotThinking
+                        : false,
                   ),
 
                 // 如果是大模型回复且回复完了，可以有一些功能按钮
@@ -394,18 +404,18 @@ class _OneChatScreenState extends State<OneChatScreen> {
                           },
                           child: Text(CusAL.of(context).regeneration),
                         ),
-                      //
 
+                      //
                       IconButton(
                         onPressed: () {
                           Clipboard.setData(
                             ClipboardData(text: messages[index].content),
                           );
 
-                          EasyLoading.showToast(
+                          ToastUtils.showToast(
                             CusAL.of(context).copiedHint,
                             duration: const Duration(seconds: 3),
-                            toastPosition: EasyLoadingToastPosition.center,
+                            align: Alignment.center,
                           );
                         },
                         icon: Icon(Icons.copy, size: 20.sp),
@@ -417,7 +427,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
                       ),
                       SizedBox(width: 10.sp),
                     ],
-                  )
+                  ),
               ],
             ),
           );
@@ -427,7 +437,7 @@ class _OneChatScreenState extends State<OneChatScreen> {
   }
 
   /// 用户发送消息的区域
-  buildUserSendArea() {
+  Padding buildUserSendArea() {
     return Padding(
       padding: EdgeInsets.all(5.sp),
       child: Row(

@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_training_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_training_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/custom_exercise.dart';
@@ -92,8 +92,8 @@ Ab_Roller.json:
           // 如果一个json文件只是一个动作，那就加上中括号；如果本身就是带了中括号的多个，就不再加
           List cusExerciseMapList =
               jsonData.trim().startsWith("[") && jsonData.trim().endsWith("]")
-                  ? json.decode(jsonData)
-                  : json.decode("[$jsonData]");
+              ? json.decode(jsonData)
+              : json.decode("[$jsonData]");
 
           var temp = cusExerciseMapList
               .map((e) => CustomExercise.fromJson(e))
@@ -104,8 +104,10 @@ Ab_Roller.json:
             cusExercises.addAll(temp);
             // 更新需要构建的表格的长度和每条数据的可选中状态
             exerciseItemsNum = cusExercises.length;
-            exerciseSelectedList =
-                List<bool>.generate(exerciseItemsNum, (int index) => false);
+            exerciseSelectedList = List<bool>.generate(
+              exerciseItemsNum,
+              (int index) => false,
+            );
           });
         } catch (e) {
           // 弹出报错提示框
@@ -154,7 +156,7 @@ Ab_Roller.json:
   }
 
   // 讲json数据保存到数据库中
-  _saveToDb() async {
+  Future<void> _saveToDb() async {
     // 已经在保存中路，再点击保存直接返回即可
     if (isLoading) return;
 
@@ -183,8 +185,10 @@ Ab_Roller.json:
         secondaryMuscles: e.secondaryMuscles?.join(","),
         // images: e.images?.join(","),
         // 如果用户有指定文件夹的位置，就加上；没有的话就加上默认相册的位置
-        images:
-            e.images?.map((e) => cusExerciseImagePerfix + e).toList().join(","),
+        images: e.images
+            ?.map((e) => cusExerciseImagePerfix + e)
+            .toList()
+            .join(","),
         // 导入json都为true则可以读取相册中对应位置的图片
         isCustom: true,
         contributor: CacheUser.userName,
@@ -192,7 +196,7 @@ Ab_Roller.json:
       );
 
       try {
-        await _trainingHelper.insertExerciseThrowError(tempExercise);
+        await _trainingHelper.insertExercise(tempExercise);
       } on Exception catch (e) {
         // 将错误信息展示给用户
         if (!mounted) return;
@@ -293,7 +297,7 @@ Ab_Roller.json:
   }
 
   /// 上方的功能按钮区域
-  _buildButtonsArea() {
+  Card _buildButtonsArea() {
     return Card(
       elevation: 5.sp,
       child: Column(
@@ -355,7 +359,7 @@ Ab_Roller.json:
   }
 
   // 构建图片公共文件夹提示按钮
-  _buildHelpButton() {
+  IconButton _buildHelpButton() {
     return IconButton(
       icon: const Icon(Icons.help_outline, color: Colors.lightGreen),
       onPressed: () {
@@ -421,7 +425,7 @@ Ab_Roller.json:
   }
 
   // 构建上传文件或文件夹时显示锻炼的数据概要和文件列表信息
-  _buildExerciseListArea() {
+  List<Widget> _buildExerciseListArea() {
     return [
       RichText(
         textAlign: TextAlign.left,
@@ -490,7 +494,7 @@ Ab_Roller.json:
     ];
   }
 
-  _buildExerciseDataTable() {
+  List<Widget> _buildExerciseDataTable() {
     return [
       Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.sp),
@@ -507,9 +511,9 @@ Ab_Roller.json:
                 setState(() {
                   // 先找到被选中的索引
                   List<int> trueIndices = List.generate(
-                          exerciseSelectedList.length, (index) => index)
-                      .where((i) => exerciseSelectedList[i])
-                      .toList();
+                    exerciseSelectedList.length,
+                    (index) => index,
+                  ).where((i) => exerciseSelectedList[i]).toList();
 
                   // 从列表中移除
                   // 倒序遍历需要移除的索引列表，以避免索引变化导致的问题
@@ -552,18 +556,18 @@ Ab_Roller.json:
             rows: List<DataRow>.generate(
               exerciseItemsNum,
               (int index) => DataRow(
-                color: WidgetStateProperty.resolveWith<Color?>(
-                    (Set<WidgetState> states) {
+                color: WidgetStateProperty.resolveWith<Color?>((
+                  Set<WidgetState> states,
+                ) {
                   // All rows will have the same selected color.
                   if (states.contains(WidgetState.selected)) {
-                    return Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withOpacity(0.08);
+                    return Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.08);
                   }
                   // Even rows will have a grey color.
                   if (index.isEven) {
-                    return Colors.grey.withOpacity(0.3);
+                    return Colors.grey.withValues(alpha: 0.3);
                   }
                   return null; // Use default value for other states and odd rows.
                 }),
@@ -617,7 +621,7 @@ Ab_Roller.json:
             ),
           ),
         ),
-      )
+      ),
     ];
   }
 }

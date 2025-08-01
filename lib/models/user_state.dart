@@ -1,5 +1,5 @@
-import '../common/global/constants.dart';
-import '../common/utils/tools.dart';
+import '../core/constants/constants.dart';
+import '../core/utils/tools.dart';
 
 /// 用户基础信息和用户设置相关的表
 

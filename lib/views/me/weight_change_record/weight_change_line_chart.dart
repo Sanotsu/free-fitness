@@ -5,12 +5,12 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:screenshot/screenshot.dart';
 
-import '../../../common/utils/db_user_helper.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/storage/db_user_helper.dart';
+import '../../../core/utils/toast_utils.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/user_state.dart';
@@ -58,7 +58,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
     getWeightData();
   }
 
-  getWeightData({String? startDate, String? endDate}) async {
+  Future<void> getWeightData({String? startDate, String? endDate}) async {
     if (isLoading) return;
 
     setState(() {
@@ -127,7 +127,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
     }
     var unit = "kg";
     return SideTitleWidget(
-      axisSide: meta.axisSide,
+      meta: meta,
       child: Text(
         "${meta.formattedValue}$unit",
         style: TextStyle(fontSize: CusFontSizes.flagTiny),
@@ -158,7 +158,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
     }
 
     return SideTitleWidget(
-      axisSide: AxisSide.top,
+      meta: meta,
       fitInside: SideTitleFitInsideData.disable(),
       child: Text(
         text,
@@ -169,7 +169,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
   }
 
   // 将折线图保存到本地图片
-  saveChartImage() async {
+  Future<void> saveChartImage() async {
     try {
       // 2024-11-18 直接保存文件到指定位置
       var dir = Directory('/storage/emulated/0/free-fitness/images');
@@ -193,7 +193,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
 
       if (byteData != null) {
         await file.writeAsBytes(byteData.buffer.asUint8List());
-        EasyLoading.showToast("图片已保存在手机下/${file.path.split("/0/").last}");
+        ToastUtils.showToast("图片已保存在手机下/${file.path.split("/0/").last}");
       }
 
       /// 方法2 使用 ScreenShot 库 (两者图片效果是一样的)
@@ -306,15 +306,16 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
               isLoading
                   ? Center(
                       child: SizedBox(
-                      height: 300.sp,
-                      child: const CircularProgressIndicator(),
-                    ))
+                        height: 300.sp,
+                        child: const CircularProgressIndicator(),
+                      ),
+                    )
                   : _buildLineChart(),
             ],
           );
   }
 
-  _buildLineChart() {
+  SingleChildScrollView _buildLineChart() {
     // 折线的数据和配置
     final lineBarsData = [
       LineChartBarData(
@@ -348,11 +349,7 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
         // 如果提供，此[LineChartBarData]将使用此[gradient]绘制。否则，使用[color]来绘制背景。
         // 如果同时提供[color]和[gradient]，则会引发异常
         gradient: const LinearGradient(
-          colors: [
-            Colors.blue,
-            Colors.pink,
-            Colors.red,
-          ],
+          colors: [Colors.blue, Colors.pink, Colors.red],
           stops: [0.1, 0.4, 0.9],
         ),
       ),
@@ -398,21 +395,22 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
                   // 这个触摸反馈是：点击某个点，显示该点的值；再点击就取消显示
                   touchCallback:
                       (FlTouchEvent event, LineTouchResponse? response) {
-                    if (response == null || response.lineBarSpots == null) {
-                      return;
-                    }
-                    if (event is FlTapUpEvent) {
-                      final spotIndex = response.lineBarSpots!.first.spotIndex;
-                      // 点击某个数据点，如果已经展示了工具提示框就从工具提示框点列表移除；没有，则加入
-                      setState(() {
-                        if (showingTooltipOnSpots.contains(spotIndex)) {
-                          showingTooltipOnSpots.remove(spotIndex);
-                        } else {
-                          showingTooltipOnSpots.add(spotIndex);
+                        if (response == null || response.lineBarSpots == null) {
+                          return;
                         }
-                      });
-                    }
-                  },
+                        if (event is FlTapUpEvent) {
+                          final spotIndex =
+                              response.lineBarSpots!.first.spotIndex;
+                          // 点击某个数据点，如果已经展示了工具提示框就从工具提示框点列表移除；没有，则加入
+                          setState(() {
+                            if (showingTooltipOnSpots.contains(spotIndex)) {
+                              showingTooltipOnSpots.remove(spotIndex);
+                            } else {
+                              showingTooltipOnSpots.add(spotIndex);
+                            }
+                          });
+                        }
+                      },
                   // 鼠标解析器(注释了在安卓上好像没影响)
                   // mouseCursorResolver:
                   //     (FlTouchEvent event, LineTouchResponse? response) {
@@ -425,32 +423,32 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
                   ///  获取触摸点的工具提示框(就是上面触摸反馈时，展示的内容工具提示框的样式)
                   getTouchedSpotIndicator:
                       (LineChartBarData barData, List<int> spotIndexes) {
-                    return spotIndexes.map((index) {
-                      return TouchedSpotIndicatorData(
-                        const FlLine(color: Colors.pink),
-                        FlDotData(
-                          show: true,
-                          getDotPainter: (spot, percent, barData, index) =>
-                              FlDotCirclePainter(
-                            // 被选中展示了工具提示框的数据点的半径
-                            radius: 5.sp,
-                            color: lerpGradient(
-                              barData.gradient!.colors,
-                              barData.gradient!.stops!,
-                              percent / 100,
+                        return spotIndexes.map((index) {
+                          return TouchedSpotIndicatorData(
+                            const FlLine(color: Colors.pink),
+                            FlDotData(
+                              show: true,
+                              getDotPainter: (spot, percent, barData, index) =>
+                                  FlDotCirclePainter(
+                                    // 被选中展示了工具提示框的数据点的半径
+                                    radius: 5.sp,
+                                    color: lerpGradient(
+                                      barData.gradient!.colors,
+                                      barData.gradient!.stops!,
+                                      percent / 100,
+                                    ),
+                                    // 折线上数据点的颜色，如果不那么较真跟着折线的渐变色显示，都统一纯色就好，简单。
+                                    // color: Colors.black,
+                                    strokeWidth: 2.sp,
+                                    strokeColor: Colors.grey,
+                                  ),
                             ),
-                            // 折线上数据点的颜色，如果不那么较真跟着折线的渐变色显示，都统一纯色就好，简单。
-                            // color: Colors.black,
-                            strokeWidth: 2.sp,
-                            strokeColor: Colors.grey,
-                          ),
-                        ),
-                      );
-                    }).toList();
-                  },
+                          );
+                        }).toList();
+                      },
                   touchTooltipData: LineTouchTooltipData(
                     getTooltipColor: (_) => Colors.pink,
-                    tooltipRoundedRadius: 8.sp,
+                    tooltipBorderRadius: BorderRadius.circular(8.sp),
                     getTooltipItems: (List<LineBarSpot> lineBarsSpot) {
                       return lineBarsSpot.map((lineBarSpot) {
                         return LineTooltipItem(
@@ -470,11 +468,14 @@ class _WeightChangeLineChartState extends State<WeightChangeLineChart> {
                 lineBarsData: lineBarsData,
                 // y轴最小值
                 // minY: 0, // ？？？如果是体重的话，传入的数据的最小值减个三五千克，然后间隔单位小一点
-                minY: (weightTrends
-                            .reduce((currentWT, nextWT) =>
-                                currentWT.weight < nextWT.weight
-                                    ? currentWT
-                                    : nextWT)
+                minY:
+                    (weightTrends
+                            .reduce(
+                              (currentWT, nextWT) =>
+                                  currentWT.weight < nextWT.weight
+                                  ? currentWT
+                                  : nextWT,
+                            )
                             .weight)
                         .floor() -
                     3, // 最后的-3是避免最小的值就显示在最下面了，还是留点空隙

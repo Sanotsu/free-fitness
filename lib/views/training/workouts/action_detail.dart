@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/components/dialog_widgets.dart';
-import '../../../common/global/constants.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/widgets/dialog_widgets.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/utils/image_preview_helper.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
@@ -81,13 +82,14 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
   }
 
   // 动作的图片
-  _buildExerciseImageArea(Exercise item) {
-    List<String> imageList =
-        (item.images?.trim().isNotEmpty == true) ? item.images!.split(",") : [];
-    return buildImageCarouselSlider(imageList);
+  Widget _buildExerciseImageArea(Exercise item) {
+    List<String> imageList = (item.images?.trim().isNotEmpty == true)
+        ? item.images!.split(",")
+        : [];
+    return buildImageViewCarouselSlider(imageList);
   }
 
-  _buildCountArea() {
+  Row _buildCountArea() {
     // 两行
     // return Padding(
     //   padding: EdgeInsets.only(left: 0.2.sw),
@@ -168,9 +170,9 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
     );
   }
 
-// ======== ？？？这个翻页部件，action config dialog和exercise detail的弹窗也有。
-// 因为有状态改变，估计要回调函数之类的，暂时不知道怎么抽出来复用
-  _buildPageButton() {
+  // ======== ？？？这个翻页部件，action config dialog和exercise detail的弹窗也有。
+  // 因为有状态改变，估计要回调函数之类的，暂时不知道怎么抽出来复用
+  Container _buildPageButton() {
     return Container(
       color: CusColors.pageChangeBg,
       child: Row(
@@ -209,9 +211,7 @@ class _ActionDetailDialogState extends State<ActionDetailDialog> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                TextSpan(
-                  text: '/$_totalSize',
-                ),
+                TextSpan(text: '/$_totalSize'),
               ],
             ),
           ),

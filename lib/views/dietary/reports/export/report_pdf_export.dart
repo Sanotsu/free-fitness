@@ -9,42 +9,64 @@ import 'package:pdf/widgets.dart';
 import 'package:flutter/services.dart' show rootBundle;
 // import 'package:printing/printing.dart';
 
-import '../../../../common/global/constants.dart';
-import '../../../../common/utils/tools.dart';
+import '../../../../core/constants/constants.dart';
+import '../../../../core/utils/tools.dart';
 import '../../../../models/dietary_state.dart';
 
 Map<String, CusLabel> _pdfLabelMap = {
   "title": CusLabel(
-      enLabel: 'Export dietary records', cnLabel: "饮食日记条目导出", value: null),
-  "headerLeft":
-      CusLabel(enLabel: 'dietary records', cnLabel: "饮食条目记录", value: null),
+    enLabel: 'Export dietary records',
+    cnLabel: "饮食日记条目导出",
+    value: null,
+  ),
+  "headerLeft": CusLabel(
+    enLabel: 'dietary records',
+    cnLabel: "饮食条目记录",
+    value: null,
+  ),
   "headerRight": CusLabel(
-      enLabel: 'exported by free-fitness',
-      cnLabel: "由free-fitness导出",
-      value: null),
+    enLabel: 'exported by free-fitness',
+    cnLabel: "由free-fitness导出",
+    value: null,
+  ),
   "number": CusLabel(enLabel: 'Page', cnLabel: "第", value: null),
   "page": CusLabel(enLabel: '', cnLabel: "页", value: null),
-  "enery":
-      CusLabel(enLabel: 'Energy\n(kcal)', cnLabel: "能量\n(大卡)", value: null),
-  "protein":
-      CusLabel(enLabel: 'Protein\n(g)', cnLabel: "蛋白质\n(克)", value: null),
+  "enery": CusLabel(
+    enLabel: 'Energy\n(kcal)',
+    cnLabel: "能量\n(大卡)",
+    value: null,
+  ),
+  "protein": CusLabel(
+    enLabel: 'Protein\n(g)',
+    cnLabel: "蛋白质\n(克)",
+    value: null,
+  ),
   "fat": CusLabel(enLabel: 'Fat\n(g)', cnLabel: "脂肪\n(克)", value: null),
   "cho": CusLabel(enLabel: 'CHO\n(g)', cnLabel: "碳水\n(克)", value: null),
   "sugar": CusLabel(enLabel: 'Sugar\n(g)', cnLabel: "糖\n(克)", value: null),
-  "dietary_fibre":
-      CusLabel(enLabel: 'DietaryFiber\n(g)', cnLabel: "膳食纤维\n(克)", value: null),
+  "dietary_fibre": CusLabel(
+    enLabel: 'DietaryFiber\n(g)',
+    cnLabel: "膳食纤维\n(克)",
+    value: null,
+  ),
   "sodium": CusLabel(enLabel: 'Sodium\n(mg)', cnLabel: "钠\n(毫克)", value: null),
-  "potassium":
-      CusLabel(enLabel: 'Potassium\n(mg)', cnLabel: "钾\n(毫克)", value: null),
-  "cholesterol":
-      CusLabel(enLabel: 'Cholesterol\n(mg)', cnLabel: "胆固醇\n(毫克)", value: null),
+  "potassium": CusLabel(
+    enLabel: 'Potassium\n(mg)',
+    cnLabel: "钾\n(毫克)",
+    value: null,
+  ),
+  "cholesterol": CusLabel(
+    enLabel: 'Cholesterol\n(mg)',
+    cnLabel: "胆固醇\n(毫克)",
+    value: null,
+  ),
   "subtotal": CusLabel(enLabel: 'Subtotal', cnLabel: "小计", value: null),
   "total": CusLabel(enLabel: 'Total', cnLabel: "小计", value: null),
 };
 
 // 根据当前语言显示 CusLabel 的 中文或者英文
 String _showLabel(String lang, CusLabel cusLable) {
-  return lang == "en" ? cusLable.enLabel : cusLable.cnLabel;
+  return lang == 'en' ? cusLable.enLabel : cusLable.cnLabel;
 }
 
 Future<Uint8List> makeReportPdf(
@@ -64,10 +86,10 @@ Future<Uint8List> makeReportPdf(
       // https://github.com/DavBfr/dart_pdf/wiki/Fonts-Management
       // base: await PdfGoogleFonts.notoSerifHKRegular(),
       // bold: await PdfGoogleFonts.notoSerifHKBold(),
-      // 但是使用知道的本地字体，会增加app体积
+      // 但是使用预设的本地字体，会增加app体积
       base: Font.ttf(await rootBundle.load("assets/MiSans-Regular.ttf")),
       fontFallback: [
-        pw.Font.ttf(await rootBundle.load('assets/MiSans-Regular.ttf'))
+        pw.Font.ttf(await rootBundle.load('assets/MiSans-Regular.ttf')),
       ],
     ),
   );
@@ -101,14 +123,9 @@ Future<Uint8List> makeReportPdf(
         }
       }
       // 构建每天的数据页面(当天的记录列表、当天按餐次分类的记录map，当天的日期)
-      pdf.addPage(_buildPdfPage(
-        data,
-        logGroupedByMeal,
-        date,
-        startDate,
-        endDate,
-        lang,
-      ));
+      pdf.addPage(
+        _buildPdfPage(data, logGroupedByMeal, date, startDate, endDate, lang),
+      );
     }
   }
 
@@ -116,7 +133,7 @@ Future<Uint8List> makeReportPdf(
 }
 
 // 构建pdf的页面
-_buildPdfPage(
+pw.Page _buildPdfPage(
   List<DailyFoodItemWithFoodServing> logData,
   Map<String, List<DailyFoodItemWithFoodServing>> logGroupedByMeal,
   String date,
@@ -127,9 +144,7 @@ _buildPdfPage(
   var mealDate = DateTime.parse(date);
   return pw.Page(
     // 两者不能同时存在
-    pageTheme: pw.PageTheme(
-      margin: pw.EdgeInsets.all(5.sp),
-    ),
+    pageTheme: pw.PageTheme(margin: pw.EdgeInsets.all(5.sp)),
     // 页面展示横向显示
     // pageFormat: PdfPageFormat.a4.landscape,
     build: (context) {
@@ -184,7 +199,7 @@ _buildPdfPage(
 }
 
 // 构建pdf统计页面的标题部分(只有一行数据的表格当做标题)
-_buildMealHeaderTable(String lang) {
+pw.Table _buildMealHeaderTable(String lang) {
   return pw.Table(
     // 表格的边框设置
     border: pw.TableBorder.all(color: PdfColors.black),
@@ -205,13 +220,13 @@ _buildMealHeaderTable(String lang) {
           expandedHeadText(_showLabel(lang, _pdfLabelMap['potassium']!)),
           expandedHeadText(_showLabel(lang, _pdfLabelMap['cholesterol']!)),
         ],
-      )
+      ),
     ],
   );
 }
 
 // 构建pdf统计页面的数据表格数据部分(每餐都算一个子表格，多个子表格组合当做数据表格部分)
-_buildMealBodyTable(
+List<pw.Widget> _buildMealBodyTable(
   Map<String, List<DailyFoodItemWithFoodServing>> mealMap,
   String lang,
 ) {
@@ -240,7 +255,7 @@ _buildMealBodyTable(
               padding: pw.EdgeInsets.symmetric(vertical: 10.sp),
               child: pw.Text(
                 // 理论上这里一定找得到一日四餐对应的中文名称
-                lang == "en" ? tempMeal.enLabel : tempMeal.cnLabel,
+                lang == 'en' ? tempMeal.enLabel : tempMeal.cnLabel,
                 style: pw.TextStyle(fontSize: 14.sp),
                 textAlign: pw.TextAlign.left,
               ),
@@ -256,7 +271,7 @@ _buildMealBodyTable(
 }
 
 // 构建每餐的子表格数据部分
-_buildMealSubBodyTable(
+pw.Table _buildMealSubBodyTable(
   List<DailyFoodItemWithFoodServing> mealData,
   String lang,
 ) {
@@ -364,13 +379,13 @@ _buildMealSubBodyTable(
           expandedSubCountText(tempPotassium),
           expandedSubCountText(tempCholesterol),
         ],
-      )
+      ),
     ],
   );
 }
 
 // 构建当日总计的子表格数据部分
-_buildTotalCountSubBodyTable(
+pw.Table _buildTotalCountSubBodyTable(
   List<DailyFoodItemWithFoodServing> logData,
   String lang,
 ) {
@@ -405,7 +420,7 @@ _buildTotalCountSubBodyTable(
           expandedSubCountText(tempCount[8], color: PdfColors.black),
           expandedSubCountText(tempCount[9], color: PdfColors.black),
         ],
-      )
+      ),
     ],
   );
 }
@@ -414,30 +429,28 @@ _buildTotalCountSubBodyTable(
 pw.Widget expandedHeadText(
   final String text, {
   final pw.TextAlign align = pw.TextAlign.center,
-}) =>
-    pw.Expanded(
-      flex: 1,
-      child: pw.Text(
-        text,
-        style: pw.TextStyle(fontSize: 12.sp, fontWeight: pw.FontWeight.bold),
-        textAlign: align,
-      ),
-    );
+}) => pw.Expanded(
+  flex: 1,
+  child: pw.Text(
+    text,
+    style: pw.TextStyle(fontSize: 12.sp, fontWeight: pw.FontWeight.bold),
+    textAlign: align,
+  ),
+);
 
 // 表格正文表格的文本
 pw.Widget expandedSubText(
   final dynamic text, {
   final pw.TextAlign align = pw.TextAlign.center,
   bool? isDouble = true,
-}) =>
-    pw.Expanded(
-      flex: 1,
-      child: pw.Text(
-        (isDouble ?? true) ? cusDoubleToString(text) : text,
-        style: pw.TextStyle(fontSize: 10.sp),
-        textAlign: align,
-      ),
-    );
+}) => pw.Expanded(
+  flex: 1,
+  child: pw.Text(
+    (isDouble ?? true) ? cusDoubleToString(text) : text,
+    style: pw.TextStyle(fontSize: 10.sp),
+    textAlign: align,
+  ),
+);
 
 // 表格正文总计部分文字
 pw.Widget expandedSubCountText(
@@ -445,21 +458,20 @@ pw.Widget expandedSubCountText(
   final pw.TextAlign align = pw.TextAlign.center,
   bool? isDouble = true,
   PdfColor? color = PdfColors.green,
-}) =>
-    pw.Expanded(
-      flex: 1,
-      child: pw.Text(
-        (isDouble ?? true) ? cusDoubleToString(text) : text,
-        style: pw.TextStyle(
-          fontSize: 11.sp,
-          fontWeight: pw.FontWeight.bold,
-          color: color,
-        ),
-        textAlign: align,
-      ),
-    );
+}) => pw.Expanded(
+  flex: 1,
+  child: pw.Text(
+    (isDouble ?? true) ? cusDoubleToString(text) : text,
+    style: pw.TextStyle(
+      fontSize: 11.sp,
+      fontWeight: pw.FontWeight.bold,
+      color: color,
+    ),
+    textAlign: align,
+  ),
+);
 
-dailyFoodItemAccumulate(List<DailyFoodItemWithFoodServing> list) {
+List<double> dailyFoodItemAccumulate(List<DailyFoodItemWithFoodServing> list) {
   var tempEnergy = 0.0;
   var tempProtein = 0.0;
   var tempFat = 0.0;

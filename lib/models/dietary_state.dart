@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 // 食物
 class Food {
   int? foodId; // 自增的，可以不传
@@ -35,7 +33,7 @@ class Food {
     };
   }
 
-// 用于从数据库行映射到 ServingInfo 对象的 fromMap 方法
+  // 用于从数据库行映射到 ServingInfo 对象的 fromMap 方法
   factory Food.fromMap(Map<String, dynamic> map) {
     return Food(
       foodId: map['food_id'] as int?,
@@ -69,6 +67,11 @@ class ServingInfo {
   String servingUnit;
   String? contributor, gmtCreate, updateUser, gmtModified;
   double energy, protein, totalFat, totalCarbohydrate, sodium;
+  // 2025-07-29 理论上创建单位营养素信息时只需要传入千焦的能量值，然后应用自动计算出大卡值
+  // 但是《中国食物成分表标准版第6版》书上给出的千焦和大卡值转化并不一定是4.184,典型的就是油部分
+  // 100g单位数据本来也有千焦和大卡值，所以这里还是支持可选的大卡值
+  // 注意，只有初始化导入asset的食品数据时，才需要传入大卡值
+  double? energyKCal;
   double? saturatedFat, transFat, polyunsaturatedFat, monounsaturatedFat;
   double? cholesterol, sugar, dietaryFiber, potassium;
   bool isDeleted;
@@ -79,6 +82,7 @@ class ServingInfo {
     required this.servingSize,
     required this.servingUnit,
     required this.energy,
+    this.energyKCal,
     required this.protein,
     required this.totalFat,
     this.saturatedFat,
@@ -105,6 +109,7 @@ class ServingInfo {
       "serving_size": servingSize,
       "serving_unit": servingUnit,
       "energy": energy,
+      "energy_kcal": energyKCal,
       "protein": protein,
       "total_fat": totalFat,
       "saturated_fat": saturatedFat,
@@ -134,6 +139,7 @@ class ServingInfo {
       "serving_size": servingSize,
       "serving_unit": servingUnit,
       "energy": energy.toStringAsFixed(2),
+      "energy_kcal": energyKCal?.toStringAsFixed(2),
       "protein": protein.toStringAsFixed(2),
       "total_fat": totalFat.toStringAsFixed(2),
       "saturated_fat": saturatedFat?.toStringAsFixed(2),
@@ -161,6 +167,7 @@ class ServingInfo {
       servingSize: map['serving_size'] as int,
       servingUnit: map['serving_unit'] as String,
       energy: map['energy'] as double,
+      energyKCal: map['energy_kcal'] as double?,
       protein: map['protein'] as double,
       totalFat: map['total_fat'] as double,
       totalCarbohydrate: map['total_carbohydrate'] as double,
@@ -187,7 +194,7 @@ class ServingInfo {
     ServingInfo{
     "serving_info_id": $servingInfoId, "food_id": $foodId, 
       "serving_size": $servingSize, "serving_unit": $servingUnit,
-      "energy": $energy, "protein": $protein, "total_fat": $totalFat, "saturated_fat": $saturatedFat, "trans_fat": $transFat, 
+      "energy": $energy, "energy_kcal": $energyKCal, "protein": $protein, "total_fat": $totalFat, "saturated_fat": $saturatedFat, "trans_fat": $transFat, 
       "polyunsaturated_fat": $polyunsaturatedFat, "monounsaturated_fat": $monounsaturatedFat, "cholesterol": $cholesterol, 
       "total_carbohydrate": $totalCarbohydrate, "sugar": $sugar, "dietary_fiber": $dietaryFiber, "sodium": $sodium, "potassium": $potassium, 
       "contributor": $contributor, "gmt_create": $gmtCreate, "update_user": $updateUser, "gmt_modified": $gmtModified,"is_deleted": $isDeleted
@@ -283,7 +290,7 @@ class MealPhoto {
     };
   }
 
-// 用于从数据库行映射到 MealPhoto 对象的 fromMap 方法
+  // 用于从数据库行映射到 MealPhoto 对象的 fromMap 方法
   factory MealPhoto.fromMap(Map<String, dynamic> map) {
     return MealPhoto(
       mealPhotoId: map['meal_photo_id'] as int?,

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/models/cus_app_localizations.dart';
-import 'package:free_fitness/models/training_state.dart';
 
-import '../../../common/components/dialog_widgets.dart';
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_training_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_training_helper.dart';
+import '../../../core/utils/image_preview_helper.dart';
+import '../../../core/utils/toast_utils.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
+import '../../../models/cus_app_localizations.dart';
+import '../../../models/training_state.dart';
+import '../../../services/exercise_importer_service.dart';
 import 'exercise_detail.dart';
 import 'exercise_json_import.dart';
 import 'exercise_modify.dart';
@@ -54,7 +54,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
   }
 
   // 滚动到最底部加载更多数据
-  _scrollListener() {
+  void _scrollListener() {
     if (isLoading) return;
 
     final maxScrollExtent = scrollController.position.maxScrollExtent;
@@ -66,19 +66,19 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     }
   }
 
-  initStorage() async {
+  Future<void> initStorage() async {
     var state = await requestStoragePermission();
 
     if (!state) {
       if (!mounted) return;
-      EasyLoading.showToast(CusAL.of(context).noStorageHint);
+      ToastUtils.showToast(CusAL.of(context).noStorageHint);
     }
 
     _loadExerciseData();
   }
 
   // 加载更多数据(一次10条，有初始值)
-  _loadExerciseData() async {
+  Future<void> _loadExerciseData() async {
     if (isLoading) return;
 
     setState(() {
@@ -107,7 +107,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
   }
 
   // 如果是有用户的查询条件，则使用查询条件进行查询（查询条件表单返回的值）；如果没有，则默认查询所有
-  _searchExercise() async {
+  Future<CusDataResult> _searchExercise() async {
     if (queryConditon == null) {
       return await _dbHelper.queryExercise(
         pageSize: pageSize,
@@ -142,7 +142,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
   }
 
   // 定义查询表单点击确认的回调函数，参数为查询条件的值
-  _handleQuery(Map<String, dynamic> query) {
+  void _handleQuery(Map<String, dynamic> query) {
     unfocusHandle();
 
     // 有变动查询条件，则重新开始查询
@@ -155,8 +155,54 @@ class _TrainingExerciseState extends State<TrainingExercise> {
   }
 
   // 从数据库移除指定基础活动
-  _removeExerciseById(id) async {
+  Future<void> _removeExerciseById(int id) async {
     await _dbHelper.deleteExerciseById(id);
+    _loadExerciseData();
+  }
+
+  // 加载内置数据
+  Future<void> loadEmbeddedExercise() async {
+    final result = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(CusAL.of(context).tipLabel),
+          content: Text(CusAL.of(context).confirmLoadEmbeddedExercise),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: Text(CusAL.of(context).cancelLabel),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: Text(CusAL.of(context).confirmLabel),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result != true) return;
+
+    // 先将初始化标志置为false
+    box.write(LocalStorageKey.exerciseDataImported, false);
+
+    if (!mounted) return;
+    Locale currentLocale = Localizations.localeOf(context);
+    String languageCode = currentLocale.languageCode;
+
+    // 再执行初始化操作
+    await ExerciseImporterService().importEmbeddedExercises(languageCode);
+
+    if (!mounted) return;
+    setState(() {
+      exerciseItems.clear();
+      currentPage = 1;
+    });
     _loadExerciseData();
   }
 
@@ -174,9 +220,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     if (!mounted) return;
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const ExerciseJsonImport(),
-      ),
+      MaterialPageRoute(builder: (context) => const ExerciseJsonImport()),
     ).then((value) {
       setState(() {
         exerciseItems.clear();
@@ -206,6 +250,12 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.flash_on),
+            onPressed: loadEmbeddedExercise,
+            tooltip: CusAL.of(context).loadEmbeddedExercise,
+          ),
+
           /// 导入json文件
           IconButton(
             icon: const Icon(Icons.import_export),
@@ -233,7 +283,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
                 _loadExerciseData();
               }
             },
-          )
+          ),
         ],
       ),
       body: SafeArea(
@@ -270,7 +320,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     );
   }
 
-  _buildDismissible(Exercise exerciseItem, int index) {
+  Dismissible _buildDismissible(Exercise exerciseItem, int index) {
     return Dismissible(
       key: Key(exerciseItem.exerciseCode),
       direction: DismissDirection.endToStart,
@@ -301,8 +351,11 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text(CusAL.of(context).deleteConfirm),
-              content: Text(CusAL.of(context)
-                  .exerciseDeleteAlert(exerciseItem.exerciseName)),
+              content: Text(
+                CusAL.of(
+                  context,
+                ).exerciseDeleteAlert(exerciseItem.exerciseName),
+              ),
               actions: <Widget>[
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
@@ -340,7 +393,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
   }
 
   // 构建单个基础活动的卡片信息
-  _buildExerciseItemCard(int index) {
+  Card _buildExerciseItemCard(int index) {
     var exerciseItem = exerciseItems[index];
 
     // 构建轮播图片列表
@@ -376,10 +429,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              flex: 3,
-              child: buildImageCarouselSlider(imageList),
-            ),
+            Expanded(flex: 3, child: buildImageViewCarouselSlider(imageList)),
             Expanded(
               flex: 5,
               child: Column(
@@ -427,7 +477,7 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     );
   }
 
-  _propertyText(String prefix, String item, List<CusLabel> options) {
+  Expanded _propertyText(String prefix, String item, List<CusLabel> options) {
     // 数据库存的是英文值，这里找到对应的中文或者英文标签进行显示
     var label = getCusLabelText(item, options);
 

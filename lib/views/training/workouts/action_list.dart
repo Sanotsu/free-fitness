@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/components/dialog_widgets.dart';
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_training_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_training_helper.dart';
+import '../../../core/utils/image_preview_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
@@ -52,7 +52,7 @@ class _ActionListState extends State<ActionList> {
   }
 
   // 查询指定训练中的动作列表
-  _getActionListByGroupId() async {
+  Future<void> _getActionListByGroupId() async {
     // 如果已经在查询数据中，则忽略此次新的查询
     if (isLoading) return;
 
@@ -76,11 +76,12 @@ class _ActionListState extends State<ActionList> {
     });
   }
 
-// 保存现有的动作列表到当前训练中
-  _saveActionList() async {
+  // 保存现有的动作列表到当前训练中
+  Future<void> _saveActionList() async {
     // 必须要把原本的action id置为空，然后让数据库设定的自增生效，否则显示的结果默认以主键排序，和实际显示的结果可能不一致。
-    List<TrainingAction> tempList =
-        actionList.map((e) => e.action..actionId = null).toList();
+    List<TrainingAction> tempList = actionList
+        .map((e) => e.action..actionId = null)
+        .toList();
 
     await _dbHelper.renewGroupWithActionsList(
       widget.groupItem.groupId!,
@@ -278,7 +279,7 @@ class _ActionListState extends State<ActionList> {
   }
 
   // 构建可以重新排序的动作列表
-  _buildReorderableList() {
+  ReorderableListView _buildReorderableList() {
     return ReorderableListView.builder(
       // 如果是修改，才允许长按进行拖拽
       buildDefaultDragHandles: _isEditing,
@@ -302,21 +303,23 @@ class _ActionListState extends State<ActionList> {
             : null;
         // 如果是计时的运动，子标题显示持续时间和器械重量(如果有的话)
         if (adItem.exercise.countingMode == countingOptions.first.value) {
-          subTitle = [duration, equipmentWeight]
-              .where((element) => element != null)
-              .join(' + ');
+          subTitle = [
+            duration,
+            equipmentWeight,
+          ].where((element) => element != null).join(' + ');
         } else {
           // 如果是计次的运动，子标题显示重复次数和器械重量(如果有的话)
-          subTitle = [frequency, equipmentWeight]
-              .where((element) => element != null)
-              .join(' + ');
+          subTitle = [
+            frequency,
+            equipmentWeight,
+          ].where((element) => element != null).join(' + ');
         }
 
         // 基础动作的图片
         List<String> imageList =
             (adItem.exercise.images?.trim().isNotEmpty == true)
-                ? adItem.exercise.images!.split(",")
-                : [];
+            ? adItem.exercise.images!.split(",")
+            : [];
 
         return Card(
           elevation: 2.sp,
@@ -372,7 +375,7 @@ class _ActionListState extends State<ActionList> {
                     flex: 6,
                     child: Padding(
                       padding: EdgeInsets.all(_isEditing ? 5.sp : 10.sp),
-                      child: buildImageCarouselSlider(imageList),
+                      child: buildImageViewCarouselSlider(imageList),
                     ),
                   ),
                   if (_isEditing)
@@ -397,14 +400,12 @@ class _ActionListState extends State<ActionList> {
   }
 
   /// 动作列表中新增动作，会查询简单exercise列表，选中某个exercise之后带回本页面，加入到action list中
-  _buildAddActionButton() {
+  FloatingActionButton _buildAddActionButton() {
     return FloatingActionButton(
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => const SimpleExerciseList(),
-          ),
+          MaterialPageRoute(builder: (context) => const SimpleExerciseList()),
         ).then((value) {
           // 如果返回的不是null，也不是false，那就应该是被选中的exercise类
           if (value != null && value != false) {

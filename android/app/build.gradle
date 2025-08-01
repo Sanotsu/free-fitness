@@ -23,7 +23,7 @@ if (flutterVersionName == null) {
 }
 
 // 在 gradle 中配置签名
-// 1. 在 android 代码块之前将你 properties 文件的密钥库信息添加进去
+// 1. 在 android 代码块之前将 properties 文件的密钥库信息添加进去
 def keystoreProperties = new Properties()
 def keystorePropertiesFile = rootProject.file('key.properties')
    if (keystorePropertiesFile.exists()) {
@@ -34,9 +34,13 @@ android {
     namespace "com.swm.free_fitness"
     // compileSdkVersion flutter.compileSdkVersion
     // 安卓14(API 34) - java17 - AGP8
-    compileSdkVersion 34
+    // compileSdkVersion 34
     // ndkVersion flutter.ndkVersion
-     ndkVersion = "26.1.10909125"
+    //  ndkVersion "26.1.10909125"
+
+    // Android 15(API 35)
+    compileSdk 35
+    ndkVersion "27.2.12479018"
 
     // 2024-11-16 升级到java 17
     compileOptions {

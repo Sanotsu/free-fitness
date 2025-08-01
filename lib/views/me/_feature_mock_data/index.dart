@@ -1,10 +1,8 @@
-// ignore_for_file: avoid_print
-
 import 'package:flutter/material.dart';
 
-import '../../../common/utils/db_diary_helper.dart';
-import '../../../common/utils/db_dietary_helper.dart';
-import '../../../common/utils/db_training_helper.dart';
+import '../../../core/storage/db_diary_helper.dart';
+import '../../../core/storage/db_dietary_helper.dart';
+import '../../../core/storage/db_training_helper.dart';
 
 import 'test_funcs.dart';
 
@@ -46,9 +44,7 @@ class _FeatureMockDemoState extends State<FeatureMockDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("生成测试数据"),
-      ),
+      appBar: AppBar(title: const Text("生成测试数据")),
       // ??? 从上倒下预计是:个人信息、功能按钮、软件信息等区块
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -159,7 +155,6 @@ class _FeatureMockDemoState extends State<FeatureMockDemo> {
                     //   },
                     //   child: const Text("userId为1的新增10条随机BMI数据"),
                     // ),
-
                     ElevatedButton(
                       onPressed: () async {
                         await _dietaryHelper.deleteDB();

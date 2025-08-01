@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.2-beta.1
+
+- feat:
+  - 内置了一些基础动作和食物成分数据，方便直接使用
+    - 如果设备系统语言是简体中文(zh)，则导入中文的基础动作，否则是英文(en)
+    - 数据初始化导入完成之后，**再切换 App 语言时，不会重新处理**，始终是初始化时语言
+      - 可以在“基础动作”和“食物成分”主页右上角执行“加载内置数据”
+  - 饮食日记餐次记录添加了可拍照留存图片
+- refactor:
+  - 简单调整了一些项目结构
+  - 统一了 toast 组件
+- chore:
+  - 升级到 flutter3.32.4，同步更新工具依赖库到最新
+- fix:
+
+  - 数据新增时如果重复，从报错改为替换
+  - 修正了一些细节和 bug
+
+---
+
+**注意**：仅全新初次使用才会初始化内置数据，App 未卸载的直接版本升级或覆盖恢复的，不会初始化内置数据，因为已有用户数据了。
+
+可以在“基础动作”和“食物成分”主页右上角执行“加载内置数据”，会替换已存在的同名/同代号的数据。
+
+“基础动作”的 [来源](https://github.com/yuhonas/free-exercise-db) json 格式固定，所以不会出现重复运动代号。
+
+- 还可以根据当前应用的显示语言，加载不同中/英文的运动数据；会替换同名/同代号的数据
+
+“食物成分”稍微不一样：
+
+- 因为内置的 json 中数据 `foodCode + foodName` 对应数据库表唯一键 `brand + product`，json 中即便 foodCode 相同、但 foodName 稍微不完全一致，就会成为 2 个产品。
+  - 比如 `012101`+`梗米 (标一)` 和 `012101`+`粳米（标一）`，因为 foodName 括号不一样，插入后会是 2 个产品
+- 因此，如果符合《中国食物成分表标准版(第 6 版)》[Sanotsu/china-food-composition-data](https://github.com/Sanotsu/china-food-composition-data) json 结构的数据(内置或者自行导入的)，先判断数据库中的 `brand` 是否满足 `foodCode` 的数字格式，如果满足，则不管其他栏位如何，直接替换。
+
 ## 0.2.1-beta.1
 
 - refactor:

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/components/dialog_widgets.dart';
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_training_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_training_helper.dart';
+import '../../../core/utils/image_preview_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
@@ -26,7 +26,7 @@ class SimpleExerciseList extends StatefulWidget {
 class _SimpleExerciseListState extends State<SimpleExerciseList> {
   final DBTrainingHelper _dbHelper = DBTrainingHelper();
 
-// 存锻炼已经加载了的列表
+  // 存锻炼已经加载了的列表
   List<Exercise> exerciseItems = [];
   // 数据库中符合条件的锻炼一共有多少
   int exerciseCount = 0;
@@ -146,7 +146,10 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
             child: Card(
               elevation: 5.sp,
               child: Column(
-                children: [_buildQueryAreaRow(), SizedBox(height: 10.sp)],
+                children: [
+                  _buildQueryAreaRow(),
+                  SizedBox(height: 10.sp),
+                ],
               ),
             ),
           ),
@@ -156,7 +159,7 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
     );
   }
 
-  _buildQueryAreaRow() {
+  Row _buildQueryAreaRow() {
     return Row(
       children: [
         Expanded(
@@ -249,12 +252,12 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
               unfocusHandle();
             },
           ),
-        )
+        ),
       ],
     );
   }
 
-  _buildListArea() {
+  ListView _buildListArea() {
     return ListView.builder(
       itemCount: exerciseItems.length + 1,
       controller: scrollController,
@@ -266,14 +269,13 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
 
           List<String> imageList =
               (exerciseItem.images?.trim().isNotEmpty == true)
-                  ? exerciseItem.images!.split(",")
-                  : [];
+              ? exerciseItem.images!.split(",")
+              : [];
 
           return Card(
             elevation: 2.sp,
             child: GestureDetector(
               onTap: () {
-                // 在这里添加你想要执行的点击事件逻辑
                 Navigator.pop(context, exerciseItem);
               },
               child: SizedBox(
@@ -300,13 +302,7 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
                           ),
                         ),
                         subtitle: Text(
-                          '${getCusLabelText(
-                            exerciseItem.countingMode,
-                            countingOptions,
-                          )} ${getCusLabelText(
-                            exerciseItem.level ?? '',
-                            levelOptions,
-                          )}',
+                          '${getCusLabelText(exerciseItem.countingMode, countingOptions)} ${getCusLabelText(exerciseItem.level ?? '', levelOptions)}',
                         ),
                       ),
                     ),
@@ -314,7 +310,7 @@ class _SimpleExerciseListState extends State<SimpleExerciseList> {
                       flex: 6,
                       child: Padding(
                         padding: EdgeInsets.all(5.sp),
-                        child: buildImageCarouselSlider(imageList),
+                        child: buildImageViewCarouselSlider(imageList),
                       ),
                     ),
                   ],

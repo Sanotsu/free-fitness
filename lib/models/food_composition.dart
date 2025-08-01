@@ -1,6 +1,8 @@
 // json 文件转换时对应的类
 
 // 食物营养素构成
+import 'dart:convert';
+
 class FoodComposition {
   String? foodCode;
   String? foodName;
@@ -80,6 +82,12 @@ class FoodComposition {
     this.tags,
     this.category,
   });
+
+  // 从字符串转
+  factory FoodComposition.fromRawJson(String str) =>
+      FoodComposition.fromJson(json.decode(str));
+  // 转为字符串
+  String toRawJson() => json.encode(toJson());
 
   FoodComposition.fromJson(Map<String, dynamic> json) {
     foodCode = json['foodCode'];

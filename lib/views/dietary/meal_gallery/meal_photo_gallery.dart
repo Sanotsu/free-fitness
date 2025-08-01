@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/common/global/constants.dart';
 
-import '../../../common/components/dialog_widgets.dart';
-import '../../../common/utils/db_dietary_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_dietary_helper.dart';
+import '../../../core/utils/image_preview_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 import '../records/save_meal_photo.dart';
@@ -80,9 +80,7 @@ class _MealPhotoGalleryState extends State<MealPhotoGallery> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(CusAL.of(context).mealGallery),
-      ),
+      appBar: AppBar(title: Text(CusAL.of(context).mealGallery)),
       body: (photoItems.isNotEmpty)
           ? ListView.builder(
               itemCount: photoItems.length + 1,
@@ -99,13 +97,14 @@ class _MealPhotoGalleryState extends State<MealPhotoGallery> {
     );
   }
 
-  _buildMealPhotoCard(MealPhoto mp) {
+  Widget _buildMealPhotoCard(MealPhoto mp) {
     if (mp.photos.trim().isEmpty) {
       return Container();
     }
 
-    List<String> photoList =
-        mp.photos.trim().isNotEmpty ? mp.photos.trim().split(",") : [];
+    List<String> photoList = mp.photos.trim().isNotEmpty
+        ? mp.photos.trim().split(",")
+        : [];
 
     // 数据库中存的餐次信息是英文标签，但显示时则需要按当前语言显示
     // 理论上是一定找得到一个符合条件的
@@ -128,15 +127,17 @@ class _MealPhotoGalleryState extends State<MealPhotoGallery> {
                   handleImageAnalysis(context, photoList);
                 },
                 child: Text(
-                  box.read('language') == "en" ? "AI analysis" : 'AI分析',
+                  box.read('language') == 'en' ? "AI analysis" : 'AI分析',
                 ),
               ),
             ),
-            buildImageCarouselSlider(photoList),
+            buildImageViewCarouselSlider(photoList),
             SizedBox(height: 10.sp),
           ],
         ),
       );
+    } else {
+      return SizedBox.shrink();
     }
   }
 }

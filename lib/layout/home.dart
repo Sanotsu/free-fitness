@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-import '../common/utils/tools.dart';
+import '../core/utils/toast_utils.dart';
+import '../core/utils/tools.dart';
 import '../models/cus_app_localizations.dart';
 import '../views/diary/index_table_calendar.dart';
 import '../views/dietary/index.dart';
@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> {
     Training(),
     Dietary(),
     DiaryTableCalendar(),
-    UserAndSettings()
+    UserAndSettings(),
   ];
 
   @override
@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
     initPermission();
   }
 
-  initPermission() async {
+  Future<void> initPermission() async {
     var state = await requestStoragePermission();
 
     if (!state) {
@@ -66,7 +66,7 @@ class _HomePageState extends State<HomePage> {
       ).then((value) {
         if (value == false) {
           if (!mounted) return;
-          EasyLoading.showToast(CusAL.of(context).noStorageHint);
+          ToastUtils.showToast(CusAL.of(context).noStorageHint);
         }
       });
     }

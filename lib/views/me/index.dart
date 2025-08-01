@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../common/global/constants.dart';
-import '../../common/utils/db_user_helper.dart';
+import '../../core/utils/tool_widgets.dart';
+import '../../core/constants/constants.dart';
+import '../../core/storage/db_user_helper.dart';
 import '../../layout/themes/cus_font_size.dart';
 import '../../models/cus_app_localizations.dart';
 import '../../models/user_state.dart';
@@ -51,7 +51,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
   }
 
   // 查询登录用户的信息
-  _queryLoginedUserInfo() async {
+  Future<void> _queryLoginedUserInfo() async {
     if (isLoading) return;
     setState(() {
       isLoading = true;
@@ -74,7 +74,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
   }
 
   // 弹窗切换用户
-  _switchUser() async {
+  Future<void> _switchUser() async {
     var userList = await _userHelper.queryUserList();
 
     if (!mounted) return;
@@ -225,7 +225,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
   }
 
   // 用户基本信息展示区域
-  _buildBaseUserInfoArea(User userInfo) {
+  List<RenderObjectWidget> _buildBaseUserInfoArea(User userInfo) {
     return [
       SizedBox(height: 10.sp),
 
@@ -403,7 +403,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
     ];
   }
 
-  _buildInfoAndWeightChangeRow() {
+  Row _buildInfoAndWeightChangeRow() {
     return Row(
       children: [
         Expanded(
@@ -444,7 +444,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
     );
   }
 
-  _buildIntakeGoalAndRestTimeRow() {
+  Row _buildIntakeGoalAndRestTimeRow() {
     return Row(
       children: [
         Expanded(
@@ -483,7 +483,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
     );
   }
 
-  _buildBakAndRestoreAndMoreSettingRow() {
+  Row _buildBakAndRestoreAndMoreSettingRow() {
     return Row(
       children: [
         Expanded(

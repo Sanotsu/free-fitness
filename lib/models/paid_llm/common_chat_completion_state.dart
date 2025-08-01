@@ -9,18 +9,26 @@ class CCMessage<T> {
   String role;
   // 注意，图像理解的话，这个还需要是比较复杂的数组(String或VisionContent)
   T content;
+  String? reasoningContent;
 
-  CCMessage({required this.role, required this.content});
+  CCMessage({required this.role, required this.content, this.reasoningContent});
 
   factory CCMessage.fromRawJson(String str) =>
       CCMessage.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-  factory CCMessage.fromJson(Map<String, dynamic> json) =>
-      CCMessage(role: json["role"], content: json["content"]);
+  factory CCMessage.fromJson(Map<String, dynamic> json) => CCMessage(
+    role: json["role"],
+    content: json["content"],
+    reasoningContent: json["reasoning_content"],
+  );
 
-  Map<String, dynamic> toJson() => {"role": role, "content": content};
+  Map<String, dynamic> toJson() => {
+    "role": role,
+    "content": content,
+    "reasoning_content": reasoningContent,
+  };
 }
 
 ///
@@ -30,23 +38,33 @@ class CCMessage<T> {
 class CCDelta {
   String? role;
   String? content;
+  String? reasoningContent;
   List<CCQuote>? quote;
 
-  CCDelta({
-    this.role,
-    this.content,
-    this.quote,
-  });
+  CCDelta({this.role, this.content, this.reasoningContent, this.quote});
 
   // 从字符串转
   factory CCDelta.fromRawJson(String str) => CCDelta.fromJson(json.decode(str));
   // 转为字符串
   String toRawJson() => json.encode(toJson());
 
-  factory CCDelta.fromJson(Map<String, dynamic> json) =>
-      CCDelta(role: json["role"], content: json["content"]);
+  factory CCDelta.fromJson(Map<String, dynamic> json) => CCDelta(
+    role: json["role"],
+    content: json["content"],
+    reasoningContent: json["reasoning_content"] ?? json["reasoningContent"],
+    quote: json["quote"] == null
+        ? null
+        : List<CCQuote>.from(json["quote"]!.map((x) => CCQuote.fromJson(x))),
+  );
 
-  Map<String, dynamic> toJson() => {"role": role, "content": content};
+  Map<String, dynamic> toJson() => {
+    "role": role,
+    "content": content,
+    "reasoning_content": reasoningContent,
+    "quote": quote == null
+        ? null
+        : List<dynamic>.from(quote!.map((x) => x.toJson())),
+  };
 }
 
 ///
@@ -65,10 +83,10 @@ class CCQuote {
   String toRawJson() => json.encode(toJson());
 
   factory CCQuote.fromJson(Map<String, dynamic> json) => CCQuote(
-        num: int.tryParse(json["num"] ?? "1"),
-        url: json["url"],
-        title: json["title"],
-      );
+    num: int.tryParse(json["num"] ?? "1"),
+    url: json["url"],
+    title: json["title"],
+  );
 
   Map<String, dynamic> toJson() => {"num": num, "url": url, "title": title};
 }
@@ -81,23 +99,19 @@ class CCUsage {
   int? completionTokens;
   int? totalTokens;
 
-  CCUsage({
-    this.promptTokens,
-    this.completionTokens,
-    this.totalTokens,
-  });
+  CCUsage({this.promptTokens, this.completionTokens, this.totalTokens});
 
   factory CCUsage.fromJson(Map<String, dynamic> json) => CCUsage(
-        promptTokens: json["prompt_tokens"],
-        completionTokens: json["completion_tokens"],
-        totalTokens: json["total_tokens"],
-      );
+    promptTokens: json["prompt_tokens"],
+    completionTokens: json["completion_tokens"],
+    totalTokens: json["total_tokens"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "prompt_tokens": promptTokens,
-        "completion_tokens": completionTokens,
-        "total_tokens": totalTokens,
-      };
+    "prompt_tokens": promptTokens,
+    "completion_tokens": completionTokens,
+    "total_tokens": totalTokens,
+  };
 
   @override
   String toString() {
@@ -133,30 +147,30 @@ class CCChoice {
   });
 
   factory CCChoice.fromJson(Map<String, dynamic> json) => CCChoice(
-        index: json["index"],
-        message: json["message"] == null
-            ? null
-            : CCMessage.fromJson(json["message"] as Map<String, dynamic>),
-        delta: json["delta"] == null
-            ? null
-            : CCDelta.fromJson(json["delta"] as Map<String, dynamic>),
-        quote: json["quote"] == null
-            ? []
-            : List<CCQuote>.from(
-                (json["quote"]! as List).map((x) => CCQuote.fromJson(x)),
-              ),
-        finishReason: json["finish_reason"],
-      );
+    index: json["index"],
+    message: json["message"] == null
+        ? null
+        : CCMessage.fromJson(json["message"] as Map<String, dynamic>),
+    delta: json["delta"] == null
+        ? null
+        : CCDelta.fromJson(json["delta"] as Map<String, dynamic>),
+    quote: json["quote"] == null
+        ? []
+        : List<CCQuote>.from(
+            (json["quote"]! as List).map((x) => CCQuote.fromJson(x)),
+          ),
+    finishReason: json["finish_reason"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "index": index,
-        "message": message?.toJson(),
-        "delta": delta?.toJson(),
-        "quote": quote == null
-            ? []
-            : List<dynamic>.from(quote!.map((x) => x.toJson())),
-        "finish_reason": finishReason,
-      };
+    "index": index,
+    "message": message?.toJson(),
+    "delta": delta?.toJson(),
+    "quote": quote == null
+        ? []
+        : List<dynamic>.from(quote!.map((x) => x.toJson())),
+    "finish_reason": finishReason,
+  };
 }
 
 ///
@@ -164,10 +178,6 @@ class CCChoice {
 /// 对话传参，都是最小的、必传的，其他都预设(一般人也不会调)
 ///  注意，都使用非流式的回复
 ///=============================================================================
-
-CCReqBody cCReqBodyFromJson(String str) => CCReqBody.fromJson(json.decode(str));
-
-String cCReqBodyToJson(CCReqBody data) => json.encode(data.toJson());
 
 class CCReqBody {
   // 显示指定模型名称(百度的带在url里面，其他两个在body里面)
@@ -198,24 +208,34 @@ class CCReqBody {
   String toRawJson() => json.encode(toJson());
 
   factory CCReqBody.fromJson(Map<String, dynamic> json) => CCReqBody(
-        model: json["model"],
-        messages: List<CCMessage>.from(
-          ((json["messages"]) as List).map((x) => CCMessage.fromJson(x)),
-        ),
-        stream: json["stream"] ?? false,
-        temperature: double.tryParse(json["temperature"] ?? '0.7'),
-        topP: double.tryParse(json["top_p"] ?? '0.7'),
-        maxTokens: int.tryParse(json["max_tokens"] ?? '2048'),
-      );
+    model: json["model"],
+    messages: List<CCMessage>.from(
+      ((json["messages"]) as List).map((x) => CCMessage.fromJson(x)),
+    ),
+    stream: json["stream"] ?? false,
+    temperature: double.tryParse(json["temperature"] ?? '0.7'),
+    topP: double.tryParse(json["top_p"] ?? '0.7'),
+    maxTokens: int.tryParse(json["max_tokens"] ?? '2048'),
+  );
+
+  Map<String, dynamic> toRequestBody() {
+    final history = <Map<String, dynamic>>[];
+    for (var message in messages) {
+      history.add({'role': message.role, 'content': message.content});
+    }
+
+    // 基础请求体
+    return {'model': model, 'messages': history, 'stream': stream};
+  }
 
   Map<String, dynamic> toJson() => {
-        "model": model,
-        "messages": messages,
-        "stream": stream,
-        "temperature": temperature,
-        "top_p": topP,
-        "max_tokens": maxTokens,
-      };
+    "model": model,
+    "messages": messages,
+    "stream": stream,
+    "temperature": temperature,
+    "top_p": topP,
+    "max_tokens": maxTokens,
+  };
 }
 
 ///
@@ -271,6 +291,8 @@ class CCRespBody {
   /// 2024-06-06 3个不同的搞成一样的显示文本，我现在是需要用到显示的值，其他的都暂时不考虑
   String? customReplyText;
 
+  String? cusReasoningContent;
+
   CCRespBody({
     this.id,
     this.object,
@@ -280,7 +302,10 @@ class CCRespBody {
     this.usage,
     this.error,
     String? customReplyText,
-  }) : customReplyText = customReplyText ?? _generatecusText(choices);
+    String? cusReasoningContent,
+  }) : customReplyText = customReplyText ?? _generatecusText(choices),
+       cusReasoningContent =
+           cusReasoningContent ?? _generatecusReasoningContent(choices);
 
   // 自定义的响应文本(比如流式返回最后是个[DONE]没法转型，但可以自行设定；而正常响应时可以从其他值中得到)
   static String _generatecusText(List<CCChoice>? choices) {
@@ -291,6 +316,19 @@ class CCRespBody {
     // 流式的
     if (choices != null && choices.isNotEmpty && choices[0].delta != null) {
       return choices[0].delta?.content ?? "";
+    }
+
+    return '';
+  }
+
+  static String _generatecusReasoningContent(List<CCChoice>? choices) {
+    // 非流式的
+    if (choices != null && choices.isNotEmpty && choices[0].message != null) {
+      return choices[0].message?.reasoningContent ?? "";
+    }
+    // 流式的
+    if (choices != null && choices.isNotEmpty && choices[0].delta != null) {
+      return choices[0].delta?.reasoningContent ?? "";
     }
 
     return '';
@@ -314,17 +352,17 @@ class CCRespBody {
   }
 
   Map<String, dynamic> toJson() => {
-        "id": id,
-        "object": object,
-        "created": created,
-        "model": model,
-        "choices": choices == null
-            ? []
-            : List<dynamic>.from(choices!.map((x) => x.toJson())),
-        "usage": usage?.toJson(),
-        "error": error?.toJson(),
-        "customReplyText": customReplyText,
-      };
+    "id": id,
+    "object": object,
+    "created": created,
+    "model": model,
+    "choices": choices == null
+        ? []
+        : List<dynamic>.from(choices!.map((x) => x.toJson())),
+    "usage": usage?.toJson(),
+    "error": error?.toJson(),
+    "customReplyText": customReplyText,
+  };
 }
 
 /// 零一万物报错返回的是一个结构体
@@ -334,24 +372,19 @@ class RespError {
   String? type;
   dynamic param;
 
-  RespError({
-    required this.code,
-    required this.message,
-    this.type,
-    this.param,
-  });
+  RespError({required this.code, required this.message, this.type, this.param});
 
   factory RespError.fromJson(Map<String, dynamic> json) => RespError(
-        code: json["code"],
-        message: json["message"],
-        type: json["type"],
-        param: json["param"],
-      );
+    code: json["code"],
+    message: json["message"],
+    type: json["type"],
+    param: json["param"],
+  );
 
   Map<String, dynamic> toJson() => {
-        "code": code,
-        "message": message,
-        "type": type,
-        "param": param,
-      };
+    "code": code,
+    "message": message,
+    "type": type,
+    "param": param,
+  };
 }

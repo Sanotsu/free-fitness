@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:numberpicker/numberpicker.dart';
 
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_user_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_user_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/user_state.dart';
@@ -361,7 +361,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                       child: Column(
                         children: [
                           Text(
-                            CusAL.of(context).weightLabel('(cm)'),
+                            CusAL.of(context).heightLabel('(cm)'),
                             style: TextStyle(fontSize: CusFontSizes.flagMedium),
                           ),
                           DecimalNumberPicker(
@@ -428,7 +428,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
 }
 
 // 构建bmi文字
-buildWeightBmiText(double bmi, BuildContext context) {
+Text buildWeightBmiText(double bmi, BuildContext context) {
   if (bmi < 18.4) {
     return Text(
       CusAL.of(context).bmiLabels("0"),

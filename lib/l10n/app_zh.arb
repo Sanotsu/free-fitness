@@ -1,11 +1,7 @@
 {
-    "appTitle": "健康追踪",
+    "appTitle": "悦动健康",
 
     "report": "报告",
-
-    
-
-    
 
     "mainNutrients": "{num, select, 0{能量} 1{卡路里} 2{蛋白质} 3{脂肪} 4{碳水} 5{RDI} other{其他} }",
     "@mainNutrients": {
@@ -76,12 +72,9 @@
     "description": "用户设置目标的栏位"
     },
 
-
-
     "training": "运动",
     "trainingReports": "运动报告",
     "trainingReportsSubtitle":"运动跟练的各项统计数据",
-
 
     "trainedReportLabels": "{num, select, 0{总锻炼次数} 1{总锻炼时间} 2{总休息时间} 3{总暂停时间} 4{总时间(分钟)} 5{上次运动} 6{日期} 7{名称} 8{用时} other{其他} }",
     "@trainedReportLabels": {
@@ -96,9 +89,6 @@
     "trainedReportExport":"导出训练记录",
     "trainedDoneNote":"你已完成所有锻炼\n总耗时 {totolTime} 秒，其中：",
 
-
-
-    
     "exercise": "动作",
     "exerciseLabel": "基础动作",
     "exerciseSubtitle": "管理运动的各个基础动作",
@@ -120,9 +110,6 @@
     "exerciseImagePath":"选择json中图片公共文件夹",
 
     "exerciseDetail": "动作详情",
-
-
-
 
     "workout": "训练做组",
     "workoutSubtitle": "制定专项的训练动作做组",
@@ -194,10 +181,6 @@
     "dayCount":"共 {number} 天",
     "incompleteLabel":"从未跟练",
 
-
-
-
-
     "itemCount": "共 {count} 条",
 
     "dietary":"饮食",
@@ -231,8 +214,6 @@
     "eatableSize":"食用量",
 
     "dietaryReportExport":"导出饮食记录",
-
-
 
     "foodTableMainLabels": "{num, select, 0{单份} 1{能量(大卡)} 2{蛋白质(克)} 3{脂肪(克)} 4{碳水(克)} 5{微量元素(毫克)} other{其他} }",
     "@foodTableMainLabels": {
@@ -288,11 +269,8 @@
     "description": "饮食报告页面食物摄入相关栏位"
     },
 
-
-
     "goalAchieved":"目标已达成{pct}%",
     "goalLabel":"目标: {number}",
-
 
     "dietaryCalendar":"饮食日历表格统计",
 
@@ -300,7 +278,6 @@
     "@dietaryCalendarLabels": {
     "description": "饮食日历表格统计的栏位标签"
     },
-
 
     "diary":"手记",
     "me":"我的",
@@ -361,8 +338,6 @@
     "userGuide":"用户手册",
     "questionAndAnswer":"常见问题",
 
-
-    
     "noteLabel":"提示",
     "tipLabel":"提示",
     "itemLabel":"{num} 项",
@@ -384,7 +359,6 @@
 
     "queryKeywordHintText": "请输入{key}关键字",
 
-    
     "heightLabel":"身高{unit}",
     "weightLabel":"体重{unit}",
     "nameLabel":"怎么称呼您?",
@@ -414,7 +388,7 @@
     "requiredErrorText":"{text}不可为空",
     "numericErrorText":"{text}只能是数字",
     
-    "aiSuggestionTitle":"问答式饮食健康分析",
+    "aiSuggestionTitle":"AI饮食健康分析",
     "aiSuggestionHint":"可以向我提问，获取健康饮食相关建议",
     "regeneration":"重新生成",
     "copiedHint":"已复制到剪贴板",
@@ -423,7 +397,16 @@
     "permissionRequest":"权限申请",
     "featuresRestrictionNote":"应用中显示图片、基础动作导入、营养成分导入、数据备份等功能需要文件管理权限，请允许。",
 
-    "appNote":"注意事项"
+    "appNote":"注意事项",
+
+    "initFinished":"初始化完成",
+    "initializing":"正在初始化应用，请耐心等待几分钟...",
+    "initializingFood":"正在初始化“食物成分”数据...",
+    "initializingExercise":"正在初始化“基础动作”数据...",
+    "loadEmbeddedExercise":"加载内置基础动作数据",
+    "confirmLoadEmbeddedExercise":"是否加载内置基础动作？同名动作会被覆盖",
+    "loadEmbeddedFood":"加载内置食物成分数据",
+    "confirmLoadEmbeddedFood":"是否加载内置食物成分？同名《中国食物成分标准》“食物代号”或者“品牌+产品”的食品会被覆盖"
 
    
 }

@@ -3,10 +3,10 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
-import '../../../../../common/global/constants.dart';
-import '../../../../../common/utils/db_dietary_helper.dart';
+import '../../../../core/constants/constants.dart';
+import '../../../../core/storage/db_dietary_helper.dart';
 import '../../../../../models/dietary_state.dart';
-import '../../../../common/utils/tools.dart';
+import '../../../../core/utils/tools.dart';
 import '../../../../layout/themes/cus_font_size.dart';
 import '../../../../models/cus_app_localizations.dart';
 import '../../foods/detail_modify_serving_info.dart';
@@ -77,7 +77,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
 
   // 可能存在1种食物多个营养素单份单位，默认取第一个用于显示
   // --- 这个是food list选择指定food之后的显示值处理
-  _getDefaulFoodServingInfo() {
+  void _getDefaulFoodServingInfo() {
     setState(() {
       // 默认给传入的食物的第一个营养素信息，daily log 主页面传入时会修改为指定的
       nutrientsInfo = fsInfo.servingInfoList[0];
@@ -111,7 +111,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   }
 
   // 修改了摄入量数值和单位，都要重新计算用于显示的营养素信息(这里是重新获取修改后的营养素单位)
-  _recalculateNutrients() {
+  void _recalculateNutrients() {
     //  ？？？注意，如果这里没有匹配的，肯定是哪里出问题了
     // 从用户输入的单份食物单位，找到对应的营养素信息
     var metricServing = fsInfo.servingInfoList
@@ -124,7 +124,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   }
 
   // 修改指定的饮食条目的摄入量、单份营养素单位、餐次信息
-  _updateDailyFoodItem() async {
+  Future<void> _updateDailyFoodItem() async {
     var updatedMfi = widget.dfiwfs!.dailyFoodItem;
     updatedMfi.foodIntakeSize = inputServingValue;
     updatedMfi.servingInfoId = nutrientsInfo.servingInfoId!;
@@ -142,7 +142,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   }
 
   // 删除饮食日记条目不用管用户修改了什么，且一定是饮食日记主页传递而来确定有条目数据
-  _removeDailyFoodItem() async {
+  Future<void> _removeDailyFoodItem() async {
     var mfiId = widget.dfiwfs!.dailyFoodItem.dailyFoodItemId!;
     var rst = await _dietaryHelper.deleteDailyFoodItem(mfiId);
 
@@ -155,7 +155,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
 
   /// 新增饮食日记条目详情
   /// 食物编号、日期 父组件有传；摄入量、食物单份营养素编号、餐次 用户有自行选择(否则就是默认食物第一个单份营养素和早餐)。
-  _addDailyFoodItem() async {
+  Future<void> _addDailyFoodItem() async {
     var temp = DailyFoodItem(
       // 主键数据库自增
       date: widget.logDate!,
@@ -189,7 +189,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   }
 
   // 点击添加新单位，默认就一定是客制化的单位
-  addNewCusServingInfo() {
+  void addNewCusServingInfo() {
     // 因为默认有选中新增单份营养素的类型，所以返回true确认新增时，一定有该type
     Navigator.push(
       context,
@@ -264,7 +264,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   }
 
   /// 传入的食物摄入量、单份单位、餐次信息表单区域
-  buildInputFormArea() {
+  FormBuilder buildInputFormArea() {
     return FormBuilder(
       key: _formKey,
       child: Column(
@@ -368,7 +368,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   }
 
   /// 构建移除、修改、新增的功能按钮区域
-  buildButtonsRowArea() {
+  Row buildButtonsRowArea() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -405,7 +405,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   }
 
   /// 构建主要营养素表格区域
-  buildNutrientTableArea() {
+  Column buildNutrientTableArea() {
     return Column(
       children: [
         Text(
@@ -462,7 +462,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
     );
   }
 
-  _genEssentialNutrientsTableCell(String title, String value) {
+  TableCell _genEssentialNutrientsTableCell(String title, String value) {
     return TableCell(
       verticalAlignment: TableCellVerticalAlignment.middle,
       child: Padding(
@@ -497,7 +497,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
 
   /// 全部营养素表格展示
   /// 这个表格比卡片样式更简洁
-  buildAllNutrientTableArea() {
+  Column buildAllNutrientTableArea() {
     return Column(
       children: [
         Text(
@@ -607,7 +607,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
   }
 
   // 构建表格行数据
-  _buildTableRow(
+  TableRow _buildTableRow(
     String label,
     String value, {
     TextAlign? labelAligh = TextAlign.left,

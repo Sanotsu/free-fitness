@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_dietary_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_dietary_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
 import 'common_utils_for_food_modify.dart';
@@ -69,7 +69,7 @@ class _DetailModifyServingInfoState extends State<DetailModifyServingInfo> {
     });
   }
 
-  _modifyServingInfo() async {
+  Future<void> _modifyServingInfo() async {
     if (_servingInfoformKey.currentState!.saveAndValidate()) {
       // 营养素表单保存验证通过后，要先格式化成指定类型数据，再才能保持到db
       var servingList = parseServingInfo(

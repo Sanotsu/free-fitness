@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/components/dialog_widgets.dart';
-import '../../../common/global/constants.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/utils/image_preview_helper.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
@@ -27,7 +27,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
   }
 
   // 根据数据库值从预设选项中显示对应标签
-  _getLabel(String? value, List<CusLabel> options) {
+  String _getLabel(String? value, List<CusLabel> options) {
     // 没有传值，返回空字符串
     if (value == null) return "";
 
@@ -42,7 +42,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
   }
 
   // 肌肉这个有多项，所以从预设选项中显示对应标签略有不同
-  _genMuscleOptionLabel(String? muscleStr) {
+  String _genMuscleOptionLabel(String? muscleStr) {
     if (muscleStr == null || muscleStr.trim().isEmpty) {
       return "";
     }
@@ -69,9 +69,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(CusAL.of(context).exerciseDetail),
-      ),
+      appBar: AppBar(title: Text(CusAL.of(context).exerciseDetail)),
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -80,7 +78,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
               padding: EdgeInsets.all(10.sp),
               child: SizedBox(
                 height: 0.3.sh,
-                child: buildImageCarouselSlider(imageList),
+                child: buildImageViewCarouselSlider(imageList),
               ),
             ),
             Padding(
@@ -98,7 +96,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
     );
   }
 
-  buildTableData() {
+  List<Padding> buildTableData() {
     return [
       Padding(
         padding: EdgeInsets.all(5.sp),
@@ -181,7 +179,7 @@ class _ExerciseDetailMoreState extends State<ExerciseDetailMore> {
   }
 
   // 构建表格行数据
-  _buildTableRow(String label, String value) {
+  TableRow _buildTableRow(String label, String value) {
     return TableRow(
       children: [
         Padding(

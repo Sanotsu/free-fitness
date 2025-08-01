@@ -3,14 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/common/utils/tools.dart';
-import 'package:free_fitness/models/dietary_state.dart';
 
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_dietary_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_dietary_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
+import '../../../models/dietary_state.dart';
 import '../../../models/food_composition.dart';
 
 ///
@@ -60,8 +60,8 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
             // 如果一个json文件只是一个动作，那就加上中括号；如果本身就是带了中括号的多个，就不再加
             List foodEnergyMapList =
                 jsonData.trim().startsWith("[") && jsonData.trim().endsWith("]")
-                    ? json.decode(jsonData)
-                    : json.decode("[$jsonData]");
+                ? json.decode(jsonData)
+                : json.decode("[$jsonData]");
 
             var temp = foodEnergyMapList
                 .map((e) => FoodComposition.fromJson(e))
@@ -72,8 +72,10 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
               foodComps.addAll(temp);
               // 更新需要构建的表格的长度和每条数据的可选中状态
               exerciseItemsNum = foodComps.length;
-              exerciseSelectedList =
-                  List<bool>.generate(exerciseItemsNum, (int index) => false);
+              exerciseSelectedList = List<bool>.generate(
+                exerciseItemsNum,
+                (int index) => false,
+              );
             });
           } catch (e) {
             // 弹出报错提示框
@@ -102,7 +104,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
   }
 
   // 讲json数据保存到数据库中
-  _saveToDb() async {
+  Future<void> _saveToDb() async {
     if (isLoading) return;
 
     setState(() {
@@ -209,8 +211,9 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
             onPressed: foodComps.isNotEmpty ? _saveToDb : null,
             icon: Icon(
               Icons.save,
-              color:
-                  foodComps.isNotEmpty ? null : Theme.of(context).disabledColor,
+              color: foodComps.isNotEmpty
+                  ? null
+                  : Theme.of(context).disabledColor,
             ),
           ),
         ],
@@ -236,7 +239,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
   }
 
   // 构建功能按钮区
-  _buildButtonsArea() {
+  Card _buildButtonsArea() {
     return Card(
       elevation: 5,
       child: Row(
@@ -275,7 +278,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
   }
 
   // 当上传的食物营养素信息超过50条，就单纯的列表展示
-  _buildFoodServingListArea() {
+  List<Widget> _buildFoodServingListArea() {
     return [
       RichText(
         textAlign: TextAlign.left,
@@ -341,7 +344,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
   }
 
   // 当上传的食物营养素信息不超过50条，可以表格管理
-  _buildFoodServingDataTable() {
+  List<Widget> _buildFoodServingDataTable() {
     return [
       Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.sp),
@@ -358,9 +361,9 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
                 setState(() {
                   // 先找到被选中的索引
                   List<int> trueIndices = List.generate(
-                          exerciseSelectedList.length, (index) => index)
-                      .where((i) => exerciseSelectedList[i])
-                      .toList();
+                    exerciseSelectedList.length,
+                    (index) => index,
+                  ).where((i) => exerciseSelectedList[i]).toList();
 
                   // 从列表中移除
                   // 倒序遍历需要移除的索引列表，以避免索引变化导致的问题
@@ -403,18 +406,18 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
             rows: List<DataRow>.generate(
               exerciseItemsNum,
               (int index) => DataRow(
-                color: WidgetStateProperty.resolveWith<Color?>(
-                    (Set<WidgetState> states) {
+                color: WidgetStateProperty.resolveWith<Color?>((
+                  Set<WidgetState> states,
+                ) {
                   // All rows will have the same selected color.
                   if (states.contains(WidgetState.selected)) {
-                    return Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withOpacity(0.08);
+                    return Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.08);
                   }
                   // Even rows will have a grey color.
                   if (index.isEven) {
-                    return Colors.grey.withOpacity(0.3);
+                    return Colors.grey.withValues(alpha: 0.3);
                   }
                   return null; // Use default value for other states and odd rows.
                 }),
@@ -468,7 +471,7 @@ class _FoodJsonImportState extends State<FoodJsonImport> {
             ),
           ),
         ),
-      )
+      ),
     ];
   }
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_user_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_user_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/user_state.dart';
@@ -39,7 +39,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
     getWeightData();
   }
 
-  getWeightData() async {
+  Future<void> getWeightData() async {
     if (isLoading) return;
 
     setState(() {
@@ -119,7 +119,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
     );
   }
 
-  _buildRemoveButton() {
+  Padding _buildRemoveButton() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.sp),
       child: Row(
@@ -203,7 +203,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
     );
   }
 
-  _buildExerciseDataTable(BuildContext context) {
+  Expanded _buildExerciseDataTable(BuildContext context) {
     return Expanded(
       child: SingleChildScrollView(
         child: DataTable(
@@ -239,11 +239,11 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
                   return Theme.of(context)
                       .colorScheme
                       .primary
-                      .withOpacity(0.08);
+                      .withValues(alpha: 0.08);
                 }
                 // Even rows will have a grey color.
                 if (index.isEven) {
-                  return Colors.grey.withOpacity(0.3);
+                  return Colors.grey.withValues(alpha: 0.3);
                 }
                 return null; // Use default value for other states and odd rows.
               }),

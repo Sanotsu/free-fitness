@@ -1,25 +1,23 @@
-// ignore_for_file: avoid_print
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:free_fitness/models/cus_app_localizations.dart';
-import 'package:free_fitness/models/user_state.dart';
 import 'package:intl/intl.dart';
 
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_dietary_helper.dart';
-import '../../../common/utils/db_user_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_dietary_helper.dart';
+import '../../../core/storage/db_user_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
+import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
+import '../../../models/user_state.dart';
 import 'export/report_pdf_viewer.dart';
 import 'week_intake_bar.dart';
 
 class DietaryReports extends StatefulWidget {
-// 报告页面默认查看当日的，但有可能从别的页面跳转过来，并带上需要查询的日期
-// ？？？注意：是否区分 日、月、周、年？
+  // 报告页面默认查看当日的，但有可能从别的页面跳转过来，并带上需要查询的日期
+  // ？？？注意：是否区分 日、月、周、年？
   final String? date;
 
   const DietaryReports({super.key, this.date});
@@ -57,7 +55,7 @@ class _DietaryReportsState extends State<DietaryReports> {
   }
 
   /// 通过下拉按钮获取统计的范围日期
-  getDateByOption(String flag) {
+  Map<String, String> getDateByOption(String flag) {
     var lowerFlag = flag.toLowerCase();
     var tempMap = {"startDate": "", "endDate": ""};
     String startTemp = "";
@@ -81,8 +79,9 @@ class _DietaryReportsState extends State<DietaryReports> {
         break;
       case "last_week":
         DateTime now = DateTime.now();
-        DateTime startOfLastWeek =
-            now.subtract(Duration(days: now.weekday + 6));
+        DateTime startOfLastWeek = now.subtract(
+          Duration(days: now.weekday + 6),
+        );
         DateTime endOfLastWeek = now.subtract(Duration(days: now.weekday));
         startTemp = DateFormat(constDateFormat).format(startOfLastWeek);
         endTemp = DateFormat(constDateFormat).format(endOfLastWeek);
@@ -94,7 +93,9 @@ class _DietaryReportsState extends State<DietaryReports> {
   }
 
   /// 有指定日期查询指定日期的饮食记录条目，没有就当前日期
-  _queryDailyFoodItemList({Map<String, String>? queryDateRange}) async {
+  Future<void> _queryDailyFoodItemList({
+    Map<String, String>? queryDateRange,
+  }) async {
     if (isLoading) return;
 
     setState(() {
@@ -108,12 +109,14 @@ class _DietaryReportsState extends State<DietaryReports> {
     };
 
     // 理论上是默认查询当日的，有选择其他日期则查询指定日期？？？还要是登录者这个用户编号的
-    var temp = (await _dietaryHelper.queryDailyFoodItemListWithDetail(
-      userId: CacheUser.userId,
-      startDate: queryDateRange["startDate"],
-      endDate: queryDateRange["endDate"],
-      withDetail: true,
-    ) as List<DailyFoodItemWithFoodServing>);
+    var temp =
+        (await _dietaryHelper.queryDailyFoodItemListWithDetail(
+              userId: CacheUser.userId,
+              startDate: queryDateRange["startDate"],
+              endDate: queryDateRange["endDate"],
+              withDetail: true,
+            )
+            as List<DailyFoodItemWithFoodServing>);
 
     // 查询用户目标值，根据今天是星期几显示对应的RDA值
     var tempUser = await _userHelper.queryUserWithIntakeDailyGoal(
@@ -192,7 +195,8 @@ class _DietaryReportsState extends State<DietaryReports> {
   // 格式化饮食记录数据(一周7填)
   // key是日期，比如2023-11-12,value是营养素VO；但如果某天没有记录，则不会有数据
   Map<String, FoodNutrientTotals> formatWeekData(
-      List<DailyFoodItemWithFoodServing> list) {
+    List<DailyFoodItemWithFoodServing> list,
+  ) {
     // 按天拆分饮食记录条目，key是日期，value是当日的饮食记录
     Map<String, List<DailyFoodItemWithFoodServing>> dailyListMap = {};
 
@@ -244,16 +248,14 @@ class _DietaryReportsState extends State<DietaryReports> {
         body: isLoading
             ? buildLoader(isLoading)
             : dfiwfsList.isEmpty
-                ? Center(
-                    child: Text(CusAL.of(context).noRecordNote),
-                  )
-                : TabBarView(
-                    children: [
-                      SingleChildScrollView(child: buildCalorieTabView()),
-                      SingleChildScrollView(child: buildMacrosTabView()),
-                      SingleChildScrollView(child: buildNutrientsTabView()),
-                    ],
-                  ),
+            ? Center(child: Text(CusAL.of(context).noRecordNote))
+            : TabBarView(
+                children: [
+                  SingleChildScrollView(child: buildCalorieTabView()),
+                  SingleChildScrollView(child: buildMacrosTabView()),
+                  SingleChildScrollView(child: buildNutrientsTabView()),
+                ],
+              ),
       ),
     );
   }
@@ -265,7 +267,7 @@ class _DietaryReportsState extends State<DietaryReports> {
   ///     上方显示今日RDA和已消耗的总量及其比例，超过100%红色，没超过绿色(仅选择昨天、今天时)。
   ///     下方显示4餐次总共的卡数和比例(昨天今天是饼图，上周本周是柱状图)。
   ///  2 食物摄入图表，日期范围一共摄入量多少种食物，每种食物多少次，每种总计多少卡
-  buildCalorieTabView() {
+  Column buildCalorieTabView() {
     // 【注意】如果是单日的（昨天、进入，则显示饼图，如果是上周、本周则是柱状图）
     List<Widget> chart = [];
     if (dropdownValue.value == "today" || dropdownValue.value == "yesterday") {
@@ -273,12 +275,13 @@ class _DietaryReportsState extends State<DietaryReports> {
       chart.add(_buildCaloryCardTitle(formatData(dfiwfsList)));
 
       /// 当日主要营养素占比饼图卡片(默认其实就是卡路里的饼图)
-      chart
-          .add(_buildPieChartCard(formatData(dfiwfsList), CusChartType.calory));
+      chart.add(
+        _buildPieChartCard(formatData(dfiwfsList), CusChartType.calory),
+      );
     } else {
       // 当周的营养素条状图
       chart = [
-        _buildBarChartCard(formatWeekData(dfiwfsList), CusChartType.calory)
+        _buildBarChartCard(formatWeekData(dfiwfsList), CusChartType.calory),
       ];
     }
 
@@ -296,7 +299,7 @@ class _DietaryReportsState extends State<DietaryReports> {
   }
 
   // 卡路里tabview的标题
-  _buildCaloryCardTitle(FoodNutrientTotals fntVO) {
+  ListTile _buildCaloryCardTitle(FoodNutrientTotals fntVO) {
     return ListTile(
       title: RichText(
         text: TextSpan(
@@ -321,19 +324,21 @@ class _DietaryReportsState extends State<DietaryReports> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-              flex: 1,
-              child: Text(
-                CusAL.of(context).goalAchieved(
-                  cusDoubleTryToIntString((fntVO.calorie / valueRDA * 100)),
-                ),
-                textAlign: TextAlign.left,
-              )),
+            flex: 1,
+            child: Text(
+              CusAL.of(context).goalAchieved(
+                cusDoubleTryToIntString((fntVO.calorie / valueRDA * 100)),
+              ),
+              textAlign: TextAlign.left,
+            ),
+          ),
           Expanded(
-              flex: 1,
-              child: Text(
-                "${CusAL.of(context).goalLabel(valueRDA)} ${CusAL.of(context).unitLabels('2')}",
-                textAlign: TextAlign.right,
-              )),
+            flex: 1,
+            child: Text(
+              "${CusAL.of(context).goalLabel(valueRDA)} ${CusAL.of(context).unitLabels('2')}",
+              textAlign: TextAlign.right,
+            ),
+          ),
         ],
       ),
     );
@@ -342,7 +347,7 @@ class _DietaryReportsState extends State<DietaryReports> {
   /// *******************************宏量素 tabview *****************************************
 
   /// 宏量macronutrients tab 页面
-  buildMacrosTabView() {
+  Column buildMacrosTabView() {
     // 【注意】如果是单日的（昨天、进入，则显示饼图，如果是上周、本周则是柱状图）
     List<Widget> chart = [];
     if (dropdownValue.value == "today" || dropdownValue.value == "yesterday") {
@@ -351,7 +356,7 @@ class _DietaryReportsState extends State<DietaryReports> {
     } else {
       // 当周的营养素条状图
       chart = [
-        _buildBarChartCard(formatWeekData(dfiwfsList), CusChartType.macro)
+        _buildBarChartCard(formatWeekData(dfiwfsList), CusChartType.macro),
       ];
     }
 
@@ -372,7 +377,7 @@ class _DietaryReportsState extends State<DietaryReports> {
   /// *******************************营养素 tabview ************************************
   /// （未完，还没有实现个人配置目标，这里需要和目标营养素的差值比较）
   /// 2023-12-13 没有这些营养素摄入目标配置，只是显示有摄入多少即可
-  buildNutrientsTabView() {
+  Card buildNutrientsTabView() {
     // 简单示例，等个人配置目标完成再继续
     List<DataRow> rows = [];
 
@@ -414,25 +419,29 @@ class _DietaryReportsState extends State<DietaryReports> {
     // 2023-12-26 这个属性是驼峰命名的，需要改为snake模式字符串，才能和预设的nutrientList的value进行匹配。
     // 注意 totalCHO会被处理成 total_c_h_o ，所以找不到对应的标签,暂时不想改，所以魔法值的强制匹配
     var temp = nutrientList
-        .where((e) =>
-            e.value ==
-            (getPropName(attribute) != 'total_c_h_o'
-                ? getPropName(attribute)
-                : 'total_cho'))
+        .where(
+          (e) =>
+              e.value ==
+              (getPropName(attribute) != 'total_c_h_o'
+                  ? getPropName(attribute)
+                  : 'total_cho'),
+        )
         .toList();
 
-    return DataRow(cells: [
-      DataCell(Text(temp.isNotEmpty ? showCusLable(temp.first) : attribute)),
-      DataCell(Text(value)),
-      // 示例占位
-      // const DataCell(Text("1000")),
-    ]);
+    return DataRow(
+      cells: [
+        DataCell(Text(temp.isNotEmpty ? showCusLable(temp.first) : attribute)),
+        DataCell(Text(value)),
+        // 示例占位
+        // const DataCell(Text("1000")),
+      ],
+    );
   }
 
   /// -----------------复用的【饼图卡片】= 图例 + 实例 ---------------------------
   ///
   /// 绘制卡路里摄入或宏量素摄入的【饼图卡片】(包含图例legend和图chart两部分)
-  _buildPieChartCard(FoodNutrientTotals fntVO, CusChartType type) {
+  Card _buildPieChartCard(FoodNutrientTotals fntVO, CusChartType type) {
     return Card(
       elevation: 5.sp,
       child: SizedBox(
@@ -464,11 +473,12 @@ class _DietaryReportsState extends State<DietaryReports> {
 
   /// 饼图的“图例”
   // 绘制卡路里摄入(type=calory)或宏量素摄入(type=macro)的饼图的图例
-  _buildPieLegend(FoodNutrientTotals fntVO, CusChartType type) {
+  Padding _buildPieLegend(FoodNutrientTotals fntVO, CusChartType type) {
     List<Widget> legendItems = [];
     // 如果类型是卡路里 calory
     if (type == CusChartType.calory) {
-      double total = fntVO.bfCalorie +
+      double total =
+          fntVO.bfCalorie +
           fntVO.lunchCalorie +
           fntVO.dinnerCalorie +
           fntVO.otherCalorie;
@@ -544,7 +554,12 @@ class _DietaryReportsState extends State<DietaryReports> {
 
   // 构建单个图例条目
   Widget _buildLegendItem(
-      Color color, String label, double value, double total, String unit) {
+    Color color,
+    String label,
+    double value,
+    double total,
+    String unit,
+  ) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 4.sp),
       child: Row(
@@ -563,7 +578,7 @@ class _DietaryReportsState extends State<DietaryReports> {
 
   /// 饼图的“实例”
   // 绘制卡路里摄入(type=calory)或宏量素摄入(type=macro)的饼图
-  _buildPieChart(FoodNutrientTotals fntVO, CusChartType type) {
+  SizedBox _buildPieChart(FoodNutrientTotals fntVO, CusChartType type) {
     List<PieChartSectionData> sections = [];
     if (type == CusChartType.calory) {
       sections = [
@@ -588,7 +603,7 @@ class _DietaryReportsState extends State<DietaryReports> {
           value: fntVO.otherCalorie,
           color: cusNutrientColors[CusNutType.otherCalorie]!,
           showTitle: false,
-        )
+        ),
       ];
     } else {
       sections = [
@@ -619,14 +634,17 @@ class _DietaryReportsState extends State<DietaryReports> {
   /// -----------------复用的【条状图卡片】= 图例 + 图表 ---------------------------
   ///
   /// 绘制卡路里摄入或宏量素摄入的【条状图卡片】(包含图例legend和图chart两部分)
-  _buildBarChartCard(Map<String, FoodNutrientTotals> map, CusChartType type) {
+  Card _buildBarChartCard(
+    Map<String, FoodNutrientTotals> map,
+    CusChartType type,
+  ) {
     // 区分是卡路里还是宏量素，获取指定的颜色和标签
     List<Color> colors = type == CusChartType.calory
         ? [
             cusNutrientColors[CusNutType.bfCalorie]!,
             cusNutrientColors[CusNutType.lunchCalorie]!,
             cusNutrientColors[CusNutType.dinnerCalorie]!,
-            cusNutrientColors[CusNutType.otherCalorie]!
+            cusNutrientColors[CusNutType.otherCalorie]!,
           ]
         : [
             cusNutrientColors[CusNutType.totalCHO]!,
@@ -651,18 +669,16 @@ class _DietaryReportsState extends State<DietaryReports> {
     List<Widget> legendWidgets = colors
         .asMap()
         .entries
-        .map((entry) => Row(
-              children: [
-                Container(
-                  width: 14.sp,
-                  height: 14.sp,
-                  color: entry.value,
-                ),
-                SizedBox(width: 4.sp),
-                Text(labels[entry.key]),
-                SizedBox(width: 8.sp),
-              ],
-            ))
+        .map(
+          (entry) => Row(
+            children: [
+              Container(width: 14.sp, height: 14.sp, color: entry.value),
+              SizedBox(width: 4.sp),
+              Text(labels[entry.key]),
+              SizedBox(width: 8.sp),
+            ],
+          ),
+        )
         .toList();
 
     // 绘制整体柱状图表
@@ -695,7 +711,7 @@ class _DietaryReportsState extends State<DietaryReports> {
   /// -----------------复用的【食物摄入次数或营养素摄入的表格】 ----------------------
   ///
   /// 按照每种食物统计总卡路里摄入 或 总宏量素摄入 的列表【卡片】
-  _buildDataTableCard(
+  Card _buildDataTableCard(
     List<DailyFoodItemWithFoodServing> dfiwfsList,
     CusChartType type, // 表示统计食物摄入次数；或统计宏量摄入
   ) {
@@ -753,44 +769,46 @@ class _DietaryReportsState extends State<DietaryReports> {
       }
     }).toList();
 
-    tempRows.add(DataRow(
-      cells: [
-        DataCell(
-          Text(
-            CusAL.of(context).countLabels('0'),
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-        DataCell(
-          Text(
-            type == CusChartType.calory
-                ? "x ${dfiwfsList.length}"
-                : cusDoubleTryToIntString(fntVO.totalCHO),
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-        DataCell(
-          SizedBox(
-            child: Text(
-              type == CusChartType.calory
-                  ? cusDoubleTryToIntString(fntVO.calorie)
-                  : cusDoubleTryToIntString(fntVO.totalFat),
-              textAlign: TextAlign.end,
+    tempRows.add(
+      DataRow(
+        cells: [
+          DataCell(
+            Text(
+              CusAL.of(context).countLabels('0'),
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-        ),
-        if (type == CusChartType.macro)
+          DataCell(
+            Text(
+              type == CusChartType.calory
+                  ? "x ${dfiwfsList.length}"
+                  : cusDoubleTryToIntString(fntVO.totalCHO),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
           DataCell(
             SizedBox(
               child: Text(
-                cusDoubleTryToIntString(fntVO.protein),
+                type == CusChartType.calory
+                    ? cusDoubleTryToIntString(fntVO.calorie)
+                    : cusDoubleTryToIntString(fntVO.totalFat),
+                textAlign: TextAlign.end,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ),
-      ],
-    ));
+          if (type == CusChartType.macro)
+            DataCell(
+              SizedBox(
+                child: Text(
+                  cusDoubleTryToIntString(fntVO.protein),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
 
     return Card(
       elevation: 5.sp,
@@ -855,7 +873,7 @@ class _DietaryReportsState extends State<DietaryReports> {
   }
 
   /// -----------------点击下拉切换报告日期范围
-  buildDropdownButton() {
+  DropdownButton<CusLabel> buildDropdownButton() {
     return DropdownButton(
       borderRadius: BorderRadius.all(Radius.circular(10.sp)),
       // 默认背景是白色，但我需要字体默认是白色，和appbar中其他保持一致，那么背景色改为灰色
@@ -870,7 +888,7 @@ class _DietaryReportsState extends State<DietaryReports> {
                 style: TextStyle(
                   color: Colors.white,
                   // fontSize: CusFontSizes.pageSubContent,
-                  fontSize: (box.read('language') == "en"
+                  fontSize: (box.read('language') == 'en'
                       ? CusFontSizes.pageSubContent
                       : CusFontSizes.pageSubTitle),
                 ),
@@ -895,7 +913,7 @@ class _DietaryReportsState extends State<DietaryReports> {
   }
 
   /// 点击导出按钮
-  buildExportButton() {
+  IconButton buildExportButton() {
     return IconButton(
       onPressed: () async {
         var dateSelected = await showDialog(
@@ -916,11 +934,12 @@ class _DietaryReportsState extends State<DietaryReports> {
                     },
                     dropdownMenuEntries: exportDateList
                         .map<DropdownMenuEntry<CusLabel>>((CusLabel value) {
-                      return DropdownMenuEntry<CusLabel>(
-                        value: value,
-                        label: showCusLable(value),
-                      );
-                    }).toList(),
+                          return DropdownMenuEntry<CusLabel>(
+                            value: value,
+                            label: showCusLable(value),
+                          );
+                        })
+                        .toList(),
                   ),
                 ),
               ),
@@ -957,10 +976,8 @@ class _DietaryReportsState extends State<DietaryReports> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ReportPdfViewer(
-                startDate: tempStart,
-                endDate: tempEnd,
-              ),
+              builder: (context) =>
+                  ReportPdfViewer(startDate: tempStart, endDate: tempEnd),
             ),
           );
         }

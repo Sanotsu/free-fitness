@@ -3,13 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../common/components/dialog_widgets.dart';
-import '../../../common/global/constants.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/utils/image_preview_helper.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
-import '../../../common/components/counter_widget.dart';
+import '../../../core/widgets/counter_widget.dart';
 
 /// 弹出动作配置弹窗，并在关闭后直接回传修改后的action
 void showConfigDialog(
@@ -17,10 +17,7 @@ void showConfigDialog(
   ActionDetail ad,
   int index, // 修改了列表中的哪一条，在回传之后的回调函数中用于修改状态，在这个函数里没什么用
   // 回调函数传回被修改的action及修改后的配置内容
-  Function(
-    int index,
-    ActionDetail adItem,
-  ) onConfigurationDialogClosed,
+  Function(int index, ActionDetail adItem) onConfigurationDialogClosed,
 ) {
   // 默认动作配置最少20秒或者10次
   int timeInSeconds = ad.action.duration ?? 20;
@@ -118,9 +115,7 @@ void showConfigDialog(
                       FilteringTextInputFormatter.allow(
                         RegExp(r'^\d+\.?\d{0,1}$'),
                       ),
-                      FilteringTextInputFormatter.deny(
-                        RegExp(r'^[0]{2,}'),
-                      ),
+                      FilteringTextInputFormatter.deny(RegExp(r'^[0]{2,}')),
                     ],
                     // 打开数字键盘
                     keyboardType: TextInputType.number,
@@ -134,7 +129,7 @@ void showConfigDialog(
     );
   }
 
-// 中间的配置区域和锻炼的概要介绍
+  // 中间的配置区域和锻炼的概要介绍
   Widget genConfigBody() {
     return SingleChildScrollView(
       child: Column(
@@ -151,7 +146,7 @@ void showConfigDialog(
                     // 图片部分
                     SizedBox(
                       height: 200.sp,
-                      child: buildImageCarouselSlider(imageList),
+                      child: buildImageViewCarouselSlider(imageList),
                     ),
                   ],
                 ),
@@ -193,7 +188,7 @@ void showConfigDialog(
                       ),
                     ),
                     // 预留空白避免被下方的保存按钮挡住说明文字，显示不全
-                    SizedBox(height: 120.sp)
+                    SizedBox(height: 120.sp),
                   ],
                 ),
               ],
@@ -221,8 +216,9 @@ void showConfigDialog(
               // 是个对象，直接修改(直接复制的浅拷贝没意义)
               ad.action.duration = timeInSeconds;
               ad.action.frequency = count;
-              ad.action.equipmentWeight =
-                  (tempWeight == 0 || tempWeight == 0.0) ? null : tempWeight;
+              ad.action.equipmentWeight = (tempWeight == 0 || tempWeight == 0.0)
+                  ? null
+                  : tempWeight;
 
               Navigator.pop(context);
 
@@ -258,12 +254,7 @@ void showConfigDialog(
             ...genTopArea(),
 
             /// 中间是配置的主体：图片、计数计时器、标题和描述
-            Positioned(
-              left: 0,
-              right: 0,
-              top: 50.sp,
-              child: genConfigBody(),
-            ),
+            Positioned(left: 0, right: 0, top: 50.sp, child: genConfigBody()),
 
             /// 保存按钮固定在屏幕底部
             Positioned(

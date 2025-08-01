@@ -3,10 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_training_helper.dart';
-import '../../../common/utils/tool_widgets.dart';
-import '../../../common/utils/tools.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_training_helper.dart';
+import '../../../core/utils/tool_widgets.dart';
+import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
@@ -63,7 +63,7 @@ class _TrainingReportsState extends State<TrainingReports> {
 
   // 初始化事件，以当前日查询对应的手记数据
   // 因为不能再改变state中用await，所以单独一个函数
-  _getEventsForInitDay() async {
+  Future<void> _getEventsForInitDay() async {
     if (isLoading) return;
 
     setState(() {
@@ -88,19 +88,19 @@ class _TrainingReportsState extends State<TrainingReports> {
   }
 
   // 获取指定某一天的手记列表
-  List<TrainedDetailLog> _getLogsForADay(day) {
+  List<TrainedDetailLog> _getLogsForADay(DateTime day) {
     // 训练记录的训练日志存入的是完整的datetime，这里只取date部分
     return tdlList
-        .where((e) =>
-            e.trainedDate.split(" ")[0] ==
-            DateFormat(constDateFormat).format(day))
+        .where(
+          (e) =>
+              e.trainedDate.split(" ")[0] ==
+              DateFormat(constDateFormat).format(day),
+        )
         .toList();
   }
 
   // 当某一天被选中时的回调
-  _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    debugPrint("某天被选中--------$selectedDay $focusedDay");
-
+  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     if (!isSameDay(_selectedDay, selectedDay)) {
       setState(() {
         _selectedDay = selectedDay;
@@ -116,15 +116,13 @@ class _TrainingReportsState extends State<TrainingReports> {
   }
 
   // 当某个日期被长按
-  _onDayLongPressed(DateTime selectedDay, DateTime focusedDay) {
+  void _onDayLongPressed(DateTime selectedDay, DateTime focusedDay) {
     debugPrint("日期被长按了---$selectedDay --$focusedDay");
     // 长按某一天，可以新增备注？？？
   }
 
   // 当日期范围被选中时
-  _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
-    debugPrint("日期被_onRangeSelected了---$start --$end $focusedDay");
-
+  void _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
     setState(() {
       _selectedDay = null;
       _focusedDay = focusedDay;
@@ -138,7 +136,7 @@ class _TrainingReportsState extends State<TrainingReports> {
       // 有起止，则获取该日期范围内所有的手记数据
       _selectedEvents.value = [
         for (final d in daysInRange(start, end))
-          ...(_selectedEvents.value = _getLogsForADay(d))
+          ...(_selectedEvents.value = _getLogsForADay(d)),
       ];
     } else if (start != null) {
       // 只有起，则只获取该起日期的所有手记数据
@@ -158,15 +156,9 @@ class _TrainingReportsState extends State<TrainingReports> {
         appBar: AppBar(
           bottom: const TabBar(
             tabs: [
-              Tab(
-                icon: Icon(Icons.bar_chart),
-              ),
-              Tab(
-                icon: Icon(Icons.calendar_month),
-              ),
-              Tab(
-                icon: Icon(Icons.history),
-              ),
+              Tab(icon: Icon(Icons.bar_chart)),
+              Tab(icon: Icon(Icons.calendar_month)),
+              Tab(icon: Icon(Icons.history)),
             ],
           ),
           title: Text(CusAL.of(context).trainingReports),
@@ -188,11 +180,12 @@ class _TrainingReportsState extends State<TrainingReports> {
                         },
                         dropdownMenuEntries: exportDateList
                             .map<DropdownMenuEntry<CusLabel>>((CusLabel value) {
-                          return DropdownMenuEntry<CusLabel>(
-                            value: value,
-                            label: showCusLable(value),
-                          );
-                        }).toList(),
+                              return DropdownMenuEntry<CusLabel>(
+                                value: value,
+                                label: showCusLable(value),
+                              );
+                            })
+                            .toList(),
                       ),
                       actions: [
                         TextButton(
@@ -223,7 +216,7 @@ class _TrainingReportsState extends State<TrainingReports> {
                     [tempStart, tempEnd] = getStartEndDateString(365 * 20);
                   }
 
-                  if (!mounted) return;
+                  if (!context.mounted) return;
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -255,15 +248,14 @@ class _TrainingReportsState extends State<TrainingReports> {
   ///
   /// 绘制训练统计的tab
   ///
-  buildReportsView() {
+  FutureBuilder<List<TrainedDetailLog>> buildReportsView() {
     // 统计的是所有的运动次数和总的运动时间
     return FutureBuilder(
       future: _trainingHelper.queryTrainedDetailLog(
         userId: CacheUser.userId,
         gmtCreateSort: "DESC",
       ),
-      builder: (BuildContext context,
-          AsyncSnapshot<List<TrainedDetailLog>> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<List<TrainedDetailLog>> snapshot) {
         if (snapshot.hasData) {
           List<TrainedDetailLog> data = snapshot.data!;
 
@@ -281,12 +273,18 @@ class _TrainingReportsState extends State<TrainingReports> {
 
           // TrainedDetailLog-->tdl
           // 计算所有训练日志的累加时间
-          int totalRest =
-              data.fold(0, (prevVal, tdl) => prevVal + tdl.totalRestTime);
-          int totolPaused =
-              data.fold(0, (prevVal, tdl) => prevVal + tdl.totolPausedTime);
-          int totalTrained =
-              data.fold(0, (prevVal, tdl) => prevVal + tdl.trainedDuration);
+          int totalRest = data.fold(
+            0,
+            (prevVal, tdl) => prevVal + tdl.totalRestTime,
+          );
+          int totolPaused = data.fold(
+            0,
+            (prevVal, tdl) => prevVal + tdl.totolPausedTime,
+          );
+          int totalTrained = data.fold(
+            0,
+            (prevVal, tdl) => prevVal + tdl.trainedDuration,
+          );
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -501,13 +499,13 @@ class _TrainingReportsState extends State<TrainingReports> {
   ///
   /// 绘制训练历史日历表格tab
   ///
-  buildHistoryView() {
+  Column buildHistoryView() {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TableCalendar(
-          locale: box.read('language') == "en" ? "en_US" : 'zh_CN',
+          locale: box.read('language') == 'en' ? "en_US" : 'zh_CN',
           firstDay: kFirstDay,
           lastDay: kLastDay,
           focusedDay: _focusedDay,
@@ -597,7 +595,7 @@ class _TrainingReportsState extends State<TrainingReports> {
   ///
   /// 绘制最近锻炼日志tab
   ///
-  buildRecentView() {
+  FutureBuilder<List<TrainedDetailLog>> buildRecentView() {
     var [start, end] = getStartEndDateString(30);
 
     return FutureBuilder(
@@ -607,110 +605,113 @@ class _TrainingReportsState extends State<TrainingReports> {
         endDate: end,
         gmtCreateSort: "DESC",
       ),
-      builder: (BuildContext context,
-          AsyncSnapshot<List<TrainedDetailLog>> snapshot) {
-        if (snapshot.hasData) {
-          List<TrainedDetailLog> data = snapshot.data!;
+      builder:
+          (
+            BuildContext context,
+            AsyncSnapshot<List<TrainedDetailLog>> snapshot,
+          ) {
+            if (snapshot.hasData) {
+              List<TrainedDetailLog> data = snapshot.data!;
 
-          if (data.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: EdgeInsets.only(top: 100.sp),
-                child: Text(
-                  '${CusAL.of(context).lastDayLabels(30)} ${CusAL.of(context).noRecordNote}',
-                  style: TextStyle(fontSize: CusFontSizes.flagMedium),
-                ),
-              ),
-            );
-          }
-
-          // 将最近30天的记录，按天分组并排序展示。
-          Map<String, List<TrainedDetailLog>> logGroupedByDate = {};
-          for (var log in data) {
-            // 日志的日期(不含时间)
-            var temp = log.trainedDate.split(" ")[0];
-            if (logGroupedByDate.containsKey(temp)) {
-              logGroupedByDate[temp]!.add(log);
-            } else {
-              logGroupedByDate[temp] = [log];
-            }
-          }
-
-          List<Widget> rst = [];
-          logGroupedByDate.forEach((key, value) {
-            rst.add(
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(20.sp, 10.sp, 0, 10.sp),
+              if (data.isEmpty) {
+                return Center(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 100.sp),
                     child: Text(
-                      key,
-                      style: TextStyle(
-                        fontSize: CusFontSizes.itemTitle,
-                        fontWeight: FontWeight.w500,
-                        color: Theme.of(context).disabledColor,
-                      ),
+                      '${CusAL.of(context).lastDayLabels(30)} ${CusAL.of(context).noRecordNote}',
+                      style: TextStyle(fontSize: CusFontSizes.flagMedium),
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(bottom: 10.sp),
-                    child: Card(
-                      elevation: 5.sp,
-                      child: ListView.builder(
-                        // 和外层的滚动只保留一个
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: value.length,
-                        itemBuilder: (context, index) {
-                          var log = value[index];
+                );
+              }
 
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (index != 0)
-                                Divider(height: 3.sp, thickness: 2.sp),
-                              _buildTrainedDetailLogListTile(log),
-                            ],
-                          );
-                        },
+              // 将最近30天的记录，按天分组并排序展示。
+              Map<String, List<TrainedDetailLog>> logGroupedByDate = {};
+              for (var log in data) {
+                // 日志的日期(不含时间)
+                var temp = log.trainedDate.split(" ")[0];
+                if (logGroupedByDate.containsKey(temp)) {
+                  logGroupedByDate[temp]!.add(log);
+                } else {
+                  logGroupedByDate[temp] = [log];
+                }
+              }
+
+              List<Widget> rst = [];
+              logGroupedByDate.forEach((key, value) {
+                rst.add(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(20.sp, 10.sp, 0, 10.sp),
+                        child: Text(
+                          key,
+                          style: TextStyle(
+                            fontSize: CusFontSizes.itemTitle,
+                            fontWeight: FontWeight.w500,
+                            color: Theme.of(context).disabledColor,
+                          ),
+                        ),
                       ),
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 10.sp),
+                        child: Card(
+                          elevation: 5.sp,
+                          child: ListView.builder(
+                            // 和外层的滚动只保留一个
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: value.length,
+                            itemBuilder: (context, index) {
+                              var log = value[index];
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (index != 0)
+                                    Divider(height: 3.sp, thickness: 2.sp),
+                                  _buildTrainedDetailLogListTile(log),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              });
+
+              return Column(
+                children: [
+                  SizedBox(height: 10.sp),
+                  Text(
+                    CusAL.of(context).lastDayLabels(30),
+                    style: TextStyle(
+                      fontSize: CusFontSizes.flagMediumBig,
+                      color: Theme.of(context).primaryColor,
                     ),
                   ),
+                  ...rst,
                 ],
-              ),
-            );
-          });
-
-          return Column(
-            children: [
-              SizedBox(height: 10.sp),
-              Text(
-                CusAL.of(context).lastDayLabels(30),
-                style: TextStyle(
-                  fontSize: CusFontSizes.flagMediumBig,
-                  color: Theme.of(context).primaryColor,
-                ),
-              ),
-              ...rst,
-            ],
-          );
-        } else if (snapshot.hasError) {
-          /// 如果请求数据有错，显示错误信息
-          return Text('${snapshot.error}');
-        } else {
-          return SizedBox(
-            width: 50.sp,
-            height: 50.sp,
-            child: const CircularProgressIndicator(),
-          );
-        }
-      },
+              );
+            } else if (snapshot.hasError) {
+              /// 如果请求数据有错，显示错误信息
+              return Text('${snapshot.error}');
+            } else {
+              return SizedBox(
+                width: 50.sp,
+                height: 50.sp,
+                child: const CircularProgressIndicator(),
+              );
+            }
+          },
     );
   }
 
   // 日历表格和最近30天记录的tab都可复用
-  _buildTrainedDetailLogListTile(TrainedDetailLog log) {
+  ListTile _buildTrainedDetailLogListTile(TrainedDetailLog log) {
     return ListTile(
       title: _buildWorkoutNameText(log),
       subtitle: Column(
@@ -738,7 +739,7 @@ class _TrainingReportsState extends State<TrainingReports> {
     );
   }
 
-  _buildWorkoutNameText(TrainedDetailLog log) {
+  RichText _buildWorkoutNameText(TrainedDetailLog log) {
     var planName = log.planName;
     return planName != null
         ? RichText(
@@ -798,7 +799,7 @@ class _TrainingReportsState extends State<TrainingReports> {
           );
   }
 
-  _buildTileRow(String label, String value) {
+  Row _buildTileRow(String label, String value) {
     return Row(
       children: [
         Expanded(flex: 2, child: Text(label)),

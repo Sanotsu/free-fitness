@@ -2,19 +2,18 @@
 
 import 'dart:convert';
 import 'dart:math';
-
-import 'package:free_fitness/models/user_state.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../../common/utils/db_dietary_helper.dart';
-import '../../../../../common/utils/tools.dart';
+import '../../../core/storage/db_dietary_helper.dart';
+import '../../../core/utils/tools.dart';
 import '../../../../../models/dietary_state.dart';
-import '../../../common/global/constants.dart';
-import '../../../common/utils/db_diary_helper.dart';
-import '../../../common/utils/db_training_helper.dart';
-import '../../../common/utils/db_user_helper.dart';
+import '../../../core/constants/constants.dart';
+import '../../../core/storage/db_diary_helper.dart';
+import '../../../core/storage/db_training_helper.dart';
+import '../../../core/storage/db_user_helper.dart';
 import '../../../models/diary_state.dart';
 import '../../../models/training_state.dart';
+import '../../../models/user_state.dart';
 import 'quill_samples.dart';
 
 final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
@@ -148,7 +147,7 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
 //    foodSize 插入多少条食物数据，
 //    logSize  插入多少条饮食记录数据(食物和营养素使用前面食物的)，
 //    dateRange插入在距离今天多少天前的范围内(比如5,就是5天前到今天随机日期插入饮食条目)
-insertDailyLogDataDemo(
+Future<void> insertDailyLogDataDemo(
   int foodSize,
   int logSize,
   int dateRange, {
@@ -358,7 +357,7 @@ Future<int> insertOneRandomPlanHasGroup() async {
 }
 
 // 2023-12-27 插入训练日志宽表数据，展示运动报告时不需要级联查询基础表
-insertTrainingDetailLogDemo() async {
+Future<void> insertTrainingDetailLogDemo() async {
   print("【【【 插入测试数据 start-->:insertTrainingDetailLogDemo ");
 
   /// 2023-12-27 正好是测试日志宽表，不会关联其他基础表，数据随意写就好了
@@ -441,7 +440,7 @@ insertTrainingDetailLogDemo() async {
 /// ---------- 个人信息相关--------------
 ///
 
-insertExtraUsers() async {
+Future<void> insertExtraUsers() async {
   print("【【【 插入测试数据 start-->:insertExtraUsers ");
 
   // 2023-12-09 成功进入app就有一条默认的用户了，这里测试是为了查询多个用户各自独立的强关联数据
@@ -496,7 +495,7 @@ insertExtraUsers() async {
 }
 
 // 插入一个固定内容随机题目的手记
-insertOneQuillDemo() async {
+Future<void> insertOneQuillDemo() async {
   print("【【【 插入测试数据 start-->:insertOneQuillDemo ");
 
   var quillList = [
@@ -519,7 +518,7 @@ insertOneQuillDemo() async {
   for (var i = 0; i < tempNum; i++) {
     var mood = diaryMoodList[Random().nextInt(diaryMoodList.length)];
     tempMoods.add(
-      box.read('language') == "en" ? mood.enLabel : mood.cnLabel,
+      box.read('language') == 'en' ? mood.enLabel : mood.cnLabel,
     );
   }
 
@@ -541,7 +540,7 @@ insertOneQuillDemo() async {
     content: jsonString,
     tags: tempTags.join(","),
     mood: tempMoods.join(","),
-    category: box.read('language') == "en" ? cate.enLabel : cate.cnLabel,
+    category: box.read('language') == 'en' ? cate.enLabel : cate.cnLabel,
     userId: Random().nextInt(3) + 1,
     gmtCreate: getCurrentDateTime(),
   );
@@ -553,7 +552,7 @@ insertOneQuillDemo() async {
 }
 
 // 插入一个固定内容随机题目的手记
-insertBMIDemo({int? size = 10}) async {
+Future<void> insertBMIDemo({int? size = 10}) async {
   print("【【【 插入测试数据 start-->:insertBMIDemo ");
 
 // 模拟身高， [165.0,175.0) 的一个随机数
