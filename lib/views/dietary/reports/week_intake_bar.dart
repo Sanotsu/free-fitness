@@ -55,10 +55,12 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
           tooltipMargin: 0,
           getTooltipItem: (group, groupIndex, rod, rodIndex) {
             // 点击时展示主要营养素的含量，但需要先取到值
-            List<double> fromYList =
-                rod.rodStackItems.map((item) => item.fromY).toList();
-            List<double> toYList =
-                rod.rodStackItems.map((item) => item.toY).toList();
+            List<double> fromYList = rod.rodStackItems
+                .map((item) => item.fromY)
+                .toList();
+            List<double> toYList = rod.rodStackItems
+                .map((item) => item.toY)
+                .toList();
 
             var unit = widget.type == CusChartType.calory
                 ? CusAL.of(context).unitLabels('2')
@@ -71,14 +73,22 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
             }
 
             if (widget.type == CusChartType.macro) {
-              String weekDay =
-                  showCusLableMapLabel(context, weekdayStringMap[group.x + 1]);
-              String choStr =
-                  getNutrientString(CusAL.of(context).mainNutrients('4'), 0);
-              String fatStr =
-                  getNutrientString(CusAL.of(context).mainNutrients('3'), 1);
-              String proteinStr =
-                  getNutrientString(CusAL.of(context).mainNutrients('2'), 2);
+              String weekDay = showCusLableMapLabel(
+                context,
+                weekdayStringMap[group.x + 1],
+              );
+              String choStr = getNutrientString(
+                CusAL.of(context).mainNutrients('4'),
+                0,
+              );
+              String fatStr = getNutrientString(
+                CusAL.of(context).mainNutrients('3'),
+                1,
+              );
+              String proteinStr = getNutrientString(
+                CusAL.of(context).mainNutrients('2'),
+                2,
+              );
 
               // 构建气泡框显示的内容
               return BarTooltipItem(
@@ -92,16 +102,26 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
                 ],
               );
             } else {
-              String weekDay =
-                  showCusLableMapLabel(context, weekdayStringMap[group.x + 1]);
-              String bfStr =
-                  getNutrientString(CusAL.of(context).mealLabels('0'), 0);
-              String lunchStr =
-                  getNutrientString(CusAL.of(context).mealLabels('1'), 1);
-              String dinnerStr =
-                  getNutrientString(CusAL.of(context).mealLabels('2'), 2);
-              String otherStr =
-                  getNutrientString(CusAL.of(context).mealLabels('3'), 3);
+              String weekDay = showCusLableMapLabel(
+                context,
+                weekdayStringMap[group.x + 1],
+              );
+              String bfStr = getNutrientString(
+                CusAL.of(context).mealLabels('0'),
+                0,
+              );
+              String lunchStr = getNutrientString(
+                CusAL.of(context).mealLabels('1'),
+                1,
+              );
+              String dinnerStr = getNutrientString(
+                CusAL.of(context).mealLabels('2'),
+                2,
+              );
+              String otherStr = getNutrientString(
+                CusAL.of(context).mealLabels('3'),
+                3,
+              );
 
               // 构建气泡框显示的内容
               return BarTooltipItem(
@@ -138,9 +158,7 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
           ),
         ),
         // 不显示内容也要设定，否则就是默认的样式
-        topTitles: const AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         rightTitles: const AxisTitles(
           sideTitles: SideTitles(showTitles: false),
         ),
@@ -210,18 +228,18 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
 
   // 整体条状图数据
   List<BarChartGroupData> _showingGroups() => List.generate(7, (i) {
-        // 查询map中存在的日期key是一周的周几，如果该weekday有数据，则构建条状图，否则就空的。
-        for (String key in widget.fntMap.keys) {
-          int weekdayNumber = DateFormat(constDateFormat).parse(key).weekday;
+    // 查询map中存在的日期key是一周的周几，如果该weekday有数据，则构建条状图，否则就空的。
+    for (String key in widget.fntMap.keys) {
+      int weekdayNumber = DateFormat(constDateFormat).parse(key).weekday;
 
-          // 星期的数字从1-7,而索引是从0-6,所以比较时后者要加一
-          if (weekdayNumber == i + 1) {
-            return makeGroupData(i, widget.fntMap[key]!);
-          }
-        }
+      // 星期的数字从1-7,而索引是从0-6,所以比较时后者要加一
+      if (weekdayNumber == i + 1) {
+        return makeGroupData(i, widget.fntMap[key]!);
+      }
+    }
 
-        return BarChartGroupData(x: i);
-      });
+    return BarChartGroupData(x: i);
+  });
 
   // 单组条状图数据
   BarChartGroupData makeGroupData(
@@ -251,7 +269,7 @@ class WeekIntakeBarState extends State<WeekIntakeBar> {
         cusNutrientColors[CusNutType.bfCalorie]!,
         cusNutrientColors[CusNutType.lunchCalorie]!,
         cusNutrientColors[CusNutType.dinnerCalorie]!,
-        cusNutrientColors[CusNutType.otherCalorie]!
+        cusNutrientColors[CusNutType.otherCalorie]!,
       ];
     } else {
       // 依次为碳水、脂肪、蛋白质的数值

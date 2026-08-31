@@ -27,7 +27,8 @@ class TrainingDdl {
   // 2023-12-27 训练日志基础宽表，不再级联查询plan和group
   static const tableNameOfTrainedDetailLog = 'ff_trained_detail_log';
 
-  static const String ddlForExercise = """
+  static const String ddlForExercise =
+      """
     CREATE TABLE $tableNameOfExercise (
       exercise_id         INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
       exercise_code       TEXT      UNIQUE NOT NULL,
@@ -51,7 +52,8 @@ class TrainingDdl {
     );
     """;
 
-  static const String ddlForAction = """
+  static const String ddlForAction =
+      """
     CREATE TABLE $tableNameOfAction (
       action_id         INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
       group_id          INTEGER   NOT NULL,
@@ -62,7 +64,8 @@ class TrainingDdl {
     );
     """;
 
-  static const String ddlForGroup = """
+  static const String ddlForGroup =
+      """
     CREATE TABLE $tableNameOfGroup (
       group_id        INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
       group_name      TEXT      UNIQUE NOT NULL,
@@ -77,7 +80,8 @@ class TrainingDdl {
     );
     """;
 
-  static const String ddlForPlan = """
+  static const String ddlForPlan =
+      """
     CREATE TABLE $tableNameOfPlan (
       plan_id         INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
       plan_code       TEXT      UNIQUE NOT NULL,
@@ -92,7 +96,8 @@ class TrainingDdl {
     );
     """;
 
-  static const String ddlForPlanHasGroup = """
+  static const String ddlForPlanHasGroup =
+      """
     CREATE TABLE $tableNameOfPlanHasGroup  (
       plan_has_group_id   INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
       plan_id             INTEGER   NOT NULL,
@@ -101,7 +106,8 @@ class TrainingDdl {
     );
     """;
 
-  static const String ddlForTrainedDetailLog = """
+  static const String ddlForTrainedDetailLog =
+      """
     CREATE TABLE $tableNameOfTrainedDetailLog (
       trained_detail_log_id   INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
       trained_date            TEXT,

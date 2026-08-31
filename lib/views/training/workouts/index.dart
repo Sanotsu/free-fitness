@@ -7,6 +7,7 @@ import '../../../core/constants/constants.dart';
 import '../../../core/storage/db_training_helper.dart';
 import '../../../core/utils/tool_widgets.dart';
 import '../../../core/utils/tools.dart';
+import '../../../core/utils/training_time_estimator.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
@@ -41,13 +42,26 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
 
   bool isPlanAddGroup = false;
 
+  // 2026-08-28 预估耗时用的间隔休息秒数(与跟练口径一致)
+  int _restSeconds = defaultActionRestSeconds;
+
   @override
   void initState() {
     super.initState();
 
     getGroupList();
+    _loadRestSeconds();
     // 如果没有传这个标志，则不是计划新增训练调过来的；如果有传，取其bool值
     isPlanAddGroup = (widget.isPlanAdd == null) ? false : widget.isPlanAdd!;
+  }
+
+  // 异步读取用户配置的间隔休息秒数，回来后刷新列表展示
+  Future<void> _loadRestSeconds() async {
+    var rest = await fetchActionRestSeconds();
+    if (!mounted) return;
+    setState(() {
+      _restSeconds = rest;
+    });
   }
 
   // 查询已有的训练
@@ -122,7 +136,10 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
             child: Card(
               elevation: 5.sp,
               child: Column(
-                children: [_buildQueryAreaRow(), SizedBox(height: 10.sp)],
+                children: [
+                  _buildQueryAreaRow(),
+                  SizedBox(height: 10.sp),
+                ],
               ),
             ),
           ),
@@ -130,12 +147,13 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
               ? buildLoader(isLoading)
               : Expanded(
                   child: ListView.builder(
-                  itemCount: groupList.length,
-                  itemBuilder: (context, index) {
-                    final groupItem = groupList[index];
-                    return _buildGroupCard(groupItem);
-                  },
-                )),
+                    itemCount: groupList.length,
+                    itemBuilder: (context, index) {
+                      final groupItem = groupList[index];
+                      return _buildGroupCard(groupItem);
+                    },
+                  ),
+                ),
         ],
       ),
     );
@@ -226,7 +244,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
               unfocusHandle();
             },
           ),
-        )
+        ),
       ],
     );
   }
@@ -259,6 +277,12 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
                   color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),
+              // 2026-08-28 预估耗时(按动作标准耗时+间隔休息实时估算，不落库)
+              TextSpan(
+                text:
+                    '  ${CusAL.of(context).estMinutes(estimateGroupMinutes(groupItem.actionDetailList, restSeconds: _restSeconds))}',
+                style: TextStyle(color: Colors.orange[700]),
+              ),
               TextSpan(
                 text:
                     '  ${getCusLabelText(groupItem.group.groupLevel, levelOptions)}  ',
@@ -266,7 +290,9 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
               ),
               TextSpan(
                 text: getCusLabelText(
-                    groupItem.group.groupCategory, categoryOptions),
+                  groupItem.group.groupCategory,
+                  categoryOptions,
+                ),
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
@@ -304,9 +330,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ActionList(
-                  groupItem: groupItem.group,
-                ),
+                builder: (context) => ActionList(groupItem: groupItem.group),
               ),
             ).then((value) {
               // ？？？暂时返回这个页面时都重新加载最新的训练列表数据
@@ -332,8 +356,11 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
               builder: (context) {
                 return AlertDialog(
                   title: Text(CusAL.of(context).deleteConfirm),
-                  content: Text(CusAL.of(context)
-                      .groupDeleteAlert(groupItem.group.groupName)),
+                  content: Text(
+                    CusAL.of(
+                      context,
+                    ).groupDeleteAlert(groupItem.group.groupName),
+                  ),
                   actions: [
                     TextButton(
                       onPressed: () {
@@ -465,10 +492,7 @@ class _TrainingWorkoutsState extends State<TrainingWorkouts> {
           // 如果是修改
           // ？？？这里应该验证是否修成功
           temp.groupId = groupItem.groupId!;
-          await _dbHelper.updateTrainingGroup(
-            groupItem.groupId!,
-            temp,
-          );
+          await _dbHelper.updateTrainingGroup(groupItem.groupId!, temp);
 
           // 如果是修改就返回训练组列表，而不是进入动作列表
           if (!mounted) return;

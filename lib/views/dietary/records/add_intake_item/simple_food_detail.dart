@@ -90,7 +90,8 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
         inputServingUnit = nutrientsInfo.servingUnit;
         // 构建初始的目标餐次(移除或修改时不会单独传日期和餐次的)
         inputMealtimeValue = mealtimeList.firstWhere(
-            (e) => e.enLabel == widget.dfiwfs!.dailyFoodItem.mealCategory);
+          (e) => e.enLabel == widget.dfiwfs!.dailyFoodItem.mealCategory,
+        );
       } else {
         // 2 如果没有饮食日记条目详情，则是food list跳转的新增
         // 构建初始化值
@@ -98,8 +99,9 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
         inputServingValue = (nutrientsInfo.servingSize).toDouble();
         inputServingUnit = nutrientsInfo.servingUnit;
         // 构建初始的目标餐次
-        inputMealtimeValue =
-            mealtimeList.firstWhere((e) => e.value == widget.mealtime);
+        inputMealtimeValue = mealtimeList.firstWhere(
+          (e) => e.value == widget.mealtime,
+        );
       }
 
       // 构建可选单位列表(不管是新增还是修改，对应食物的单份营养素列表都一样)
@@ -289,8 +291,9 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
                 return;
               }
               setState(() {
-                inputServingValue =
-                    (value != "" && value != null) ? double.parse(value) : 1.0;
+                inputServingValue = (value != "" && value != null)
+                    ? double.parse(value)
+                    : 1.0;
                 _recalculateNutrients();
               });
             },
@@ -309,11 +312,13 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
                   ),
                   initialValue: servingUnitOptions[0],
                   items: servingUnitOptions
-                      .map((unit) => DropdownMenuItem(
-                            alignment: AlignmentDirectional.center,
-                            value: unit,
-                            child: Text(unit),
-                          ))
+                      .map(
+                        (unit) => DropdownMenuItem(
+                          alignment: AlignmentDirectional.center,
+                          value: unit,
+                          child: Text(unit),
+                        ),
+                      )
                       .toList(),
                   onChanged: (val) {
                     setState(() {
@@ -334,7 +339,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
                   // 2023-10-21 应该也是跳转到新增food的表单，但是可能是修改或新增已有的营养素子栏位，食物信息不变化
                   child: Text(CusAL.of(context).dietaryAddTabs('4')),
                 ),
-              )
+              ),
             ],
           ),
           // 切换餐次
@@ -348,11 +353,13 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
             ),
             initialValue: inputMealtimeValue,
             items: mealtimeList
-                .map((unit) => DropdownMenuItem(
-                      alignment: AlignmentDirectional.center,
-                      value: unit,
-                      child: Text(showCusLableMapLabel(context, unit)),
-                    ))
+                .map(
+                  (unit) => DropdownMenuItem(
+                    alignment: AlignmentDirectional.center,
+                    value: unit,
+                    child: Text(showCusLableMapLabel(context, unit)),
+                  ),
+                )
                 .toList(),
             onChanged: (val) {
               setState(() {
@@ -511,10 +518,7 @@ class _SimpleFoodDetailState extends State<SimpleFoodDetail> {
           // 设置表格边框
           border: TableBorder.all(color: Theme.of(context).primaryColor),
           // 设置每列的宽度占比
-          columnWidths: const {
-            0: FlexColumnWidth(2),
-            1: FlexColumnWidth(3),
-          },
+          columnWidths: const {0: FlexColumnWidth(2), 1: FlexColumnWidth(3)},
           defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           children: [
             _buildTableRow(

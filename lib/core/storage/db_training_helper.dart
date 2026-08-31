@@ -493,10 +493,14 @@ class DBTrainingHelper {
 
     for (final row in groupRows) {
       final group = TrainingGroup.fromMap(row);
+      // 2026-08-28 显式按自增主键排序：动作是"全删重插"式保存(rowid 全变)，
+      // 无 ORDER BY 时 sqlite 返回顺序不保证，可能造成列表页与AI分析上下文
+      // 的动作顺序漂移
       final actionRows = await db.query(
         TrainingDdl.tableNameOfAction,
         where: 'group_id = ?',
         whereArgs: [group.groupId],
+        orderBy: 'action_id ASC',
       );
 
       // 上面是异步的，说是性能要好些

@@ -11,7 +11,8 @@ class DietaryDdl {
   // 餐次的食物照片表
   static const tableNameOfMealPhoto = 'ff_meal_photo';
 
-  static const String ddlForFood = """
+  static const String ddlForFood =
+      """
     CREATE TABLE IF NOT EXISTS $tableNameOfFood (
       food_id     INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT,
       brand       TEXT      NOT NULL,
@@ -28,7 +29,8 @@ class DietaryDdl {
     """;
 
   // 2023-12-06 新增唯一检查，同一个食物、同一个单位、同一个数量的联合值是唯一的
-  static const String ddlForServingInfo = """
+  static const String ddlForServingInfo =
+      """
     CREATE TABLE IF NOT EXISTS $tableNameOfServingInfo (
       serving_info_id       INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT,
       food_id               INTEGER   NOT NULL,
@@ -57,7 +59,8 @@ class DietaryDdl {
     );
     """;
 
-  static const String ddlForDailyFoodItem = """
+  static const String ddlForDailyFoodItem =
+      """
     CREATE TABLE IF NOT EXISTS $tableNameOfDailyFoodItem (
       daily_food_item_id  INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT,
       user_id             INTEGER   NOT NULL,
@@ -71,7 +74,8 @@ class DietaryDdl {
     );
     """;
 
-  static const String ddlForMealPhoto = """
+  static const String ddlForMealPhoto =
+      """
     CREATE TABLE IF NOT EXISTS $tableNameOfMealPhoto (
       meal_photo_id   INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT,
       user_id         INTEGER   NOT NULL,

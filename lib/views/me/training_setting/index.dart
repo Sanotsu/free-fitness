@@ -33,9 +33,7 @@ class _TrainingSettingState extends State<TrainingSetting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(CusAL.of(context).settingLabels('3')),
-      ),
+      appBar: AppBar(title: Text(CusAL.of(context).settingLabels('3'))),
       body: ListView(
         children: [
           _buildListItem(

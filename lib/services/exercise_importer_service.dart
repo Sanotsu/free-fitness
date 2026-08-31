@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get_storage/get_storage.dart';
 
 import '../core/storage/db_training_helper.dart';
+import '../core/utils/import_progress.dart';
 import '../core/utils/toast_utils.dart';
 import '../core/utils/tools.dart';
 import '../core/constants/constants.dart';
@@ -26,30 +26,22 @@ class ExerciseImporterService {
 
   /// 检查并导入内置的基础动作数据
   Future<void> importEmbeddedExercises(String languageCode) async {
-    dynamic closeToast;
+    // (注意：本服务直接按固定文件名加载 json，不依赖 AssetManifest 枚举)
+    bool isZh = languageCode == 'zh';
 
     try {
       // 检查是否已经导入过
       bool alreadyImported = _checkIfAlreadyImported();
       if (alreadyImported) {
         if (kDebugMode) {
-          print('基础动作数据已经导入过，跳过导入步骤');
+          debugPrint('基础动作数据已经导入过，跳过导入步骤');
         }
         return;
       }
 
-      closeToast = ToastUtils.showLoading(
-        languageCode == 'zh'
-            ? '正在初始化“基础动作”数据...'
-            : "Initializing Exercise Data...",
-        Alignment.center,
-      );
-
       // 读取内置的JSON文件
       final String jsonData = await rootBundle.loadString(
-        languageCode == 'zh'
-            ? _embeddedZhExerciseJsonPath
-            : _embeddedEnExerciseJsonPath,
+        isZh ? _embeddedZhExerciseJsonPath : _embeddedEnExerciseJsonPath,
       );
       final List<dynamic> exerciseList = json.decode(jsonData);
 
@@ -58,22 +50,44 @@ class ExerciseImporterService {
           .map((json) => CustomExercise.fromJson(json))
           .toList();
 
-      // 转换为Exercise对象列表并保存到数据库
-      await _saveExercisesToDatabase(customExercises);
+      // 逐条入库并上报进度(每10条刷新一次，避免过于频繁地重建UI)
+      int total = customExercises.length;
+      int importedCount = 0;
+      String title = isZh ? '正在初始化“基础动作”数据' : "Initializing Exercise Data";
+
+      for (int i = 0; i < total; i++) {
+        bool success = await _saveSingleExercise(customExercises[i]);
+        if (success) importedCount++;
+
+        if ((i + 1) % 10 == 0 || i + 1 == total) {
+          ImportProgressCenter.update(
+            ImportProgress(
+              title: title,
+              detail: isZh
+                  ? '已写入数据库 $importedCount 条'
+                  : '$importedCount records saved',
+              current: i + 1,
+              total: total,
+            ),
+          );
+        }
+      }
 
       // 标记为已导入
       _markAsImported();
 
       ToastUtils.showSuccess(
-        '成功导入 ${customExercises.length} 条基础动作数据',
+        isZh
+            ? '成功导入 $importedCount 条基础动作数据'
+            : "Successfully imported $importedCount exercises",
         duration: const Duration(seconds: 3),
       );
     } catch (e) {
-      ToastUtils.showError('导入基础动作数据时出错: $e');
+      ToastUtils.showError(
+        isZh ? '导入基础动作数据时出错: $e' : 'Error importing exercise data: $e',
+      );
     } finally {
-      if (closeToast != null) {
-        closeToast();
-      }
+      ImportProgressCenter.update(null);
     }
   }
 
@@ -89,52 +103,45 @@ class ExerciseImporterService {
     box.write(LocalStorageKey.exerciseDataImported, true);
   }
 
-  /// 将CustomExercise列表转换为Exercise对象并保存到数据库
-  Future<void> _saveExercisesToDatabase(
-    List<CustomExercise> customExercises,
-  ) async {
-    // 处理每个运动记录
-    for (var cusExercise in customExercises) {
-      // 将CustomExercise转换为Exercise
-      var exercise = Exercise(
-        // json文件的id就是代号
-        exerciseCode: cusExercise.code ?? cusExercise.id ?? '',
-        exerciseName: cusExercise.name ?? "",
-        category: cusExercise.category ?? "",
+  /// 将单个CustomExercise转换为Exercise并保存到数据库，返回是否成功
+  Future<bool> _saveSingleExercise(CustomExercise cusExercise) async {
+    // 将CustomExercise转换为Exercise
+    var exercise = Exercise(
+      // json文件的id就是代号
+      exerciseCode: cusExercise.code ?? cusExercise.id ?? '',
+      exerciseName: cusExercise.name ?? "",
+      category: cusExercise.category ?? "",
 
-        force: cusExercise.force,
-        level: cusExercise.level,
-        mechanic: cusExercise.mechanic,
-        equipment: cusExercise.equipment,
-        primaryMuscles: cusExercise.primaryMuscles?.join(","),
-        secondaryMuscles: cusExercise.secondaryMuscles?.join(","),
-        instructions: cusExercise.instructions?.join("\n\n"),
-        // 直接使用我github地址，使用网络图片
-        images:
-            cusExercise.images
-                ?.map((e) => imagePerfix + e)
-                .toList()
-                .join(",") ??
-            placeholderImageUrl,
-        // 这几个原json没有的
-        countingMode: cusExercise.countingMode ?? countingOptions.first.value,
-        standardDuration:
-            int.tryParse(cusExercise.standardDuration ?? "1") ?? 1,
-        ttsNotes: cusExercise.ttsNotes,
-        isCustom: false,
-        contributor: "system",
-        gmtCreate: getCurrentDateTime(),
-      );
+      force: cusExercise.force,
+      level: cusExercise.level,
+      mechanic: cusExercise.mechanic,
+      equipment: cusExercise.equipment,
+      primaryMuscles: cusExercise.primaryMuscles?.join(","),
+      secondaryMuscles: cusExercise.secondaryMuscles?.join(","),
+      instructions: cusExercise.instructions?.join("\n\n"),
+      // 直接使用我github地址，使用网络图片
+      images:
+          cusExercise.images?.map((e) => imagePerfix + e).toList().join(",") ??
+          placeholderImageUrl,
+      // 这几个原json没有的
+      countingMode: cusExercise.countingMode ?? countingOptions.first.value,
+      standardDuration: int.tryParse(cusExercise.standardDuration ?? "1") ?? 1,
+      ttsNotes: cusExercise.ttsNotes,
+      isCustom: false,
+      contributor: "system",
+      gmtCreate: getCurrentDateTime(),
+    );
 
-      try {
-        // 将基础动作数据插入数据库
-        await _dbHelper.insertExercise(exercise);
-      } catch (e) {
-        // 如果是唯一约束错误，则跳过
-        if (kDebugMode) {
-          print('导入基础动作数据时出错 (${cusExercise.id}): $e');
-        }
+    try {
+      // 将基础动作数据插入数据库
+      await _dbHelper.insertExercise(exercise);
+      return true;
+    } catch (e) {
+      // 如果是唯一约束错误，则跳过
+      if (kDebugMode) {
+        debugPrint('导入基础动作数据时出错 (${cusExercise.id}): $e');
       }
+      return false;
     }
   }
 }

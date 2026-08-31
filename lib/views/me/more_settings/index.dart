@@ -4,7 +4,10 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../core/constants/constants.dart';
 import '../../../models/cus_app_localizations.dart';
+import '../../../models/paid_llm/llm_config.dart';
 import '../../../services/app_restart_service.dart';
+import '../../../services/llm_config_service.dart';
+import '../llm_config/index.dart';
 
 class MoreSettings extends StatefulWidget {
   const MoreSettings({super.key});
@@ -22,10 +25,14 @@ class _MoreSettingsState extends State<MoreSettings> {
     buildSignature: 'Unknown',
   );
 
+  final LlmConfigService _llmConfigService = LlmConfigService();
+
   @override
   void initState() {
     super.initState();
     _initPackageInfo();
+    // 大模型配置状态值(右侧显示"已配置 N 个/未配置")
+    _llmConfigService.load();
   }
 
   Future<void> _initPackageInfo() async {
@@ -118,6 +125,37 @@ class _MoreSettingsState extends State<MoreSettings> {
               'light',
             ),
           ],
+        ),
+
+        // 2026-08-27 大模型配置入口(AI 助手的配置管理)
+        // 风格对齐上方语言/主题设置项：左标题 + 右侧当前状态值，无 leading 图标
+        ListTile(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(CusAL.of(context).llmConfigTitle),
+              ValueListenableBuilder<List<LlmConfig>>(
+                valueListenable: _llmConfigService.configsNotifier,
+                builder: (context, configs, _) {
+                  return Text(
+                    configs.isEmpty
+                        ? CusAL.of(context).llmConfigStatusNone
+                        : CusAL.of(
+                            context,
+                          ).llmConfigStatusCount(configs.length),
+                  );
+                },
+              ),
+            ],
+          ),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const LlmConfigListPage(),
+              ),
+            );
+          },
         ),
 
         ListTile(

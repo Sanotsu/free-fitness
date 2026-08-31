@@ -12,25 +12,55 @@ ThemeData lightTheme = ThemeData(
   // 否则就是默认的
   textTheme: TextTheme(
     displayLarge: TextStyle(
-        fontSize: 96.sp, fontWeight: FontWeight.w300, color: Colors.black),
+      fontSize: 96.sp,
+      fontWeight: FontWeight.w300,
+      color: Colors.black,
+    ),
     displayMedium: TextStyle(
-        fontSize: 60.sp, fontWeight: FontWeight.w400, color: Colors.black),
+      fontSize: 60.sp,
+      fontWeight: FontWeight.w400,
+      color: Colors.black,
+    ),
     displaySmall: TextStyle(
-        fontSize: 48.sp, fontWeight: FontWeight.w400, color: Colors.black),
+      fontSize: 48.sp,
+      fontWeight: FontWeight.w400,
+      color: Colors.black,
+    ),
     headlineMedium: TextStyle(
-        fontSize: 34.sp, fontWeight: FontWeight.w400, color: Colors.black),
+      fontSize: 34.sp,
+      fontWeight: FontWeight.w400,
+      color: Colors.black,
+    ),
     headlineSmall: TextStyle(
-        fontSize: 24.sp, fontWeight: FontWeight.w400, color: Colors.black),
+      fontSize: 24.sp,
+      fontWeight: FontWeight.w400,
+      color: Colors.black,
+    ),
     titleLarge: TextStyle(
-        fontSize: 20.sp, fontWeight: FontWeight.w500, color: Colors.black),
+      fontSize: 20.sp,
+      fontWeight: FontWeight.w500,
+      color: Colors.black,
+    ),
     bodyLarge: TextStyle(
-        fontSize: 16.sp, fontWeight: FontWeight.w400, color: Colors.black87),
+      fontSize: 16.sp,
+      fontWeight: FontWeight.w400,
+      color: Colors.black87,
+    ),
     bodyMedium: TextStyle(
-        fontSize: 14.sp, fontWeight: FontWeight.w400, color: Colors.black87),
+      fontSize: 14.sp,
+      fontWeight: FontWeight.w400,
+      color: Colors.black87,
+    ),
     bodySmall: TextStyle(
-        fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.black54),
+      fontSize: 12.sp,
+      fontWeight: FontWeight.w400,
+      color: Colors.black54,
+    ),
     labelLarge: TextStyle(
-        fontSize: 14.sp, fontWeight: FontWeight.w500, color: Colors.white),
+      fontSize: 14.sp,
+      fontWeight: FontWeight.w500,
+      color: Colors.white,
+    ),
   ),
   // appbar主题
   appBarTheme: AppBarTheme(
@@ -41,16 +71,15 @@ ThemeData lightTheme = ThemeData(
   // 颜色组，定义应用可以使用的颜色集。定义了许多小部件的默认颜色
   colorScheme: ColorScheme.fromSeed(
     seedColor: Colors.red,
-  ).copyWith(
-    primary: Colors.green,
-  ),
+  ).copyWith(primary: Colors.green),
   // 指定某种按钮的主体
   elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ButtonStyle(
-    backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-      (Set<WidgetState> states) => Colors.red,
+    style: ButtonStyle(
+      backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+        (Set<WidgetState> states) => Colors.red,
+      ),
     ),
-  )),
+  ),
 );
 
 final ThemeData darkTheme = ThemeData(
@@ -62,10 +91,7 @@ final ThemeData darkTheme = ThemeData(
   secondaryHeaderColor: Colors.grey,
   primarySwatch: Colors.red,
   textTheme: TextTheme(
-    displayLarge: TextStyle(
-      fontSize: 52.sp,
-      fontWeight: FontWeight.w500,
-    ),
+    displayLarge: TextStyle(fontSize: 52.sp, fontWeight: FontWeight.w500),
     bodyLarge: TextStyle(fontSize: 18.sp),
   ),
 );

@@ -7,6 +7,7 @@ import '../../../core/constants/constants.dart';
 import '../../../core/storage/db_training_helper.dart';
 import '../../../core/utils/tool_widgets.dart';
 import '../../../core/utils/tools.dart';
+import '../../../core/utils/training_time_estimator.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
@@ -39,10 +40,23 @@ class _TrainingPlansState extends State<TrainingPlans> {
 
   bool isLoading = false;
 
+  // 2026-08-28 预估耗时用的间隔休息秒数(与跟练口径一致)
+  int _restSeconds = defaultActionRestSeconds;
+
   @override
   void initState() {
     super.initState();
     getPlanList();
+    _loadRestSeconds();
+  }
+
+  // 异步读取用户配置的间隔休息秒数，回来后刷新列表展示
+  Future<void> _loadRestSeconds() async {
+    var rest = await fetchActionRestSeconds();
+    if (!mounted) return;
+    setState(() {
+      _restSeconds = rest;
+    });
   }
 
   // 查询已有的训练
@@ -97,10 +111,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
         ),
         actions: [
           /// 新增训练组基本信息
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _modifyPlanInfo,
-          ),
+          IconButton(icon: const Icon(Icons.add), onPressed: _modifyPlanInfo),
         ],
       ),
       body: Column(
@@ -111,7 +122,10 @@ class _TrainingPlansState extends State<TrainingPlans> {
             child: Card(
               elevation: 5.sp,
               child: Column(
-                children: [_buildQueryArea(), SizedBox(height: 10.sp)],
+                children: [
+                  _buildQueryArea(),
+                  SizedBox(height: 10.sp),
+                ],
               ),
             ),
           ),
@@ -247,6 +261,12 @@ class _TrainingPlansState extends State<TrainingPlans> {
                 style: TextStyle(
                   color: Theme.of(context).textTheme.bodyMedium?.color,
                 ),
+              ),
+              // 2026-08-28 计划总预估耗时(每日组耗时求和，按动作标准耗时+间隔休息估算)
+              TextSpan(
+                text:
+                    '  ${CusAL.of(context).estMinutes(planItem.groupDetailList.fold<int>(0, (sum, gwa) => sum + estimateGroupMinutes(gwa.actionDetailList, restSeconds: _restSeconds)))}',
+                style: TextStyle(color: Colors.orange[700]),
               ),
               TextSpan(
                 text: getCusLabelText(planItem.plan.planLevel, levelOptions),
@@ -451,9 +471,7 @@ class _TrainingPlansState extends State<TrainingPlans> {
           // 新增计划完成后弹窗关闭，同时进入其训练组列表页面让用户进行训练的添加
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => GroupList(planItem: temp),
-            ),
+            MaterialPageRoute(builder: (context) => GroupList(planItem: temp)),
           ).then((value) {
             // 新增plan基本信息后直接跳入训练列表，在其中完成新增训练操作之后该计划就会变；
             // 暂时返回这个页面时都重新加载最新的计划列表数据

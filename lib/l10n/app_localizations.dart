@@ -179,7 +179,7 @@ abstract class AppLocalizations {
   /// 用户与设置页面的备份与恢复的标签
   ///
   /// In en, this message translates to:
-  /// **'{ num, select, 0{Backup & Restore} 1{Full Backup} 2{Overwrite Restore}  other{Other} }'**
+  /// **'{ num, select, 0{Backup & Restore} 1{Full Backup} 2{Merge Restore}  other{Other} }'**
   String bakLabels(String num);
 
   /// No description provided for @bakOpNote.
@@ -197,7 +197,7 @@ abstract class AppLocalizations {
   /// No description provided for @resSuccessNote.
   ///
   /// In en, this message translates to:
-  /// **'The original data has been deleted, and the backup data has been restored.'**
+  /// **'Backup data has been merged into the device.'**
   String get resSuccessNote;
 
   /// No description provided for @restIntervals.
@@ -415,6 +415,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No available TTS engine'**
   String get noTtsEngine;
+
+  /// 无TTS引擎时的说明(仅提示，不中断跟练)
+  ///
+  /// In en, this message translates to:
+  /// **'Follow practice still works, just without voice prompts'**
+  String get noTtsEngineDesc;
+
+  /// 显示当前使用的TTS引擎信息
+  ///
+  /// In en, this message translates to:
+  /// **'Using TTS engine: {engineName}'**
+  String ttsEngineInfo(String engineName);
+
+  /// No description provided for @selectTtsEngine.
+  ///
+  /// In en, this message translates to:
+  /// **'Select TTS Engine'**
+  String get selectTtsEngine;
+
+  /// No description provided for @multipleTtsEnginesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple TTS engines detected, please select one:'**
+  String get multipleTtsEnginesFound;
+
+  /// No description provided for @ttsEngineCheckFail.
+  ///
+  /// In en, this message translates to:
+  /// **'TTS engine check failed; voice prompts may be unavailable'**
+  String get ttsEngineCheckFail;
 
   /// 训练跟练页面tts相关文字
   ///
@@ -1357,6 +1387,894 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Load embedded food? This will overwrite duplicates.'**
   String get confirmLoadEmbeddedFood;
+
+  /// No description provided for @tipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips'**
+  String get tipsTitle;
+
+  /// No description provided for @guideStepLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {num}/4 · {name}'**
+  String guideStepLabel(int num, Object name);
+
+  /// No description provided for @guideStepIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Intro'**
+  String get guideStepIntro;
+
+  /// No description provided for @guideStepStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage'**
+  String get guideStepStorage;
+
+  /// No description provided for @guideStepData.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in Data'**
+  String get guideStepData;
+
+  /// No description provided for @guideStepProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get guideStepProfile;
+
+  /// No description provided for @guideIntroTrainingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get guideIntroTrainingTitle;
+
+  /// No description provided for @guideIntroTrainingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercise library & period plans with guided workouts'**
+  String get guideIntroTrainingDesc;
+
+  /// No description provided for @guideIntroDietaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dietary'**
+  String get guideIntroDietaryTitle;
+
+  /// No description provided for @guideIntroDietaryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Food composition, servings, meal photos & daily intake'**
+  String get guideIntroDietaryDesc;
+
+  /// No description provided for @guideIntroDiaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Diary'**
+  String get guideIntroDiaryTitle;
+
+  /// No description provided for @guideIntroDiaryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Rich-text notes and long-term weight trends'**
+  String get guideIntroDiaryDesc;
+
+  /// No description provided for @guideIntroAiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Assistant'**
+  String get guideIntroAiTitle;
+
+  /// No description provided for @guideIntroAiDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring your own LLM API key for diet/training analysis'**
+  String get guideIntroAiDesc;
+
+  /// No description provided for @guideStorageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why storage permission?'**
+  String get guideStorageTitle;
+
+  /// No description provided for @guideStorageReason1.
+  ///
+  /// In en, this message translates to:
+  /// **'Databases live in the app-specific directory, removed on uninstall'**
+  String get guideStorageReason1;
+
+  /// No description provided for @guideStorageReason2.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup & restore: full zip backups for device migration and safety'**
+  String get guideStorageReason2;
+
+  /// No description provided for @guideStorageReason3.
+  ///
+  /// In en, this message translates to:
+  /// **'Images: diary photos and analyzed meal photos are copied for history'**
+  String get guideStorageReason3;
+
+  /// No description provided for @guideStorageGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'✓ Granted'**
+  String get guideStorageGranted;
+
+  /// No description provided for @guideStorageSkippable.
+  ///
+  /// In en, this message translates to:
+  /// **'You may skip; features will ask again later'**
+  String get guideStorageSkippable;
+
+  /// No description provided for @guideDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Load built-in data?'**
+  String get guideDataTitle;
+
+  /// No description provided for @guideDataHint.
+  ///
+  /// In en, this message translates to:
+  /// **'(Recommended on first launch)'**
+  String get guideDataHint;
+
+  /// No description provided for @guideDataExerciseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in exercise library'**
+  String get guideDataExerciseTitle;
+
+  /// No description provided for @guideDataExerciseDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Common strength/cardio exercises with categories'**
+  String get guideDataExerciseDesc;
+
+  /// No description provided for @guideDataFoodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Food composition table'**
+  String get guideDataFoodTitle;
+
+  /// No description provided for @guideDataFoodDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'China Food Composition datasets with energy & macros'**
+  String get guideDataFoodDesc;
+
+  /// No description provided for @guideDataManualNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip freely: use the flash icon on the exercise/food pages to import anytime.'**
+  String get guideDataManualNote;
+
+  /// No description provided for @guideBtnNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get guideBtnNext;
+
+  /// No description provided for @guideBtnSkipStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get guideBtnSkipStep;
+
+  /// No description provided for @guideBtnGrant.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant & continue'**
+  String get guideBtnGrant;
+
+  /// No description provided for @guideBtnGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'Granted, continue'**
+  String get guideBtnGranted;
+
+  /// No description provided for @guideBtnStartLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Start loading'**
+  String get guideBtnStartLoad;
+
+  /// No description provided for @guideBtnNoLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip loading'**
+  String get guideBtnNoLoad;
+
+  /// No description provided for @restoreSelectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select data to restore'**
+  String get restoreSelectTitle;
+
+  /// No description provided for @restoreModUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User & goals'**
+  String get restoreModUser;
+
+  /// No description provided for @restoreModUserDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Profiles / intake goals / weight trends'**
+  String get restoreModUserDesc;
+
+  /// No description provided for @restoreModDietary.
+  ///
+  /// In en, this message translates to:
+  /// **'Dietary'**
+  String get restoreModDietary;
+
+  /// No description provided for @restoreModDietaryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Foods / servings / daily intake / meal photos'**
+  String get restoreModDietaryDesc;
+
+  /// No description provided for @restoreModDiary.
+  ///
+  /// In en, this message translates to:
+  /// **'Diary'**
+  String get restoreModDiary;
+
+  /// No description provided for @restoreModDiaryDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Rich-text notes'**
+  String get restoreModDiaryDesc;
+
+  /// No description provided for @restoreModTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get restoreModTraining;
+
+  /// No description provided for @restoreModTrainingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Exercises / groups / plans / training logs\nBuilt-in items already on this device are kept as-is'**
+  String get restoreModTrainingDesc;
+
+  /// No description provided for @restoreModAi.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Assistant'**
+  String get restoreModAi;
+
+  /// No description provided for @restoreModAiDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversations / custom roles / LLM configs (incl. keys) / images'**
+  String get restoreModAiDesc;
+
+  /// No description provided for @restoreMergeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore merges into existing data (deduplicated); an automatic full backup is made first.'**
+  String get restoreMergeNote;
+
+  /// No description provided for @restoreNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No restorable data in this backup'**
+  String get restoreNoData;
+
+  /// No description provided for @restorePhaseBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Backing up current data first'**
+  String get restorePhaseBackup;
+
+  /// No description provided for @restorePhaseBackupNote.
+  ///
+  /// In en, this message translates to:
+  /// **'For rollback safety'**
+  String get restorePhaseBackupNote;
+
+  /// No description provided for @restorePhaseLlm.
+  ///
+  /// In en, this message translates to:
+  /// **'Merging LLM configs'**
+  String get restorePhaseLlm;
+
+  /// No description provided for @restorePhaseImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Merging AI images'**
+  String get restorePhaseImages;
+
+  /// No description provided for @restoreProgressDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{current} / {total} rows merged'**
+  String restoreProgressDetail(int current, int total);
+
+  /// No description provided for @restoreResultNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore merged: {inserted} new, {skipped} existing kept'**
+  String restoreResultNote(int inserted, int skipped);
+
+  /// No description provided for @restoreBuiltinNote.
+  ///
+  /// In en, this message translates to:
+  /// **'({count} built-in entries kept)'**
+  String restoreBuiltinNote(int count);
+
+  /// No description provided for @restoreTblUser.
+  ///
+  /// In en, this message translates to:
+  /// **'user profiles'**
+  String get restoreTblUser;
+
+  /// No description provided for @restoreTblIntakeGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'intake goals'**
+  String get restoreTblIntakeGoal;
+
+  /// No description provided for @restoreTblWeightTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'weight trends'**
+  String get restoreTblWeightTrend;
+
+  /// No description provided for @restoreTblFood.
+  ///
+  /// In en, this message translates to:
+  /// **'foods'**
+  String get restoreTblFood;
+
+  /// No description provided for @restoreTblServing.
+  ///
+  /// In en, this message translates to:
+  /// **'servings'**
+  String get restoreTblServing;
+
+  /// No description provided for @restoreTblDailyIntake.
+  ///
+  /// In en, this message translates to:
+  /// **'daily intake'**
+  String get restoreTblDailyIntake;
+
+  /// No description provided for @restoreTblMealPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'meal photos'**
+  String get restoreTblMealPhoto;
+
+  /// No description provided for @restoreTblDiary.
+  ///
+  /// In en, this message translates to:
+  /// **'diary notes'**
+  String get restoreTblDiary;
+
+  /// No description provided for @restoreTblExercise.
+  ///
+  /// In en, this message translates to:
+  /// **'exercises'**
+  String get restoreTblExercise;
+
+  /// No description provided for @restoreTblGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'workout groups'**
+  String get restoreTblGroup;
+
+  /// No description provided for @restoreTblAction.
+  ///
+  /// In en, this message translates to:
+  /// **'plan actions'**
+  String get restoreTblAction;
+
+  /// No description provided for @restoreTblPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'plans'**
+  String get restoreTblPlan;
+
+  /// No description provided for @restoreTblPlanDay.
+  ///
+  /// In en, this message translates to:
+  /// **'plan schedules'**
+  String get restoreTblPlanDay;
+
+  /// No description provided for @restoreTblTrainLog.
+  ///
+  /// In en, this message translates to:
+  /// **'training logs'**
+  String get restoreTblTrainLog;
+
+  /// No description provided for @restoreTblAiConv.
+  ///
+  /// In en, this message translates to:
+  /// **'AI conversations'**
+  String get restoreTblAiConv;
+
+  /// No description provided for @restoreTblAiMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'AI messages'**
+  String get restoreTblAiMsg;
+
+  /// No description provided for @restoreTblAiRole.
+  ///
+  /// In en, this message translates to:
+  /// **'custom roles'**
+  String get restoreTblAiRole;
+
+  /// No description provided for @llmConfigTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'LLM Config'**
+  String get llmConfigTitle;
+
+  /// No description provided for @llmConfigStatusNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not configured'**
+  String get llmConfigStatusNone;
+
+  /// No description provided for @llmConfigStatusCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} config(s)'**
+  String llmConfigStatusCount(int count);
+
+  /// No description provided for @llmConfigEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No configs yet.\nTap + to add an OpenAI-compatible LLM config.'**
+  String get llmConfigEmpty;
+
+  /// No description provided for @llmConfigAddTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add config'**
+  String get llmConfigAddTooltip;
+
+  /// No description provided for @llmConfigDeleteNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete config \"{name}\"? Existing conversations keep their history (snapshot display).'**
+  String llmConfigDeleteNote(Object name);
+
+  /// No description provided for @llmConfigPageAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add LLM Config'**
+  String get llmConfigPageAdd;
+
+  /// No description provided for @llmConfigPageEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit LLM Config'**
+  String get llmConfigPageEdit;
+
+  /// No description provided for @llmConfigSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get llmConfigSaved;
+
+  /// No description provided for @llmConfigFixForm.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fix form errors first'**
+  String get llmConfigFixForm;
+
+  /// No description provided for @llmConfigFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Config name'**
+  String get llmConfigFieldName;
+
+  /// No description provided for @llmConfigFieldNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. SiliconFlow-Qwen'**
+  String get llmConfigFieldNameHint;
+
+  /// No description provided for @llmConfigFieldUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'API URL'**
+  String get llmConfigFieldUrl;
+
+  /// No description provided for @llmConfigFieldKey.
+  ///
+  /// In en, this message translates to:
+  /// **'API Key'**
+  String get llmConfigFieldKey;
+
+  /// No description provided for @llmConfigFieldModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get llmConfigFieldModel;
+
+  /// No description provided for @llmConfigFieldModelHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Qwen/Qwen2.5-VL-32B-Instruct'**
+  String get llmConfigFieldModelHint;
+
+  /// No description provided for @llmConfigFieldVision.
+  ///
+  /// In en, this message translates to:
+  /// **'Supports vision'**
+  String get llmConfigFieldVision;
+
+  /// No description provided for @llmConfigFieldVisionNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Most modern models are multimodal. Turn off for text-only models (e.g. deepseek-chat).'**
+  String get llmConfigFieldVisionNote;
+
+  /// No description provided for @llmConfigFieldExtra.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced params (JSON, optional)'**
+  String get llmConfigFieldExtra;
+
+  /// No description provided for @llmConfigFieldExtraNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Merged into request body. Keys model/messages/stream are ignored.'**
+  String get llmConfigFieldExtraNote;
+
+  /// No description provided for @llmConfigRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get llmConfigRequired;
+
+  /// No description provided for @llmConfigInvalidUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid URL'**
+  String get llmConfigInvalidUrl;
+
+  /// No description provided for @llmConfigInvalidJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Must be a valid JSON object'**
+  String get llmConfigInvalidJson;
+
+  /// No description provided for @llmConfigQuickFill.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick fill:'**
+  String get llmConfigQuickFill;
+
+  /// No description provided for @llmConfigTestConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Test connection'**
+  String get llmConfigTestConnection;
+
+  /// No description provided for @llmConfigTestVision.
+  ///
+  /// In en, this message translates to:
+  /// **'Test vision'**
+  String get llmConfigTestVision;
+
+  /// No description provided for @llmConfigTestResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Test result'**
+  String get llmConfigTestResult;
+
+  /// No description provided for @llmConfigEmptyReply.
+  ///
+  /// In en, this message translates to:
+  /// **'(empty reply)'**
+  String get llmConfigEmptyReply;
+
+  /// No description provided for @llmConfigVisionTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Vision test'**
+  String get llmConfigVisionTest;
+
+  /// No description provided for @llmConfigVisionOk.
+  ///
+  /// In en, this message translates to:
+  /// **'The model seems to support image input.\n\nReply: {reply}'**
+  String llmConfigVisionOk(Object reply);
+
+  /// No description provided for @llmConfigVisionFail.
+  ///
+  /// In en, this message translates to:
+  /// **'The model may NOT support image input.\n\n{detail}'**
+  String llmConfigVisionFail(Object detail);
+
+  /// No description provided for @llmConfigPingText.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi, reply with \"ok\" only.'**
+  String get llmConfigPingText;
+
+  /// No description provided for @llmConfigVisionPingText.
+  ///
+  /// In en, this message translates to:
+  /// **'What color is this image?'**
+  String get llmConfigVisionPingText;
+
+  /// No description provided for @llmGateNoKey.
+  ///
+  /// In en, this message translates to:
+  /// **'No LLM API key configured.\nPlease configure it in Me → More Settings → LLM Config first.'**
+  String get llmGateNoKey;
+
+  /// No description provided for @llmGateGoConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Go config'**
+  String get llmGateGoConfig;
+
+  /// No description provided for @llmGateNoVision.
+  ///
+  /// In en, this message translates to:
+  /// **'No vision-capable model config.\nPlease enable \"supports vision\" on a config first.'**
+  String get llmGateNoVision;
+
+  /// No description provided for @aiChatNoConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'No LLM config, please configure first'**
+  String get aiChatNoConfig;
+
+  /// No description provided for @aiChatSwitchModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch model'**
+  String get aiChatSwitchModel;
+
+  /// No description provided for @aiChatVisionTag.
+  ///
+  /// In en, this message translates to:
+  /// **'vision'**
+  String get aiChatVisionTag;
+
+  /// No description provided for @aiChatModelNoVision.
+  ///
+  /// In en, this message translates to:
+  /// **'Current model doesn\'t support images; pending images removed'**
+  String get aiChatModelNoVision;
+
+  /// No description provided for @aiChatImageLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 4 images'**
+  String get aiChatImageLimit;
+
+  /// No description provided for @aiChatRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get aiChatRename;
+
+  /// No description provided for @aiChatClearNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all messages in this conversation?'**
+  String get aiChatClearNote;
+
+  /// No description provided for @aiChatDeleteNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this conversation? Messages and images will be removed too.'**
+  String get aiChatDeleteNote;
+
+  /// No description provided for @aiChatDeleteShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this conversation?'**
+  String get aiChatDeleteShort;
+
+  /// No description provided for @aiChatClearMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear messages'**
+  String get aiChatClearMessages;
+
+  /// No description provided for @aiChatDeleteConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete conversation'**
+  String get aiChatDeleteConversation;
+
+  /// No description provided for @aiChatNoConfigName.
+  ///
+  /// In en, this message translates to:
+  /// **'No config'**
+  String get aiChatNoConfigName;
+
+  /// No description provided for @aiChatInputHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask anything...'**
+  String get aiChatInputHint;
+
+  /// No description provided for @aiChatAskWith.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with {name}:'**
+  String aiChatAskWith(Object name);
+
+  /// No description provided for @aiChatRegenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate'**
+  String get aiChatRegenerate;
+
+  /// No description provided for @aiChatCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get aiChatCopied;
+
+  /// No description provided for @aiChatTokenUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'tokens in:{inputTokens} out:{outputTokens} total:{totalTokens}'**
+  String aiChatTokenUsage(int inputTokens, int outputTokens, int totalTokens);
+
+  /// No description provided for @aiChatAddImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add images (up to 4)'**
+  String get aiChatAddImage;
+
+  /// No description provided for @aiChatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Assistant'**
+  String get aiChatTitle;
+
+  /// No description provided for @aiChatNewChat.
+  ///
+  /// In en, this message translates to:
+  /// **'New chat'**
+  String get aiChatNewChat;
+
+  /// No description provided for @aiChatManageRoles.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage roles'**
+  String get aiChatManageRoles;
+
+  /// No description provided for @aiChatHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get aiChatHistory;
+
+  /// No description provided for @aiChatNoHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No conversations yet'**
+  String get aiChatNoHistory;
+
+  /// No description provided for @aiChatDataUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'(The data has been updated. Please analyze based on the following latest data.)'**
+  String get aiChatDataUpdated;
+
+  /// No description provided for @aiChatException.
+  ///
+  /// In en, this message translates to:
+  /// **'Exception'**
+  String get aiChatException;
+
+  /// No description provided for @rolesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Roles'**
+  String get rolesTitle;
+
+  /// No description provided for @rolesBuiltIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in roles'**
+  String get rolesBuiltIn;
+
+  /// No description provided for @rolesCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom roles'**
+  String get rolesCustom;
+
+  /// No description provided for @rolesEmptyCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'No custom roles yet, tap + to add one'**
+  String get rolesEmptyCustom;
+
+  /// No description provided for @rolesAddTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Add role'**
+  String get rolesAddTooltip;
+
+  /// No description provided for @rolesDeleteNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete role \"{name}\"? Existing conversations keep their history.'**
+  String rolesDeleteNote(Object name);
+
+  /// No description provided for @rolePageAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Role'**
+  String get rolePageAdd;
+
+  /// No description provided for @rolePageEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Role'**
+  String get rolePageEdit;
+
+  /// No description provided for @rolePageDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Role Details'**
+  String get rolePageDetail;
+
+  /// No description provided for @roleReadOnlyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in roles are read-only and cannot be modified or deleted'**
+  String get roleReadOnlyNote;
+
+  /// No description provided for @roleNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Role name'**
+  String get roleNameLabel;
+
+  /// No description provided for @roleNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Running Coach'**
+  String get roleNameHint;
+
+  /// No description provided for @rolePromptLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'System prompt'**
+  String get rolePromptLabel;
+
+  /// No description provided for @rolePromptHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe this role\'s expertise, tone and how it should answer...'**
+  String get rolePromptHint;
+
+  /// No description provided for @rolePromptNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This prompt will be used as the system message when chatting with this role.'**
+  String get rolePromptNote;
+
+  /// No description provided for @roleInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Name and prompt cannot be empty'**
+  String get roleInvalid;
+
+  /// 训练组/计划的预估耗时(按动作标准耗时+间隔休息估算)
+  ///
+  /// In en, this message translates to:
+  /// **'~{minutes} min'**
+  String estMinutes(int minutes);
 }
 
 class _AppLocalizationsDelegate

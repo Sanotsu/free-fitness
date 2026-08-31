@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../core/constants/constants.dart';
 import '../models/cus_app_localizations.dart';
-import '../services/service_initializer.dart';
 import 'home.dart';
 import 'init_guide_page.dart';
 import 'themes/cus_font_size.dart';
@@ -28,9 +27,9 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeApp() async {
-    // 内置数据初始化成功之后，才会进入初始化导航页面InitGuidePage
-    // 进入初始化导航页面之后，只要同意使用进入了主页面，那就一定会有用户信息了
-    // 有用户信息了，就不必重新初始化了
+    // 2026-08-27 改版：内置运动/食物数据不再在此自动导入——
+    // 首次使用由引导页(InitGuidePage)第3步让用户自行选择加载与否，
+    // 之后仍可在对应页面手动导入。这里只负责首次时记录系统语言。
     if (!(box.read(LocalStorageKey.userId) != null)) {
       // 获取当前系统语言
       Locale currentLocale = Localizations.localeOf(context);
@@ -38,9 +37,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
       // 写入当前语言到本地存储
       await box.write('language', languageCode);
-
-      // 初始化所有服务
-      await ServiceInitializer().initializeServices(languageCode);
     }
 
     // 标记初始化完成

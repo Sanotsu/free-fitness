@@ -7,6 +7,7 @@ import '../../../core/utils/image_preview_helper.dart';
 import '../../../core/utils/toast_utils.dart';
 import '../../../core/utils/tool_widgets.dart';
 import '../../../core/utils/tools.dart';
+import '../../../core/widgets/import_progress_overlay.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
@@ -195,8 +196,13 @@ class _TrainingExerciseState extends State<TrainingExercise> {
     Locale currentLocale = Localizations.localeOf(context);
     String languageCode = currentLocale.languageCode;
 
-    // 再执行初始化操作
-    await ExerciseImporterService().importEmbeddedExercises(languageCode);
+    // 再执行初始化操作(期间显示导入进度浮层)
+    final closeOverlay = showImportProgressOverlay();
+    try {
+      await ExerciseImporterService().importEmbeddedExercises(languageCode);
+    } finally {
+      closeOverlay();
+    }
 
     if (!mounted) return;
     setState(() {

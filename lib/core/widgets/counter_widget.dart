@@ -26,8 +26,9 @@ class _CounterWidgetState extends State<CounterWidget> {
   @override
   void initState() {
     super.initState();
-    _count =
-        widget.isTimeMode ? (widget.initialCount * 10) : widget.initialCount;
+    _count = widget.isTimeMode
+        ? (widget.initialCount * 10)
+        : widget.initialCount;
   }
 
   String _formatTime(int seconds) {
@@ -61,11 +62,7 @@ class _CounterWidgetState extends State<CounterWidget> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         IconButton(
-          icon: Icon(
-            Icons.remove_circle,
-            size: 24.sp,
-            color: Colors.green,
-          ),
+          icon: Icon(Icons.remove_circle, size: 24.sp, color: Colors.green),
           // 最小值10秒或者1次，就不允许再点击
           onPressed: _count > (_isTimeMode ? 10 : 1)
               ? () {
@@ -78,11 +75,7 @@ class _CounterWidgetState extends State<CounterWidget> {
           style: TextStyle(fontSize: 28.0.sp, fontWeight: FontWeight.bold),
         ),
         IconButton(
-          icon: Icon(
-            Icons.add_circle,
-            size: 24.sp,
-            color: Colors.green,
-          ),
+          icon: Icon(Icons.add_circle, size: 24.sp, color: Colors.green),
           // 最大值300秒或者100次，就不允许再点击
           onPressed: _count < (_isTimeMode ? 300 : 100)
               ? () {

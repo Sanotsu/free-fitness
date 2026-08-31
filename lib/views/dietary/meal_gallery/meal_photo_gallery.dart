@@ -124,7 +124,12 @@ class _MealPhotoGalleryState extends State<MealPhotoGallery> {
               ),
               trailing: TextButton(
                 onPressed: () {
-                  handleImageAnalysis(context, photoList);
+                  // 同一(日期+餐次)的照片分析复用同一会话
+                  handleImageAnalysis(
+                    context,
+                    photoList,
+                    bizKey: '${mp.date}:${mp.mealCategory}',
+                  );
                 },
                 child: Text(
                   box.read('language') == 'en' ? "AI analysis" : 'AI分析',

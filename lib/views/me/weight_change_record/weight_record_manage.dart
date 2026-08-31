@@ -72,10 +72,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
       context: context,
       firstDate: DateTime(2010),
       lastDate: DateTime(2030),
-      initialDateRange: DateTimeRange(
-        start: _startDate,
-        end: _endDate,
-      ),
+      initialDateRange: DateTimeRange(start: _startDate, end: _endDate),
     );
 
     if (!mounted) return;
@@ -92,9 +89,7 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(CusAL.of(context).weightRecord),
-      ),
+      appBar: AppBar(title: Text(CusAL.of(context).weightRecord)),
       body: isLoading
           ? buildLoader(isLoading)
           : Column(
@@ -163,10 +158,10 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
               // 如果是确认删除，则进行删除
 
               // 先找到被选中的索引
-              List<int> trueIndices =
-                  List.generate(wtSelectedList.length, (index) => index)
-                      .where((i) => wtSelectedList[i])
-                      .toList();
+              List<int> trueIndices = List.generate(
+                wtSelectedList.length,
+                (index) => index,
+              ).where((i) => wtSelectedList[i]).toList();
 
               // 获取要删除的体重趋势数据
               List<WeightTrend> toDeletedWT = [];
@@ -232,14 +227,14 @@ class _WeightRecordManageState extends State<WeightRecordManage> {
           rows: List<DataRow>.generate(
             wtItemsNum,
             (int index) => DataRow(
-              color: WidgetStateProperty.resolveWith<Color?>(
-                  (Set<WidgetState> states) {
+              color: WidgetStateProperty.resolveWith<Color?>((
+                Set<WidgetState> states,
+              ) {
                 // All rows will have the same selected color.
                 if (states.contains(WidgetState.selected)) {
-                  return Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withValues(alpha: 0.08);
+                  return Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.08);
                 }
                 // Even rows will have a grey color.
                 if (index.isEven) {

@@ -46,7 +46,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
   // 这次食物摄入的查询或者预计新增的meal item，属于哪一天的(也是用来查daily log的条件，应该不会变)
   late String currentDate;
 
-// 定义TabController
+  // 定义TabController
   late TabController _tabController;
 
   /// ------------- 查询简单食物列表时一次性只查询10条，上滑加载更多
@@ -137,12 +137,8 @@ class _AddIntakeItemState extends State<AddIntakeItem>
       isFoodLoading = true;
     });
 
-    CusDataResult temp =
-        await _dietaryHelper.searchFoodWithServingInfoWithPagination(
-      query,
-      currentPage,
-      pageSize,
-    );
+    CusDataResult temp = await _dietaryHelper
+        .searchFoodWithServingInfoWithPagination(query, currentPage, pageSize);
 
     List<FoodAndServingInfo> newData = temp.data as List<FoodAndServingInfo>;
 
@@ -186,12 +182,13 @@ class _AddIntakeItemState extends State<AddIntakeItem>
 
     List<DailyFoodItemWithFoodServing> temp =
         (await _dietaryHelper.queryDailyFoodItemListWithDetail(
-      userId: CacheUser.userId,
-      startDate: startDate,
-      endDate: endDate,
-      mealCategory: mealEnLabel,
-      withDetail: true,
-    ) as List<DailyFoodItemWithFoodServing>);
+              userId: CacheUser.userId,
+              startDate: startDate,
+              endDate: endDate,
+              mealCategory: mealEnLabel,
+              withDetail: true,
+            )
+            as List<DailyFoodItemWithFoodServing>);
 
     // 要过滤重复的，即产品、摄入单份营养素、摄入量是一样的
     Map<String, DailyFoodItemWithFoodServing> uniqueObjects = {};
@@ -324,20 +321,18 @@ class _AddIntakeItemState extends State<AddIntakeItem>
               _queryRecentDailyFoodItemList(mealEnLabel: dropdownValue.enLabel);
             });
           },
-          items: mealtimeList.map<DropdownMenuItem<CusLabel>>(
-            (CusLabel value) {
-              return DropdownMenuItem<CusLabel>(
-                value: value,
-                child: Text(
-                  showCusLable(value),
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: CusFontSizes.pageSubTitle,
-                  ),
+          items: mealtimeList.map<DropdownMenuItem<CusLabel>>((CusLabel value) {
+            return DropdownMenuItem<CusLabel>(
+              value: value,
+              child: Text(
+                showCusLable(value),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: CusFontSizes.pageSubTitle,
                 ),
-              );
-            },
-          ).toList(),
+              ),
+            );
+          }).toList(),
           underline: Container(), // 将下划线设置为空的Container
           // icon: null, // 将图标设置为null
           icon: Icon(
@@ -395,7 +390,7 @@ class _AddIntakeItemState extends State<AddIntakeItem>
                   }
                 });
               },
-            )
+            ),
           ],
         ),
     ];
@@ -415,7 +410,8 @@ class _AddIntakeItemState extends State<AddIntakeItem>
         var tempIntake = cusDoubleTryToIntString(foodIntakeSize);
         // 当日已经摄入的卡路里数量
         var tempCalories = cusDoubleTryToIntString(
-            foodIntakeSize * e.servingInfo.energy / oneCalToKjRatio);
+          foodIntakeSize * e.servingInfo.energy / oneCalToKjRatio,
+        );
 
         return SizedBox(
           height: 60.sp,
@@ -504,9 +500,9 @@ class _AddIntakeItemState extends State<AddIntakeItem>
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
-                hintText: CusAL.of(context).queryKeywordHintText(
-                  CusAL.of(context).food,
-                ),
+                hintText: CusAL.of(
+                  context,
+                ).queryKeywordHintText(CusAL.of(context).food),
               ),
             ),
           ),
@@ -545,23 +541,22 @@ class _AddIntakeItemState extends State<AddIntakeItem>
         // 点击这个添加就是默认添加单份营养素的食物，那就直接返回日志页面。
         trailing: IconButton(
           onPressed: () async {
-            var tempStr =
-                mealtimeList.firstWhere((e) => e.value == currentMealtime);
+            var tempStr = mealtimeList.firstWhere(
+              (e) => e.value == currentMealtime,
+            );
 
             // ？？？这里应该有插入是否成功的判断
-            var rst = await _dietaryHelper.insertDailyFoodItemList(
-              [
-                DailyFoodItem(
-                  date: currentDate,
-                  mealCategory: tempStr.enLabel,
-                  foodId: food.foodId!,
-                  servingInfoId: fistServingInfo.servingInfoId!,
-                  foodIntakeSize: fistServingInfo.servingSize.toDouble(),
-                  userId: CacheUser.userId,
-                  gmtCreate: getCurrentDateTime(),
-                )
-              ],
-            );
+            var rst = await _dietaryHelper.insertDailyFoodItemList([
+              DailyFoodItem(
+                date: currentDate,
+                mealCategory: tempStr.enLabel,
+                foodId: food.foodId!,
+                servingInfoId: fistServingInfo.servingInfoId!,
+                foodIntakeSize: fistServingInfo.servingSize.toDouble(),
+                userId: CacheUser.userId,
+                gmtCreate: getCurrentDateTime(),
+              ),
+            ]);
 
             if (!mounted) return;
             if (rst.isNotEmpty) {

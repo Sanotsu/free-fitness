@@ -34,8 +34,9 @@ class _FoodServingInfoModifyState extends State<FoodServingInfoModify> {
       // 如果有传表单的初始对象值，就显示该值
       if (widget.currentServingInfo != null) {
         setState(() {
-          _servingInfoformKey.currentState
-              ?.patchValue(widget.currentServingInfo!);
+          _servingInfoformKey.currentState?.patchValue(
+            widget.currentServingInfo!,
+          );
         });
       }
     });

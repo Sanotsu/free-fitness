@@ -33,7 +33,9 @@ class _FreeFitnessAppState extends State<FreeFitnessApp> {
         splitScreenMode: true,
         builder: (_, widget) {
           return MaterialApp(
-            debugShowCheckedModeBanner: false, // 关闭 Debug 标识
+            // 显示右上角 Debug 标识：仅 debug 构建可见，用于与正式签名包肉眼区分
+            // （2026-08-27 曾因 debug 包装作正式版残留手机导致覆盖安装失败，故恢复此标识）
+            debugShowCheckedModeBanner: true,
             title: 'free_fitness',
             onGenerateTitle: (context) {
               return CusAL.of(context).appTitle;

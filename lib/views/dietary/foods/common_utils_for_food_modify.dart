@@ -25,7 +25,9 @@ import '../../../models/dietary_state.dart';
 
 /// 构建食物的单份营养素使用formbuilder的表单栏位
 Column buildServingModifyFormColumn(
-    BuildContext context, CusLabel servingType) {
+  BuildContext context,
+  CusLabel servingType,
+) {
   return Column(
     children: [
       if (servingType.value == "metric")
@@ -88,25 +90,25 @@ Column buildServingModifyFormColumn(
         "energy",
         "*${CusAL.of(context).mainNutrients('0')}",
         suffix: CusAL.of(context).unitLabels('3'),
-        errorText: CusAL.of(context).requiredErrorText(
-          CusAL.of(context).mainNutrients('0'),
-        ),
+        errorText: CusAL.of(
+          context,
+        ).requiredErrorText(CusAL.of(context).mainNutrients('0')),
       ),
       _cusNumberTextField(
         context,
         "protein",
         "*${CusAL.of(context).mainNutrients('2')}",
-        errorText: CusAL.of(context).requiredErrorText(
-          CusAL.of(context).mainNutrients('2'),
-        ),
+        errorText: CusAL.of(
+          context,
+        ).requiredErrorText(CusAL.of(context).mainNutrients('2')),
       ),
       _cusNumberTextField(
         context,
         "total_fat",
         "*${CusAL.of(context).mainNutrients('3')}",
-        errorText: CusAL.of(context).requiredErrorText(
-          CusAL.of(context).mainNutrients('2'),
-        ),
+        errorText: CusAL.of(
+          context,
+        ).requiredErrorText(CusAL.of(context).mainNutrients('2')),
       ),
       _cusSubTextFieldRow(
         context,
@@ -132,9 +134,9 @@ Column buildServingModifyFormColumn(
         context,
         "total_carbohydrate",
         "*${CusAL.of(context).mainNutrients('4')}",
-        errorText: CusAL.of(context).requiredErrorText(
-          CusAL.of(context).mainNutrients('4'),
-        ),
+        errorText: CusAL.of(
+          context,
+        ).requiredErrorText(CusAL.of(context).mainNutrients('4')),
       ),
       _cusSubTextFieldRow(
         context,
@@ -151,9 +153,9 @@ Column buildServingModifyFormColumn(
         "sodium",
         "*${CusAL.of(context).microNutrients('0')}",
         suffix: CusAL.of(context).unitLabels('1'),
-        errorText: CusAL.of(context).requiredErrorText(
-          CusAL.of(context).microNutrients('0'),
-        ),
+        errorText: CusAL.of(
+          context,
+        ).requiredErrorText(CusAL.of(context).microNutrients('0')),
       ),
       _cusNumberTextField(
         context,
@@ -180,11 +182,13 @@ Flexible _buildUnitDropdown(String name) {
         name: name,
         initialValue: "g",
         items: ["ml", "g"]
-            .map((unit) => DropdownMenuItem(
-                  alignment: AlignmentDirectional.center,
-                  value: unit,
-                  child: Text(unit),
-                ))
+            .map(
+              (unit) => DropdownMenuItem(
+                alignment: AlignmentDirectional.center,
+                value: unit,
+                child: Text(unit),
+              ),
+            )
             .toList(),
         decoration: const InputDecoration(
           // 设置透明底色
@@ -233,10 +237,7 @@ Row _cusSubTextFieldRow(BuildContext context, String name, String labelText) {
   return Row(
     children: [
       const Expanded(flex: 1, child: SizedBox()),
-      Expanded(
-        flex: 4,
-        child: _cusNumberTextField(context, name, labelText),
-      ),
+      Expanded(flex: 4, child: _cusNumberTextField(context, name, labelText)),
     ],
   );
 }
@@ -297,12 +298,10 @@ List<Widget> buildFoodModifyFormColumns(
               Text(CusAL.of(context).imageUploadLabel),
             ],
           ),
-        )
+        ),
       ],
-      customTypeViewerBuilder: (children) => Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: children,
-      ),
+      customTypeViewerBuilder: (children) =>
+          Row(mainAxisAlignment: MainAxisAlignment.end, children: children),
       onFileLoading: (val) {
         debugPrint(val.toString());
       },
@@ -336,19 +335,21 @@ List<ServingInfo> parseServingInfo(
       'dietaryFiber',
       'sodium',
       'potassium',
-      'cholesterol'
+      'cholesterol',
     ];
 
     // 如果用户有输入值的栏位才计算相关转换单位内容，为null的就直接保存null
-    final props = Map.fromEntries(propNames.map((key) {
-      final propName = getPropName(key);
+    final props = Map.fromEntries(
+      propNames.map((key) {
+        final propName = getPropName(key);
 
-      final val = servingInfo[propName];
-      return MapEntry(
-        propName,
-        val == null ? null : _calculatePercentage(val, multiplier),
-      );
-    }));
+        final val = servingInfo[propName];
+        return MapEntry(
+          propName,
+          val == null ? null : _calculatePercentage(val, multiplier),
+        );
+      }),
+    );
 
     return ServingInfo(
       // 有传食物编号则赋值；没有就随意给个值，存入数据库时会修改

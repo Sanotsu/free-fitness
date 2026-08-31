@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -36,14 +34,9 @@ MaterialColor buildMaterialColor(Color color) {
 }
 
 // 生成随机颜色
-Color genRandomColor() => Color((math.Random().nextDouble() * 0xFFFFFF).toInt())
-    .withValues(alpha: 1.0);
-
-// 随机icon（可能没效果）
-final List<int> points = <int>[0xe0b0, 0xe0b1, 0xe0b2, 0xe0b3, 0xe0b4];
-final Random r = Random();
-IconData genRandomIcon() =>
-    IconData(r.nextInt(points.length), fontFamily: 'MaterialIcons');
+Color genRandomColor() => Color(
+  (math.Random().nextDouble() * 0xFFFFFF).toInt(),
+).withValues(alpha: 1.0);
 
 // 指定卡路里转化为千焦数值
 String caloryToKjStr(int calory) =>
@@ -52,9 +45,7 @@ String caloryToKjStr(int calory) =>
 // 绘制转圈圈
 Widget buildLoader(bool isLoading) {
   if (isLoading) {
-    return const Center(
-      child: CircularProgressIndicator(),
-    );
+    return const Center(child: CircularProgressIndicator());
   } else {
     return Container();
   }
@@ -68,8 +59,9 @@ List<DropdownMenuItem<Object>> genDropdownMenuItems(
   List<CusLabel> options, {
   double? textSize,
 }) {
-// 2023-12-30 为了英文的时候输入框显示完整，字体小点(13)，中午就16
-  var fontSize = textSize ??
+  // 2023-12-30 为了英文的时候输入框显示完整，字体小点(13)，中午就16
+  var fontSize =
+      textSize ??
       (box.read('language') == 'en'
           ? CusFontSizes.pageSubContent
           : CusFontSizes.pageSubTitle);
@@ -92,19 +84,21 @@ List<DropdownMenuItem<Object>> genDropdownMenuItems(
 /// form builder 库中文本栏位和下拉选择框组件的二次封装
 ///
 // 构建表单的文本输入框
-Widget cusFormBuilerTextField(String name,
-    {String? initialValue,
-    double? valueFontSize,
-    int? maxLines,
-    String? hintText, // 可不传提示语
-    TextStyle? hintStyle,
-    String? labelText, // 可不传栏位标签，在输入框前面有就行
-    String? Function(Object?)? validator,
-    bool? isOutline = false, // 输入框是否有线条
-    bool isReadOnly = false, // 输入框是否有线条
-    TextInputType? keyboardType,
-    void Function(String?)? onChanged,
-    List<TextInputFormatter>? inputFormatters}) {
+Widget cusFormBuilerTextField(
+  String name, {
+  String? initialValue,
+  double? valueFontSize,
+  int? maxLines,
+  String? hintText, // 可不传提示语
+  TextStyle? hintStyle,
+  String? labelText, // 可不传栏位标签，在输入框前面有就行
+  String? Function(Object?)? validator,
+  bool? isOutline = false, // 输入框是否有线条
+  bool isReadOnly = false, // 输入框是否有线条
+  TextInputType? keyboardType,
+  void Function(String?)? onChanged,
+  List<TextInputFormatter>? inputFormatters,
+}) {
   return Padding(
     padding: EdgeInsets.symmetric(horizontal: 10.sp),
     child: FormBuilderTextField(
@@ -117,7 +111,8 @@ Widget cusFormBuilerTextField(String name,
       // 2023-12-21 enableSuggestions 设为 true后键盘类型为text就正常了。
       // 注意：如果有最大行超过1的话，默认启用多行的键盘类型
       enableSuggestions: true,
-      keyboardType: keyboardType ??
+      keyboardType:
+          keyboardType ??
           ((maxLines != null && maxLines > 1)
               ? TextInputType.multiline
               : TextInputType.text),
@@ -193,12 +188,10 @@ InputDecoration _buildInputDecoration(
     hintStyle: hintStyle,
     contentPadding: contentPadding,
     border: isOutline != null && isOutline
-        ? OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          )
+        ? OutlineInputBorder(borderRadius: BorderRadius.circular(10.0))
         : isReadOnly
-            ? InputBorder.none
-            : null,
+        ? InputBorder.none
+        : null,
     // 设置透明底色
     filled: true,
     fillColor: Colors.transparent,
@@ -225,11 +218,7 @@ void commonExceptionDialog(BuildContext context, String title, String message) {
   );
 }
 
-Chip buildSmallChip(
-  String labelText, {
-  Color? bgColor,
-  double? labelTextSize,
-}) {
+Chip buildSmallChip(String labelText, {Color? bgColor, double? labelTextSize}) {
   return Chip(
     label: Text(labelText),
     backgroundColor: bgColor,
@@ -251,14 +240,9 @@ RawMaterialButton buildSmallButtonTag(
     onPressed: () {},
     constraints: const BoxConstraints(),
     padding: const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10.0),
-    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
     fillColor: bgColor ?? Colors.grey[300],
-    child: Text(
-      labelText,
-      style: TextStyle(fontSize: labelTextSize ?? 12.sp),
-    ),
+    child: Text(labelText, style: TextStyle(fontSize: labelTextSize ?? 12.sp)),
   );
 }
 
@@ -271,7 +255,8 @@ SizedBox buildTinyButtonTag(
 }) {
   return SizedBox(
     // 传入大于12的字体，修正为12；不传则默认12
-    height: ((labelTextSize != null && labelTextSize > 10.sp)
+    height:
+        ((labelTextSize != null && labelTextSize > 10.sp)
             ? 10.sp
             : labelTextSize ?? 10.sp) +
         10.sp,
@@ -279,9 +264,7 @@ SizedBox buildTinyButtonTag(
       onPressed: () {},
       constraints: const BoxConstraints(),
       padding: EdgeInsets.fromLTRB(4.sp, 2.sp, 4.sp, 2.sp),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.sp),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.sp)),
       fillColor: bgColor ?? Colors.grey[300],
       child: Text(
         labelText,
@@ -429,10 +412,7 @@ RichText buildRichTextItem(
       children: [
         TextSpan(
           text: text,
-          style: TextStyle(
-            fontSize: CusFontSizes.itemContent,
-            color: color,
-          ),
+          style: TextStyle(fontSize: CusFontSizes.itemContent, color: color),
         ),
       ],
     ),

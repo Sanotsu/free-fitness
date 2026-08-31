@@ -6,7 +6,8 @@ class DiaryDdl {
 
   static const tableNameOfDiary = 'ff_diary';
 
-  static const String ddlForDiary = """
+  static const String ddlForDiary =
+      """
     CREATE TABLE IF NOT EXISTS $tableNameOfDiary (
       diary_id      INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT,
       date          TEXT      NOT NULL,

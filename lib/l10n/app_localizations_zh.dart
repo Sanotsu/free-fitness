@@ -130,7 +130,7 @@ class AppLocalizationsZh extends AppLocalizations {
     String _temp0 = intl.Intl.selectLogic(num, {
       '0': '备份恢复',
       '1': '全量备份',
-      '2': '覆写恢复',
+      '2': '合并恢复',
       'other': '其他',
     });
     return '$_temp0';
@@ -145,7 +145,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get resSuccessNote => '原有数据已删除，备份数据已恢复。';
+  String get resSuccessNote => '备份数据已合并恢复。';
 
   @override
   String get restIntervals => '跟练动作间隔休息时间(秒)';
@@ -403,6 +403,23 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get noTtsEngine => '无可用TTS引擎';
+
+  @override
+  String get noTtsEngineDesc => '跟练不受影响，只是过程中没有语音提示';
+
+  @override
+  String ttsEngineInfo(String engineName) {
+    return '将使用TTS引擎：$engineName';
+  }
+
+  @override
+  String get selectTtsEngine => '选择TTS引擎';
+
+  @override
+  String get multipleTtsEnginesFound => '检测到多个TTS引擎，请选择一个：';
+
+  @override
+  String get ttsEngineCheckFail => 'TTS引擎检查失败，语音功能可能不可用';
 
   @override
   String followTtsLabel(String num) {
@@ -1092,4 +1109,476 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get confirmLoadEmbeddedFood =>
       '是否加载内置食物成分？同名《中国食物成分标准》“食物代号”或者“品牌+产品”的食品会被覆盖';
+
+  @override
+  String get tipsTitle => '温馨提示';
+
+  @override
+  String guideStepLabel(int num, Object name) {
+    return '第 $num/4 步 · $name';
+  }
+
+  @override
+  String get guideStepIntro => '功能介绍';
+
+  @override
+  String get guideStepStorage => '存储权限';
+
+  @override
+  String get guideStepData => '内置数据';
+
+  @override
+  String get guideStepProfile => '基本信息';
+
+  @override
+  String get guideIntroTrainingTitle => '训练运动';
+
+  @override
+  String get guideIntroTrainingDesc => '基础动作库与周期计划，跟练计时、负重组歇全记录';
+
+  @override
+  String get guideIntroDietaryTitle => '饮食记录';
+
+  @override
+  String get guideIntroDietaryDesc => '食物成分查询、份量换算、餐次照片与每日摄入统计';
+
+  @override
+  String get guideIntroDiaryTitle => '手记日记';
+
+  @override
+  String get guideIntroDiaryDesc => '支持富文本手记随手记，任何内容随时记录随时查看';
+
+  @override
+  String get guideIntroAiTitle => '智能助手';
+
+  @override
+  String get guideIntroAiDesc => '接入云平台大模型 API Key，饮食/训练智能分析(可选)';
+
+  @override
+  String get guideStorageTitle => '为什么需要存储权限？';
+
+  @override
+  String get guideStorageReason1 => '数据库等运行数据保存在应用专属目录，卸载即清除，不污染公共空间';
+
+  @override
+  String get guideStorageReason2 => '备份与恢复：生成/读取完整 zip 备份文件，用于换机和数据安全';
+
+  @override
+  String get guideStorageReason3 => '图片持久化：手记图片、AI 分析的餐食照片会复制保存，历史可回看';
+
+  @override
+  String get guideStorageGranted => '✓ 已授权';
+
+  @override
+  String get guideStorageSkippable => '也可以先跳过，之后相关功能会再次提示';
+
+  @override
+  String get guideDataTitle => '是否加载内置基础数据？';
+
+  @override
+  String get guideDataHint => '(可多选，稍加数据量较大，建议首次全部加载)';
+
+  @override
+  String get guideDataExerciseTitle => '内置动作库';
+
+  @override
+  String get guideDataExerciseDesc => '来源自 free-exercise-db，常见公开领域训练动作';
+
+  @override
+  String get guideDataFoodTitle => '食物成分表';
+
+  @override
+  String get guideDataFoodDesc => '《中国食物成分表标准版(第 6 版)》营养成分数据';
+
+  @override
+  String get guideDataManualNote =>
+      '跳过后也不用担心：运动页「基础动作」和饮食页「食物成分」页面右上角的闪电图标，随时可手动导入或重新导入。';
+
+  @override
+  String get guideBtnNext => '下一步';
+
+  @override
+  String get guideBtnSkipStep => '跳过此步';
+
+  @override
+  String get guideBtnGrant => '授权并继续';
+
+  @override
+  String get guideBtnGranted => '已授权，继续';
+
+  @override
+  String get guideBtnStartLoad => '开始加载';
+
+  @override
+  String get guideBtnNoLoad => '不加载，继续';
+
+  @override
+  String get restoreSelectTitle => '选择要恢复的数据';
+
+  @override
+  String get restoreModUser => '用户目标';
+
+  @override
+  String get restoreModUserDesc => '基本资料、摄入目标、体重趋势';
+
+  @override
+  String get restoreModDietary => '饮食记录';
+
+  @override
+  String get restoreModDietaryDesc => '食物成分、份量、每日摄入、餐食照片';
+
+  @override
+  String get restoreModDiary => '手记日记';
+
+  @override
+  String get restoreModDiaryDesc => '富文本手记与体重曲线关联数据';
+
+  @override
+  String get restoreModTraining => '训练数据';
+
+  @override
+  String get restoreModTrainingDesc =>
+      '动作、训练做组、周期计划、跟练日志\n内置基础动作在本机已存在时保持现状不被覆盖';
+
+  @override
+  String get restoreModAi => '智能助手';
+
+  @override
+  String get restoreModAiDesc => '会话、自定义角色、大模型配置(含密钥)、对话图片';
+
+  @override
+  String get restoreMergeNote => '恢复以合并方式并入本机数据(自动去重)；执行前会先自动全量备份。';
+
+  @override
+  String get restoreNoData => '该备份中没有可恢复的数据';
+
+  @override
+  String get restorePhaseBackup => '正在自动全量备份当前数据';
+
+  @override
+  String get restorePhaseBackupNote => '完成后即开始合并恢复，可用于回退';
+
+  @override
+  String get restorePhaseLlm => '正在合并大模型配置';
+
+  @override
+  String get restorePhaseImages => '正在合并对话图片';
+
+  @override
+  String restoreProgressDetail(int current, int total) {
+    return '已合并 $current / $total 条';
+  }
+
+  @override
+  String restoreResultNote(int inserted, int skipped) {
+    return '恢复完成(合并)：新增 $inserted 条，已存在保留 $skipped 条';
+  }
+
+  @override
+  String restoreBuiltinNote(int count) {
+    return '(其中 $count 条为内置基础数据，保持本机现状)';
+  }
+
+  @override
+  String get restoreTblUser => '用户资料';
+
+  @override
+  String get restoreTblIntakeGoal => '摄入目标';
+
+  @override
+  String get restoreTblWeightTrend => '体重趋势';
+
+  @override
+  String get restoreTblFood => '食物成分';
+
+  @override
+  String get restoreTblServing => '食物份量';
+
+  @override
+  String get restoreTblDailyIntake => '每日摄入';
+
+  @override
+  String get restoreTblMealPhoto => '餐食照片';
+
+  @override
+  String get restoreTblDiary => '手记日记';
+
+  @override
+  String get restoreTblExercise => '基础动作';
+
+  @override
+  String get restoreTblGroup => '训练做组';
+
+  @override
+  String get restoreTblAction => '组内动作';
+
+  @override
+  String get restoreTblPlan => '周期计划';
+
+  @override
+  String get restoreTblPlanDay => '计划日程';
+
+  @override
+  String get restoreTblTrainLog => '跟练日志';
+
+  @override
+  String get restoreTblAiConv => 'AI 会话';
+
+  @override
+  String get restoreTblAiMsg => 'AI 消息';
+
+  @override
+  String get restoreTblAiRole => '自定义角色';
+
+  @override
+  String get llmConfigTitle => 'AI 大模型配置';
+
+  @override
+  String get llmConfigStatusNone => '未配置';
+
+  @override
+  String llmConfigStatusCount(int count) {
+    return '$count 个配置';
+  }
+
+  @override
+  String get llmConfigEmpty => '暂无配置。\n点右下角 + 新增 OpenAI 兼容大模型配置。';
+
+  @override
+  String get llmConfigAddTooltip => '新增配置';
+
+  @override
+  String llmConfigDeleteNote(Object name) {
+    return '确定删除配置\"$name\"？历史会话会保留(仅快照展示)。';
+  }
+
+  @override
+  String get llmConfigPageAdd => '新增大模型配置';
+
+  @override
+  String get llmConfigPageEdit => '编辑大模型配置';
+
+  @override
+  String get llmConfigSaved => '已保存';
+
+  @override
+  String get llmConfigFixForm => '请先修正表单错误';
+
+  @override
+  String get llmConfigFieldName => '配置名称';
+
+  @override
+  String get llmConfigFieldNameHint => '如：硅基流动-Qwen';
+
+  @override
+  String get llmConfigFieldUrl => 'API 地址';
+
+  @override
+  String get llmConfigFieldKey => 'API Key';
+
+  @override
+  String get llmConfigFieldModel => '模型';
+
+  @override
+  String get llmConfigFieldModelHint => '如 Qwen/Qwen2.5-VL-32B-Instruct';
+
+  @override
+  String get llmConfigFieldVision => '支持视觉理解';
+
+  @override
+  String get llmConfigFieldVisionNote =>
+      '主流模型多为多模态，默认开启；纯文本模型(如 deepseek-chat)请关闭。';
+
+  @override
+  String get llmConfigFieldExtra => '高级参数(JSON，可选)';
+
+  @override
+  String get llmConfigFieldExtraNote =>
+      '浅合并进请求体；model/messages/stream 为程序控制字段会被忽略。';
+
+  @override
+  String get llmConfigRequired => '必填';
+
+  @override
+  String get llmConfigInvalidUrl => 'URL 格式不正确';
+
+  @override
+  String get llmConfigInvalidJson => '必须是合法的 JSON 对象';
+
+  @override
+  String get llmConfigQuickFill => '常见平台快速填充：';
+
+  @override
+  String get llmConfigTestConnection => '测试连接';
+
+  @override
+  String get llmConfigTestVision => '测试视觉';
+
+  @override
+  String get llmConfigTestResult => '测试结果';
+
+  @override
+  String get llmConfigEmptyReply => '(空响应)';
+
+  @override
+  String get llmConfigVisionTest => '视觉测试';
+
+  @override
+  String llmConfigVisionOk(Object reply) {
+    return '模型似乎支持图片输入，建议开启\"支持视觉理解\"。\n\n回复：$reply';
+  }
+
+  @override
+  String llmConfigVisionFail(Object detail) {
+    return '模型可能不支持图片输入，建议关闭\"支持视觉理解\"。\n\n$detail';
+  }
+
+  @override
+  String get llmConfigPingText => '你好，请只回复\"好的\"。';
+
+  @override
+  String get llmConfigVisionPingText => '这张图片是什么颜色？';
+
+  @override
+  String get llmGateNoKey => '未配置大模型 API Key。\n请先在 我的→更多设置→AI 大模型配置 中完成配置。';
+
+  @override
+  String get llmGateGoConfig => '去配置';
+
+  @override
+  String get llmGateNoVision => '没有支持视觉理解的模型配置，无法进行图片分析。\n请先在配置中开启\"支持视觉理解\"。';
+
+  @override
+  String get aiChatNoConfig => '未配置大模型，请先完成配置';
+
+  @override
+  String get aiChatSwitchModel => '切换模型';
+
+  @override
+  String get aiChatVisionTag => '视觉';
+
+  @override
+  String get aiChatModelNoVision => '当前模型不支持图片，已移除待发送图片';
+
+  @override
+  String get aiChatImageLimit => '最多4张图片';
+
+  @override
+  String get aiChatRename => '重命名';
+
+  @override
+  String get aiChatClearNote => '确定清空该会话的全部消息？';
+
+  @override
+  String get aiChatDeleteNote => '确定删除该会话？消息与图片将一并删除。';
+
+  @override
+  String get aiChatDeleteShort => '确定删除该会话？';
+
+  @override
+  String get aiChatClearMessages => '清空消息';
+
+  @override
+  String get aiChatDeleteConversation => '删除会话';
+
+  @override
+  String get aiChatNoConfigName => '未配置';
+
+  @override
+  String get aiChatInputHint => '随便问点什么...';
+
+  @override
+  String aiChatAskWith(Object name) {
+    return '和$name聊聊：';
+  }
+
+  @override
+  String get aiChatRegenerate => '重新生成';
+
+  @override
+  String get aiChatCopied => '已复制';
+
+  @override
+  String aiChatTokenUsage(int inputTokens, int outputTokens, int totalTokens) {
+    return 'tokens 输入:$inputTokens 输出:$outputTokens 总计:$totalTokens';
+  }
+
+  @override
+  String get aiChatAddImage => '添加图片(最多4张)';
+
+  @override
+  String get aiChatTitle => 'AI 助手';
+
+  @override
+  String get aiChatNewChat => '新对话';
+
+  @override
+  String get aiChatManageRoles => '管理角色';
+
+  @override
+  String get aiChatHistory => '对话历史';
+
+  @override
+  String get aiChatNoHistory => '暂无对话记录';
+
+  @override
+  String get aiChatDataUpdated => '（数据已更新，请基于以下最新数据分析。）';
+
+  @override
+  String get aiChatException => '异常提示';
+
+  @override
+  String get rolesTitle => '管理角色';
+
+  @override
+  String get rolesBuiltIn => '内置角色(不可修改)';
+
+  @override
+  String get rolesCustom => '自定义角色';
+
+  @override
+  String get rolesEmptyCustom => '暂无自定义角色，点右下角 + 新增';
+
+  @override
+  String get rolesAddTooltip => '新增角色';
+
+  @override
+  String rolesDeleteNote(Object name) {
+    return '确定删除角色\"$name\"？已有会话的历史记录会保留。';
+  }
+
+  @override
+  String get rolePageAdd => '新增角色';
+
+  @override
+  String get rolePageEdit => '编辑角色';
+
+  @override
+  String get rolePageDetail => '角色详情';
+
+  @override
+  String get roleReadOnlyNote => '系统内置角色仅可查看，不支持修改或删除';
+
+  @override
+  String get roleNameLabel => '角色名称';
+
+  @override
+  String get roleNameHint => '如：跑步教练';
+
+  @override
+  String get rolePromptLabel => '角色设定(System Prompt)';
+
+  @override
+  String get rolePromptHint => '描述这个角色的专业背景、回答风格、注意事项等...';
+
+  @override
+  String get rolePromptNote => '该设定会作为 system 消息在与此角色的对话中生效。';
+
+  @override
+  String get roleInvalid => '名称和设定不能为空';
+
+  @override
+  String estMinutes(int minutes) {
+    return '约$minutes分钟';
+  }
 }

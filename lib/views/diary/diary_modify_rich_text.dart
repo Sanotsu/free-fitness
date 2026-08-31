@@ -297,8 +297,8 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                   text: (initDiaryId == null)
                       ? CusAL.of(context).addLabel(CusAL.of(context).diary)
                       : isEditing
-                          ? CusAL.of(context).eidtLabel(CusAL.of(context).diary)
-                          : CusAL.of(context).diary,
+                      ? CusAL.of(context).eidtLabel(CusAL.of(context).diary)
+                      : CusAL.of(context).diary,
                   style: TextStyle(fontSize: CusFontSizes.pageTitle),
                 ),
                 if (lastSavedTime != null)
@@ -379,10 +379,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
               child: Padding(
                 padding: EdgeInsets.fromLTRB(5.sp, 5.sp, 10.sp, 5.sp),
                 child: Column(
-                  children: [
-                    _buildTitleAndTags(),
-                    buildRichTextArea(),
-                  ],
+                  children: [_buildTitleAndTags(), buildRichTextArea()],
                 ),
               ),
             ),
@@ -410,9 +407,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ...buildTagsArea(),
-              ],
+              children: [...buildTagsArea()],
             ),
           ),
         ],
@@ -562,7 +557,6 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                   },
                   children: <Widget>[
                     // 如果工具栏简单点就这样
-
                     SizedBox(
                       width: 1.sw,
                       child: QuillSimpleToolbar(
@@ -574,8 +568,12 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                           showLineHeightButton: true,
                           showAlignmentButtons: true,
                           showDirection: true,
+                          // flutter_quill 11.x 中这三个按钮仍是实验性 API，无稳定替代，暂时忽略告警
+                          // ignore: experimental_member_use
                           showClipboardCut: true,
+                          // ignore: experimental_member_use
                           showClipboardCopy: true,
+                          // ignore: experimental_member_use
                           showClipboardPaste: true,
                         ),
                       ),
@@ -613,7 +611,7 @@ class _DiaryModifyRichTextState extends State<DiaryModifyRichText> {
                   ),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

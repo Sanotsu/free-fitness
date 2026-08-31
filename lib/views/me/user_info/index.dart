@@ -69,7 +69,7 @@ class _UserInfoState extends State<UserInfo> {
               });
             },
             icon: const Icon(Icons.edit),
-          )
+          ),
         ],
       ),
       body: isLoading
@@ -85,8 +85,9 @@ class _UserInfoState extends State<UserInfo> {
                       CircleAvatar(
                         maxRadius: 60.sp,
                         backgroundColor: Colors.transparent,
-                        backgroundImage:
-                            const AssetImage(defaultAvatarImageUrl),
+                        backgroundImage: const AssetImage(
+                          defaultAvatarImageUrl,
+                        ),
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
@@ -167,10 +168,7 @@ class _UserInfoState extends State<UserInfo> {
 
   Widget _buildListItem(String title, String value) {
     return Expanded(
-      child: ListTile(
-        title: Text(title),
-        subtitle: Text(value),
-      ),
+      child: ListTile(title: Text(title), subtitle: Text(value)),
     );
   }
 }

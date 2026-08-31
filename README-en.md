@@ -9,28 +9,27 @@
 
 Free-Fitness is a comprehensive fitness and nutrition management application developed with Flutter, integrating features for exercise training, dietary recording, and journaling.
 
-This application serves as an auxiliary tool for individuals with requirements for fitness training, weight management (loss/muscle gain), dietary tracking, and quick note-taking. All data is stored locally. ~~Internet connection is not required, and by default, no built-in data is included, offering flexible customization.~~
+This application serves as an auxiliary tool for individuals with requirements for fitness training, weight management (loss/muscle gain), dietary tracking, and quick note-taking. All data is stored locally.
 
 - 2025-08-01: For immediate usability, versions `0.2.2-beta.1` and subsequent releases may include built-in data:
   - "Exercises": Sourced from the GitHub repository [yuhonas/free-exercise-db](https://github.com/yuhonas/free-exercise-db), utilizing exercise data and images from the forked repository
   - "Food Composition": Nutritional data from "China Food Composition Table Standard Edition (6th Edition)" [Sanotsu/china-food-composition-data](https://github.com/Sanotsu/china-food-composition-data)
   - **Note**: Built-in data initialization only occurs during first-time installation. Upgrading or restoring the app without uninstallation will not trigger data initialization
     - Users can manually load built-in data via the "Load Built-in Data" option in the top-right corner of the "Exercises" and "Food Composition" homepages, which will replace existing data with identical names/codes
+    - 2026-08-31: **Updated the built-in food composition data to the latest version**
 
 ## Updates
 
+- 2026-08-31 `0.2.3-beta.1`
+  - Brand-new "AI Assistant" module: user-configured LLM API, 5 built-in specialized roles + custom role management, and unified AI analysis entries for diet journal / meal photos / training groups / plans
+  - Backup restore supports module-based (user/diet/journal/training/AI) selective merge restore with progress display
+  - Updated the built-in food composition data to the latest version
 - 2025-08-01 `0.2.2-beta.1`
   - Incorporated built-in "Exercises" and "Food Composition" data for immediate use
 - 2024-12-03 `0.2.1-beta.1`
   - Integrated 01.AI's large language model API for AI-powered analysis of dietary records and meal photos, providing interactive recommendations
 
 For additional changes, refer to [CHANGELOG](CHANGELOG.md)
-
-_2025-02-11_
-
-If interested in the online AI model platform [SiliconFlow](https://siliconflow.cn/en/models), we would appreciate your registration using our referral code:
-
-[https://cloud.siliconflow.cn/i/tRIcST68](https://cloud.siliconflow.cn/i/tRIcST68)
 
 ## Feature Overview
 
@@ -80,7 +79,8 @@ The plan module functions similarly to training - after creating basic plan info
 
 After selecting a specific training session or training day from a plan, users can begin guided workouts with simple TTS voice prompts.
 
-- Note: Requires a TTS engine installed on the device
+- Note: A TTS engine is required for voice prompts; devices without a TTS engine can still follow along normally, just without voice (a one-time notice appears when entering the guided workout page)
+- Training group lists, plan lists, and each training day within a plan display an "estimated duration", calculated in real time from exercise configurations and the rest-interval setting, consistent with the actual guided workout execution
 
 Countdown duration corresponds to configured exercise times: timed exercises use set durations directly, while counted exercises calculate duration as `repetitions × standard movement completion time`.
 
@@ -131,8 +131,8 @@ Photos can be uploaded for each meal to document consumption, viewable later in 
 
 **For days with dietary records, tap the chat icon (bottom-right) for AI analysis**:
 
-- Transmits daily food/nutrient intake data to AI for analysis, enabling simple multi-turn dialogue
-- Uses 01.AI's `yi-lightning` model - requires code modification to change platforms/models/prompts
+- Transmits daily food/nutrient intake data to the AI Assistant for analysis with the Dietitian role, supporting simple multi-turn dialogue
+- When the day's intake data is unchanged, re-entering only shows the previous analysis without calling the LLM again
 
 ![Basic Diet Recording Functions](_screenshots/9饮食记录基本功能.jpg)
 
@@ -140,12 +140,10 @@ Photos can be uploaded for each meal to document consumption, viewable later in 
 
 Centralized browsing of saved meal images, with options to select gallery photos or take new pictures.
 
-AI analysis is also available from either the diet record photo page or meal gallery:
+AI image analysis is also available from either the diet record photo page or the meal gallery:
 
-- Image analysis uses 01.AI's `yi-vision-v2`
-- Currently processes only single images (uses first image if multiple exist)
-
-As this uses personal API credits, functionality may become unavailable when credits are exhausted. Modify code as needed.
+- Analyzed by the AI Assistant with the Dietitian role, supporting up to 4 images at once
+- Requires the model enabled in "LLM Configuration" to support vision (verifiable via "Test Vision" on the configuration page); unchanged photos of the same meal will not trigger repeated calls
 
 ![Meal Gallery Interface](_screenshots/10餐食相册页面.jpg)
 
@@ -165,13 +163,25 @@ The journal features a rich text editor for flexible information recording, incl
 
 ![Journal Interface](_screenshots/12手记页面.jpg)
 
-### User & Settings
+### AI Assistant Module
 
-Primarily handles user information management, weight records, daily intake goals, comprehensive backup/restore, language/theme switching, etc.
+New general-purpose AI assistant introduced in `0.2.3-beta.1`, accessible via the floating button on the home page; business entries (Diet Journal / Meal Photos / Training Groups / Periodic Plans) also jump in with context.
 
-Full backups export all database data to JSON files compressed into ZIP packages. Restorable files don't strictly require app-generated ZIPs - any properly formatted ZIP will work.
+- **Self-configured LLM API**: add any OpenAI-compatible platform's endpoint and API key under "User & Settings" - "More Settings" - "LLM Configuration"; multiple configurations can be saved and switched at any time. Each configuration independently selects the model, vision support, and advanced parameters, with "Test Connection" / "Test Vision" provided
+- **Role system**: 5 built-in roles — Assistant, Health Assistant, Dietitian, Fitness Coach, and Weight Advisor (each with its own setup and suggested questions); built-in roles are view-only, and custom roles can be added
+- **General chat**: streaming responses, multi-image upload (up to 4), conversation history management (switch/rename/clear/delete), and token usage display
+- **Business conversation reuse**: the same business object (same day's diet / same meal's photos / same training group / same plan) reuses one conversation; when the data is unchanged, only the previous analysis is shown, and a new analysis is appended automatically after changes
+- **Backup & restore**: LLM configurations and conversation images are included in the module-based backup/restore
 
-**Note: Before uninstalling or upgrading, perform a full backup. After reinstallation, restore first.**
+## User & Settings
+
+Primarily handles user information management, weight records, daily intake goals, backup/restore, language/theme switching, etc.
+
+Backups export all database data to JSON files compressed into ZIP packages. Restorable files don't strictly require app-generated ZIPs - any properly formatted ZIP will work.
+
+Since `0.2.3-beta.1`, restore supports **module-based (user/diet/journal/training/AI) selective merge restore** — restore only the parts you need; LLM configurations and conversation images are also included in backup/restore.
+
+**Note: Before uninstalling or upgrading, perform a full backup first; after reinstallation, perform a merge restore first.**
 
 English language and dark theme support isn't fully implemented - some discrepancies may exist.
 
@@ -186,6 +196,7 @@ English language and dark theme support isn't fully implemented - some discrepan
 ~~The app operates offline,~~ but requests storage access for PDF export and backup/restore functions. Denying permission only disables these features without affecting others.
 
 - 2025-08-01: Added AI analysis for diet records requires internet connectivity for API calls.
+- 2026-08-31: Since `0.2.3-beta.1`, the AI platform is user-configured (any OpenAI-compatible platform). Without AI configured, all features work normally; AI analysis entries will just guide you to the configuration page.
 
 ### Sensitive Information
 

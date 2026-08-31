@@ -46,10 +46,12 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
           // tooltipMargin: -100,
           getTooltipItem: (group, groupIndex, rod, rodIndex) {
             // 点击时展示主要营养素的含量，但需要先取到值
-            List<double> fromYList =
-                rod.rodStackItems.map((item) => item.fromY).toList();
-            List<double> toYList =
-                rod.rodStackItems.map((item) => item.toY).toList();
+            List<double> fromYList = rod.rodStackItems
+                .map((item) => item.fromY)
+                .toList();
+            List<double> toYList = rod.rodStackItems
+                .map((item) => item.toY)
+                .toList();
 
             String getNutrientString(String name, int index) {
               double nutrientAmount = toYList[index] - fromYList[index];
@@ -108,9 +110,7 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
           ),
         ),
         // 不显示内容也要设定，否则就是默认的样式
-        topTitles: const AxisTitles(
-          sideTitles: SideTitles(showTitles: false),
-        ),
+        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
         rightTitles: const AxisTitles(
           sideTitles: SideTitles(showTitles: false),
         ),
@@ -150,13 +150,13 @@ class WeekIntakeBarChartState extends State<WeekIntakeBarChart> {
 
   // 整体条状图数据
   List<BarChartGroupData> _showingGroups() => List.generate(7, (i) {
-        // 传入的一周摄入数据key是从1到7,但这里和绘制时需要0到6,所以取值时i+1即可。
-        if (widget.intakeData[i + 1] != null) {
-          return makeGroupData(i, widget.intakeData[i + 1]!);
-        } else {
-          return throw Error();
-        }
-      });
+    // 传入的一周摄入数据key是从1到7,但这里和绘制时需要0到6,所以取值时i+1即可。
+    if (widget.intakeData[i + 1] != null) {
+      return makeGroupData(i, widget.intakeData[i + 1]!);
+    } else {
+      return throw Error();
+    }
+  });
 
   // 单组条状图数据
   BarChartGroupData makeGroupData(
