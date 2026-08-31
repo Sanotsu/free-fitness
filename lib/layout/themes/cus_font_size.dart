@@ -67,7 +67,7 @@ class CusColors {
   // appbar的下拉框的背景色，深色/浅色主题下，背景都是灰色的话白色文字就看得见
   static Color dropdownColor = const Color.fromARGB(255, 124, 96, 96);
 
-// 手记模块心情、分类、标签、更多的小图标的背景色
+  // 手记模块心情、分类、标签、更多的小图标的背景色
   static Color moodTinyTagBg = Colors.red[300]!;
   static Color cateTinyTagBg = Colors.lightBlue;
   static Color tagTinyTagBg = Colors.lightGreen;

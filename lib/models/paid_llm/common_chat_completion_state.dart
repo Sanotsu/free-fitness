@@ -241,30 +241,6 @@ class CCReqBody {
 ///
 /// 对话模型的响应
 ///
-/*
-/// 零一万物的出参
-{
-  "id": "cmpl-c730301f",
-  "object": "chat.completion",
-  "created": 7825887,
-  "model": "yi-large",
-  "usage": {
-    "completion_tokens": 65,
-    "prompt_tokens": 15,
-    "total_tokens": 80
-  },
-  "choices": [
-    {
-      "index": 0,
-      "message": {
-        "role": "assistant",
-        "content": "Hello! My name is Yi, ……"
-      },
-      "finish_reason": "stop"
-    }
-  ]
-}
-*/
 CCRespBody ccRespBodyFromJson(String str) =>
     CCRespBody.fromJson(json.decode(str));
 

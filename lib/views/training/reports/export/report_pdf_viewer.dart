@@ -70,30 +70,26 @@ class _TrainedReportPdfViewerState extends State<TrainedReportPdfViewer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(CusAL.of(context).trainedReportExport),
-      ),
+      appBar: AppBar(title: Text(CusAL.of(context).trainedReportExport)),
       body: isLoading
           ? buildLoader(isLoading)
           : tdlList.isEmpty
-              ? Center(
-                  child: Text(CusAL.of(context).noRecordNote),
-                )
-              : PdfPreview(
-                  initialPageFormat: PdfPageFormat.a4,
-                  build: (context) => makeTrainedReportPdf(
-                    tdlList,
-                    // 在pdf页首会显示查询数据的日期
-                    widget.startDate.split(" ")[0],
-                    widget.endDate.split(" ")[0],
-                    lang: box.read('language'),
-                  ),
-                  pdfFileName: box.read('language') == 'en'
-                      // ? "TrainedRecords_${widget.startDate}~${widget.endDate}"
-                      // : "训练日志导出_${widget.startDate}~${widget.endDate}"),
-                      ? "TrainingLogExport_${DateTime.now().millisecondsSinceEpoch}"
-                      : "训练日志导出_${DateTime.now().millisecondsSinceEpoch}",
-                ),
+          ? Center(child: Text(CusAL.of(context).noRecordNote))
+          : PdfPreview(
+              initialPageFormat: PdfPageFormat.a4,
+              build: (context) => makeTrainedReportPdf(
+                tdlList,
+                // 在pdf页首会显示查询数据的日期
+                widget.startDate.split(" ")[0],
+                widget.endDate.split(" ")[0],
+                lang: box.read('language'),
+              ),
+              pdfFileName: box.read('language') == 'en'
+                  // ? "TrainedRecords_${widget.startDate}~${widget.endDate}"
+                  // : "训练日志导出_${widget.startDate}~${widget.endDate}"),
+                  ? "TrainingLogExport_${DateTime.now().millisecondsSinceEpoch}"
+                  : "训练日志导出_${DateTime.now().millisecondsSinceEpoch}",
+            ),
     );
   }
 }

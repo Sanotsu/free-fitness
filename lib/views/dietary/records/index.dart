@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/constants/constants.dart';
+import '../../../core/apis/prompts/diet_prompt_builder.dart';
 import '../../../core/storage/db_dietary_helper.dart';
 import '../../../core/storage/db_user_helper.dart';
 import '../../../core/utils/tool_widgets.dart';
@@ -11,9 +12,12 @@ import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
+import '../../../models/paid_llm/llm_config.dart';
+import '../../../services/llm_config_service.dart';
+import '../../../views/ai/ai_chat_screen.dart';
 import '../reports/index.dart';
+
 import 'add_intake_item/index.dart';
-import 'ai_suggestion/ai_suggestion_page.dart';
 import 'format_tools.dart';
 import 'report_calendar_summary.dart';
 import 'save_meal_photo.dart';
@@ -213,46 +217,8 @@ class _DietaryRecordsState extends State<DietaryRecords> {
   }
 
   /// 2024-07-08 可以使用大模型询问今日摄入的情况，并做出分析
-  /// 但需要比较好的规划提问的内容。
-  String buildSuggestionString() {
-    var str = box.read('language') == 'en'
-        ? """Please analyze my food intake today, provide effective healthy dietary recommendations, and arrange improved quantitative recipes.
-        \n\nThis is my main food intake for today:\n"""
-        : "请根据我今天的食物摄入做出分析，给出有效的健康饮食建议，安排改善后的量化食谱。\n\n这是我今天的主要食物摄入量:\n";
-
-    // 2024-07-08 想要分餐次，营养素也得分，然后食物的营养素成分表也得说明。目前这AI也不好用，就笼统一整天的好了
-    // Map<String, List<DailyFoodItemWithFoodServing>> itemsByMeal =
-    //     dfiwfsList.groupListsBy((l) => l.dailyFoodItem.mealCategory);
-
-    // // 分餐次的食物摄入
-    // itemsByMeal.forEach((meal, items) {
-    //   str += "- $meal:\n\n";
-    //   for (var e in items) {
-    //     str +=
-    //         "  - ${e.food.product} ${e.dailyFoodItem.foodIntakeSize} x ${e.servingInfo.servingUnit}; \n\n";
-    //   }
-    // });
-
-    for (var e in dfiwfsList) {
-      var temp = mealtimeList.firstWhere(
-        (m) => m.enLabel == e.dailyFoodItem.mealCategory,
-      );
-
-      str += """  - [${showCusLable(temp)}] ${e.food.product}
-               ${e.dailyFoodItem.foodIntakeSize} x ${e.servingInfo.servingUnit}\n""";
-    }
-
-    str += box.read('language') == 'en'
-        ? "\nThis is my main nutrient intake for today:\n"
-        : "\n这是我今天的主要营养素摄入量:\n";
-
-    // 全部营养素
-    for (var e in mainNutrientsChartData) {
-      str += "  - ${e.name} ${e.value.toStringAsFixed(2)} ${e.unit}\n";
-    }
-
-    return str;
-  }
+  /// 2026-08-27 prompt 构建已迁至 core/apis/prompts/diet_prompt_builder.dart
+  /// (入口统一收口到通用 AiChatScreen，营养师角色)
 
   @override
   Widget build(BuildContext context) {
@@ -390,7 +356,7 @@ class _DietaryRecordsState extends State<DietaryRecords> {
       floatingActionButton: dfiwfsList.isEmpty
           ? null
           : FloatingActionButton(
-              onPressed: () {
+              onPressed: () async {
                 if (dfiwfsList.isEmpty) {
                   commonExceptionDialog(
                     context,
@@ -398,10 +364,26 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                     "本日暂无食物摄入信息，无须AI助手给出分析建议。",
                   );
                 } else {
+                  // 2026-08-27 门禁校验(未配置引导去配置页)后进入通用 AI 聊天页
+                  LlmConfig? config = await ensureLlmConfigured(
+                    context,
+                    needVision: false,
+                  );
+                  if (config == null || !context.mounted) return;
+
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) =>
-                          OneChatScreen(intakeInfo: buildSuggestionString()),
+                      builder: (context) => AiChatScreen(
+                        roleKey: 'dietitian',
+                        // 同一天的摄入分析复用同一会话；数据指纹不同才重复调用
+                        bizType: 'diet_intake',
+                        bizKey: selectedDateStr,
+                        bizHash: buildDietIntakeDataHash(dfiwfsList),
+                        firstMessage: buildDietIntakePrompt(
+                          dfiwfsList,
+                          mainNutrientsChartData,
+                        ),
+                      ),
                     ),
                   );
                 }
@@ -646,8 +628,11 @@ class _DietaryRecordsState extends State<DietaryRecords> {
 
           /// 折叠tile展开灰色，展开后白色
           if (showExpansionTile)
-            Container(
-              decoration: BoxDecoration(
+            // 2026-08-28 修复debug断言：带背景色的Container(DecoratedBox)包住ExpansionTile
+            // 会挡住其内部ListTile的背景色和水波纹(画在最近Material祖先上，被中间层遮住)。
+            // 改用Material自带color+shape承载背景与圆角，ink效果画在自身上不再被挡。
+            Material(
+              shape: RoundedRectangleBorder(
                 // borderRadius: BorderRadius.circular(10.0), // 设置所有圆角的大小
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(0.sp), // 保持上左角为直角
@@ -655,9 +640,10 @@ class _DietaryRecordsState extends State<DietaryRecords> {
                   bottomLeft: Radius.circular(10.sp), // 设置下左角为圆角
                   bottomRight: Radius.circular(10.sp), // 设置下右角为圆角
                 ),
-                // 折叠栏设置展开前的背景色
-                color: Theme.of(context).focusColor,
               ),
+              // 折叠栏设置展开前的背景色
+              color: Theme.of(context).focusColor,
+              clipBehavior: Clip.antiAlias,
               child: ExpansionTile(
                 initiallyExpanded: isExpandedList[mealtime.enLabel]!,
                 // 如果是概要，展开的标题只显示餐次的食物数量；是详情，则展示该餐次各项食物的主要营养素之和

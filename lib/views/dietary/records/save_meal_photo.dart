@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:form_builder_file_picker/form_builder_file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/apis/prompts/meal_photo_prompt_builder.dart';
 import '../../../core/constants/constants.dart';
 import '../../../core/storage/db_dietary_helper.dart';
 import '../../../core/utils/image_preview_helper.dart';
@@ -14,7 +15,9 @@ import '../../../core/utils/tools.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
-import 'ai_suggestion/ai_suggestion_page.dart';
+import '../../../models/paid_llm/llm_config.dart';
+import '../../../services/llm_config_service.dart';
+import '../../../views/ai/ai_chat_screen.dart';
 
 class SaveMealPhotos extends StatefulWidget {
   // 2023-12-31 还需要传是为哪一天的餐次添加照片
@@ -378,7 +381,12 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           if (imagesUrls.isNotEmpty && !isEditing) {
-            handleImageAnalysis(context, imagesUrls);
+            // 同一(日期+餐次)的照片分析复用同一会话
+            handleImageAnalysis(
+              context,
+              imagesUrls,
+              bizKey: '${widget.date}:${widget.mealtime.enLabel}',
+            );
           } else {
             commonExceptionDialog(
               context,
@@ -397,9 +405,15 @@ class _SaveMealPhotosState extends State<SaveMealPhotos> {
 }
 
 /// 2024-07-12 这两个函数在 meal_photo_gallery 也会用到
+/// 2026-08-27 重构：支持最多4张图片；入口统一收口到通用 AiChatScreen(营养师角色)；
+/// 同一(日期+餐次)的照片分析复用同一会话，照片未变仅查看不重复调用
 // 提示即将用于AI分析的图片信息
-void handleImageAnalysis(BuildContext context, List<String> imagesUrls) {
-  if (imagesUrls.length > 1) {
+void handleImageAnalysis(
+  BuildContext context,
+  List<String> imagesUrls, {
+  String? bizKey,
+}) {
+  if (imagesUrls.length > 4) {
     showDialog(
       context: context,
       builder: (context) {
@@ -407,10 +421,10 @@ void handleImageAnalysis(BuildContext context, List<String> imagesUrls) {
           title: Text(box.read('language') == 'en' ? "Tips" : "温馨提示"),
           content: Text(
             box.read('language') == 'en'
-                ? """Currently, only a single image with a size no larger than 1024*1024 is supported for analysis.
-                \nIf there are more than one meal image, only the first image will be used for analysis.
+                ? """Currently, up to 4 images with a size no larger than 1024*1024 are supported for analysis.
+                \nIf there are more than 4 meal images, only the first 4 images will be used for analysis.
                 """
-                : "目前仅支持单张、且尺寸不大于1024*1024的图片进行分析。如果餐次图片大于1张，仅会使用第一张图片进行分析",
+                : "目前最多支持4张、且尺寸不大于1024*1024的图片进行分析。如果餐次图片大于4张，仅会使用前4张图片进行分析",
             style: TextStyle(fontSize: 15.sp),
           ),
           actions: [
@@ -425,28 +439,53 @@ void handleImageAnalysis(BuildContext context, List<String> imagesUrls) {
       },
     ).then((value) {
       if (!context.mounted) return;
-      navigateToOneChatScreen(context, imagesUrls.first);
+      navigateToAiChatScreen(context, imagesUrls, bizKey: bizKey);
     });
   } else {
-    navigateToOneChatScreen(context, imagesUrls.first);
+    navigateToAiChatScreen(context, imagesUrls, bizKey: bizKey);
   }
 }
 
-// 跳转到AI问答页面
-void navigateToOneChatScreen(BuildContext context, String imageUrl) {
+// 跳转到AI问答页面(门禁→营养师角色+餐食分析prompt+图片)
+Future<void> navigateToAiChatScreen(
+  BuildContext context,
+  List<String> imagesUrls, {
+  String? bizKey,
+}) async {
+  // 图片场景需要视觉模型配置
+  LlmConfig? config = await ensureLlmConfigured(context, needVision: true);
+  if (config == null) return;
+  if (!context.mounted) return;
+
+  // 2026-08-28 参与分析图片的指纹(文件名+字节数，前4张)：
+  // 同一(日期+餐次)复用同一会话，图片变化(指纹不同)才追加新分析
+  var usedImages = imagesUrls.take(4).toList();
+  String? bizHash;
+  if (bizKey != null) {
+    var sb = StringBuffer('m|$bizKey');
+    for (var path in usedImages) {
+      try {
+        var f = File(path);
+        sb.write('|${f.uri.pathSegments.last}:${await f.length()}');
+      } catch (_) {
+        sb.write('|$path');
+      }
+    }
+    bizHash = fnv1a64Hash(sb.toString());
+  }
+
+  // 指纹计算含文件 IO(跨异步间隙)，使用 context 前补 mounted 检查
+  if (!context.mounted) return;
+
   Navigator.of(context).push(
     MaterialPageRoute(
-      builder: (context) => OneChatScreen(
-        intakeInfo: box.read('language') == 'en'
-            ? """Please analyze the given pictures and answer each of the following questions.
-         \n\n - Please list the foods in the pictures and estimate the number of servings (in grams) of each food. If the food items are not present, answer truthfully; 
-         \n\n - Analyze the nutritional composition of the meal in the picture, whether it is reasonably balanced and healthy;.
-         \n\n - Optimize the proportions of the food provided in the picture to achieve nutritional balance."""
-            : """请分析给出的图片，分别回答以下问题:
-         \n\n - 请列出图片中的食物，并预估每种食物的份量(单位：克)。如果不存在食物，请如实回答;
-         \n\n - 分析图中这顿饭的营养搭配，是否合理均衡，是否健康;
-         \n\n - 优化图片提供食物的比例，达到营养均衡。""",
-        imageUrl: imageUrl,
+      builder: (context) => AiChatScreen(
+        roleKey: 'dietitian',
+        firstMessage: buildMealPhotoPrompt(),
+        imagePaths: usedImages,
+        bizType: bizKey == null ? null : 'meal_photo',
+        bizKey: bizKey,
+        bizHash: bizHash,
       ),
     ),
   );

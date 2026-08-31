@@ -1,3 +1,5 @@
 arb-dir: lib/l10n
 template-arb-file: app_en.arb
 output-localization-file: app_localizations.dart
+# 生成结果落在 lib/l10n 下随仓库提交(项目内以相对路径 import 该文件)
+output-dir: lib/l10n

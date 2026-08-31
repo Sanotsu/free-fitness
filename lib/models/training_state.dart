@@ -58,7 +58,7 @@ class Exercise {
     };
   }
 
-// 用于从数据库行映射到 Exercise 对象的 fromMap 方法
+  // 用于从数据库行映射到 Exercise 对象的 fromMap 方法
   factory Exercise.fromMap(Map<String, dynamic> map) {
     return Exercise(
       exerciseId: map['exercise_id'] as int?,
@@ -355,7 +355,7 @@ class TrainedDetailLog {
     };
   }
 
-// 用于从数据库行映射到 ServingInfo 对象的 fromMap 方法
+  // 用于从数据库行映射到 ServingInfo 对象的 fromMap 方法
   factory TrainedDetailLog.fromMap(Map<String, dynamic> map) {
     return TrainedDetailLog(
       trainedDetailLogId: map['trained_detail_log_id'] as int?,

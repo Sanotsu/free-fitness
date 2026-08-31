@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../core/utils/toast_utils.dart';
+import '../core/widgets/import_progress_overlay.dart';
 import 'exercise_importer_service.dart';
 import 'food_importer_service.dart';
 
@@ -16,6 +17,9 @@ class ServiceInitializer {
 
   /// 初始化所有服务
   Future<void> initializeServices(String languageCode) async {
+    // 导入期间显示带进度的浮层(进度由两个导入服务通过 ImportProgressCenter 上报)
+    final closeOverlay = showImportProgressOverlay();
+
     try {
       // 可以根据传入的languageCode，初始化不同的数据，注意，初始化后指定了数据，后续切换UI的语言时，数据不会跟着变化
 
@@ -26,11 +30,13 @@ class ServiceInitializer {
       await _foodImporter.importEmbeddedFoods(languageCode);
     } catch (e) {
       if (kDebugMode) {
-        print('初始化服务时出错: $e');
+        debugPrint('初始化服务时出错: $e');
       }
       ToastUtils.showError(
         languageCode == 'zh' ? '初始化服务时出错' : 'Error initializing services',
       );
+    } finally {
+      closeOverlay();
     }
   }
 }

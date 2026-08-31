@@ -5,6 +5,7 @@ import '../../../core/constants/constants.dart';
 import '../../../core/storage/db_dietary_helper.dart';
 import '../../../core/utils/tool_widgets.dart';
 import '../../../core/utils/tools.dart';
+import '../../../core/widgets/import_progress_overlay.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/dietary_state.dart';
@@ -135,8 +136,13 @@ class _DietaryFoodsState extends State<DietaryFoods> {
     Locale currentLocale = Localizations.localeOf(context);
     String languageCode = currentLocale.languageCode;
 
-    // 再执行初始化操作
-    await FoodImporterService().importEmbeddedFoods(languageCode);
+    // 再执行初始化操作(期间显示导入进度浮层)
+    final closeOverlay = showImportProgressOverlay();
+    try {
+      await FoodImporterService().importEmbeddedFoods(languageCode);
+    } finally {
+      closeOverlay();
+    }
 
     if (!mounted) return;
     setState(() {

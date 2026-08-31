@@ -56,13 +56,14 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         userCode: temp['user_code'],
         gender: (temp['gendar'] as CusLabel).value,
         dateOfBirth: temp['date_of_birth'] != null
-            ? DateFormat(constDateFormat)
-                .format(temp['date_of_birth'] as DateTime)
+            ? DateFormat(
+                constDateFormat,
+              ).format(temp['date_of_birth'] as DateTime)
             : null,
         height: double.tryParse(temp['height']),
         currentWeight: double.tryParse(temp['current_weight']),
-        rdaGoal: int.tryParse(temp['rda_goal']),
-        actionRestTime: int.tryParse(temp['action_rest_time']),
+        rdaGoal: int.tryParse(temp['rda_goal'] ?? '1800'),
+        actionRestTime: int.tryParse(temp['action_rest_time'] ?? '30'),
         description: temp['description'],
       );
 
@@ -107,10 +108,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
               : CusAL.of(context).eidtLabel(CusAL.of(context).userInfo),
         ),
         actions: [
-          IconButton(
-            onPressed: _saveUser,
-            icon: const Icon(Icons.save),
-          ),
+          IconButton(onPressed: _saveUser, icon: const Icon(Icons.save)),
         ],
       ),
       body: SingleChildScrollView(
@@ -120,11 +118,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
               padding: EdgeInsets.all(5.sp),
               child: FormBuilder(
                 key: _formKey,
-                child: Column(
-                  children: [
-                    ...buildFormDataColumns(),
-                  ],
-                ),
+                child: Column(children: [...buildFormDataColumns()]),
               ),
             ),
           ],
@@ -149,9 +143,9 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
         // keyboardType: TextInputType.text,
         validator: FormBuilderValidators.compose([
           FormBuilderValidators.required(
-            errorText: CusAL.of(context).requiredErrorText(
-              CusAL.of(context).userInfoLabels("0"),
-            ),
+            errorText: CusAL.of(
+              context,
+            ).requiredErrorText(CusAL.of(context).userInfoLabels("0")),
           ),
         ]),
       ),
@@ -180,11 +174,13 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
           fillColor: Colors.transparent,
         ),
         items: genderOptions
-            .map((unit) => DropdownMenuItem(
-                  alignment: AlignmentDirectional.center,
-                  value: unit,
-                  child: Text(showCusLableMapLabel(context, unit)),
-                ))
+            .map(
+              (unit) => DropdownMenuItem(
+                alignment: AlignmentDirectional.center,
+                value: unit,
+                child: Text(showCusLableMapLabel(context, unit)),
+              ),
+            )
             .toList(),
       ),
       FormBuilderDateTimePicker(
@@ -244,11 +240,12 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
       Row(
         children: [
           Expanded(
-              child: _buildDoubleTextField(
-            'rda_goal',
-            CusAL.of(context).userGoalLabels("0"),
-            CusAL.of(context).unitLabels("2"),
-          )),
+            child: _buildDoubleTextField(
+              'rda_goal',
+              CusAL.of(context).userGoalLabels("0"),
+              CusAL.of(context).unitLabels("2"),
+            ),
+          ),
           SizedBox(width: 10.sp),
           Expanded(
             child: _buildDoubleTextField(
@@ -292,7 +289,7 @@ class _ModifyUserPageState extends State<ModifyUserPage> {
       ),
       // 正则来只允许输入数字和小数点
       inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'))
+        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
       ],
       keyboardType: TextInputType.number,
       validator: validator,

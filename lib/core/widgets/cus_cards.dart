@@ -35,11 +35,9 @@ Card buildCoverCard(
           // 这里需要使用pushName 带上指定的路由名称，后续跨层级popUntil的时候才能指定路由名称进行传参
           Navigator.pushNamed(context, routeName);
         } else {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext ctx) => widget,
-            ),
-          );
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (BuildContext ctx) => widget));
         }
       },
       child: Center(
@@ -115,9 +113,7 @@ class CusCoverCard extends StatelessWidget {
             Navigator.pushNamed(context, routeName!);
           } else {
             Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext ctx) => targetPage,
-              ),
+              MaterialPageRoute(builder: (BuildContext ctx) => targetPage),
             );
           }
         },

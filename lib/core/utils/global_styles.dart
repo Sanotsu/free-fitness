@@ -11,10 +11,7 @@ var blackHeadTextStyle = TextStyle(
   color: Colors.black,
 );
 
-var appBarTextStyle = TextStyle(
-  fontFamily: "BarlowBold",
-  fontSize: 20.sp,
-);
+var appBarTextStyle = TextStyle(fontFamily: "BarlowBold", fontSize: 20.sp);
 
 // 图标的大小
 var appBarIconButtonSize = 20.sp;
@@ -48,11 +45,14 @@ var sizeDialogButton = 14.sp;
 // 后续应该要整专门的自定义主题进行切换，例如深色/浅色模式
 // 测试用的深色背景色
 
-var dartThemeMaterialColor1 =
-    buildMaterialColor(const Color.fromARGB(255, 116, 102, 102));
+var dartThemeMaterialColor1 = buildMaterialColor(
+  const Color.fromARGB(255, 116, 102, 102),
+);
 
-var dartThemeMaterialColor2 =
-    buildMaterialColor(const Color.fromARGB(255, 87, 82, 82));
+var dartThemeMaterialColor2 = buildMaterialColor(
+  const Color.fromARGB(255, 87, 82, 82),
+);
 
-var dartThemeMaterialColor3 =
-    buildMaterialColor(const Color.fromARGB(255, 59, 56, 56));
+var dartThemeMaterialColor3 = buildMaterialColor(
+  const Color.fromARGB(255, 59, 56, 56),
+);

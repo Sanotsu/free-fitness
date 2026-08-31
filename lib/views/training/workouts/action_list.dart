@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/apis/prompts/training_prompt_builder.dart';
 import '../../../core/constants/constants.dart';
 import '../../../core/storage/db_training_helper.dart';
 import '../../../core/utils/image_preview_helper.dart';
 import '../../../core/utils/tool_widgets.dart';
 import '../../../core/utils/tools.dart';
+import '../../../core/utils/tts_engine_helper.dart';
+import '../../../core/utils/training_time_estimator.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
+import '../../../models/paid_llm/llm_config.dart';
 import '../../../models/training_state.dart';
+import '../../../services/llm_config_service.dart';
+import '../../../views/ai/ai_chat_screen.dart';
 import 'action_config_dialog.dart';
 import 'action_detail.dart';
 import 'action_follow_practice.dart';
@@ -108,11 +114,9 @@ class _ActionListState extends State<ActionList> {
   }
 
   // 当对列表重新排序后，更新当前列表的数据
+  // (onReorderItem 由框架自动校正向下移动时的 newIndex，无需再手动 -1)
   void _onReorder(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
       var item = actionList.removeAt(oldIndex);
       actionList.insert(newIndex, item);
     });
@@ -123,6 +127,38 @@ class _ActionListState extends State<ActionList> {
     setState(() {
       actionList.removeAt(index);
     });
+  }
+
+  /// 2026-08-27 AI 分析这个训练：门禁校验后带训练上下文进入通用聊天页(健身教练角色)
+  Future<void> _onAiAnalysisPressed() async {
+    LlmConfig? config = await ensureLlmConfigured(context, needVision: false);
+    if (config == null) return;
+    if (!mounted) return;
+
+    // 预估耗时按用户配置的间隔休息秒数计算(与跟练口径一致)
+    var restSeconds = await fetchActionRestSeconds();
+    if (!mounted) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AiChatScreen(
+          roleKey: 'coach',
+          // 同一训练组的分析复用同一会话；数据指纹不同才重复调用
+          bizType: 'training_group',
+          bizKey: '${widget.groupItem.groupId}',
+          bizHash: buildTrainingGroupDataHash(
+            widget.groupItem,
+            actionList,
+            restSeconds: restSeconds,
+          ),
+          firstMessage: buildTrainingGroupPrompt(
+            widget.groupItem,
+            actionList,
+            restSeconds: restSeconds,
+          ),
+        ),
+      ),
+    );
   }
 
   // 关闭动作弹窗时，根据其回调函数中的值，修改当前显示的动作配置为修改后的值
@@ -198,27 +234,34 @@ class _ActionListState extends State<ActionList> {
               }
             },
           ),
+          // 2026-08-27 AI 分析入口(非编辑且有动作时显示；从计划进入也可分析)
           // 2023-12-23 如果有planId，则从计划跳某一个训练日，再到这里，就不允许修改这个训练组，只能查看
-          actions: widget.planItem != null
-              ? null
-              : <Widget>[
-                  if (_isEditing)
-                    IconButton(
-                      icon: const Icon(Icons.cancel_outlined),
-                      onPressed: () async {
-                        // 取消时数据恢复原本的内容
-                        await _getActionListByGroupId();
-                        if (!mounted) return;
-                        setState(() {
-                          _isEditing = !_isEditing;
-                        });
-                      },
-                    ),
-                  IconButton(
-                    icon: Icon(_isEditing ? Icons.done : Icons.edit),
-                    onPressed: _isEditing ? _onSavePressed : _onEditPressed,
-                  ),
-                ],
+          actions: <Widget>[
+            if (!_isEditing && actionList.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.smart_toy_outlined),
+                tooltip: box.read('language') == 'en' ? "AI analysis" : "AI 分析",
+                onPressed: _onAiAnalysisPressed,
+              ),
+            if (widget.planItem == null) ...[
+              if (_isEditing)
+                IconButton(
+                  icon: const Icon(Icons.cancel_outlined),
+                  onPressed: () async {
+                    // 取消时数据恢复原本的内容
+                    await _getActionListByGroupId();
+                    if (!mounted) return;
+                    setState(() {
+                      _isEditing = !_isEditing;
+                    });
+                  },
+                ),
+              IconButton(
+                icon: Icon(_isEditing ? Icons.done : Icons.edit),
+                onPressed: _isEditing ? _onSavePressed : _onEditPressed,
+              ),
+            ],
+          ],
         ),
         body: isLoading
             ? buildLoader(isLoading)
@@ -237,24 +280,33 @@ class _ActionListState extends State<ActionList> {
                 width: 0.6.sw,
                 child: (actionList.isNotEmpty)
                     ? ElevatedButton(
-                        onPressed: () {
-                          /// 点击开始跟练
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ActionFollowPracticeWithTTS(
-                                // 虽然计划编号、训练日 和训练编号都有传，但理论上两者不会同时存在也不会同时为空
-                                plan: widget.planItem,
-                                dayNumber: widget.dayNumber,
-                                // 有计划编号，就不传训练编号了
-                                group: widget.planItem != null
-                                    ? null
-                                    : widget.groupItem,
-                                // 动作组数据是必须要传的
-                                actionList: actionList,
+                        onPressed: () async {
+                          bool canProceed =
+                              await TtsEngineHelper.checkAndSelectTtsEngine(
+                                context,
+                              );
+
+                          if (!context.mounted) return;
+
+                          if (canProceed) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ActionFollowPracticeWithTTS(
+                                      // 虽然计划编号、训练日 和训练编号都有传，但理论上两者不会同时存在也不会同时为空
+                                      plan: widget.planItem,
+                                      dayNumber: widget.dayNumber,
+                                      // 有计划编号，就不传训练编号了
+                                      group: widget.planItem != null
+                                          ? null
+                                          : widget.groupItem,
+                                      // 动作组数据是必须要传的
+                                      actionList: actionList,
+                                    ),
                               ),
-                            ),
-                          );
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
@@ -395,7 +447,7 @@ class _ActionListState extends State<ActionList> {
           ),
         );
       },
-      onReorder: _onReorder,
+      onReorderItem: _onReorder,
     );
   }
 

@@ -15,6 +15,7 @@ import '../../../core/storage/db_user_helper.dart';
 import '../../../core/utils/image_preview_helper.dart';
 import '../../../core/utils/tool_widgets.dart';
 import '../../../core/utils/tools.dart';
+import '../../../core/utils/tts_engine_helper.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
 import '../../../models/training_state.dart';
@@ -263,9 +264,14 @@ class _ActionFollowPracticeWithTTSState
     _setAwaitOptions();
 
     if (isAndroid) {
-      _getDefaultEngine();
       _getDefaultVoice();
+      // 应用用户选定的TTS引擎
+      TtsEngineHelper.applySelectedEngine(flutterTts);
     }
+
+    // 2026-08-28 无论平台统一检查一次默认引擎，无引擎时提示(跟练页是唯一汇聚点，
+    // 入口可能有多个，"无引擎"提示只在这里弹，避免多处重复)
+    _getDefaultEngine();
 
     flutterTts.setStartHandler(() {
       setState(() {
@@ -312,19 +318,28 @@ class _ActionFollowPracticeWithTTSState
 
   Future _getDefaultEngine() async {
     var engine = await flutterTts.getDefaultEngine;
-    if (engine != null) {
-    } else {
+
+    debugPrint("默认引擎 $engine");
+
+    // 2026-08-28 无引擎时提示一次(仅此处提示，入口静默放行)，跟练照常只是没语音；
+    // 直接返回不再查引擎/语音列表，避免插件层"not bound to TTS engine"刷屏
+    if (engine == null) {
       if (!mounted) return;
-      // EasyLoading.showError(CusAL.of(context).noTtsEngine);
       toastification.show(
         context: context,
         type: ToastificationType.warning,
         style: ToastificationStyle.fillColored,
         alignment: Alignment.topCenter,
         title: Text(CusAL.of(context).noTtsEngine),
+        description: Text(CusAL.of(context).noTtsEngineDesc),
         autoCloseDuration: const Duration(seconds: 5),
       );
+      return;
     }
+
+    flutterTts.getEngines.then((value) => debugPrint("所有引擎 $value"));
+
+    flutterTts.getVoices.then((value) => debugPrint("所有语音 $value"));
   }
 
   Future _getDefaultVoice() async {
@@ -335,10 +350,15 @@ class _ActionFollowPracticeWithTTSState
   }
 
   Future _speak(String voiceText, {double? cusRate}) async {
-    await flutterTts.setVolume(volume);
-    await flutterTts.setSpeechRate(cusRate ?? rate);
-    await flutterTts.setPitch(pitch);
-    await flutterTts.speak(voiceText);
+    try {
+      await flutterTts.setVolume(volume);
+      await flutterTts.setSpeechRate(cusRate ?? rate);
+      await flutterTts.setPitch(pitch);
+      await flutterTts.speak(voiceText);
+    } catch (e) {
+      // 2026-08-28 无TTS引擎(或平台不支持)时静默降级：跟练照常，只是没有语音
+      debugPrint("【_speak】TTS不可用，跳过语音: $e");
+    }
   }
 
   Future _setAwaitOptions() async {

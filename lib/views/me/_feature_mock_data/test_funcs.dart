@@ -35,7 +35,7 @@ Future<Map<String, Object>> insertOneRandomFoodWithServingInfo() async {
     tags: [
       generateRandomString(1, 8),
       generateRandomString(1, 8),
-      generateRandomString(1, 8)
+      generateRandomString(1, 8),
     ].join(","),
     category: generateRandomString(5, 10),
     description: generateRandomString(50, 100),
@@ -215,7 +215,7 @@ Future<void> insertDailyLogDataDemo(
 Future<int> insertOneRandomExercise({String? countingMode}) async {
   print("【【【 插入测试数据 start-->:insertOneRandomExercise ");
 
-// 在模拟训练添加动作是，需要指定技术方式来显示是计时器或者计数器。没传就随机
+  // 在模拟训练添加动作是，需要指定技术方式来显示是计时器或者计数器。没传就随机
   String temp;
   if (countingMode == null) {
     temp = countingOptions[Random().nextInt(countingOptions.length)].value;
@@ -338,10 +338,10 @@ Future<int> insertOneRandomGroupAndAction() async {
 Future<int> insertOneRandomPlanHasGroup() async {
   print("【【【 插入测试数据 start-->:insertOneRandomPlanHasGroup ");
 
-// 插入计划的基础数据
+  // 插入计划的基础数据
   var [planId, planPeriod] = (await _insertOneRandomPlan());
 
-// 插入带动作列表的训练数据
+  // 插入带动作列表的训练数据
   List<PlanHasGroup> phgList = [];
   for (var i = 1; i < planPeriod + 1; i++) {
     var groupId = await insertOneRandomGroupAndAction();
@@ -373,8 +373,9 @@ Future<void> insertTrainingDetailLogDemo() async {
     planLevel: levelOptions[Random().nextInt(levelOptions.length)].value,
     dayNumber: Random().nextInt(8) + 1,
     // 起止时间就测试插入时的1个小时
-    trainedStartTime: DateFormat(constDatetimeFormat)
-        .format(DateTime.now().add(const Duration(hours: -1))),
+    trainedStartTime: DateFormat(
+      constDatetimeFormat,
+    ).format(DateTime.now().add(const Duration(hours: -1))),
     trainedEndTime: getCurrentDateTime(),
     // 单位都是秒
     trainedDuration: 40 * 60, // 实际训练时间
@@ -395,10 +396,12 @@ Future<void> insertTrainingDetailLogDemo() async {
     groupLevel: levelOptions[Random().nextInt(levelOptions.length)].value,
     consumption: Random().nextInt(1000),
     // 起止时间就测试插入时的1个小时
-    trainedStartTime: DateFormat(constDatetimeFormat)
-        .format(DateTime.now().add(const Duration(hours: -2))),
-    trainedEndTime: DateFormat(constDatetimeFormat)
-        .format(DateTime.now().add(const Duration(hours: -1))),
+    trainedStartTime: DateFormat(
+      constDatetimeFormat,
+    ).format(DateTime.now().add(const Duration(hours: -2))),
+    trainedEndTime: DateFormat(
+      constDatetimeFormat,
+    ).format(DateTime.now().add(const Duration(hours: -1))),
     // 单位都是秒
     trainedDuration: 30 * 60, // 实际训练时间
     totolPausedTime: 10 * 60, // 暂停的总时间
@@ -409,8 +412,9 @@ Future<void> insertTrainingDetailLogDemo() async {
 
   // 前一天的日志 计划中的某一天
   var tl3 = TrainedDetailLog(
-    trainedDate: DateFormat(constDatetimeFormat)
-        .format(DateTime.now().add(const Duration(days: -1))),
+    trainedDate: DateFormat(
+      constDatetimeFormat,
+    ).format(DateTime.now().add(const Duration(days: -1))),
     userId: Random().nextInt(3) + 1,
     // 单次记录，有计划及其训练日，就没有训练编号了；反之亦然
     planName: generateRandomString(5, 20),
@@ -419,10 +423,12 @@ Future<void> insertTrainingDetailLogDemo() async {
     planLevel: levelOptions[Random().nextInt(levelOptions.length)].value,
     dayNumber: Random().nextInt(8) + 1,
     // 起止时间就测试插入时的1个小时
-    trainedStartTime: DateFormat(constDatetimeFormat)
-        .format(DateTime.now().add(const Duration(days: -1, hours: -1))),
-    trainedEndTime: DateFormat(constDatetimeFormat)
-        .format(DateTime.now().add(const Duration(days: -1))),
+    trainedStartTime: DateFormat(
+      constDatetimeFormat,
+    ).format(DateTime.now().add(const Duration(days: -1, hours: -1))),
+    trainedEndTime: DateFormat(
+      constDatetimeFormat,
+    ).format(DateTime.now().add(const Duration(days: -1))),
     // 单位都是秒
     trainedDuration: 40 * 60, // 实际训练时间
     totolPausedTime: 8 * 60, // 暂停的总时间
@@ -517,9 +523,7 @@ Future<void> insertOneQuillDemo() async {
   var tempMoods = [];
   for (var i = 0; i < tempNum; i++) {
     var mood = diaryMoodList[Random().nextInt(diaryMoodList.length)];
-    tempMoods.add(
-      box.read('language') == 'en' ? mood.enLabel : mood.cnLabel,
-    );
+    tempMoods.add(box.read('language') == 'en' ? mood.enLabel : mood.cnLabel);
   }
 
   // 生成一个随机数来获取标签列表
@@ -555,10 +559,10 @@ Future<void> insertOneQuillDemo() async {
 Future<void> insertBMIDemo({int? size = 10}) async {
   print("【【【 插入测试数据 start-->:insertBMIDemo ");
 
-// 模拟身高， [165.0,175.0) 的一个随机数
+  // 模拟身高， [165.0,175.0) 的一个随机数
   var tempHeight = Random().nextInt(10) + 165 + Random().nextDouble();
 
-// 随机插入的体重记录在今天往前15天的随机一天中
+  // 随机插入的体重记录在今天往前15天的随机一天中
   var dates = getAdjacentDatesInRange(10);
 
   // 一次性插入多条数据，身高是一样的，但体重稍微变化一下
@@ -567,8 +571,10 @@ Future<void> insertBMIDemo({int? size = 10}) async {
     // 模拟体重， [70.0,80.0)的一个随机数，刻意的一位小数
     var tempweight = Random().nextInt(10) + 70 + Random().nextDouble();
     //  BMI = 体重(公斤) / 身高^2(米^2)
-    var bmi = double.tryParse((tempweight / (tempHeight * tempHeight / 10000))
-            .toStringAsFixed(2)) ??
+    var bmi =
+        double.tryParse(
+          (tempweight / (tempHeight * tempHeight / 10000)).toStringAsFixed(2),
+        ) ??
         30.5;
 
     var temp = WeightTrend(

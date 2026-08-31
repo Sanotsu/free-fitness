@@ -37,8 +37,12 @@ class _IndexTimelineState extends State<IndexTimeline> {
   String query = '';
 
   // 时间线连接线的颜色
-  Color borderColor =
-      const Color.fromARGB(255, 112, 78, 78).withValues(alpha: 0.5);
+  Color borderColor = const Color.fromARGB(
+    255,
+    112,
+    78,
+    78,
+  ).withValues(alpha: 0.5);
 
   @override
   void initState() {
@@ -188,9 +192,9 @@ class _IndexTimelineState extends State<IndexTimeline> {
             child: TextField(
               controller: searchController,
               decoration: InputDecoration(
-                hintText: CusAL.of(context).queryKeywordHintText(
-                  CusAL.of(context).diary,
-                ),
+                hintText: CusAL.of(
+                  context,
+                ).queryKeywordHintText(CusAL.of(context).diary),
                 // 设置透明底色
                 filled: true,
                 fillColor: Colors.transparent,
@@ -245,13 +249,13 @@ class _IndexTimelineState extends State<IndexTimeline> {
 
   Container _buildListStartChild(Diary diaryItem) {
     // 创建时间(不使用最后修改时间是避免时间线显示出现时间不连续的尴尬)
-    var createTime = DateFormat(constTimeFormat).format(
-      DateTime.parse(diaryItem.gmtCreate ?? unknownDateTimeString),
-    );
+    var createTime = DateFormat(
+      constTimeFormat,
+    ).format(DateTime.parse(diaryItem.gmtCreate ?? unknownDateTimeString));
 
-    var createDate = DateFormat(constDateFormat).format(
-      DateTime.parse(diaryItem.gmtCreate ?? unknownDateTimeString),
-    );
+    var createDate = DateFormat(
+      constDateFormat,
+    ).format(DateTime.parse(diaryItem.gmtCreate ?? unknownDateTimeString));
     return Container(
       // 内外边距
       // padding: EdgeInsets.all(5.sp),
@@ -300,17 +304,18 @@ class _IndexTimelineState extends State<IndexTimeline> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Expanded(
-                      flex: 4,
-                      child: Text(
-                        diaryItem.title,
-                        maxLines: 2,
-                        softWrap: true,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontSize: CusFontSizes.itemTitle,
-                        ),
-                      )),
+                    flex: 4,
+                    child: Text(
+                      diaryItem.title,
+                      maxLines: 2,
+                      softWrap: true,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontSize: CusFontSizes.itemTitle,
+                      ),
+                    ),
+                  ),
                   Expanded(
                     flex: 1,
                     child: Icon(
@@ -343,23 +348,23 @@ class _IndexTimelineState extends State<IndexTimeline> {
                           ? diaryItem.mood!.trim().split(",")
                           : [])
                       .map((mood) {
-                    return buildTinyButtonTag(
-                      mood,
-                      bgColor: CusColors.moodTinyTagBg,
-                      labelTextSize: CusFontSizes.flagMinute,
-                    );
-                  }),
+                        return buildTinyButtonTag(
+                          mood,
+                          bgColor: CusColors.moodTinyTagBg,
+                          labelTextSize: CusFontSizes.flagMinute,
+                        );
+                      }),
                   ...((diaryItem.tags != null &&
                               diaryItem.tags!.trim().isNotEmpty)
                           ? diaryItem.tags!.trim().split(",")
                           : [])
                       .map((tag) {
-                    return buildTinyButtonTag(
-                      tag,
-                      bgColor: CusColors.tagTinyTagBg,
-                      labelTextSize: CusFontSizes.flagMinute,
-                    );
-                  }),
+                        return buildTinyButtonTag(
+                          tag,
+                          bgColor: CusColors.tagTinyTagBg,
+                          labelTextSize: CusFontSizes.flagMinute,
+                        );
+                      }),
                 ],
               ),
             ],
@@ -369,21 +374,20 @@ class _IndexTimelineState extends State<IndexTimeline> {
       onTap: () {
         Navigator.of(context)
             .push(
-          MaterialPageRoute(
-            builder: (BuildContext ctx) => DiaryModifyRichText(
-              diaryItem: diaryItem,
-            ),
-          ),
-        )
+              MaterialPageRoute(
+                builder: (BuildContext ctx) =>
+                    DiaryModifyRichText(diaryItem: diaryItem),
+              ),
+            )
             .then((value) {
-          // 编辑页面返回后，重新加载手记数据
-          setState(() {
-            currentPage = 1; // 数据库查询的时候会从0开始offset
-            pageSize = 10;
-            diaryList = [];
-          });
-          loadMoreDiary();
-        });
+              // 编辑页面返回后，重新加载手记数据
+              setState(() {
+                currentPage = 1; // 数据库查询的时候会从0开始offset
+                pageSize = 10;
+                diaryList = [];
+              });
+              loadMoreDiary();
+            });
       },
       // 长按点击弹窗提示是否删除
       onLongPress: () {
@@ -441,10 +445,7 @@ class _IndexTimelineState extends State<IndexTimeline> {
 
 // 自定义的时间线指示器样式
 class _CusIndicator extends StatelessWidget {
-  const _CusIndicator({
-    required this.category,
-    required this.borderColor,
-  });
+  const _CusIndicator({required this.category, required this.borderColor});
 
   final String category;
   final Color borderColor;

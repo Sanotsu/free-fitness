@@ -51,9 +51,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
       isLoading = true;
     });
 
-    var tempUser = (await _userHelper.queryUser(
-      userId: CacheUser.userId,
-    ))!;
+    var tempUser = (await _userHelper.queryUser(userId: CacheUser.userId))!;
 
     if (!mounted) return;
     setState(() {
@@ -71,9 +69,7 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(CusAL.of(context).settingLabels('1')),
-      ),
+      appBar: AppBar(title: Text(CusAL.of(context).settingLabels('1'))),
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.all(5.sp),
@@ -118,11 +114,9 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                     MaterialPageRoute(
                       builder: (context) => WeightRecordManage(user: user),
                     ),
-                  ).then(
-                    (value) async {
-                      await _refreshUser();
-                    },
-                  );
+                  ).then((value) async {
+                    await _refreshUser();
+                  });
                 },
                 child: Text(CusAL.of(context).manageLabel),
               ),
@@ -130,17 +124,17 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
               ElevatedButton(
                 onPressed: () {
                   // 这里只显示修改体重
-                  _buildModifyWeightOrBmiDialog(onlyWeight: true).then(
-                    (value) async {
-                      // 强制重新加载体重变化图表
-                      await _refreshUser();
-                    },
-                  );
+                  _buildModifyWeightOrBmiDialog(onlyWeight: true).then((
+                    value,
+                  ) async {
+                    // 强制重新加载体重变化图表
+                    await _refreshUser();
+                  });
                 },
                 child: Text(CusAL.of(context).recordLabel),
               ),
             ],
-          )
+          ),
         ],
       ),
       // 显示体重趋势图
@@ -178,12 +172,12 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
           ElevatedButton(
             onPressed: () {
               // 这里要显示修改身高和体重
-              _buildModifyWeightOrBmiDialog(onlyWeight: false).then(
-                (value) async {
-                  // 强制重新加载体重变化图表
-                  await _refreshUser();
-                },
-              );
+              _buildModifyWeightOrBmiDialog(onlyWeight: false).then((
+                value,
+              ) async {
+                // 强制重新加载体重变化图表
+                await _refreshUser();
+              });
             },
             child: Text(CusAL.of(context).recordLabel),
           ),
@@ -235,8 +229,8 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
               left: bmi < 15
                   ? 0
                   : bmi > 40
-                      ? 300
-                      : ((bmi - 15) / (40 - 15) * 300.sp),
+                  ? 300
+                  : ((bmi - 15) / (40 - 15) * 300.sp),
             ),
             child: Icon(Icons.arrow_downward, size: CusIconSizes.iconNormal),
           ),
@@ -387,7 +381,8 @@ class _WeightChangeRecordState extends State<WeightChangeRecord> {
                       // 修改用户基本信息
                       await _userHelper.updateUser(user);
 
-                      var bmi = _currentWeight /
+                      var bmi =
+                          _currentWeight /
                           (_currentHeight / 100 * _currentHeight / 100);
 
                       // 新增体重趋势信息

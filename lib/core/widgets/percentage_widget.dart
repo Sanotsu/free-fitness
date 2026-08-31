@@ -28,12 +28,7 @@ class PercentageWidget extends StatelessWidget {
             color: index < filledSquares ? Colors.black : Colors.transparent,
           ),
         ),
-      )..addAll(
-          List.generate(
-            emptySquares,
-            (index) => Container(),
-          ),
-        ),
+      )..addAll(List.generate(emptySquares, (index) => Container())),
     );
   }
 }

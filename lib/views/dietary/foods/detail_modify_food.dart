@@ -28,7 +28,7 @@ class DetailModifyFood extends StatefulWidget {
 class _DetailModifyFoodState extends State<DetailModifyFood> {
   final DBDietaryHelper _dietaryHelper = DBDietaryHelper();
 
-//  食物添加的表单key
+  //  食物添加的表单key
   final _foodFormKey = GlobalKey<FormBuilderState>();
 
   // 默认显示的图片列表
@@ -64,9 +64,9 @@ class _DetailModifyFoodState extends State<DetailModifyFood> {
         category: temp?["category"],
         photos: temp?["images"] != null
             ? (temp?["images"] as List<PlatformFile>)
-                .map((e) => e.path)
-                .toList()
-                .join(",")
+                  .map((e) => e.path)
+                  .toList()
+                  .join(",")
             : null,
         contributor: CacheUser.userName,
         gmtCreate: getCurrentDateTime(),

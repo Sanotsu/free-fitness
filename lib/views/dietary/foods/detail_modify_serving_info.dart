@@ -61,8 +61,9 @@ class _DetailModifyServingInfoState extends State<DetailModifyServingInfo> {
           // 如果修改时传入的是标准度量，则修改单位为ml或者g
           // 此时的值是100ml或者100g，删除前面的100即可(1g/1ml会被当做客制化的)
           if (widget.servingType.value == "metric") {
-            _servingInfoformKey.currentState?.fields['serving_unit']
-                ?.didChange((map["serving_unit"] as String).substring(3));
+            _servingInfoformKey.currentState?.fields['serving_unit']?.didChange(
+              (map["serving_unit"] as String).substring(3),
+            );
           }
         });
       }

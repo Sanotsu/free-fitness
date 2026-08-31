@@ -10,10 +10,17 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/> -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+
+    <!-- 从 Android Gradle Plugin 3.6 开始，
+    构建时会倾向于把原生库以不压缩方式放进 APK（配合 android:extractNativeLibs="false"），
+    这样系统可以直接 mmap 加载，但会显著增大 APK 文件本身；
+    可以在 Manifest 里显式改回压缩（extractNativeLibs=true）来缩小 APK 
+    但只影响 APK 文件大小，代价是安装时会解压 so-->
     <application
         android:label="Free Fitness"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:extractNativeLibs="true">
         <!-- 原来是安卓10开始，要想访问外部存储的所有文件,还需要requestLegacyExternalStorage权限 
          Android9或更低则单独 WRITE_EXTERNAL_STORAGE 即可
          -->

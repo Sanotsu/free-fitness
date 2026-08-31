@@ -127,7 +127,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
       // 有起止，则获取该日期范围内所有的手记数据
       _selectedEvents.value = [
         for (final d in daysInRange(start, end))
-          ...(_selectedEvents.value = _getDiarysForADay(d))
+          ...(_selectedEvents.value = _getDiarysForADay(d)),
       ];
     } else if (start != null) {
       // 只有起，则只获取该起日期的所有手记数据
@@ -148,9 +148,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const IndexTimeline(),
-                ),
+                MaterialPageRoute(builder: (context) => const IndexTimeline()),
               );
             },
             style: ButtonStyle(
@@ -179,7 +177,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
             style: ButtonStyle(
               foregroundColor: WidgetStateProperty.all<Color>(Colors.white),
             ),
-          )
+          ),
         ],
       ),
       // 异步获取全部的手记数据，以便自定义事件时展示每日有多少的手记数量
@@ -335,10 +333,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                           );
                         })
                         .toList()
-                        .sublist(
-                          0,
-                          initTags.length > 1 ? 1 : initTags.length,
-                        ),
+                        .sublist(0, initTags.length > 1 ? 1 : initTags.length),
                   ],
                   if (chipLength > 3)
                     buildSmallButtonTag(
@@ -358,7 +353,7 @@ class _DiaryTableCalendarState extends State<DiaryTableCalendar> {
                     ),
                     Text(
                       "${CusAL.of(context).gmtCreate}: ${diarys[index].gmtCreate ?? unknownDateTimeString}",
-                    )
+                    ),
                   ],
                 ),
                 trailing: Icon(

@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/apis/prompts/training_prompt_builder.dart';
 import '../../../core/constants/constants.dart';
 import '../../../core/storage/db_training_helper.dart';
 import '../../../core/utils/tool_widgets.dart';
 import '../../../core/utils/tools.dart';
+import '../../../core/utils/training_time_estimator.dart';
 import '../../../layout/themes/cus_font_size.dart';
 import '../../../models/cus_app_localizations.dart';
+import '../../../models/paid_llm/llm_config.dart';
 import '../../../models/training_state.dart';
+import '../../../services/llm_config_service.dart';
+import '../../../views/ai/ai_chat_screen.dart';
 import '../workouts/action_list.dart';
 import '../workouts/index.dart';
 
@@ -19,7 +24,7 @@ import '../workouts/index.dart';
 ///   这里删除某个训练只是从plan中移除某一个训练，后者删除某个训练就是直接从数据库删除了。
 ///
 class GroupList extends StatefulWidget {
-//  从已存在的计划进入group list，会带上plan信息去查询已存在的group list
+  //  从已存在的计划进入group list，会带上plan信息去查询已存在的group list
   final TrainingPlan planItem;
 
   const GroupList({super.key, required this.planItem});
@@ -47,12 +52,25 @@ class _GroupListState extends State<GroupList> {
   // 是否处于编辑状态
   bool _isEditing = false;
 
+  // 2026-08-28 预估耗时用的间隔休息秒数(与跟练口径一致)
+  int _restSeconds = defaultActionRestSeconds;
+
   @override
   void initState() {
     super.initState();
 
     planItem = widget.planItem;
     _getGroupListByPlanId();
+    _loadRestSeconds();
+  }
+
+  // 异步读取用户配置的间隔休息秒数，回来后刷新列表展示
+  Future<void> _loadRestSeconds() async {
+    var rest = await fetchActionRestSeconds();
+    if (!mounted) return;
+    setState(() {
+      _restSeconds = rest;
+    });
   }
 
   // 查询指定训练中的动作列表
@@ -67,13 +85,12 @@ class _GroupListState extends State<GroupList> {
 
     // ？？？正常来讲，这里一定只有1个结果，不会有多个，也不会没有（验证就暂时不做了）
     // 指定计划包含多个训练
-    var tempPWG = await _dbHelper.searchPlanWithGroups(
-      planId: planItem.planId,
-    );
+    var tempPWG = await _dbHelper.searchPlanWithGroups(planId: planItem.planId);
 
     // 查询该训练计划的跟练日志信息，用于显示每个训练的最后一次跟练时间
-    var tempLog =
-        await _dbHelper.queryLastTrainingDetailLogByPlanName(planItem);
+    var tempLog = await _dbHelper.queryLastTrainingDetailLogByPlanName(
+      planItem,
+    );
 
     if (!mounted) return;
     // 设置查询结果
@@ -137,10 +154,8 @@ class _GroupListState extends State<GroupList> {
   }
 
   void _onReorder(int oldIndex, int newIndex) {
+    // (onReorderItem 由框架自动校正向下移动时的 newIndex，无需再手动 -1)
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
       var item = groupList.removeAt(oldIndex);
       groupList.insert(newIndex, item);
     });
@@ -151,6 +166,38 @@ class _GroupListState extends State<GroupList> {
     setState(() {
       groupList.removeAt(index);
     });
+  }
+
+  /// 2026-08-27 AI 分析这个计划：门禁校验后带计划上下文进入通用聊天页(健身教练角色)
+  Future<void> _onAiAnalysisPressed() async {
+    LlmConfig? config = await ensureLlmConfigured(context, needVision: false);
+    if (config == null) return;
+    if (!mounted) return;
+
+    // 每日预估耗时按用户配置的间隔休息秒数计算(与跟练口径一致)
+    var restSeconds = await fetchActionRestSeconds();
+    if (!mounted) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AiChatScreen(
+          roleKey: 'coach',
+          // 同一计划的分析复用同一会话；数据指纹不同才重复调用
+          bizType: 'training_plan',
+          bizKey: '${planItem.planId}',
+          bizHash: buildTrainingPlanDataHash(
+            planItem,
+            groupList,
+            restSeconds: restSeconds,
+          ),
+          firstMessage: buildTrainingPlanPrompt(
+            planItem,
+            groupList,
+            restSeconds: restSeconds,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -211,6 +258,13 @@ class _GroupListState extends State<GroupList> {
           // 2023-12-04 因为有跟练日志之后再修改计划的内容可能会导致日志查不到对应的基础表数据
           // 所以暂时有跟练的计划不让修改内容(理论上对应的action list也不允许再改了)
           actions: [
+            // 2026-08-27 AI 分析入口(非编辑且有训练日时显示)
+            if (!_isEditing && groupList.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.smart_toy_outlined),
+                tooltip: box.read('language') == 'en' ? "AI analysis" : "AI 分析",
+                onPressed: _onAiAnalysisPressed,
+              ),
             // 没有训练日志的训练才可修改
             if (!(logMap.values
                 .where((value) => value != null)
@@ -236,7 +290,8 @@ class _GroupListState extends State<GroupList> {
             IconButton(
               icon: const Icon(Icons.info_outline),
               onPressed: () {
-                var content = """
+                var content =
+                    """
 - ${planItem.planCode}
 - ${getCusLabelText(planItem.planCategory, categoryOptions)} 
 - ${getCusLabelText(planItem.planLevel, levelOptions)} 
@@ -273,7 +328,7 @@ class _GroupListState extends State<GroupList> {
                           ),
                         );
                       },
-                      onReorder: _onReorder,
+                      onReorderItem: _onReorder,
                     ),
                   ),
                   // 避免修改时新增按钮遮住最后一条列表
@@ -288,9 +343,8 @@ class _GroupListState extends State<GroupList> {
                     context,
                     MaterialPageRoute(
                       // 复用训练列表主页面，并告知是计划新增训练
-                      builder: (context) => const TrainingWorkouts(
-                        isPlanAdd: true,
-                      ),
+                      builder: (context) =>
+                          const TrainingWorkouts(isPlanAdd: true),
                     ),
                   ).then((value) {
                     // 这里正常返回值的话，一定是一个GroupWithActions类型的 groupItem， 存入group列表尾部就好了
@@ -313,7 +367,9 @@ class _GroupListState extends State<GroupList> {
 
   // 构建训练条目瓦片
   ListTile _buildGroupItemListTile(
-      List<GroupWithActions> groupList, int index) {
+    List<GroupWithActions> groupList,
+    int index,
+  ) {
     GroupWithActions gwaItem = groupList[index];
     TrainingGroup groupItem = gwaItem.group;
 
@@ -328,7 +384,7 @@ class _GroupListState extends State<GroupList> {
                       Icons.menu,
                       color: Theme.of(context).primaryColor,
                     ),
-                  )
+                  ),
                 ],
               ),
             )
@@ -355,18 +411,19 @@ class _GroupListState extends State<GroupList> {
                   '${gwaItem.actionDetailList.length} ${CusAL.of(context).exercise} ',
               style: TextStyle(color: Theme.of(context).shadowColor),
             ),
+            // 2026-08-28 预估耗时(按动作标准耗时+间隔休息实时估算，不落库)
             TextSpan(
-              text: '${getCusLabelText(
-                groupItem.groupLevel,
-                levelOptions,
-              )}  ',
+              text:
+                  '  ${CusAL.of(context).estMinutes(estimateGroupMinutes(gwaItem.actionDetailList, restSeconds: _restSeconds))}',
+              style: TextStyle(color: Colors.orange[700]),
+            ),
+            TextSpan(
+              text: '${getCusLabelText(groupItem.groupLevel, levelOptions)}  ',
               style: TextStyle(color: Colors.green[500]),
             ),
             TextSpan(
-              text: '\n${getCusLabelText(
-                groupItem.groupCategory,
-                categoryOptions,
-              )}',
+              text:
+                  '\n${getCusLabelText(groupItem.groupCategory, categoryOptions)}',
               style: TextStyle(color: Theme.of(context).shadowColor),
             ),
           ],
@@ -401,13 +458,14 @@ class _GroupListState extends State<GroupList> {
               child: Row(
                 children: [
                   Expanded(
-                      child: IconButton(
-                    icon: Icon(
-                      Icons.delete,
-                      color: Theme.of(context).primaryColor,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.delete,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      onPressed: () => _onDelete(index),
                     ),
-                    onPressed: () => _onDelete(index),
-                  ))
+                  ),
                 ],
               ),
             )

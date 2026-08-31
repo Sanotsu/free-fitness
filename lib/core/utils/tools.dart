@@ -297,6 +297,21 @@ String getCusLabelText(String item, List<CusLabel> options) {
   return box.read('language') == 'en' ? op.enLabel : op.cnLabel;
 }
 
+/// 2026-08-28 FNV-1a 64位指纹(返回16位hex字符串)
+///
+/// 仅用于"业务数据是否变更"的轻量检测(AI 业务会话的 biz_hash)，
+/// 无安全性要求，自实现避免额外引入 crypto 依赖。
+String fnv1a64Hash(String input) {
+  // dart 的 int 是 64 位有符号，用 mask 模拟无符号 64 位运算
+  const int mask = 0x7FFFFFFFFFFFFFFF;
+  var hash = 0xcbf29ce484222325;
+  for (var byte in input.codeUnits) {
+    hash ^= byte & 0xFF;
+    hash = (hash * 0x100000001b3) & mask;
+  }
+  return hash.toRadixString(16).padLeft(16, '0');
+}
+
 // 只请求内部存储访问权限(食物营养素、锻炼动作导入；备份还原等)
 Future<bool> requestStoragePermission() async {
   if (Platform.isAndroid) {

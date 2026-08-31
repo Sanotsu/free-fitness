@@ -130,7 +130,7 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.selectLogic(num, {
       '0': 'Backup & Restore',
       '1': 'Full Backup',
-      '2': 'Overwrite Restore',
+      '2': 'Merge Restore',
       'other': 'Other',
     });
     return '$_temp0';
@@ -145,8 +145,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get resSuccessNote =>
-      'The original data has been deleted, and the backup data has been restored.';
+  String get resSuccessNote => 'Backup data has been merged into the device.';
 
   @override
   String get restIntervals => 'Rest time between follow-up exercises (s)';
@@ -404,6 +403,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noTtsEngine => 'No available TTS engine';
+
+  @override
+  String get noTtsEngineDesc =>
+      'Follow practice still works, just without voice prompts';
+
+  @override
+  String ttsEngineInfo(String engineName) {
+    return 'Using TTS engine: $engineName';
+  }
+
+  @override
+  String get selectTtsEngine => 'Select TTS Engine';
+
+  @override
+  String get multipleTtsEnginesFound =>
+      'Multiple TTS engines detected, please select one:';
+
+  @override
+  String get ttsEngineCheckFail =>
+      'TTS engine check failed; voice prompts may be unavailable';
 
   @override
   String followTtsLabel(String num) {
@@ -1099,4 +1118,498 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get confirmLoadEmbeddedFood =>
       'Load embedded food? This will overwrite duplicates.';
+
+  @override
+  String get tipsTitle => 'Tips';
+
+  @override
+  String guideStepLabel(int num, Object name) {
+    return 'Step $num/4 · $name';
+  }
+
+  @override
+  String get guideStepIntro => 'Intro';
+
+  @override
+  String get guideStepStorage => 'Storage';
+
+  @override
+  String get guideStepData => 'Built-in Data';
+
+  @override
+  String get guideStepProfile => 'Profile';
+
+  @override
+  String get guideIntroTrainingTitle => 'Training';
+
+  @override
+  String get guideIntroTrainingDesc =>
+      'Exercise library & period plans with guided workouts';
+
+  @override
+  String get guideIntroDietaryTitle => 'Dietary';
+
+  @override
+  String get guideIntroDietaryDesc =>
+      'Food composition, servings, meal photos & daily intake';
+
+  @override
+  String get guideIntroDiaryTitle => 'Diary';
+
+  @override
+  String get guideIntroDiaryDesc =>
+      'Rich-text notes and long-term weight trends';
+
+  @override
+  String get guideIntroAiTitle => 'AI Assistant';
+
+  @override
+  String get guideIntroAiDesc =>
+      'Bring your own LLM API key for diet/training analysis';
+
+  @override
+  String get guideStorageTitle => 'Why storage permission?';
+
+  @override
+  String get guideStorageReason1 =>
+      'Databases live in the app-specific directory, removed on uninstall';
+
+  @override
+  String get guideStorageReason2 =>
+      'Backup & restore: full zip backups for device migration and safety';
+
+  @override
+  String get guideStorageReason3 =>
+      'Images: diary photos and analyzed meal photos are copied for history';
+
+  @override
+  String get guideStorageGranted => '✓ Granted';
+
+  @override
+  String get guideStorageSkippable =>
+      'You may skip; features will ask again later';
+
+  @override
+  String get guideDataTitle => 'Load built-in data?';
+
+  @override
+  String get guideDataHint => '(Recommended on first launch)';
+
+  @override
+  String get guideDataExerciseTitle => 'Built-in exercise library';
+
+  @override
+  String get guideDataExerciseDesc =>
+      'Common strength/cardio exercises with categories';
+
+  @override
+  String get guideDataFoodTitle => 'Food composition table';
+
+  @override
+  String get guideDataFoodDesc =>
+      'China Food Composition datasets with energy & macros';
+
+  @override
+  String get guideDataManualNote =>
+      'Skip freely: use the flash icon on the exercise/food pages to import anytime.';
+
+  @override
+  String get guideBtnNext => 'Next';
+
+  @override
+  String get guideBtnSkipStep => 'Skip';
+
+  @override
+  String get guideBtnGrant => 'Grant & continue';
+
+  @override
+  String get guideBtnGranted => 'Granted, continue';
+
+  @override
+  String get guideBtnStartLoad => 'Start loading';
+
+  @override
+  String get guideBtnNoLoad => 'Skip loading';
+
+  @override
+  String get restoreSelectTitle => 'Select data to restore';
+
+  @override
+  String get restoreModUser => 'User & goals';
+
+  @override
+  String get restoreModUserDesc => 'Profiles / intake goals / weight trends';
+
+  @override
+  String get restoreModDietary => 'Dietary';
+
+  @override
+  String get restoreModDietaryDesc =>
+      'Foods / servings / daily intake / meal photos';
+
+  @override
+  String get restoreModDiary => 'Diary';
+
+  @override
+  String get restoreModDiaryDesc => 'Rich-text notes';
+
+  @override
+  String get restoreModTraining => 'Training';
+
+  @override
+  String get restoreModTrainingDesc =>
+      'Exercises / groups / plans / training logs\nBuilt-in items already on this device are kept as-is';
+
+  @override
+  String get restoreModAi => 'AI Assistant';
+
+  @override
+  String get restoreModAiDesc =>
+      'Conversations / custom roles / LLM configs (incl. keys) / images';
+
+  @override
+  String get restoreMergeNote =>
+      'Restore merges into existing data (deduplicated); an automatic full backup is made first.';
+
+  @override
+  String get restoreNoData => 'No restorable data in this backup';
+
+  @override
+  String get restorePhaseBackup => 'Backing up current data first';
+
+  @override
+  String get restorePhaseBackupNote => 'For rollback safety';
+
+  @override
+  String get restorePhaseLlm => 'Merging LLM configs';
+
+  @override
+  String get restorePhaseImages => 'Merging AI images';
+
+  @override
+  String restoreProgressDetail(int current, int total) {
+    return '$current / $total rows merged';
+  }
+
+  @override
+  String restoreResultNote(int inserted, int skipped) {
+    return 'Restore merged: $inserted new, $skipped existing kept';
+  }
+
+  @override
+  String restoreBuiltinNote(int count) {
+    return '($count built-in entries kept)';
+  }
+
+  @override
+  String get restoreTblUser => 'user profiles';
+
+  @override
+  String get restoreTblIntakeGoal => 'intake goals';
+
+  @override
+  String get restoreTblWeightTrend => 'weight trends';
+
+  @override
+  String get restoreTblFood => 'foods';
+
+  @override
+  String get restoreTblServing => 'servings';
+
+  @override
+  String get restoreTblDailyIntake => 'daily intake';
+
+  @override
+  String get restoreTblMealPhoto => 'meal photos';
+
+  @override
+  String get restoreTblDiary => 'diary notes';
+
+  @override
+  String get restoreTblExercise => 'exercises';
+
+  @override
+  String get restoreTblGroup => 'workout groups';
+
+  @override
+  String get restoreTblAction => 'plan actions';
+
+  @override
+  String get restoreTblPlan => 'plans';
+
+  @override
+  String get restoreTblPlanDay => 'plan schedules';
+
+  @override
+  String get restoreTblTrainLog => 'training logs';
+
+  @override
+  String get restoreTblAiConv => 'AI conversations';
+
+  @override
+  String get restoreTblAiMsg => 'AI messages';
+
+  @override
+  String get restoreTblAiRole => 'custom roles';
+
+  @override
+  String get llmConfigTitle => 'LLM Config';
+
+  @override
+  String get llmConfigStatusNone => 'Not configured';
+
+  @override
+  String llmConfigStatusCount(int count) {
+    return '$count config(s)';
+  }
+
+  @override
+  String get llmConfigEmpty =>
+      'No configs yet.\nTap + to add an OpenAI-compatible LLM config.';
+
+  @override
+  String get llmConfigAddTooltip => 'Add config';
+
+  @override
+  String llmConfigDeleteNote(Object name) {
+    return 'Delete config \"$name\"? Existing conversations keep their history (snapshot display).';
+  }
+
+  @override
+  String get llmConfigPageAdd => 'Add LLM Config';
+
+  @override
+  String get llmConfigPageEdit => 'Edit LLM Config';
+
+  @override
+  String get llmConfigSaved => 'Saved';
+
+  @override
+  String get llmConfigFixForm => 'Please fix form errors first';
+
+  @override
+  String get llmConfigFieldName => 'Config name';
+
+  @override
+  String get llmConfigFieldNameHint => 'e.g. SiliconFlow-Qwen';
+
+  @override
+  String get llmConfigFieldUrl => 'API URL';
+
+  @override
+  String get llmConfigFieldKey => 'API Key';
+
+  @override
+  String get llmConfigFieldModel => 'Model';
+
+  @override
+  String get llmConfigFieldModelHint => 'e.g. Qwen/Qwen2.5-VL-32B-Instruct';
+
+  @override
+  String get llmConfigFieldVision => 'Supports vision';
+
+  @override
+  String get llmConfigFieldVisionNote =>
+      'Most modern models are multimodal. Turn off for text-only models (e.g. deepseek-chat).';
+
+  @override
+  String get llmConfigFieldExtra => 'Advanced params (JSON, optional)';
+
+  @override
+  String get llmConfigFieldExtraNote =>
+      'Merged into request body. Keys model/messages/stream are ignored.';
+
+  @override
+  String get llmConfigRequired => 'Required';
+
+  @override
+  String get llmConfigInvalidUrl => 'Invalid URL';
+
+  @override
+  String get llmConfigInvalidJson => 'Must be a valid JSON object';
+
+  @override
+  String get llmConfigQuickFill => 'Quick fill:';
+
+  @override
+  String get llmConfigTestConnection => 'Test connection';
+
+  @override
+  String get llmConfigTestVision => 'Test vision';
+
+  @override
+  String get llmConfigTestResult => 'Test result';
+
+  @override
+  String get llmConfigEmptyReply => '(empty reply)';
+
+  @override
+  String get llmConfigVisionTest => 'Vision test';
+
+  @override
+  String llmConfigVisionOk(Object reply) {
+    return 'The model seems to support image input.\n\nReply: $reply';
+  }
+
+  @override
+  String llmConfigVisionFail(Object detail) {
+    return 'The model may NOT support image input.\n\n$detail';
+  }
+
+  @override
+  String get llmConfigPingText => 'Hi, reply with \"ok\" only.';
+
+  @override
+  String get llmConfigVisionPingText => 'What color is this image?';
+
+  @override
+  String get llmGateNoKey =>
+      'No LLM API key configured.\nPlease configure it in Me → More Settings → LLM Config first.';
+
+  @override
+  String get llmGateGoConfig => 'Go config';
+
+  @override
+  String get llmGateNoVision =>
+      'No vision-capable model config.\nPlease enable \"supports vision\" on a config first.';
+
+  @override
+  String get aiChatNoConfig => 'No LLM config, please configure first';
+
+  @override
+  String get aiChatSwitchModel => 'Switch model';
+
+  @override
+  String get aiChatVisionTag => 'vision';
+
+  @override
+  String get aiChatModelNoVision =>
+      'Current model doesn\'t support images; pending images removed';
+
+  @override
+  String get aiChatImageLimit => 'Up to 4 images';
+
+  @override
+  String get aiChatRename => 'Rename';
+
+  @override
+  String get aiChatClearNote => 'Clear all messages in this conversation?';
+
+  @override
+  String get aiChatDeleteNote =>
+      'Delete this conversation? Messages and images will be removed too.';
+
+  @override
+  String get aiChatDeleteShort => 'Delete this conversation?';
+
+  @override
+  String get aiChatClearMessages => 'Clear messages';
+
+  @override
+  String get aiChatDeleteConversation => 'Delete conversation';
+
+  @override
+  String get aiChatNoConfigName => 'No config';
+
+  @override
+  String get aiChatInputHint => 'Ask anything...';
+
+  @override
+  String aiChatAskWith(Object name) {
+    return 'Chat with $name:';
+  }
+
+  @override
+  String get aiChatRegenerate => 'Regenerate';
+
+  @override
+  String get aiChatCopied => 'Copied';
+
+  @override
+  String aiChatTokenUsage(int inputTokens, int outputTokens, int totalTokens) {
+    return 'tokens in:$inputTokens out:$outputTokens total:$totalTokens';
+  }
+
+  @override
+  String get aiChatAddImage => 'Add images (up to 4)';
+
+  @override
+  String get aiChatTitle => 'AI Assistant';
+
+  @override
+  String get aiChatNewChat => 'New chat';
+
+  @override
+  String get aiChatManageRoles => 'Manage roles';
+
+  @override
+  String get aiChatHistory => 'History';
+
+  @override
+  String get aiChatNoHistory => 'No conversations yet';
+
+  @override
+  String get aiChatDataUpdated =>
+      '(The data has been updated. Please analyze based on the following latest data.)';
+
+  @override
+  String get aiChatException => 'Exception';
+
+  @override
+  String get rolesTitle => 'Manage Roles';
+
+  @override
+  String get rolesBuiltIn => 'Built-in roles';
+
+  @override
+  String get rolesCustom => 'Custom roles';
+
+  @override
+  String get rolesEmptyCustom => 'No custom roles yet, tap + to add one';
+
+  @override
+  String get rolesAddTooltip => 'Add role';
+
+  @override
+  String rolesDeleteNote(Object name) {
+    return 'Delete role \"$name\"? Existing conversations keep their history.';
+  }
+
+  @override
+  String get rolePageAdd => 'Add Role';
+
+  @override
+  String get rolePageEdit => 'Edit Role';
+
+  @override
+  String get rolePageDetail => 'Role Details';
+
+  @override
+  String get roleReadOnlyNote =>
+      'Built-in roles are read-only and cannot be modified or deleted';
+
+  @override
+  String get roleNameLabel => 'Role name';
+
+  @override
+  String get roleNameHint => 'e.g. Running Coach';
+
+  @override
+  String get rolePromptLabel => 'System prompt';
+
+  @override
+  String get rolePromptHint =>
+      'Describe this role\'s expertise, tone and how it should answer...';
+
+  @override
+  String get rolePromptNote =>
+      'This prompt will be used as the system message when chatting with this role.';
+
+  @override
+  String get roleInvalid => 'Name and prompt cannot be empty';
+
+  @override
+  String estMinutes(int minutes) {
+    return '~$minutes min';
+  }
 }

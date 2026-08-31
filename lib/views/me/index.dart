@@ -34,12 +34,12 @@ class _UserAndSettingsState extends State<UserAndSettings> {
   // 这里有修改，暂时不用get
   int currentUserId = 1;
 
-// ？？？登录用户信息，怎么在app中记录用户信息？缓存一个用户id每次都查？记住状态实时更新？……
+  // ？？？登录用户信息，怎么在app中记录用户信息？缓存一个用户id每次都查？记住状态实时更新？……
   late User userInfo;
 
   bool isLoading = false;
 
-// 切换用户时，选择的用户
+  // 切换用户时，选择的用户
   User? selectedUser;
 
   @override
@@ -104,7 +104,9 @@ class _UserAndSettingsState extends State<UserAndSettings> {
           return AlertDialog(
             title: Text(CusAL.of(context).switchUser),
             content: DropdownButtonFormField<User>(
-              value: userList.firstWhere((e) => e.userId == currentUserId),
+              initialValue: userList.firstWhere(
+                (e) => e.userId == currentUserId,
+              ),
               decoration: const InputDecoration(
                 // 设置透明底色
                 filled: true,
@@ -179,23 +181,16 @@ class _UserAndSettingsState extends State<UserAndSettings> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          CusAL.of(context).moduleTitles('3'),
-        ),
+        title: Text(CusAL.of(context).moduleTitles('3')),
         actions: [
           // 切换用户(切换后缓存的用户编号也得修改)
-          IconButton(
-            onPressed: _switchUser,
-            icon: const Icon(Icons.toggle_on),
-          ),
+          IconButton(onPressed: _switchUser, icon: const Icon(Icons.toggle_on)),
           // 新增用户(默认就一个用户，保存多个用户的数据就需要可以新增其他用户)
           IconButton(
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const ModifyUserPage(),
-                ),
+                MaterialPageRoute(builder: (context) => const ModifyUserPage()),
               );
             },
             icon: const Icon(Icons.add),
@@ -293,16 +288,16 @@ class _UserAndSettingsState extends State<UserAndSettings> {
                     color: Colors.red,
                   )
                 : userInfo.gender == "female"
-                    ? Icon(
-                        Icons.female,
-                        size: CusIconSizes.iconBig,
-                        color: Colors.green,
-                      )
-                    : Icon(
-                        Icons.bolt,
-                        size: CusIconSizes.iconNormal,
-                        color: Theme.of(context).disabledColor,
-                      ),
+                ? Icon(
+                    Icons.female,
+                    size: CusIconSizes.iconBig,
+                    color: Colors.green,
+                  )
+                : Icon(
+                    Icons.bolt,
+                    size: CusIconSizes.iconNormal,
+                    color: Theme.of(context).disabledColor,
+                  ),
           ),
 
           /// 修改头像按钮
@@ -315,9 +310,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: Text(
-                        CusAL.of(context).changeAvatarLabels('1'),
-                      ),
+                      title: Text(CusAL.of(context).changeAvatarLabels('1')),
                       actions: [
                         TextButton(
                           onPressed: () {
@@ -413,9 +406,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const UserInfo(),
-                ),
+                MaterialPageRoute(builder: (context) => const UserInfo()),
               ).then((value) {
                 _queryLoginedUserInfo();
               });
@@ -507,9 +498,7 @@ class _UserAndSettingsState extends State<UserAndSettings> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const MoreSettings(),
-                ),
+                MaterialPageRoute(builder: (context) => const MoreSettings()),
               );
             },
           ),

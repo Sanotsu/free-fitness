@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../core/constants/constants.dart';
 import '../core/utils/toast_utils.dart';
 import '../core/utils/tools.dart';
 import '../models/cus_app_localizations.dart';
+import '../models/paid_llm/llm_config.dart';
+import '../services/llm_config_service.dart';
+import '../views/ai/ai_chat_screen.dart';
 import '../views/diary/index_table_calendar.dart';
 import '../views/dietary/index.dart';
 import '../views/me/index.dart';
@@ -78,6 +82,19 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  /// 2026-08-27 全局 AI 助手入口(悬浮按钮)：
+  /// 门禁校验(未配置引导去配置页) → 默认以"通用助手"角色进入新对话
+  Future<void> _openAiAssistant() async {
+    LlmConfig? config = await ensureLlmConfigured(context, needVision: false);
+    if (config == null || !mounted) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const AiChatScreen(roleKey: 'assistant'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -126,6 +143,15 @@ class _HomePageState extends State<HomePage> {
         // home页的背景色(如果下层还有设定其他主题颜色，会被覆盖)
         // backgroundColor: Colors.red,
         body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
+
+        // 2026-08-27 全局悬浮 AI 助手按钮(右下角，4个Tab都可见)
+        floatingActionButton: FloatingActionButton(
+          onPressed: _openAiAssistant,
+          tooltip: box.read('language') == 'en' ? "AI Assistant" : "AI 助手",
+          child: const Icon(Icons.smart_toy),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
         bottomNavigationBar: BottomNavigationBar(
           // 当item数量小于等于3时会默认fixed模式下使用主题色，大于3时则会默认shifting模式下使用白色。
           // 为了使用主题色，这里手动设置为fixed

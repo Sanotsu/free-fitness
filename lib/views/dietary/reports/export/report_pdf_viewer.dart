@@ -53,12 +53,14 @@ class _ReportPdfViewerState extends State<ReportPdfViewer> {
     });
 
     // 理论上是默认查询当日的，有选择其他日期则查询指定日期？？？还要是登录者这个用户编号的
-    var temp = (await _dietaryHelper.queryDailyFoodItemListWithDetail(
-      userId: CacheUser.userId,
-      startDate: widget.startDate,
-      endDate: widget.endDate,
-      withDetail: true,
-    ) as List<DailyFoodItemWithFoodServing>);
+    var temp =
+        (await _dietaryHelper.queryDailyFoodItemListWithDetail(
+              userId: CacheUser.userId,
+              startDate: widget.startDate,
+              endDate: widget.endDate,
+              withDetail: true,
+            )
+            as List<DailyFoodItemWithFoodServing>);
 
     if (!mounted) return;
     setState(() {
@@ -70,28 +72,24 @@ class _ReportPdfViewerState extends State<ReportPdfViewer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(CusAL.of(context).dietaryReportExport),
-      ),
+      appBar: AppBar(title: Text(CusAL.of(context).dietaryReportExport)),
       body: isLoading
           ? buildLoader(isLoading)
           : dfiwfsList.isEmpty
-              ? Center(
-                  child: Text(CusAL.of(context).noRecordNote),
-                )
-              : PdfPreview(
-                  initialPageFormat: PdfPageFormat.a4,
-                  build: (context) => makeReportPdf(
-                    dfiwfsList,
-                    // 在pdf页首会显示查询数据的日期
-                    widget.startDate.split(" ")[0],
-                    widget.endDate.split(" ")[0],
-                    lang: box.read('language'),
-                  ),
-                  pdfFileName: box.read('language') == 'en'
-                      ? "DietaryLogExport_${DateTime.now().millisecondsSinceEpoch}"
-                      : "饮食日志导出_${DateTime.now().millisecondsSinceEpoch}",
-                ),
+          ? Center(child: Text(CusAL.of(context).noRecordNote))
+          : PdfPreview(
+              initialPageFormat: PdfPageFormat.a4,
+              build: (context) => makeReportPdf(
+                dfiwfsList,
+                // 在pdf页首会显示查询数据的日期
+                widget.startDate.split(" ")[0],
+                widget.endDate.split(" ")[0],
+                lang: box.read('language'),
+              ),
+              pdfFileName: box.read('language') == 'en'
+                  ? "DietaryLogExport_${DateTime.now().millisecondsSinceEpoch}"
+                  : "饮食日志导出_${DateTime.now().millisecondsSinceEpoch}",
+            ),
     );
   }
 }

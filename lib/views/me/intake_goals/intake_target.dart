@@ -139,9 +139,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(CusAL.of(context).settingLabels('2')),
-      ),
+      appBar: AppBar(title: Text(CusAL.of(context).settingLabels('2'))),
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
@@ -203,7 +201,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                   color: cusNutrientColors[CusNutType.protein]!,
                 ),
                 SizedBox(width: 8.sp),
-                Text(CusAL.of(context).mainNutrients('2'))
+                Text(CusAL.of(context).mainNutrients('2')),
               ],
             ),
             SizedBox(height: 10.sp),
@@ -259,15 +257,28 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                       if (_isEditing) {
                         if (_macrosFormKey.currentState!.saveAndValidate()) {
                           setState(() {
-                            user.rdaGoal = int.parse(_macrosFormKey
-                                .currentState!.fields['calory']!.value);
+                            user.rdaGoal = int.parse(
+                              _macrosFormKey
+                                  .currentState!
+                                  .fields['calory']!
+                                  .value,
+                            );
                             equivalentKJdata = caloryToKjStr(user.rdaGoal!);
-                            user.choGoal = double.parse(_macrosFormKey
-                                .currentState!.fields['carbs']!.value);
-                            user.fatGoal = double.parse(_macrosFormKey
-                                .currentState!.fields['fat']!.value);
-                            user.proteinGoal = double.parse(_macrosFormKey
-                                .currentState!.fields['protein']!.value);
+                            user.choGoal = double.parse(
+                              _macrosFormKey
+                                  .currentState!
+                                  .fields['carbs']!
+                                  .value,
+                            );
+                            user.fatGoal = double.parse(
+                              _macrosFormKey.currentState!.fields['fat']!.value,
+                            );
+                            user.proteinGoal = double.parse(
+                              _macrosFormKey
+                                  .currentState!
+                                  .fields['protein']!
+                                  .value,
+                            );
                           });
                           await _userHelper.updateUser(user);
 
@@ -314,7 +325,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                         Text(
                           "$equivalentKJdata ${CusAL.of(context).unitLabels('3')}    ",
                           style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
-                        )
+                        ),
                       ],
                     ),
                     _buildFormTextField(
@@ -338,7 +349,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -378,9 +389,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
       keyboardType: TextInputType.number,
       // 限制键盘输入只能是数字和小数
       inputFormatters: <TextInputFormatter>[
-        FilteringTextInputFormatter.allow(
-          RegExp(r'^\d+\.?\d{0,2}'),
-        ),
+        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
       ],
     );
   }
@@ -510,7 +519,7 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
                 Text(
                   '$weekKJdata ${CusAL.of(context).unitLabels('3')}    ',
                   style: TextStyle(fontSize: CusFontSizes.itemSubTitle),
-                )
+                ),
               ],
             ),
             _buildFormTextField(
@@ -544,13 +553,17 @@ class _IntakeTargetPageState extends State<IntakeTargetPage> {
       if (_weekMacrosFormKey.currentState!.saveAndValidate()) {
         CusMacro newData = CusMacro(
           calory: int.parse(
-              _weekMacrosFormKey.currentState!.fields['calory']!.value),
+            _weekMacrosFormKey.currentState!.fields['calory']!.value,
+          ),
           carbs: double.parse(
-              _weekMacrosFormKey.currentState!.fields['carbs']!.value),
+            _weekMacrosFormKey.currentState!.fields['carbs']!.value,
+          ),
           fat: double.parse(
-              _weekMacrosFormKey.currentState!.fields['fat']!.value),
+            _weekMacrosFormKey.currentState!.fields['fat']!.value,
+          ),
           protein: double.parse(
-              _weekMacrosFormKey.currentState!.fields['protein']!.value),
+            _weekMacrosFormKey.currentState!.fields['protein']!.value,
+          ),
         );
         var temp = IntakeDailyGoal(
           userId: user.userId!,

@@ -11,7 +11,8 @@ class UserDdl {
   // 用户体重趋势表
   static const tableNameWeightTrend = 'ff_weight_trend';
 
-  static const String ddlForUser = """
+  static const String ddlForUser =
+      """
     CREATE TABLE $tableNameOfUser (
       user_id           INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT,
       user_name         TEXT      NOT NULL,
@@ -35,7 +36,8 @@ class UserDdl {
     );
     """;
 
-  static const String ddlForIntakeDailyGoal = """
+  static const String ddlForIntakeDailyGoal =
+      """
     CREATE TABLE IF NOT EXISTS $tableNameOfIntakeDailyGoal (
       intake_daily_goal_id    INTEGER     NOT NULL PRIMARY KEY AUTOINCREMENT,
       user_id                 INTEGER     NOT NULL,
@@ -47,7 +49,8 @@ class UserDdl {
     );
     """;
 
-  static const String ddlForWeightTrend = """
+  static const String ddlForWeightTrend =
+      """
     CREATE TABLE IF NOT EXISTS $tableNameWeightTrend (
       weight_trend_id   INTEGER   NOT NULL PRIMARY KEY AUTOINCREMENT,
       user_id           INTEGER   NOT NULL,

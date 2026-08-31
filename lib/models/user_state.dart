@@ -82,7 +82,7 @@ class User {
     };
   }
 
-// 用于从数据库行映射到 ServingInfo 对象的 fromMap 方法
+  // 用于从数据库行映射到 ServingInfo 对象的 fromMap 方法
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
       userId: map['user_id'] as int?,
@@ -203,7 +203,7 @@ class WeightTrend {
     };
   }
 
-// 用于从数据库行映射到 ServingInfo 对象的 fromMap 方法
+  // 用于从数据库行映射到 ServingInfo 对象的 fromMap 方法
   factory WeightTrend.fromMap(Map<String, dynamic> map) {
     return WeightTrend(
       weightTrendId: map['weight_trend_id'] as int?,
@@ -237,10 +237,7 @@ class UserWithIntakeDailyGoal {
   // 一个用户最多有周一到周日7条每日摄入目标设定值
   List<IntakeDailyGoal> intakeGoals;
 
-  UserWithIntakeDailyGoal({
-    required this.user,
-    required this.intakeGoals,
-  });
+  UserWithIntakeDailyGoal({required this.user, required this.intakeGoals});
   @override
   String toString() {
     return '''
